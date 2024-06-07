@@ -4,6 +4,14 @@
 
 2D grid based farming simulator with user auth + individual gardens/customization. Built with react, typescript, nextjs, postgresql. Hosted on vercel (?)
 
+## Features
+  * Build a virtual garden by planting seeds, placing decorations, and harvesting/selling crops to expand your land
+  * Each user owns their own garden and has a separate money supply
+  * All users share a global store with a rotating selection of items
+  * User Authentication with Auth0
+  * Data storage with PostgreSQL
+  * Multiple pages routed with NextJS App Router
+
 ## Models
 
 ### Garden
@@ -22,21 +30,29 @@
   * YPosition - Int
   * React Component - Basically a square that contains the item
 
-### PlacedItem
-  * Placed in individual plots
+### ItemTemplate
+  * Contains the shared information about an item, but is not an instance of one
+  * Id - Int
   * Name - String
   * Icon - String (Emoji)
+  * Type - String (Placed, Inventory)
+  * Subtype - String (Plant, Decoration, Ground, Seed, HarvestedItem, Blueprint)
+  * BasePrice - Value for selling to the shop. Shop sells back items for BasePrice * multiplier.
+  * TransformId - Int -- Seed -> plant, plant -> ground (+ generate a harvested item in inventory), ground -> ground, blueprint -> decoration, decoration -> ground (+ generate a blueprint item in inventory)
+
+### PlacedItem
+  * Placed in individual plots
+  * ItemData - ItemTemplate
+  * Status - String? Enum? -- Various statuses like alive, dead, needs watering, not sure yet
   * React Component - Clickable button that displays the icon, onClick = bring up selection menu to harvest/move/remove etc
 
 ### Plant
-  * Extends PlacedItem, can be harvested
+  * Extends PlacedItem, can be harvested to turn the plot into ground, and place a harvestedItem into inventory.
   * EndGrowTime - DateTime -- Determines if the plant is harvestable or not
-  * Value - $ gained when harvested
-  * Status - String? Enum? -- Various statuses like alive, dead, needs watering, not sure yet
   * Specific selection of icons to represent plants
 
-### PlacedDecoration
-  * Extends PlacedItem, can be moved
+### Decoration
+  * Extends PlacedItem, can be moved, can be removed to turn the plot into ground, and place a blueprint into inventory.
   * Specific selection of icons to represent decorations
 
 ### EmptyItem (Ground)
@@ -45,9 +61,7 @@
 
 ### InventoryItem
   * Held in inventory
-  * Name - String
-  * Icon - String (Emoji)
-  * BasePrice - Value for selling to the shop. Shop sells back items for BasePrice * multiplier.
+  * ItemData - ItemTemplate
   * Quantity - Number of this item owned
   * React Component - Clickable button that displays the icon, onClick = bring up selection menu to buy/sell/place etc
 
@@ -55,8 +69,12 @@
   * Extends InventoryItem, creates a plant upon being placed
   * Specific selection of icons to represent seeds
 
-### InventoryDecoration
-  * Extends InventoryItem, creates a placeddecoration upon being placed
+### HarvestedItem
+  * Extends InventoryItem, cannot be planted, only sold
+  * Same selection of icons as plants
+
+### Blueprint
+  * Extends InventoryItem, creates a decoration upon being placed
   * Specific selection of icons to represent decorations
 
 ### Inventory
@@ -80,7 +98,6 @@
     * Displays Username, Icon, clickable link to user page
 
 ## Database
-
   * PostgreSQL
 
 ### Users Table
@@ -105,50 +122,38 @@
   * PlacedItemType (Plant, Decoration, Empty)
   * Foreign Key: GardenId -> Gardens.GardenId
 
-### PlacedItems Table
-  * PlacedItemId [Serial Primary Key] Int
+### ItemTemplates Table
+  * ItemTemplateId [Serial Primary Key] Int
   * Name String NOT NULL
   * Icon String NOT NULL
-  * Type String NOT NULL (Plant, Decoration, Empty)
+  * Type String NOT NULL (Placed, Inventory)
+  * Subtype String NOT NULL (Plant, Decoration, Empty, Seed, HarvestedPlant, Blueprint)
+  * BasePrice Int NOT NULL
+  * TransformId Int (Points to another id within this table)
+  * Foreign Key: TransformId -> ItemTemplates.ItemTemplateId
 
-### Plants Table
-  * PlacedItemId [Primary Key] Int
-  * EndGrowTime Timestamp NOT NULL
-  * Value Int NOT NULL
+### PlacedItems Table
+  * PlacedItemId [Serial Primary Key] Int
+  * ItemTemplateId Int NOT NULL
+  * EndGrowTime Timestamp (Only for plants)
   * Status String
-  * Foreign Key: PlacedItemId -> PlacedItems.PlacedItemId
-
-### PlacedDecorations Table
-  * PlacedItemId [Primary Key] Int
-  * Foreign Key: PlacedItemId -> PlacedItems.PlacedItemId
-
-### EmptyItems Table
-  * PlacedItemId [Primary Key] Int
-  * Foreign Key: PlacedItemId -> PlacedItems.PlacedItemId
+  * Type String NOT NULL (Plant, Decoration, Empty)
+  * Foreign Key: ItemTemplateId -> ItemTemplates.ItemTemplateId
 
 ### Inventory Table
   * InventoryId [Serial Primary Key] Int
   * UserId String NOT NULL
-  * Gold Int NOT NULL
+  * Gold Int NOT NULL Default 0
   * Foreign Key: UserId -> Users.UserId
 
 ### InventoryItems Table
   * InventoryItemId [Serial Primary Key] Int
   * InventoryId Int NOT NULL
-  * Name String NOT NULL
-  * Icon String NOT NULL
-  * BasePrice Int NOT NULL
+  * ItemTemplateId Int NOT NULL
   * Quantity Int NOT NULL
-  * Type String NOT NULL (Seed, InventoryDecoration)
+  * Type String NOT NULL (Seed, HarvestedItem, Blueprint)
   * Foreign Key: InventoryId -> Inventory.InventoryId
-
-### Seeds Table
-  * InventoryItemId [Serial Primary Key] Int
-  * Foreign Key: InventoryItemId -> InventoryItems.InventoryItemId
-
-### InventoryDecorationTable
-  * InventoryItemId [Serial Primary Key] Int
-  * Foreign Key: InventoryItemId -> InventoryItems.InventoryItemId
+  * Foreign Key: ItemTemplateId -> ItemTemplates.ItemId
 
 ### Stores Table
   * StoreId [Serial Primary Key] Int
@@ -190,15 +195,32 @@
     * Allow editing of icon, tagline
     * Button to log out
 
-## Features
-
-
 ## External Setup
+  * Need an external database, or use vercel postgres
+  * Look into firebase, dynamodb, aws rds/aurora
+  * Need auth0 for user auth
 
   
 ## Goals/Timeline
 
   * Set up webpage - get a blank page to load, with some default text
+  * Build classes/model infrastructure
+    * Build set of possible items, later we will make this in the db
+  * Build a static garden with fixed data
+    * Fixed rows/cols, populate with some plants/decorations
+  * Build a static inventory with fixed data
+  * Build a static store with fixed data
+  * Build a static user with the garden and inventory
+  * Add interaction
+    * Garden plants can be harvested
+	* Inventory items can be placed
+	* User can buy items from the store
+  * Add user auth - require login to access the page
+  * Add localhost db
+  * Build server actions to access db
+    * Allow persistence of data and start tracking garden, inventory, user etc
+  * Build apis to access db, redirect server actions to these apis
+    * Use env variables to store secrets
   * 
   * Extra features:
     * 
