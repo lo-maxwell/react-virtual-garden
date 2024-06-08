@@ -32,6 +32,7 @@
 
 ### ItemTemplate
   * Contains the shared information about an item, but is not an instance of one
+  * These are all constant, so we just load them from an internal file, not stored to database.
   * Id - Int
   * Name - String
   * Icon - String (Emoji)
@@ -122,7 +123,7 @@
   * PlacedItemType (Plant, Decoration, Empty)
   * Foreign Key: GardenId -> Gardens.GardenId
 
-### ItemTemplates Table
+### ItemTemplates Table - Not used until we need to dynamically update any of these properties
   * ItemTemplateId [Serial Primary Key] Int
   * Name String NOT NULL
   * Icon String NOT NULL
@@ -138,7 +139,7 @@
   * EndGrowTime Timestamp (Only for plants)
   * Status String
   * Type String NOT NULL (Plant, Decoration, Empty)
-  * Foreign Key: ItemTemplateId -> ItemTemplates.ItemTemplateId
+  * ~~Foreign Key: ItemTemplateId -> ItemTemplates.ItemTemplateId~~
 
 ### Inventory Table
   * InventoryId [Serial Primary Key] Int
@@ -153,7 +154,7 @@
   * Quantity Int NOT NULL
   * Type String NOT NULL (Seed, HarvestedItem, Blueprint)
   * Foreign Key: InventoryId -> Inventory.InventoryId
-  * Foreign Key: ItemTemplateId -> ItemTemplates.ItemId
+  * ~~Foreign Key: ItemTemplateId -> ItemTemplates.ItemId~~
 
 ### Stores Table
   * StoreId [Serial Primary Key] Int
