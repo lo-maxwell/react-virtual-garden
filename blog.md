@@ -7,3 +7,9 @@
 ### Upload to git
 
 ### Write design doc
+
+## Day 2
+
+### Building infrastructure/models/writing tests
+
+### Run tests with npm test

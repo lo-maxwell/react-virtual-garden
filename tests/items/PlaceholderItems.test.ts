@@ -1,4 +1,4 @@
-import { generateNewPlaceholderInventoryItem, generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";
+import { generateNewPlaceholderInventoryItem, generateNewPlaceholderPlacedItem, generateRandomPlaceholderInventoryItem, generateRandomPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";
 
 test('Should Generate PlacedItem', () => {
 	const placedItem = generateNewPlaceholderPlacedItem("apple", "");
@@ -12,6 +12,12 @@ test('Should Generate PlacedItem', () => {
 	const placedItem3 = generateNewPlaceholderPlacedItem("coconut", "");
 	expect(placedItem3).toBeTruthy();
 	expect(placedItem3.itemData.name).toBe("coconut");
+
+	for (let i = 0; i < 100; i++) {
+		const placedItem4 = generateRandomPlaceholderPlacedItem();
+		expect(placedItem4).toBeTruthy();
+		expect(placedItem4.itemData.type).toBe("PlacedItem");
+	}
 });
 
 test('Should Generate Error PlacedItem', () => {
@@ -29,9 +35,15 @@ test('Should Generate InventoryItem', () => {
 	expect(inventoryItem2).toBeTruthy();
 	expect(inventoryItem2.itemData.name).toBe("banana seed");
 
-	const inventoryItem3 = generateNewPlaceholderInventoryItem("coconutSeed", 0);
+	const inventoryItem3 = generateNewPlaceholderInventoryItem("harvestedCoconut", 0);
 	expect(inventoryItem3).toBeTruthy();
-	expect(inventoryItem3.itemData.name).toBe("coconut seed");
+	expect(inventoryItem3.itemData.name).toBe("harvested coconut");
+
+	for (let i = 0; i < 100; i++) {
+		const inventoryItem4 = generateRandomPlaceholderInventoryItem();
+		expect(inventoryItem4).toBeTruthy();
+		expect(inventoryItem4.itemData.type).toBe("InventoryItem");
+	}
 });
 
 test('Should Generate Error InventoryItem', () => {

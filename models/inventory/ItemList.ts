@@ -19,6 +19,7 @@ export class ItemList {
 					return response;
 				}
 			})
+			if (response.payload != null) return response;
 			response.addErrorMessage(`item ${item} not found`);
 			return response;
 		} else {
@@ -32,6 +33,7 @@ export class ItemList {
 					return response;
 				}
 			})
+			if (response.payload != null) return response;
 			response.addErrorMessage(`item ${item.name} not found`);
 			return response;
 		}
@@ -46,6 +48,7 @@ export class ItemList {
 					return response;
 				}
 			})
+			if (response.payload != null) return response;
 			response.payload = false;
 			return response;
 		} else {
@@ -60,6 +63,7 @@ export class ItemList {
 					return response;
 				}
 			})
+			if (response.payload != null) return response;
 			response.payload = false;
 			return response;
 		}
