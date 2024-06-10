@@ -10,89 +10,123 @@ export class ItemList {
 		this.items = items;
 	}
 
-	get(item: ItemTemplate | string): InventoryTransactionResponse {
+	isInventoryItem(item: any): item is InventoryItem {
+		return (item as InventoryItem).quantity !== undefined;
+	}
+	
+	isItemTemplate(item: any): item is ItemTemplate {
+		return (item as ItemTemplate).basePrice !== undefined;
+	}
+
+	getItemName(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
+		let itemName: string;
 		if (typeof item === 'string') {
-			this.items.forEach((element, index) => {
-				if (element.itemData.name == item) {
-					response.payload = element;
-					return response;
-				}
-			})
-			if (response.payload != null) return response;
-			response.addErrorMessage(`item ${item} not found`);
-			return response;
-		} else {
+			itemName = item;
+		} else if (typeof item === 'object' && this.isItemTemplate(item)) {
+			itemName = item.name;
 			if (item.type == ItemTypes.PLACED.name) {
 				response.addErrorMessage(`Cannot get a placeditem from inventory`);
 				return response;
 			}
-			this.items.forEach((element, index) => {
-				if (element.itemData == item) {
-					response.payload = element;
-					return response;
-				}
-			})
-			if (response.payload != null) return response;
-			response.addErrorMessage(`item ${item.name} not found`);
+		} else if (typeof item === 'object' && this.isInventoryItem(item)) {
+			itemName = item.itemData.name;
+		} else {
+			//Should never occur
+			response.addErrorMessage(`Could not parse item: ${item}`);
 			return response;
 		}
+		response.payload = itemName;
+		return response;
 	}
 
-	contains(item: ItemTemplate | string): InventoryTransactionResponse {
+	get(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		if (typeof item === 'string') {
-			this.items.forEach((element, index) => {
-				if (element.itemData.name == item) {
-					response.payload = true;
-					return response;
-				}
-			})
-			if (response.payload != null) return response;
-			response.payload = false;
-			return response;
-		} else {
-			if (item.type == ItemTypes.PLACED.name) {
-				response.addErrorMessage(`Cannot contain a placeditem in inventory`);
-				response.payload = false;
+		const itemNameResponse = this.getItemName(item);
+		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
+		const itemName = itemNameResponse.payload;
+
+		this.items.forEach((element, index) => {
+			if (element.itemData.name == itemName) {
+				response.payload = element;
 				return response;
 			}
-			this.items.forEach((element, index) => {
-				if (element.itemData == item) {
-					response.payload = true;
-					return response;
-				}
-			})
-			if (response.payload != null) return response;
-			response.payload = false;
-			return response;
-		}
+		})
+		if (response.payload != null) return response;
+		response.addErrorMessage(`item ${itemName} not found`);
+		return response;
 	}
 
-	addItem(item: InventoryItem): InventoryTransactionResponse {
+	contains(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		let toUpdate = this.get(item.itemData);
+		const itemNameResponse = this.getItemName(item);
+		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
+		const itemName = itemNameResponse.payload;
+		
+		this.items.forEach((element, index) => {
+			if (element.itemData.name == itemName) {
+				response.payload = true;
+				return response;
+			}
+		})
+		if (response.payload != null) return response;
+		response.payload = false;
+		return response;
+	}
+
+	/*
+		item is only used to get the item template. 
+		The quantity tied to item will be ignored, pass it as an additional argument instead.
+	*/
+	addItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
+		const response = new InventoryTransactionResponse();
+
+		let toUpdate = this.get(item);
 		if (toUpdate.isSuccessful()) {
-			toUpdate.payload.quantity = toUpdate.payload.quantity + item.quantity;
+			//Item already in inventory, update quantity
+			if (quantity === 0) {
+				response.addErrorMessage('Quantity is 0, no change');
+				return response;
+			}
+			if (quantity < 0) {
+				response.addErrorMessage('Cannot remove items with add. Try update instead.');
+				return response;
+			}
+			toUpdate.payload.quantity = toUpdate.payload.quantity + quantity;
 			response.payload = toUpdate.payload;
 			return response;
 		} else {
-			const newItem = new InventoryItem(item.itemData, item.quantity);
+			//Add item to inventory
+			let newItem: InventoryItem;
+			if (this.isInventoryItem(item)) {
+				newItem = new InventoryItem(item.itemData, quantity);
+			} else if (this.isItemTemplate(item)) {
+				newItem = new InventoryItem(item, quantity);
+			} else {
+				//should never occur
+				response.addErrorMessage(`Could not parse item of type ${typeof item}`);
+				return response;
+			}
+			if (quantity === 0) {
+				response.addErrorMessage('Quantity is 0, no item added');
+				return response;
+			}
+			if (quantity < 0) {
+				response.addErrorMessage('Cannot remove items with add. Try update instead.');
+				return response;
+			}
 			this.items.push(newItem);
 			response.payload = newItem;
 			return response;
 		}
 	}
 
-	updateQuantity(item: InventoryItem, delta: number): InventoryTransactionResponse {
+	updateQuantity(item: InventoryItem | ItemTemplate | string, delta: number): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		let toUpdate = this.get(item.itemData);
+		let toUpdate = this.get(item);
 		if (toUpdate.isSuccessful()) {
-			if (delta < 0 && toUpdate.payload.quantity + delta < 0) {
-				response.addErrorMessage(`Not enough of ${item.itemData.name} to remove`)
-				return response;
-			}
-			if (delta < 0 && toUpdate.payload.quantity + delta == 0) {
+			//Item already in inventory, update quantity
+			if (delta < 0 && toUpdate.payload.quantity + delta <= 0) {
 				return this.deleteItem(item);
 			}
 
@@ -100,20 +134,24 @@ export class ItemList {
 			response.payload = toUpdate.payload;
 			return response;
 		} else {
+			//Item not found, fail
 			response.addErrorMessage("item not in inventory");
 			return response;
 		}
 	}
 
-	deleteItem(item: InventoryItem): InventoryTransactionResponse {
+	deleteItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		let toDelete = this.get(item.itemData);
+		let toDelete = this.get(item);
 		if (toDelete.isSuccessful()) {
+			//Item in inventory, delete
 			response.payload = toDelete.payload;
+			response.payload.quantity = 0;
 			const toDeleteIndex = this.items.indexOf(toDelete.payload);
 			this.items.splice(toDeleteIndex, 1);
 			return response;
 		} else {
+			//Item not found, fail
 			response.addErrorMessage("item not in inventory");
 			return response;
 		}
