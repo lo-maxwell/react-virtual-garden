@@ -99,6 +99,7 @@ test('Should Buy Item', () => {
 	expect(testInventory.size()).toBe(4);
 	expect(testInventory.contains(PlaceHolderItems.harvestedApple).payload).toBe(true);
 	expect(testInventory.get(PlaceHolderItems.harvestedApple).payload.quantity).toBe(2);
+	expect(testInventory.gold).toBe(0);
 })
 
 test('Should Not Buy Expensive Item', () => {
@@ -106,6 +107,7 @@ test('Should Not Buy Expensive Item', () => {
 	expect(response.isSuccessful()).toBe(false);
 	expect(testInventory.size()).toBe(3);
 	expect(testInventory.contains(PlaceHolderItems.harvestedApple).payload).toBe(false);
+	expect(testInventory.gold).toBe(100);
 })
 
 test('Should Not Buy Invalid Item', () => {
@@ -113,6 +115,7 @@ test('Should Not Buy Invalid Item', () => {
 	expect(response.isSuccessful()).toBe(false);
 	const response2 = testInventory.buyItem(PlaceHolderItems.harvestedApple, 1, -1);
 	expect(response2.isSuccessful()).toBe(false);
+	expect(testInventory.gold).toBe(100);
 })
 
 test('Should Sell Item', () => {
@@ -133,6 +136,7 @@ test('Should Sell Item', () => {
 	expect(testInventory.size()).toBe(2);
 	expect(testInventory.contains(PlaceHolderItems.coconutSeed).payload).toBe(true);
 	expect(testInventory.get(PlaceHolderItems.coconutSeed).payload.quantity).toBe(1);
+	expect(testInventory.gold).toBe(180);
 })
 
 test('Should Not Sell Nonexistent Item', () => {
@@ -146,4 +150,5 @@ test('Should Not Sell Nonexistent Item', () => {
 	expect(response4.isSuccessful()).toBe(false);
 	const response5 = testInventory.sellItem('not an item', 1, 1);
 	expect(response5.isSuccessful()).toBe(false);
+	expect(testInventory.gold).toBe(100);
 })
