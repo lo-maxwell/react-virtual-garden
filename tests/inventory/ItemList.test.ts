@@ -18,7 +18,6 @@ test('Should Initialize Default ItemList Object', () => {
 });
 
 test('Should Get Existing Item', () => {
-	expect(testItemList.size()).toBe(3);
 	const appleSeed = testItemList.get('apple seed');
 	expect(appleSeed.payload.itemData.name).toBe('apple seed');
 	expect(appleSeed.isSuccessful()).toBeTruthy();
@@ -31,7 +30,6 @@ test('Should Get Existing Item', () => {
 });
 
 test('Should Not Get Nonexistent Item', () => {
-	expect(testItemList.size()).toBe(3);
 	const response = testItemList.get('not a real item');
 	expect(response.isSuccessful()).toBeFalsy();
 	expect(response.payload).toBeNull();
@@ -44,7 +42,6 @@ test('Should Not Get Nonexistent Item', () => {
 });
 
 test('Should Check Contains Existing Item', () => {
-	expect(testItemList.size()).toBe(3);
 	const appleSeed = testItemList.contains('apple seed');
 	expect(appleSeed.payload).toBeTruthy();
 	expect(appleSeed.isSuccessful()).toBeTruthy();
@@ -57,7 +54,6 @@ test('Should Check Contains Existing Item', () => {
 });
 
 test('Should Check Does Not Contain Nonexistent Item', () => {
-	expect(testItemList.size()).toBe(3);
 	const response = testItemList.contains('harvested apple');
 	expect(response.payload).toBeFalsy();
 	expect(response.isSuccessful()).toBeTruthy();
@@ -65,6 +61,40 @@ test('Should Check Does Not Contain Nonexistent Item', () => {
 	expect(response2.payload).toBeFalsy();
 	expect(response2.isSuccessful()).toBeTruthy();
 	const response3 = testItemList.contains('not a real item');
+	expect(response3.payload).toBeFalsy();
+	expect(response3.isSuccessful()).toBeTruthy();
+});
+
+test('Should Check Contains Amount of Existing Item', () => {
+	const appleSeed = testItemList.containsAmount('apple seed', 1);
+	expect(appleSeed.payload).toBeTruthy();
+	expect(appleSeed.isSuccessful()).toBeTruthy();
+	const bananaSeed = testItemList.containsAmount(PlaceHolderItems.bananaSeed, 2);
+	expect(bananaSeed.payload).toBeTruthy();
+	expect(bananaSeed.isSuccessful()).toBeTruthy();
+	const coconutSeed = testItemList.containsAmount(generateNewPlaceholderInventoryItem("coconutSeed", 1), 1);
+	expect(coconutSeed.payload).toBeTruthy();
+	expect(coconutSeed.isSuccessful()).toBeTruthy();
+});
+
+test('Should Check Does Not Contain Amount of Lacking Item', () => {
+	const appleSeed = testItemList.containsAmount('apple seed', 2);
+	expect(appleSeed.payload).toBeFalsy();
+	expect(appleSeed.isSuccessful()).toBeTruthy();
+	const bananaSeed = testItemList.containsAmount(PlaceHolderItems.bananaSeed, 0);
+	expect(bananaSeed.isSuccessful()).toBeFalsy();
+	const coconutSeed = testItemList.containsAmount(generateNewPlaceholderInventoryItem("coconutSeed", 1), -1);
+	expect(coconutSeed.isSuccessful()).toBeFalsy();
+});
+
+test('Should Check Does Not Contain Amount of Nonexistent Item', () => {
+	const response = testItemList.containsAmount('harvested apple', 1);
+	expect(response.payload).toBeFalsy();
+	expect(response.isSuccessful()).toBeTruthy();
+	const response2 = testItemList.containsAmount(PlaceHolderItems.harvestedBanana, 2);
+	expect(response2.payload).toBeFalsy();
+	expect(response2.isSuccessful()).toBeTruthy();
+	const response3 = testItemList.containsAmount('not a real item', 3);
 	expect(response3.payload).toBeFalsy();
 	expect(response3.isSuccessful()).toBeTruthy();
 });
@@ -92,6 +122,18 @@ test('Should Add New Item If Not Existing', () => {
 	expect(inv.get("banana seed").payload.quantity).toBe(2);
 });
 
+test('Should Not Add Invalid Item', () => {
+	const response = testItemList.addItem(PlaceHolderItems.harvestedApple, 0);
+	expect(response.isSuccessful()).toBeFalsy();
+	expect(testItemList.size()).toBe(3);
+	const response2 = testItemList.addItem(PlaceHolderItems.harvestedApple, -1);
+	expect(response2.isSuccessful()).toBeFalsy();
+	expect(testItemList.size()).toBe(3);
+	const response3 = testItemList.addItem(PlaceHolderItems.apple, 1);
+	expect(response3.isSuccessful()).toBeFalsy();
+	expect(testItemList.size()).toBe(3);
+})
+
 test('Should Update Quantity When Adding Item', () => {
 	const inv = new ItemList();
 	expect(inv).toBeTruthy();
@@ -106,8 +148,6 @@ test('Should Update Quantity When Adding Item', () => {
 });
 
 test('Should Not Add Invalid Quantity', () => {
-	expect(testItemList.size()).toBe(3);
-	expect(testItemList.contains('apple seed')).toBeTruthy();
 	const response = testItemList.addItem(PlaceHolderItems.appleSeed, 0);
 	expect(response.isSuccessful()).toBeFalsy();
 	expect(testItemList.get('apple seed').payload.quantity).toBe(1);
@@ -123,8 +163,6 @@ test('Should Not Add Invalid Quantity', () => {
 });
 
 test('Should Update Quantity of Existing Item', () => {
-	expect(testItemList.size()).toBe(3);
-	expect(testItemList.contains('apple seed')).toBeTruthy();
 	const response = testItemList.updateQuantity('apple seed', 1);
 	expect(response.isSuccessful()).toBeTruthy();
 	expect(response.payload.quantity).toBe(2);
@@ -137,8 +175,6 @@ test('Should Update Quantity of Existing Item', () => {
 });
 
 test('Should Delete When Updating Quantity to Zero', () => {
-	expect(testItemList.size()).toBe(3);
-	expect(testItemList.contains('apple seed')).toBeTruthy();
 	const response = testItemList.updateQuantity('apple seed', -1);
 	expect(response.isSuccessful()).toBeTruthy();
 	expect(response.payload.quantity).toBe(0);
@@ -150,7 +186,6 @@ test('Should Delete When Updating Quantity to Zero', () => {
 });
 
 test('Should Not Update Nonexistent Item', () => {
-	expect(testItemList.size()).toBe(3);
 	expect(testItemList.contains('invalid item').payload).toBeFalsy();
 	const response = testItemList.updateQuantity('invalid item', 1);
 	expect(response.isSuccessful()).toBeFalsy();
@@ -158,8 +193,6 @@ test('Should Not Update Nonexistent Item', () => {
 });
 
 test('Should Delete Existing Item', () => {
-	expect(testItemList.size()).toBe(3);
-	expect(testItemList.contains('apple seed')).toBeTruthy();
 	const response = testItemList.deleteItem('apple seed');
 	expect(response.isSuccessful()).toBeTruthy();
 	expect(testItemList.size()).toBe(2);
@@ -172,7 +205,6 @@ test('Should Delete Existing Item', () => {
 });
 
 test('Should Not Delete Nonexistent Item', () => {
-	expect(testItemList.size()).toBe(3);
 	expect(testItemList.contains('invalid item').payload).toBeFalsy();
 	const response = testItemList.deleteItem('invalid item');
 	expect(response.isSuccessful()).toBeFalsy();
