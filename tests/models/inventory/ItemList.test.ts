@@ -18,26 +18,31 @@ test('Should Initialize Default ItemList Object', () => {
 	expect(inv.size()).toBe(0);
 });
 
+test('Should Get All Items', () => {
+	const items = testItemList.getAllItems();
+	expect(items.length).toBe(3);
+})
+
 test('Should Get Existing Item', () => {
-	const appleSeed = testItemList.get('apple seed');
+	const appleSeed = testItemList.getItem('apple seed');
 	expect(appleSeed.payload.itemData.name).toBe('apple seed');
 	expect(appleSeed.isSuccessful()).toBe(true);
-	const bananaSeed = testItemList.get(PlaceHolderItems.bananaSeed);
+	const bananaSeed = testItemList.getItem(PlaceHolderItems.bananaSeed);
 	expect(bananaSeed.payload.itemData.name).toBe('banana seed');
 	expect(bananaSeed.isSuccessful()).toBe(true);
-	const coconutSeed = testItemList.get(generateNewPlaceholderInventoryItem("coconutSeed", 1));
+	const coconutSeed = testItemList.getItem(generateNewPlaceholderInventoryItem("coconutSeed", 1));
 	expect(coconutSeed.payload.itemData.name).toBe('coconut seed');
 	expect(coconutSeed.isSuccessful()).toBe(true);
 });
 
 test('Should Not Get Nonexistent Item', () => {
-	const response = testItemList.get('not a real item');
+	const response = testItemList.getItem('not a real item');
 	expect(response.isSuccessful()).toBe(false);
 	expect(response.payload).toBeNull();
-	const response2 = testItemList.get(PlaceHolderItems.harvestedBanana.name);
+	const response2 = testItemList.getItem(PlaceHolderItems.harvestedBanana.name);
 	expect(response2.isSuccessful()).toBe(false);
 	expect(response2.payload).toBeNull();
-	const response3 = testItemList.get(PlaceHolderItems.banana);
+	const response3 = testItemList.getItem(PlaceHolderItems.banana);
 	expect(response3.isSuccessful()).toBe(false);
 	expect(response3.payload).toBeNull();
 });
@@ -119,8 +124,8 @@ test('Should Add New Item If Not Existing', () => {
 	const response2 = inv.addItem(PlaceHolderItems.bananaSeed, 2);
 	expect(response2.isSuccessful()).toBe(true);
 	expect(inv.size()).toBe(2);
-	expect(inv.get("apple seed").payload.quantity).toBe(1);
-	expect(inv.get("banana seed").payload.quantity).toBe(2);
+	expect(inv.getItem("apple seed").payload.quantity).toBe(1);
+	expect(inv.getItem("banana seed").payload.quantity).toBe(2);
 });
 
 test('Should Not Add Invalid Item', () => {
@@ -146,16 +151,16 @@ test('Should Update Quantity When Adding Item', () => {
 	const response2 = inv.addItem(PlaceHolderItems.appleSeed, 2);
 	expect(response2.isSuccessful()).toBe(true);
 	expect(inv.size()).toBe(1);
-	expect(inv.get("apple seed").payload.quantity).toBe(3);
+	expect(inv.getItem("apple seed").payload.quantity).toBe(3);
 });
 
 test('Should Not Add Invalid Quantity', () => {
 	const response = testItemList.addItem(PlaceHolderItems.appleSeed, 0);
 	expect(response.isSuccessful()).toBe(false);
-	expect(testItemList.get('apple seed').payload.quantity).toBe(1);
+	expect(testItemList.getItem('apple seed').payload.quantity).toBe(1);
 	const response2 = testItemList.addItem(generateNewPlaceholderInventoryItem("bananaSeed", 1), -2);
 	expect(response2.isSuccessful()).toBe(false);
-	expect(testItemList.get('banana seed').payload.quantity).toBe(2);
+	expect(testItemList.getItem('banana seed').payload.quantity).toBe(2);
 	const response3 = testItemList.addItem(generateNewPlaceholderInventoryItem("harvestedApple", 1), 0);
 	expect(response3.isSuccessful()).toBe(false);
 	expect(testItemList.size()).toBe(3);

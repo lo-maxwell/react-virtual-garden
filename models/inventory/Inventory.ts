@@ -5,14 +5,69 @@ import { InventoryTransactionResponse } from "./InventoryTransactionResponse";
 import { ItemList } from "./ItemList";
 
 export class Inventory {
-	userId: string;
-	gold: number;
+	private userId: string;
+	private gold: number;
 	private items: ItemList;
 	
 	constructor(userId: string, gold: number = 0, items: ItemList = new ItemList()) {
 		this.userId = userId;
 		this.gold = gold;
 		this.items = items;
+	}
+	/**
+	 * @returns the userId of the owner of the inventory.
+	 */
+	getUserId(): string {
+		return this.userId;
+	}
+
+	/**
+	 * @returns the amount of gold in inventory.
+	 */
+	getGold(): number {
+		return this.gold;
+	}
+
+	/**
+	 * @returns a copy of the inventory items within the list.
+	 */
+	 getAllItems(): InventoryItem[] {
+		return this.items.getAllItems();
+	}
+
+	/**
+     * Gains quantity gold.
+	 * @param quantity - Positive integer amount of item being added.
+     * @returns InventoryTransactionResponse containing the ending gold amount or an error message.
+     */
+	addGold(quantity: number): InventoryTransactionResponse {
+		const response = new InventoryTransactionResponse();
+		if (quantity <= 0 || !Number.isInteger(quantity)) {
+			response.addErrorMessage(`Invalid quantity: ${quantity}`);
+			return response;
+		}
+		this.gold += quantity;
+		response.payload = this.gold;
+		return response;
+	}
+
+	/**
+     * Removes quantity gold from inventory. If reduced to below 0, sets gold to 0 instead.
+	 * @param quantity - Positive integer amount of gold being removed.
+     * @returns InventoryTransactionResponse containing the ending gold amount or an error message.
+     */
+	removeGold(quantity: number): InventoryTransactionResponse {
+		const response = new InventoryTransactionResponse();
+		if (quantity <= 0 || !Number.isInteger(quantity)) {
+			response.addErrorMessage(`Invalid quantity: ${quantity}`);
+			return response;
+		}
+		this.gold -= quantity;
+		if (this.gold < 0) {
+			this.gold = 0;
+		}
+		response.payload = this.gold;
+		return response;
 	}
 
 	/**
@@ -74,14 +129,15 @@ export class Inventory {
 		if (this.gold >= itemCost * quantity) {
 			const buyItemResponse = this.addItem(item, quantity);
 			if (buyItemResponse.isSuccessful()) {
-				this.gold -= itemCost * quantity;
-				response.payload = this.gold;
+				const removeGoldResponse = this.removeGold(itemCost * quantity);
+				if (!removeGoldResponse.isSuccessful()) return removeGoldResponse;
+				response.payload = this.getGold();
 				return response;
 			} else {
 				return buyItemResponse;
 			}
 		} else {
-			response.addErrorMessage(`Insufficient gold: had ${this.gold} but requires ${itemCost * quantity}`);
+			response.addErrorMessage(`Insufficient gold: had ${this.getGold()} but requires ${itemCost * quantity}`);
 			return response;
 		}
 	}
@@ -100,7 +156,7 @@ export class Inventory {
 			return response;
 		}
 
-		let findItem = this.get(item);
+		let findItem = this.getItem(item);
 		if (!findItem.isSuccessful()) {
 			return findItem;
 		}
@@ -108,7 +164,7 @@ export class Inventory {
 
 		const containsItem = this.items.containsAmount(item, quantity);
 		if (!containsItem.payload) {
-			const itemAmount = this.get(item).payload;
+			const itemAmount = this.getItem(item).payload;
 			if (itemAmount) {
 				response.addErrorMessage(`Insufficient quantity in inventory: had ${itemAmount.quantity} but requires ${quantity}`);
 			} else {
@@ -119,8 +175,9 @@ export class Inventory {
 
 		const sellItemResponse = this.items.updateQuantity(item, -1 * quantity);
 		if (sellItemResponse.isSuccessful()) {
-			this.gold += itemCost * quantity;
-			response.payload = this.gold;
+			const addGoldResponse = this.addGold(itemCost * quantity);
+			if (!addGoldResponse.isSuccessful()) return addGoldResponse;
+			response.payload = this.getGold();
 			return response;
 		} else {
 			return sellItemResponse;
@@ -132,8 +189,8 @@ export class Inventory {
      * @param item - The item to get, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the found InventoryItem or error message.
      */
-	get(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
-		const response = this.items.get(item);
+	getItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
+		const response = this.items.getItem(item);
 		return response;
 	}
 

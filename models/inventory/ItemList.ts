@@ -5,7 +5,7 @@ import { ItemTypes } from "../items/ItemTypes";
 import { InventoryTransactionResponse } from "./InventoryTransactionResponse";
 
 export class ItemList {
-	items: InventoryItem[];
+	private items: InventoryItem[];
 	constructor(items: InventoryItem[] = []) {
 		this.items = items;
 	}
@@ -26,6 +26,13 @@ export class ItemList {
      */
 	static isItemTemplate(item: any): item is ItemTemplate {
 		return (item as ItemTemplate).basePrice !== undefined;
+	}
+
+	/**
+	 * @returns a copy of the inventory items within the list.
+	 */
+	getAllItems(): InventoryItem[] {
+		return this.items.slice();
 	}
 
 	/**
@@ -60,7 +67,7 @@ export class ItemList {
      * @param item - The item to get, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the found InventoryItem or error message.
      */
-	get(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
+	getItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
 		const itemNameResponse = this.getItemName(item);
 		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
@@ -136,7 +143,7 @@ export class ItemList {
 	addItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
 
-		let toUpdate = this.get(item);
+		let toUpdate = this.getItem(item);
 		if (toUpdate.isSuccessful()) {
 			//Item already in inventory, update quantity
 			if (quantity === 0) {
@@ -188,7 +195,7 @@ export class ItemList {
      */
 	updateQuantity(item: InventoryItem | ItemTemplate | string, delta: number): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		let toUpdate = this.get(item);
+		let toUpdate = this.getItem(item);
 		if (toUpdate.isSuccessful()) {
 			//Item already in inventory, update quantity
 			if (delta < 0 && toUpdate.payload.quantity + delta <= 0) {
@@ -212,7 +219,7 @@ export class ItemList {
      */
 	deleteItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		let toDelete = this.get(item);
+		let toDelete = this.getItem(item);
 		if (toDelete.isSuccessful()) {
 			//Item in inventory, delete
 			response.payload = toDelete.payload;
