@@ -1,11 +1,11 @@
+import { Item } from "../Item";
 import { ItemTemplate } from "../ItemTemplate";
 
-export class InventoryItem {
-	itemData: ItemTemplate;
+export class InventoryItem extends Item {
 	quantity: number;
-
+	
 	constructor(itemData: ItemTemplate, quantity: number) {
-		this.itemData = itemData;
+		super(itemData);
 		this.quantity = quantity;
 	}
 }

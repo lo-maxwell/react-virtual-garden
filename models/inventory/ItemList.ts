@@ -100,6 +100,34 @@ export class ItemList {
 	}
 
 	/**
+     * Check if the inventory contains at least quantity of an item.
+     * @param item - The item to check for, identified by InventoryItem, ItemTemplate, or name.
+	 * @param quantity - Amount to require
+     * @returns InventoryTransactionResponse containing True/False or error message.
+     */
+	 containsAmount(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
+		const response = new InventoryTransactionResponse();
+		if (quantity <= 0 || !Number.isInteger(quantity)) {
+			response.addErrorMessage(`Invalid quantity: ${quantity}`);
+			return response;
+		}
+
+		const itemNameResponse = this.getItemName(item);
+		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
+		const itemName = itemNameResponse.payload;
+		
+		this.items.forEach((element, index) => {
+			if (element.itemData.name == itemName && element.quantity >= quantity) {
+				response.payload = true;
+				return response;
+			}
+		})
+		if (response.payload != null) return response;
+		response.payload = false;
+		return response;
+	}
+
+	/**
      * Add an item to the inventory.
      * @param item - The item to add.
      * @param quantity - The quantity of the item to add.
@@ -151,7 +179,7 @@ export class ItemList {
 	/**
      * Update the quantity of an item in the inventory.
      * @param item - The item to update, identified by InventoryItem, ItemTemplate, or name.
-     * @param delta - The amount to change the quantity by.
+     * @param delta - The amount to change the quantity by. If negative and the final quantity ends up at or below 0, deletes the item from the list.
      * @returns InventoryTransactionResponse containing the updated InventoryItem or error message.
      */
 	updateQuantity(item: InventoryItem | ItemTemplate | string, delta: number): InventoryTransactionResponse {
@@ -176,7 +204,7 @@ export class ItemList {
 	/**
      * Delete an item from the inventory.
      * @param item - The item to delete, identified by InventoryItem, ItemTemplate, or name.
-     * @returns InventoryTransactionResponse containing the deleted InventoryItem or error message.
+     * @returns InventoryTransactionResponse containing the deleted InventoryItem with quantity set to 0 or error message.
      */
 	deleteItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();

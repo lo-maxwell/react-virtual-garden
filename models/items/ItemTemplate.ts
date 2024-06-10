@@ -18,4 +18,8 @@ export class ItemTemplate {
 		this.basePrice = basePrice;
 		this.transformId = transformId;
 	}
+
+	getPrice(multiplier: number) {
+		return Math.max(1, Math.floor(this.basePrice * multiplier + 0.5));
+	}
 }
