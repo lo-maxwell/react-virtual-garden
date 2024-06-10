@@ -117,7 +117,7 @@ export class ItemList {
 		const itemName = itemNameResponse.payload;
 		
 		this.items.forEach((element, index) => {
-			if (element.itemData.name == itemName && element.quantity >= quantity) {
+			if (element.itemData.name === itemName && element.quantity >= quantity) {
 				response.payload = true;
 				return response;
 			}
@@ -157,6 +157,10 @@ export class ItemList {
 				newItem = new InventoryItem(item.itemData, quantity);
 			} else if (ItemList.isItemTemplate(item)) {
 				newItem = new InventoryItem(item, quantity);
+				if (item.type === ItemTypes.PLACED.name) {
+					response.addErrorMessage(`Cannot add a placeditem to inventory`);
+					return response;
+				}
 			} else {
 				//should never occur
 				response.addErrorMessage(`Could not parse item of type ${typeof item}`);

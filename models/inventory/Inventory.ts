@@ -1,5 +1,6 @@
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
 import { ItemTemplate } from "../items/ItemTemplate";
+import { ItemTypes } from "../items/ItemTypes";
 import { InventoryTransactionResponse } from "./InventoryTransactionResponse";
 import { ItemList } from "./ItemList";
 
@@ -8,12 +9,11 @@ export class Inventory {
 	gold: number;
 	private items: ItemList;
 	
-	constructor(userId: string, gold: number = 0, items: ItemList) {
+	constructor(userId: string, gold: number = 0, items: ItemList = new ItemList()) {
 		this.userId = userId;
 		this.gold = gold;
 		this.items = items;
 	}
-
 
 	/**
      * Gains quantity of item to inventory at no cost.
@@ -26,21 +26,20 @@ export class Inventory {
 		return response;
 	}
 
-
 	/**
      * Trashes quantity of item from inventory. If item quantity goes to 0, deletes it from inventory. Fails if item is not in inventory.
      * @param item - The item to remove, identified by InventoryItem, ItemTemplate, or name
 	 * @param quantity - Positive integer amount of item being removed. If quantity is greater than the remaining amount, removes all existing ones.
      * @returns InventoryTransactionResponse containing the item or an error message.
      */
-	trashItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
+	trashItem(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
 		if (quantity <= 0 || !Number.isInteger(quantity)) {
 			response.addErrorMessage(`Invalid quantity: ${quantity}`);
 			return response;
 		}
 
-		return this.items.updateQuantity(item, -1 * quantity);
+		return this.updateQuantity(item, -1 * quantity);
 	}
 
 	/**
@@ -62,6 +61,10 @@ export class Inventory {
 			itemCost = item.itemData.getPrice(multiplier);
 		} else if (ItemList.isItemTemplate(item)) {
 			itemCost = item.getPrice(multiplier);
+			if (item.type === ItemTypes.PLACED.name) { //we check this before the addItem call so that we don't return not enough money
+				response.addErrorMessage(`Cannot add a placeditem to inventory`);
+				return response;
+			}
 		} else {
 			//should never occur
 			response.addErrorMessage(`Could not parse item: ${item}`);
@@ -90,45 +93,42 @@ export class Inventory {
 	 * @param quantity - Positive integer amount of item being sold.
      * @returns InventoryTransactionResponse containing the final gold amount or an error message.
      */
-	 sellItem(item: InventoryItem | ItemTemplate, multiplier: number, quantity: number): InventoryTransactionResponse {
+	 sellItem(item: InventoryItem | ItemTemplate | string, multiplier: number, quantity: number): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		if (!Number.isInteger(quantity)) {
+		if (!Number.isInteger(quantity) || quantity <= 0) {
 			response.addErrorMessage(`Invalid quantity: ${quantity}`);
 			return response;
 		}
 
-		let itemCost: number;
-		if (ItemList.isInventoryItem(item)) {
-			itemCost = item.itemData.getPrice(multiplier);
-		} else if (ItemList.isItemTemplate(item)) {
-			itemCost = item.getPrice(multiplier);
-		} else {
-			//should never occur
-			response.addErrorMessage(`Could not parse item: ${item}`);
-			return response;
+		let findItem = this.get(item);
+		if (!findItem.isSuccessful()) {
+			return findItem;
 		}
+		let itemCost: number = findItem.payload.itemData.getPrice(multiplier);
 
 		const containsItem = this.items.containsAmount(item, quantity);
-		if (!containsItem.isSuccessful()) {
-			return containsItem;
-		} else if (!containsItem.payload) {
-			response.addErrorMessage(`Insufficient quantity in inventory: had ${this.items.get(item).payload.quantity} but requires ${quantity}`);
+		if (!containsItem.payload) {
+			const itemAmount = this.get(item).payload;
+			if (itemAmount) {
+				response.addErrorMessage(`Insufficient quantity in inventory: had ${itemAmount.quantity} but requires ${quantity}`);
+			} else {
+				response.addErrorMessage(`Insufficient quantity in inventory: had 0 but requires ${quantity}`);
+			}
 			return response;
 		}
 
 		const sellItemResponse = this.items.updateQuantity(item, -1 * quantity);
 		if (sellItemResponse.isSuccessful()) {
 			this.gold += itemCost * quantity;
-			response.payload = true;
+			response.payload = this.gold;
 			return response;
 		} else {
 			return sellItemResponse;
 		}
 	}
 
-
 	/**
-     * Get an item from the inventory.
+     * Find an item in the inventory.
      * @param item - The item to get, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the found InventoryItem or error message.
      */
@@ -153,7 +153,7 @@ export class Inventory {
      * @param quantity - The quantity of the item to add.
      * @returns InventoryTransactionResponse containing the added InventoryItem or error message
      */
-	addItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
+	private addItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
 		const response = this.items.addItem(item, quantity);
 		return response;
 	}
@@ -164,7 +164,7 @@ export class Inventory {
      * @param delta - The amount to change the quantity by.
      * @returns InventoryTransactionResponse containing the updated InventoryItem or error message.
      */
-	updateQuantity(item: InventoryItem | ItemTemplate | string, delta: number): InventoryTransactionResponse {
+	private updateQuantity(item: InventoryItem | ItemTemplate | string, delta: number): InventoryTransactionResponse {
 		const response = this.items.updateQuantity(item, delta);
 		return response;
 	}
@@ -174,7 +174,7 @@ export class Inventory {
      * @param item - The item to delete, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the deleted InventoryItem or error message.
      */
-	deleteItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
+	private deleteItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
 		const response = this.items.deleteItem(item);
 		return response;
 	}
