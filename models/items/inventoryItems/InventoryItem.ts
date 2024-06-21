@@ -8,4 +8,18 @@ export class InventoryItem extends Item {
 		super(itemData);
 		this.quantity = quantity;
 	}
+	
+	/**
+	 * @returns the quantity
+	 */
+	getQuantity(): number {
+		return this.quantity;
+	}
+
+	/** Replaces the existing quantity
+	 * @status the new quantity
+	 */
+	setQuantity(quantity: number): void {
+		this.quantity = quantity;
+	}
 }

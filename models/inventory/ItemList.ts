@@ -16,7 +16,7 @@ export class ItemList {
      * @returns True/False
      */
 	static isInventoryItem(item: any): item is InventoryItem {
-		return (item as InventoryItem).quantity !== undefined;
+		return item instanceof InventoryItem;
 	}
 	
 	/**
@@ -25,7 +25,7 @@ export class ItemList {
      * @returns True/False
      */
 	static isItemTemplate(item: any): item is ItemTemplate {
-		return (item as ItemTemplate).basePrice !== undefined;
+		return item instanceof ItemTemplate;
 	}
 
 	/**

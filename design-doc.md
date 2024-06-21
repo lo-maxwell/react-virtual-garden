@@ -98,6 +98,8 @@
   * React Component - User Bubble
     * Displays Username, Icon, clickable link to user page
 
+Might need a controller to pass data from user to garden?
+
 ## Database
   * PostgreSQL
 

@@ -13,3 +13,8 @@
 ### Building infrastructure/models/writing tests
 
 ### Run tests with npm test
+
+## Day 3
+
+### Building more infrastructure + writing more tests
+  * Working on Inventory + ItemList right now, next goal is plots/gardens
