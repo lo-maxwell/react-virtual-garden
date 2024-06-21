@@ -1,5 +1,5 @@
 import { Garden } from "@/models/Garden";
-import { generateNewPlaceholderPlacedItem, PlaceHolderItems } from "@/models/items/PlaceholderItems";
+import { generateNewPlaceholderPlacedItem} from "@/models/items/PlaceholderItems";
 
 test('getEmptyPlots generates new set of plots', () => {
 	const plots1 = Garden.generateEmptyPlots(3, 3);

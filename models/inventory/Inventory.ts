@@ -185,6 +185,23 @@ export class Inventory {
 	}
 
 	/**
+     * Uses an item from the inventory.
+	 * Consumes 1 quantity from the specified item.
+	 * Performs a specific action depending on the item type:
+	 * Blueprint -> returns the Decoration ItemTemplate corresponding to the Blueprint
+	 * Seed -> returns the Plant ItemTemplate corresponding to the Seed
+	 * HarvestedItem -> error
+     * @param item - The item to use, identified by InventoryItem, ItemTemplate, or name.
+     * @returns InventoryTransactionResponse containing the resulting ItemTemplate or error message.
+     */
+	useItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
+		const getResponse = this.items.getItem(item);
+		if (!getResponse.isSuccessful()) return getResponse;
+		const useResponse = getResponse.payload.use();
+		return useResponse;
+	}
+
+	/**
      * Find an item in the inventory.
      * @param item - The item to get, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the found InventoryItem or error message.

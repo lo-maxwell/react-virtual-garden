@@ -1,4 +1,3 @@
-import { Item } from "./items/Item";
 import { PlacedItem } from "./items/placedItems/PlacedItem";
 
 export class Plot {
@@ -22,7 +21,8 @@ export class Plot {
 		return new PlacedItem(this.item.itemData, this.item.status);
 	}
 
-	/** Replaces the existing item with a new one.
+	/** 
+	 * Replaces the existing item with a new one.
 	 * @item the item to replace with
 	 * @returns the changed item.
 	 */
@@ -44,4 +44,6 @@ export class Plot {
 	setItemStatus(status: string): void {
 		this.item.setStatus(status);
 	}
+
+
 }

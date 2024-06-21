@@ -1,4 +1,4 @@
-import { generateNewPlaceholderPlacedItem, PlaceHolderItems } from "@/models/items/PlaceholderItems";
+import { generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";
 import { Plot } from "@/models/Plot";
 
 test('Should Initialize Plot Object', () => {

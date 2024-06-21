@@ -124,7 +124,7 @@ export class ItemList {
 		const itemName = itemNameResponse.payload;
 		
 		this.items.forEach((element, index) => {
-			if (element.itemData.name === itemName && element.quantity >= quantity) {
+			if (element.itemData.name === itemName && element.getQuantity() >= quantity) {
 				response.payload = true;
 				return response;
 			}

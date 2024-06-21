@@ -1,5 +1,5 @@
 import { PlacedItem } from "./items/placedItems/PlacedItem";
-import { generateNewPlaceholderPlacedItem, PlaceHolderItems } from "./items/PlaceholderItems";
+import { generateNewPlaceholderPlacedItem} from "./items/PlaceholderItems";
 import { Plot } from "./Plot";
 
 export class Garden {
@@ -139,7 +139,7 @@ export class Garden {
 			if (this.isValidIndex(row1, col1) && this.isValidIndex(row2, col2)) {
 				const plot1 = this.plots[row1][col1];
 				const plot2 = this.plots[row2][col2];
-				
+
 				// Swap plots in the 2D array
 				[this.plots[row1][col1], this.plots[row2][col2]] = [this.plots[row2][col2], this.plots[row1][col1]];
 	
