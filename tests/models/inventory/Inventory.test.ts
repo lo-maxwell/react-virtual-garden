@@ -189,3 +189,24 @@ test('Should Not Remove Invalid Gold Amount', () => {
 	expect(response2.isSuccessful()).toBe(false);
 	expect(testInventory.getGold()).toBe(100);
 })
+
+test('Should Use Item Then Delete', () => {
+	const response = testInventory.useItem(PlaceholderItemTemplates.PlaceHolderItems.appleSeed, 1);
+	expect(response.payload.originalItem.quantity).toBe(0);
+	expect(response.isSuccessful()).toBe(true);
+	expect(response.payload.newTemplate.name).toBe('apple');
+	expect(testInventory.getItem(PlaceholderItemTemplates.PlaceHolderItems.appleSeed).isSuccessful()).toBe(false);
+})
+
+test('Should Use Item', () => {
+	const response = testInventory.useItem(PlaceholderItemTemplates.PlaceHolderItems.bananaSeed, 1);
+	expect(response.payload.originalItem.quantity).toBe(1);
+	expect(response.isSuccessful()).toBe(true);
+	expect(response.payload.newTemplate.name).toBe('banana');
+	expect(testInventory.getItem(PlaceholderItemTemplates.PlaceHolderItems.appleSeed).payload.quantity).toBe(1);
+})
+
+test('Should Not Use Item Lacking Quantity', () => {
+	const response = testInventory.useItem(PlaceholderItemTemplates.PlaceHolderItems.coconutSeed, 5);
+	expect(response.isSuccessful()).toBe(false);
+})

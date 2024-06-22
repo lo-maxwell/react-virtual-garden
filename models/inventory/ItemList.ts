@@ -112,7 +112,7 @@ export class ItemList {
 	 * @param quantity - Amount to require
      * @returns InventoryTransactionResponse containing True/False or error message.
      */
-	 containsAmount(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
+	containsAmount(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
 		if (quantity <= 0 || !Number.isInteger(quantity)) {
 			response.addErrorMessage(`Invalid quantity: ${quantity}`);
@@ -132,6 +132,31 @@ export class ItemList {
 		if (response.payload != null) return response;
 		response.payload = false;
 		return response;
+	}
+
+	/**
+	 * Consumes x quantity from the specified item.
+	 * Performs a specific action depending on the item type:
+	 * Blueprint -> returns the Decoration ItemTemplate corresponding to the Blueprint
+	 * Seed -> returns the Plant ItemTemplate corresponding to the Seed
+	 * HarvestedItem -> error
+	 * @param item - The item to use, identified by InventoryItem, ItemTemplate, or name.
+	 * @param quantity - the quantity of item consumed
+	 * @returns a response containing the following object, or an error message
+	 * {originalItem: InventoryItem
+	 *  newTemplate: ItemTemplate}
+	 */
+	useItem(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
+		let toUse = this.getItem(item);
+		if (toUse.isSuccessful()) {
+			const response = toUse.payload.use(quantity);
+			return response;
+		} else {
+			//Item not found, fail
+			const response = new InventoryTransactionResponse();
+			response.addErrorMessage("item not in inventory");
+			return response;
+		}
 	}
 
 	/**

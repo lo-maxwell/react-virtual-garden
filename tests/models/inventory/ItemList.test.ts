@@ -218,3 +218,24 @@ test('Should Not Delete Nonexistent Item', () => {
 	expect(response.isSuccessful()).toBe(false);
 	expect(testItemList.size()).toBe(3);
 });
+
+test('Should Use AppleSeed Item', () => {
+	const response = testItemList.useItem(PlaceholderItemTemplates.PlaceHolderItems.appleSeed, 1);
+	expect(response.payload.originalItem.quantity).toBe(0);
+	expect(response.isSuccessful()).toBe(true);
+	expect(response.payload.newTemplate.name).toBe('apple');
+	expect(testItemList.getItem(PlaceholderItemTemplates.PlaceHolderItems.appleSeed).payload.quantity).toBe(0);
+})
+
+test('Should Use BananaSeed Item', () => {
+	const response = testItemList.useItem(PlaceholderItemTemplates.PlaceHolderItems.bananaSeed, 1);
+	expect(response.payload.originalItem.quantity).toBe(1);
+	expect(response.isSuccessful()).toBe(true);
+	expect(response.payload.newTemplate.name).toBe('banana');
+	expect(testItemList.getItem(PlaceholderItemTemplates.PlaceHolderItems.appleSeed).payload.quantity).toBe(1);
+})
+
+test('Should Not Use Item Lacking Quantity', () => {
+	const response = testItemList.useItem(PlaceholderItemTemplates.PlaceHolderItems.coconutSeed, 5);
+	expect(response.isSuccessful()).toBe(false);
+})

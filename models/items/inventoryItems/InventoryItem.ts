@@ -27,24 +27,31 @@ export class InventoryItem extends Item {
 	}
 
 	/**
-	 * Consumes 1 quantity from the specified item.
+	 * Consumes x quantity from the specified item.
 	 * Performs a specific action depending on the item type:
 	 * Blueprint -> returns the Decoration ItemTemplate corresponding to the Blueprint
 	 * Seed -> returns the Plant ItemTemplate corresponding to the Seed
 	 * HarvestedItem -> error
-	 * @returns a response containing the resulting transformed item template, or an error message
+	 * Fails if there is not enough quantity of item
+	 * @quantity the number of item used
+	 * @returns a response containing the following object, or an error message
+	 * {originalItem: InventoryItem
+	 *  newTemplate: ItemTemplate}
 	 */
-	use(): InventoryTransactionResponse {
+	use(quantity: number): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		if (this.getQuantity() <= 0) {
-			response.addErrorMessage(`item lacks the required quantity to use`);
+		if (this.getQuantity() < quantity) {
+			response.addErrorMessage(`item lacks the required quantity to use, needs ${quantity} and has ${this.getQuantity()}`);
 			return response;
 		}
 		switch(this.itemData.subtype) {
 			case ItemSubtypes.BLUEPRINT.name:
 			case ItemSubtypes.SEED.name:
-				response.payload = PlaceholderItemTemplates.getTransformTemplate(this.itemData.transformId);
-				this.setQuantity(this.getQuantity() - 1);
+				response.payload = {
+					originalItem: this,
+					newTemplate: PlaceholderItemTemplates.getTransformTemplate(this.itemData.transformId),
+				};
+				this.setQuantity(this.getQuantity() - quantity);
 				break;
 			default:
 				response.addErrorMessage(`item is of type ${this.itemData.subtype}, cannot be used`);
