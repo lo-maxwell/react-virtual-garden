@@ -1,5 +1,5 @@
-import { PlacedItem } from "./items/placedItems/PlacedItem";
-import { generateNewPlaceholderPlacedItem} from "./items/PlaceholderItems";
+import { PlacedItem } from "../items/placedItems/PlacedItem";
+import { generateNewPlaceholderPlacedItem} from "../items/PlaceholderItems";
 import { Plot } from "./Plot";
 
 export class Garden {

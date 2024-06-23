@@ -13,4 +13,10 @@ export class CustomResponse {
 	addErrorMessage(msg: string) {
 		this.messages.push(msg);
 	}
+
+	printErrorMessages() {
+		this.messages.forEach((element, index) => {
+			console.log(element);
+		})
+	}
 }

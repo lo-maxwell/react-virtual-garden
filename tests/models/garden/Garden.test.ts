@@ -1,4 +1,4 @@
-import { Garden } from "@/models/Garden";
+import { Garden } from "@/models/garden/Garden";
 import { generateNewPlaceholderPlacedItem} from "@/models/items/PlaceholderItems";
 
 test('getEmptyPlots generates new set of plots', () => {

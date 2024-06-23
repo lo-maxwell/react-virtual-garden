@@ -42,7 +42,7 @@ export class PlaceholderItemTemplates {
 		coconut: new ItemTemplate(9, "coconut", "!", "PlacedItem", "Plant", 150, 10),
 		harvestedCoconut: new ItemTemplate(10, "harvested coconut", "!", "InventoryItem", "HarvestedItem", 150, 0),
 		bench: new ItemTemplate(11, "bench", "B", "PlacedItem", "Decoration", 100, 12),
-		benchBlueprint: new ItemTemplate(12, "bench", "B", "InventoryItem", "Blueprint", 100, 11),
+		benchBlueprint: new ItemTemplate(12, "bench blueprint", "B", "InventoryItem", "Blueprint", 100, 11),
 	}
 	
 	
