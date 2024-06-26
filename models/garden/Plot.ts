@@ -27,12 +27,19 @@ export class Plot {
 
 	/** 
 	 * Replaces the existing item with a new one.
-	 * @item the item to replace with
+	 * @param item the item to replace with
 	 * @returns the changed item.
 	 */
 	setItem(item: PlacedItem): PlacedItem {
 		this.item = item;
 		return this.item;
+	}
+
+	/**
+	 * @returns the subtype of the item contained in this plot
+	 */
+	 getItemSubtype(): string {
+		return this.item.itemData.subtype;
 	}
 
 	/**
@@ -55,7 +62,7 @@ export class Plot {
 	 * Decoration -> returns the Blueprint ItemTemplate corresponding to the Decoration
 	 * Plant -> returns the HarvestedItem ItemTemplate corresponding to the Plant
 	 * EmptyItem -> error
-	 * @item the item to replace with. Default: ground
+	 * @param item the item to replace with. Default: ground
 	 * @returns a response containing the following object, or an error message
 	 * {originalItem: PlacedItem, 
 	 *  replacedItem: PlacedItem, 

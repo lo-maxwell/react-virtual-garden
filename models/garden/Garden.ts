@@ -208,11 +208,11 @@ export class Garden {
 	/**
 	 * Looks up a plot by its row and column.
 	 */
-	getPlotByRowAndColumn(row: number, col: number): Plot | undefined {
+	getPlotByRowAndColumn(row: number, col: number): Plot | null {
 		if (row >= 0 && row < this.plots.length && col >= 0 && col < this.plots[row].length) {
 			return this.plots[row][col];
 		}
-		return undefined;
+		return null;
 	}
 
 	/**

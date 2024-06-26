@@ -19,7 +19,7 @@ export class PlacedItem extends Item {
 	}
 
 	/** Replaces the existing status
-	 * @status the new status
+	 * @param status the new status
 	 */
 	setStatus(status: string): void {
 		this.status = status;

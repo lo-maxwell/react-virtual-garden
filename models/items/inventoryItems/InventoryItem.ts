@@ -20,7 +20,7 @@ export class InventoryItem extends Item {
 
 	/** 
 	 * Replaces the existing quantity
-	 * @status the new quantity
+	 * @param quantity the new quantity
 	 */
 	setQuantity(quantity: number): void {
 		this.quantity = quantity;
@@ -33,7 +33,7 @@ export class InventoryItem extends Item {
 	 * Seed -> returns the Plant ItemTemplate corresponding to the Seed
 	 * HarvestedItem -> error
 	 * Fails if there is not enough quantity of item
-	 * @quantity the number of item used
+	 * @param quantity the number of item used
 	 * @returns a response containing the following object, or an error message
 	 * {originalItem: InventoryItem
 	 *  newTemplate: ItemTemplate}
