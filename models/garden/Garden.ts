@@ -1,5 +1,8 @@
+import { PlaceholderItemTemplates } from "../items/ItemTemplate";
+import { EmptyItem } from "../items/placedItems/EmptyItem";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { generateNewPlaceholderPlacedItem} from "../items/PlaceholderItems";
+import { GardenTransactionResponse } from "./GardenTransactionResponse";
 import { Plot } from "./Plot";
 
 export class Garden {
@@ -89,8 +92,8 @@ export class Garden {
 
 	/**
  	 * Sets the garden size. Fills empty slots with Empty Plots, and deletes slots that are out of bounds.
-	 * @rows - new number of rows
-	 * @cols - new number of columns
+	 * @param rows - new number of rows
+	 * @param cols - new number of columns
 	 */
 	setGardenSize(rows: number, cols: number): void {
 		const newPlots = Array.from({ length: rows }, (_, rowIndex) =>
@@ -183,13 +186,13 @@ export class Garden {
 
 	/**
 	 * Changes the item in a plot in this garden
-	 * @param rowIndex - column index
-	 * @param colIndex - row index
+	 * @param rowIndex - row index
+	 * @param colIndex - column index
 	 * @param item - the replacement PlacedItem
 	 * @returns the plot changed
 	 */
 	setPlotItem(rowIndex: number, colIndex: number, item: PlacedItem): Plot {
-		this.plots[rowIndex][colIndex].item = item;
+		this.plots[rowIndex][colIndex].setItem(item);
 		//TODO: setItem function in plot
 		return this.plots[rowIndex][colIndex];
 	}
@@ -207,12 +210,115 @@ export class Garden {
 
 	/**
 	 * Looks up a plot by its row and column.
+	 * @param row - row index
+	 * @param col - col index
+	 * @returns the found plot, or null.
 	 */
 	getPlotByRowAndColumn(row: number, col: number): Plot | null {
 		if (row >= 0 && row < this.plots.length && col >= 0 && col < this.plots[row].length) {
 			return this.plots[row][col];
 		}
 		return null;
+	}
+
+	/**
+	 * Helper function to call useItem and format the response.
+	 * @param plot - the plot in the garden.
+	 * @param replacementItem - item to replace with after modification
+	 * @returns response containing:
+	 * {originalItem: PlacedItem, 
+	 *  updatedPlot: Plot, 
+	 *  returnedItemTemplate: ItemTemplate}
+	 */
+	private replaceItemInPlot(plot: Plot, replacementItem: PlacedItem): GardenTransactionResponse {
+		const response = new GardenTransactionResponse();
+		const useItemResponse = plot.useItem(replacementItem);
+		if (!useItemResponse.isSuccessful()) return useItemResponse;
+
+		response.payload = {
+			originalItem: useItemResponse.payload.originalItem,
+			updatedPlot: plot,
+			returnedItemTemplate: useItemResponse.payload.newTemplate
+		};
+		return response;
+	}
+
+	/**
+	 * Verifies that the plot contains a Plant. Replaces the Plant with an item. Returns a response containing the harvested item.
+	 * @param plot - the plot in the garden, or an object containing the row, col indexes.
+	 * @param replacementItem (optional) - item to replace with after harvesting
+	 * @returns response containing:
+	 * {originalItem: PlacedItem, 
+	 *  updatedPlot: Plot, 
+	 *  harvestedItemTemplate: ItemTemplate}
+	 */
+	harvestPlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(PlaceholderItemTemplates.PlaceHolderItems.ground, '')): GardenTransactionResponse {
+		const response = new GardenTransactionResponse();
+		let data: Plot | {row: number, col: number} | null = plot;
+		if (!(plot instanceof Plot)) {
+			data = this.getPlotByRowAndColumn(plot.row, plot.col);
+			if (data == null) {
+				response.addErrorMessage(`Could not find Plot at (${plot.row}, ${plot.col})`);
+				return response;
+			}
+		} else {
+			if (!this.plotPositions.has(plot)) {
+				response.addErrorMessage(`Could not find Plot in this Garden.`);
+				return response;
+			}
+		}
+		let plotToHarvest = data as Plot;
+		if (plotToHarvest.getItemSubtype() !== 'Plant') {
+			response.addErrorMessage(`Item is not of type Plant, is of type ${plotToHarvest.getItemSubtype()}`);
+			return response;
+		}
+		const replaceResponse = this.replaceItemInPlot(plotToHarvest, replacementItem);
+		if (!replaceResponse.isSuccessful()) return replaceResponse;
+		response.payload = {
+			originalItem: replaceResponse.payload.originalItem, 
+			updatedPlot: replaceResponse.payload.updatedPlot, 
+			harvestedItemTemplate:  replaceResponse.payload.returnedItemTemplate
+		}
+		return response;
+	}
+
+	/**
+	 * Verifies that the plot contains a Decoration. Replaces the Decoration with an item. Returns a response containing the blueprint.
+	 * @param plot - the plot in the garden, or an object containing the row, col indexes.
+	 * @param replacementItem (optional) - item to replace with after harvesting
+	 * @returns response containing:
+	 * {originalItem: PlacedItem, 
+	 *  updatedPlot: Plot, 
+	 *  blueprintItemTemplate: ItemTemplate}
+	 */
+	repackagePlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(PlaceholderItemTemplates.PlaceHolderItems.ground, '')): GardenTransactionResponse {
+		const response = new GardenTransactionResponse();
+		let data: Plot | {row: number, col: number} | null = plot;
+		if (!(plot instanceof Plot)) {
+			data = this.getPlotByRowAndColumn(plot.row, plot.col);
+			if (data == null) {
+				response.addErrorMessage(`Could not find Plot at (${plot.row}, ${plot.col})`);
+				return response;
+			}
+		} else {
+			if (!this.plotPositions.has(plot)) {
+				response.addErrorMessage(`Could not find Plot in this Garden.`);
+				return response;
+			}
+		}
+		let plotToHarvest = data as Plot;
+		if (plotToHarvest.getItemSubtype() !== 'Decoration') {
+			response.addErrorMessage(`Item is not of type Decoration, is of type ${plotToHarvest.getItemSubtype()}`);
+			return response;
+		}
+		const replaceResponse = this.replaceItemInPlot(plotToHarvest, replacementItem);
+		if (!replaceResponse.isSuccessful()) return replaceResponse;
+		response.payload = {
+			originalItem: replaceResponse.payload.originalItem, 
+			updatedPlot: replaceResponse.payload.updatedPlot, 
+			blueprintItemTemplate:  replaceResponse.payload.returnedItemTemplate
+		}
+		return response;
 	}
 
 	/**

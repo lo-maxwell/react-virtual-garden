@@ -1,3 +1,5 @@
+import { Inventory } from "../inventory/Inventory";
+import { InventoryItem } from "../items/inventoryItems/InventoryItem";
 import { PlaceholderItemTemplates } from "../items/ItemTemplate";
 import { ItemSubtypes } from "../items/ItemTypes";
 import { EmptyItem } from "../items/placedItems/EmptyItem";
@@ -5,7 +7,7 @@ import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { GardenTransactionResponse } from "./GardenTransactionResponse";
 
 export class Plot {
-	item: PlacedItem;
+	private item: PlacedItem;
 
 	constructor(item: PlacedItem) {
 		this.item = item;
@@ -57,7 +59,7 @@ export class Plot {
 	}
 
 	/**
-	 * Removes the item from this plot and replaces it with the specified item.
+	 * Removes the item from this plot and replaces it with the specified item. Removes status messages.
 	 * Performs a specific action depending on the item type:
 	 * Decoration -> returns the Blueprint ItemTemplate corresponding to the Decoration
 	 * Plant -> returns the HarvestedItem ItemTemplate corresponding to the Plant
@@ -95,5 +97,43 @@ export class Plot {
 		return response;
 	}
 
+	/**
+	 * Converts an inventoryItem into a PlacedItem, removes 1 quantity from it, and adds that item to this plot.
+	 * Requires that this plot contains an emptyItem.
+	 * Performs a specific action depending on the item type:
+	 * Blueprint -> returns a new Decoration corresponding to the blueprint
+	 * Seed -> returns a new Plant corresponding to the blueprint
+	 * HarvestedItem -> error
+	 * @param item the inventoryItem to convert
+	 * @returns a response containing the following object, or an error message
+	 */
+	placeItem(inventory: Inventory, item: InventoryItem): GardenTransactionResponse {
+		const response = new GardenTransactionResponse();
+		const originalItem = this.item;
+		if (originalItem.itemData.subtype != ItemSubtypes.GROUND.name) {
+			response.addErrorMessage(`existing item is of type ${item.itemData.subtype} but should be ground, cannot place here`);
+			return response;
+		}
+		let useItemResponse: GardenTransactionResponse;
+		switch(item.itemData.subtype) {
+			case ItemSubtypes.SEED.name:
+			case ItemSubtypes.BLUEPRINT.name:
+				useItemResponse = inventory.useItem(item, 1);
+				if (!useItemResponse.isSuccessful()) {
+					return useItemResponse;
+				}
+				const newPlacedItem = new PlacedItem(useItemResponse.payload.newTemplate, "");
+				this.setItem(newPlacedItem);
+				break;
+			default:
+				response.addErrorMessage(`item is of type ${item.itemData.subtype}, cannot replace used item`);
+				return response;
+		}
+		response.payload = {
+			replacedItem: this.item,
+			newTemplate: useItemResponse!.payload.newTemplate
+		}
 
+		return response;
+	}
 }
