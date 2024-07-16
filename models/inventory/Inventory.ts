@@ -72,7 +72,7 @@ export class Inventory {
 
 	/**
      * Gains quantity of item to inventory at no cost.
-     * @param item - The item to remove, identified by InventoryItem or ItemTemplate.
+     * @param item - The item to add, identified by InventoryItem or ItemTemplate.
 	 * @param quantity - Positive integer amount of item being added.
      * @returns InventoryTransactionResponse containing the added item or an error message.
      */

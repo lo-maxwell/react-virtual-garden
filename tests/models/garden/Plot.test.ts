@@ -1,7 +1,7 @@
 import { Plot } from "@/models/garden/Plot";
 import { Inventory } from "@/models/inventory/Inventory";
 import { ItemList } from "@/models/inventory/ItemList";
-import { PlaceholderItemTemplates } from "@/models/items/ItemTemplate";
+import { ItemTemplate, PlaceholderItemTemplates } from "@/models/items/ItemTemplate";
 import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { generateNewPlaceholderInventoryItem, generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";
 
@@ -67,7 +67,7 @@ test('Should Place Apple Seed Item', () => {
 	const response = newPlot.placeItem(testInventory, testInventory.getItem('apple seed').payload);
 	expect(response.isSuccessful()).toBe(true);
 	expect(newPlot.getItem().itemData.name).toBe('apple');
-	expect(response.payload.newTemplate.name).toBe('apple');
+	expect(response.payload.newItem.itemData.name).toBe('apple');
 	expect(testInventory.contains('apple seed').payload).toBe(false);
 })
 
@@ -77,7 +77,7 @@ test('Should Place Bench Item', () => {
 	const response = newPlot.placeItem(testInventory, testInventory.getItem('bench blueprint').payload);
 	expect(response.isSuccessful()).toBe(true);
 	expect(newPlot.getItem().itemData.name).toBe('bench');
-	expect(response.payload.newTemplate.name).toBe('bench');
+	expect(response.payload.newItem.itemData.name).toBe('bench');
 	expect(testInventory.contains('bench blueprint').payload).toBe(true);
 	expect(testInventory.getItem('bench blueprint').payload.quantity).toBe(1);
 })
@@ -91,7 +91,7 @@ test('Should Not Place on Non Ground', () => {
 	expect(testInventory.getItem('bench blueprint').payload.quantity).toBe(2);
 })
 
-test('Should Not Use Place Harvested Item', () => {
+test('Should Not Place Harvested Item', () => {
 	const newPlot = new Plot(generateNewPlaceholderPlacedItem("ground", "newItem"));
 	const testInventory = new Inventory("Dummy", 100, new ItemList([generateNewPlaceholderInventoryItem('harvestedApple', 1)]));
 	const response = newPlot.placeItem(testInventory, testInventory.getItem('harvested apple').payload);
@@ -103,4 +103,35 @@ test('Should Not Place Item With 0 Quantity', () => {
 	const testInventory = new Inventory("Dummy", 100, new ItemList([generateNewPlaceholderInventoryItem('appleSeed', 0)]));
 	const response = newPlot.placeItem(testInventory, testInventory.getItem('apple seed').payload);
 	expect(response.isSuccessful()).toBe(false);
+})
+
+test('Should Pickup Apple Item', () => {
+	const newPlot = new Plot(generateNewPlaceholderPlacedItem("apple", "newItem"));
+	const testInventory = new Inventory("Dummy", 100, new ItemList([generateNewPlaceholderInventoryItem('harvestedApple', 1)]));
+	const response = newPlot.pickupItem(testInventory, generateNewPlaceholderPlacedItem("ground", ""));
+	expect(response.isSuccessful()).toBe(true);
+	expect(newPlot.getItem().itemData.name).toBe('ground');
+	expect(response.payload.newItem.itemData.name).toBe('harvested apple');
+	expect(testInventory.contains('harvested apple').payload).toBe(true);
+	expect(testInventory.getItem('harvested apple').payload.quantity).toBe(2);
+})
+
+test('Should Pickup Bench Item', () => {
+	const newPlot = new Plot(generateNewPlaceholderPlacedItem("bench", "newItem"));
+	const testInventory = new Inventory("Dummy", 100, new ItemList());
+	const response = newPlot.pickupItem(testInventory);
+	expect(response.isSuccessful()).toBe(true);
+	expect(newPlot.getItem().itemData.name).toBe('ground');
+	expect(response.payload.newItem.itemData.name).toBe('bench blueprint');
+	expect(testInventory.contains('bench blueprint').payload).toBe(true);
+	expect(testInventory.getItem('bench blueprint').payload.quantity).toBe(1);
+})
+
+test('Should Not Pickup Non Plant/Decoration', () => {
+	const newPlot = new Plot(generateNewPlaceholderPlacedItem("ground", "newItem"));
+	const testInventory = new Inventory("Dummy", 100, new ItemList([]));
+	const response = newPlot.pickupItem(testInventory);
+	expect(response.isSuccessful()).toBe(false);
+	expect(newPlot.getItem().itemData.name).toBe("ground");
+	expect(testInventory.size()).toBe(0);
 })

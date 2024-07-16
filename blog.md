@@ -40,3 +40,7 @@ TODO:
 Implement plot actions -> runs when the plot is clicked to place/harvest/repackage items
 
 Ensure data persistence within user sessions + swapping to different pages
+
+Implement way to add to inventory
+Display current gold in inventory
+Implement selling items in inventory

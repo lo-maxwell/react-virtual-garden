@@ -16,6 +16,10 @@ export const generateRandomPlaceholderInventoryItem = () => {
 	return generateNewPlaceholderInventoryItem(inventoryItems[Math.floor(Math.random() * inventoryItems.length)].name, 1);
 }
 
+/**
+ * @param itemName - the item name in camelCase, ie. appleSeed
+ * @param status - the status string
+ */
 export const generateNewPlaceholderPlacedItem = (itemName: string, status: string) => {
 	const itemData = PlaceholderItemTemplates.PlaceHolderItems[itemName];
 	if (itemData == null) return new Plant(PlaceholderItemTemplates.PlaceHolderItems.errorPlacedItem, "error");
@@ -31,6 +35,10 @@ export const generateNewPlaceholderPlacedItem = (itemName: string, status: strin
 	}
 }
 
+/**
+ * @param itemName - the item name in camelCase, ie. appleSeed
+ * @param quantity - the quantity
+ */
 export const generateNewPlaceholderInventoryItem = (itemName: string, quantity: number) => {
 	const itemData = PlaceholderItemTemplates.PlaceHolderItems[itemName];
 	if (itemData == null) return new Seed(PlaceholderItemTemplates.PlaceHolderItems.errorInventoryItem, 1);

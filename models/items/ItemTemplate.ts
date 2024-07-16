@@ -31,7 +31,7 @@ export class PlaceholderItemTemplates {
 	static PlaceHolderItems: PlaceHolderItems = {
 		errorPlacedItem: new ItemTemplate(-1, "error", "❌", "PlacedItem", "Plant", 0, -1),
 		errorInventoryItem: new ItemTemplate(-2, "error", "❌", "InventoryItem", "Seed", 0, -2),
-		ground: new ItemTemplate(1, "ground", ".", "PlacedItem", "Ground", 0, 1),
+		ground: new ItemTemplate(1, "ground", "_", "PlacedItem", "Ground", 0, 1),
 		appleSeed: new ItemTemplate(2, "apple seed", "🍎", "InventoryItem", "Seed", 10, 3),
 		apple: new ItemTemplate(3, "apple", "🍎", "PlacedItem", "Plant", 50, 4),
 		harvestedApple: new ItemTemplate(4, "harvested apple", "🍎", "InventoryItem", "HarvestedItem", 50, 0),

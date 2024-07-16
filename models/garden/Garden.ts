@@ -46,10 +46,12 @@ export class Garden {
 	}
 
 	/**
-	 * @returns a deep copy of the plots in the garden.
+	 * @returns the plots in the garden. (modifiable)
 	 */
 	getPlots(): Plot[][] {
-		return this.plots.map(innerArray => innerArray.map(plot => plot.clone()));
+		return this.plots;
+		// deep copy instead (?)
+		// return this.plots.map(innerArray => innerArray.map(plot => plot.clone()));
 	}
 
 	/**
