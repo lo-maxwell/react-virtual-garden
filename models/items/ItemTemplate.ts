@@ -1,6 +1,7 @@
 import { ItemSubtype, ItemType } from "./ItemTypes";
 
 export class ItemTemplate {
+	
 	id: number;
 	name: string;
 	icon: string;
@@ -17,6 +18,11 @@ export class ItemTemplate {
 		this.subtype = subtype;
 		this.basePrice = basePrice;
 		this.transformId = transformId;
+	}
+
+	static fromPlainObject(plainObject: any): ItemTemplate {
+		const { id, name, icon, type, subtype, basePrice, transformId } = plainObject;
+    	return new ItemTemplate(id, name, icon, type, subtype, basePrice, transformId);
 	}
 
 	getPrice(multiplier: number) {

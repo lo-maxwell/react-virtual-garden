@@ -3,6 +3,7 @@ import { Plot } from "@/models/garden/Plot";
 import { Inventory } from "@/models/inventory/Inventory";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
+import { saveInventory } from "@/utils/localStorage/inventory";
 import { forwardRef, useImperativeHandle, useState } from "react";
 
 //contains static onclick functions for plot components
@@ -21,6 +22,7 @@ export class PlotActions {
 			if (item.itemData.subtype != ItemSubtypes.SEED.name) return plot.getItem().itemData.icon;
 			const placeItemResponse = plot.placeItem(inventory, item);
 			if (!placeItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
+			saveInventory(inventory);
 			return plot.getItem().itemData.icon;
 		}
 		return helper;
@@ -38,6 +40,7 @@ export class PlotActions {
 			if (item.itemData.subtype != ItemSubtypes.BLUEPRINT.name) return plot.getItem().itemData.icon;
 			const placeItemResponse = plot.placeItem(inventory, item);
 			if (!placeItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
+			saveInventory(inventory);
 			return plot.getItem().itemData.icon;
 		}
 		return helper;
@@ -54,6 +57,7 @@ export class PlotActions {
 			if (plot.getItem().itemData.subtype != ItemSubtypes.PLANT.name) return plot.getItem().itemData.icon;
 			const pickupItemResponse = plot.pickupItem(inventory);
 			if (!pickupItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
+			saveInventory(inventory);
 			return plot.getItem().itemData.icon;
 		}
 		return helper;
@@ -70,6 +74,7 @@ export class PlotActions {
 			if (plot.getItem().itemData.subtype != ItemSubtypes.DECORATION.name) return plot.getItem().itemData.icon;
 			const pickupItemResponse = plot.pickupItem(inventory);
 			if (!pickupItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
+			saveInventory(inventory);
 			return plot.getItem().itemData.icon;
 		}
 		return helper;
@@ -114,8 +119,21 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 		}
 	}
 
+	function getColor() {
+		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name) {
+			return `bg-gray-300`;
+		} else if (plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
+			return `bg-green-300`;
+		} else if (plot.getItemSubtype() === ItemSubtypes.DECORATION.name) {
+			return `bg-gray-100`;
+		} else {
+			//should never occur
+			return `bg-gray-300`;
+		}
+	}
+
 	return (
-		<button onClick={handleClick} className="bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2">{displayIcon}</button>
+		<button onClick={handleClick} className={`flex items-center justify-center text-4xl ${getColor()} w-12 h-12 text-purple-600 font-semibold border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent`}>{displayIcon}</button>
 	  );
 });
 

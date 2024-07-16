@@ -4,6 +4,7 @@ import { Plot } from "@/models/garden/Plot";
 import { Inventory } from "@/models/inventory/Inventory";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
+import { saveInventory } from "@/utils/localStorage/inventory";
 import { useRef } from "react";
 
 const GardenComponent = ({garden, inventory, selected, setSelected, inventoryForceRefresh}: {garden: Garden, inventory: Inventory, selected: InventoryItem, setSelected: Function, inventoryForceRefresh: {value: number, setter: Function}}) => {
@@ -84,10 +85,10 @@ const GardenComponent = ({garden, inventory, selected, setSelected, inventoryFor
 		<>
 		{generatePlots(garden.getPlots())}
 		<div>
-			<button onClick={plantAll}>Plant All</button>
+			<button onClick={plantAll} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>Plant All</button>
 		</div>
 		<div>
-			<button onClick={harvestAll}>Harvest All</button>
+			<button onClick={harvestAll} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>Harvest All</button>
 		</div>
      	</>
 	);

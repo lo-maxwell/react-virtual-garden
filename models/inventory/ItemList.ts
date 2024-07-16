@@ -1,5 +1,6 @@
 
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
+import { Item } from "../items/Item";
 import { ItemTemplate } from "../items/ItemTemplate";
 import { ItemTypes } from "../items/ItemTypes";
 import { InventoryTransactionResponse } from "./InventoryTransactionResponse";
@@ -8,6 +9,11 @@ export class ItemList {
 	private items: InventoryItem[];
 	constructor(items: InventoryItem[] = []) {
 		this.items = items;
+	}
+
+	static fromPlainObject(plainObject: any): ItemList {
+		const items = plainObject.items.map((item: any) => InventoryItem.fromPlainObject(item));
+		return new ItemList(items);
 	}
 
 	/**

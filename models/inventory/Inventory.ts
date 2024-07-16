@@ -5,6 +5,7 @@ import { InventoryTransactionResponse } from "./InventoryTransactionResponse";
 import { ItemList } from "./ItemList";
 
 export class Inventory {
+	
 	private userId: string;
 	private gold: number;
 	private items: ItemList;
@@ -14,6 +15,14 @@ export class Inventory {
 		this.gold = gold;
 		this.items = items;
 	}
+
+	static fromPlainObject(plainObject: any): Inventory {
+		const { userId, gold, items } = plainObject;
+		const rehydratedItemList = ItemList.fromPlainObject(items);
+		if (rehydratedItemList == null) return new Inventory(userId, gold);
+		return new Inventory(userId, gold, rehydratedItemList);
+	}
+
 	/**
 	 * @returns the userId of the owner of the inventory.
 	 */

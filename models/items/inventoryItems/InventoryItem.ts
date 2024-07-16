@@ -10,6 +10,11 @@ export class InventoryItem extends Item {
 		super(itemData);
 		this.quantity = quantity;
 	}
+
+	static fromPlainObject(plainObject: any): InventoryItem {
+		const itemData = ItemTemplate.fromPlainObject(plainObject.itemData);
+		return new InventoryItem(itemData, plainObject.quantity);
+	}
 	
 	/**
 	 * @returns the quantity
