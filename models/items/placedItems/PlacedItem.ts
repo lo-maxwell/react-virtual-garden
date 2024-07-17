@@ -11,6 +11,11 @@ export class PlacedItem extends Item {
 		this.status = status;
 	}
 
+	static fromPlainObject(plainObject: any): PlacedItem {
+		const itemData = ItemTemplate.fromPlainObject(plainObject.itemData);
+		return new PlacedItem(itemData, plainObject.status);
+	}
+
 	/**
 	 * @returns the status
 	 */

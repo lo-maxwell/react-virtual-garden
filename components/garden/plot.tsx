@@ -3,8 +3,9 @@ import { Plot } from "@/models/garden/Plot";
 import { Inventory } from "@/models/inventory/Inventory";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
+import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
 //contains static onclick functions for plot components
 export class PlotActions {
@@ -15,14 +16,16 @@ export class PlotActions {
 	 * @param inventory - the inventory to get the inventoryItem from
 	 * @param item - the inventoryItem to convert to a placedItem
 	 * @param plot - the plot to modify
+	 * @param garden - the garden that the plot belongs to, only used for saving
 	 * @returns the updated icon
 	 */
-	static plantSeed(inventory: Inventory, item: InventoryItem, plot: Plot) {
+	static plantSeed(inventory: Inventory, item: InventoryItem, plot: Plot, garden: Garden) {
 		const helper = () => {
 			if (item.itemData.subtype != ItemSubtypes.SEED.name) return plot.getItem().itemData.icon;
 			const placeItemResponse = plot.placeItem(inventory, item);
 			if (!placeItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
 			saveInventory(inventory);
+			saveGarden(garden);
 			return plot.getItem().itemData.icon;
 		}
 		return helper;
@@ -33,14 +36,16 @@ export class PlotActions {
 	 * @param inventory - the inventory to get the inventoryItem from
 	 * @param item - the inventoryItem to convert to a placedItem
 	 * @param plot - the plot to modify
+	 * @param garden - the garden that the plot belongs to, only used for saving
 	 * @returns the updated icon
 	 */
-	static placeDecoration(inventory: Inventory, item: InventoryItem, plot: Plot) {
+	static placeDecoration(inventory: Inventory, item: InventoryItem, plot: Plot, garden: Garden) {
 		const helper = () => {
 			if (item.itemData.subtype != ItemSubtypes.BLUEPRINT.name) return plot.getItem().itemData.icon;
 			const placeItemResponse = plot.placeItem(inventory, item);
 			if (!placeItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
 			saveInventory(inventory);
+			saveGarden(garden);
 			return plot.getItem().itemData.icon;
 		}
 		return helper;
@@ -50,14 +55,16 @@ export class PlotActions {
 	 * Can only be used in a plot with a plant.
 	 * @param inventory - the inventory to modify
 	 * @param plot - the plot to modify
+	 * @param garden - the garden that the plot belongs to, only used for saving
 	 * @returns the updated icon
 	 */
-	 static harvestPlant(inventory: Inventory, plot: Plot) {
+	 static harvestPlant(inventory: Inventory, plot: Plot, garden: Garden) {
 		const helper = () => {
 			if (plot.getItem().itemData.subtype != ItemSubtypes.PLANT.name) return plot.getItem().itemData.icon;
 			const pickupItemResponse = plot.pickupItem(inventory);
 			if (!pickupItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
 			saveInventory(inventory);
+			saveGarden(garden);
 			return plot.getItem().itemData.icon;
 		}
 		return helper;
@@ -67,14 +74,16 @@ export class PlotActions {
 	 * Can only be used in a plot with a decoration.
 	 * @param inventory - the inventory to modify
 	 * @param plot - the plot to modify
+	 * @param garden - the garden that the plot belongs to, only used for saving
 	 * @returns the updated icon
 	 */
-	 static repackageDecoration(inventory: Inventory, plot: Plot) {
+	 static repackageDecoration(inventory: Inventory, plot: Plot, garden: Garden) {
 		const helper = () => {
 			if (plot.getItem().itemData.subtype != ItemSubtypes.DECORATION.name) return plot.getItem().itemData.icon;
 			const pickupItemResponse = plot.pickupItem(inventory);
 			if (!pickupItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
 			saveInventory(inventory);
+			saveGarden(garden);
 			return plot.getItem().itemData.icon;
 		}
 		return helper;

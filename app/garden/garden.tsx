@@ -4,25 +4,26 @@ import { Plot } from "@/models/garden/Plot";
 import { Inventory } from "@/models/inventory/Inventory";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
+import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { useRef } from "react";
 
-const GardenComponent = ({garden, inventory, selected, setSelected, inventoryForceRefresh}: {garden: Garden, inventory: Inventory, selected: InventoryItem, setSelected: Function, inventoryForceRefresh: {value: number, setter: Function}}) => {
+const GardenComponent = ({garden, inventory, selected, setSelected, inventoryForceRefresh}: {garden: Garden, inventory: Inventory, selected: InventoryItem | null, setSelected: Function, inventoryForceRefresh: {value: number, setter: Function}}) => {
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
-	
-	function getPlotAction(plot: Plot, selected: InventoryItem) {
+
+	function getPlotAction(plot: Plot, selected: InventoryItem | null) {
 		if (plot.getItemSubtype() == ItemSubtypes.GROUND.name && selected != null) {
 			if (selected.itemData.subtype == ItemSubtypes.SEED.name) {
-				return PlotActions.plantSeed(inventory, selected, plot);
+				return PlotActions.plantSeed(inventory, selected, plot, garden);
 			} else if (selected.itemData.subtype == ItemSubtypes.BLUEPRINT.name) {
-				return PlotActions.placeDecoration(inventory, selected, plot);
+				return PlotActions.placeDecoration(inventory, selected, plot, garden);
 			}
 		}
 		if (plot.getItemSubtype() == ItemSubtypes.PLANT.name) {
-			return PlotActions.harvestPlant(inventory, plot);
+			return PlotActions.harvestPlant(inventory, plot, garden);
 		}
 		if (plot.getItemSubtype() == ItemSubtypes.DECORATION.name) {
-			return PlotActions.repackageDecoration(inventory, plot);
+			return PlotActions.repackageDecoration(inventory, plot, garden);
 		}
 		return PlotActions.doNothing(plot);
 	}

@@ -9,10 +9,16 @@ import { GardenTransactionResponse } from "./GardenTransactionResponse";
 
 export class Plot {
 	
+	
 	private item: PlacedItem;
 
 	constructor(item: PlacedItem) {
 		this.item = item;
+	}
+
+	static fromPlainObject(plainObject: any): Plot {
+		const item = PlacedItem.fromPlainObject(plainObject.item);
+    	return new Plot(item);
 	}
 
 	/**

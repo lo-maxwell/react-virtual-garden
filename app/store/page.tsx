@@ -1,6 +1,8 @@
-export default function Home() {
+const StorePage = () => {
   return (
     <div> This is the Store Page!
     </div>
   );
 }
+
+export default StorePage;

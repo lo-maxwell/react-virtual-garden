@@ -6,14 +6,14 @@ export const loadGarden = () => {
 	  if (serializedGarden === null) {
 		return [];
 	  }
-	  return JSON.parse(serializedGarden);
+	  return Garden.fromPlainObject(JSON.parse(serializedGarden));
 	} catch (err) {
 	  console.error('Could not load garden', err);
 	  return [];
 	}
   };
   
-export const saveInventory = (garden: Garden) => {
+export const saveGarden = (garden: Garden) => {
 	try {
 		const serializedGarden = JSON.stringify(garden);
 		localStorage.setItem('garden', serializedGarden);

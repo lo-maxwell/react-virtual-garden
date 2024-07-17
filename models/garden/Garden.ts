@@ -6,12 +6,13 @@ import { GardenTransactionResponse } from "./GardenTransactionResponse";
 import { Plot } from "./Plot";
 
 export class Garden {
+	
 	private userId: string;
 	private plots: Plot[][];
 	private plotPositions: Map<Plot, [number, number]>;
 	
-	static getStartingRows() {return 10;}
-	static getStartingCols() {return 10;}
+	static getStartingRows() {return 6;}
+	static getStartingCols() {return 6;}
 
 	constructor(userId: string = "Dummy User", rows: number = Garden.getStartingRows(), cols: number = Garden.getStartingCols(), plots: Plot[][] | null = null) {
 		this.userId = userId;
@@ -22,6 +23,26 @@ export class Garden {
 			this.plots = Garden.generateEmptyPlots(rows, cols);
 		}
 		this.updatePlotPositions();
+	}
+
+	static fromPlainObject(plainObject: any): Garden {
+		const { userId, plots: plainPlots, plotPositions: plainPlotPositions } = plainObject;
+
+		// Convert plainPlots to Plot[][]
+		const plots: Plot[][] = plainPlots.map((row: any[]) => row.map((plot: any) => Plot.fromPlainObject(plot)));
+
+		// Convert plainPlotPositions to Map<Plot, [number, number]>
+		// const plotPositions: Map<Plot, [number, number]> = new Map();
+		// for (const [plotPlain, position] of Object.entries(plainPlotPositions)) {
+		// 	const plot = Plot.fromPlainObject(JSON.parse(plotPlain));
+		// 	plotPositions.set(plot, position);	
+		// }
+
+		const garden = new Garden(userId, plainPlots.length, plainPlots[0]?.length || 0, plots);
+		// garden.plotPositions = plotPositions; //unnecessary?
+		garden.updatePlotPositions();
+
+		return garden;
 	}
 
 	/**
