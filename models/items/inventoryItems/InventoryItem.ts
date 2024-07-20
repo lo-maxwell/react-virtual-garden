@@ -1,4 +1,4 @@
-import { InventoryTransactionResponse } from "@/models/inventory/InventoryTransactionResponse";
+import { InventoryTransactionResponse } from "@/models/itemStore/inventory/InventoryTransactionResponse";
 import { Item } from "../Item";
 import { ItemTemplate, PlaceholderItemTemplates } from "../ItemTemplate";
 import { ItemSubtypes} from "../ItemTypes";

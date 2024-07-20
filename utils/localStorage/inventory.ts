@@ -1,4 +1,4 @@
-import { Inventory } from "@/models/inventory/Inventory";
+import { Inventory } from "@/models/itemStore/inventory/Inventory";
 
 export const loadInventory = () => {
 	try {

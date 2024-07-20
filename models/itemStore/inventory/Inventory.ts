@@ -1,19 +1,21 @@
-import { InventoryItem } from "../items/inventoryItems/InventoryItem";
-import { ItemTemplate } from "../items/ItemTemplate";
-import { ItemTypes } from "../items/ItemTypes";
+import { InventoryItem } from "../../items/inventoryItems/InventoryItem";
+import { ItemTemplate } from "../../items/ItemTemplate";
+import { ItemTypes } from "../../items/ItemTypes";
 import { InventoryTransactionResponse } from "./InventoryTransactionResponse";
-import { ItemList } from "./ItemList";
+import { ItemList } from "../ItemList";
+import { ItemStore } from "../ItemStore";
 
-export class Inventory {
+export class Inventory extends ItemStore{
 	
 	private userId: string;
 	private gold: number;
-	private items: ItemList;
+	// private items: ItemList;
 	
 	constructor(userId: string, gold: number = 0, items: ItemList = new ItemList()) {
+		super(items);
 		this.userId = userId;
 		this.gold = gold;
-		this.items = items;
+		// this.items = items;
 	}
 
 	static fromPlainObject(plainObject: any): Inventory {
@@ -35,13 +37,6 @@ export class Inventory {
 	 */
 	getGold(): number {
 		return this.gold;
-	}
-
-	/**
-	 * @returns a copy of the inventory items within the list.
-	 */
-	 getAllItems(): InventoryItem[] {
-		return this.items.getAllItems();
 	}
 
 	/**
@@ -79,39 +74,15 @@ export class Inventory {
 		return response;
 	}
 
-	/**
-     * Gains quantity of item to inventory at no cost.
-     * @param item - The item to add, identified by InventoryItem or ItemTemplate.
-	 * @param quantity - Positive integer amount of item being added.
-     * @returns InventoryTransactionResponse containing the added item or an error message.
-     */
-	gainItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
-		const response = this.addItem(item, quantity);
-		return response;
-	}
-
-	/**
-     * Trashes quantity of item from inventory. If item quantity goes to 0, deletes it from inventory. Fails if item is not in inventory.
-     * @param item - The item to remove, identified by InventoryItem, ItemTemplate, or name
-	 * @param quantity - Positive integer amount of item being removed. If quantity is greater than the remaining amount, removes all existing ones.
-     * @returns InventoryTransactionResponse containing the item or an error message.
-     */
-	trashItem(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
-		if (quantity <= 0 || !Number.isInteger(quantity)) {
-			response.addErrorMessage(`Invalid quantity: ${quantity}`);
-			return response;
-		}
-
-		return this.updateQuantity(item, -1 * quantity);
-	}
 
 	/**
      * Spends gold to add items to inventory. Fails if there is not enough gold.
      * @param item - The item to add, identified by InventoryItem or ItemTemplate.
 	 * @param multiplier - Value that the base price is modified by.
 	 * @param quantity - Amount of item being purchased.
-     * @returns InventoryTransactionResponse containing final gold amount or an error message.
+     * @returns InventoryTransactionResponse containing the following object or an error message.
+	 * {finalGold: number,
+	 *  purchasedItem: InventoryItem}
      */
 	buyItem(item: InventoryItem | ItemTemplate, multiplier: number, quantity: number): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
@@ -140,7 +111,10 @@ export class Inventory {
 			if (buyItemResponse.isSuccessful()) {
 				const removeGoldResponse = this.removeGold(itemCost * quantity);
 				if (!removeGoldResponse.isSuccessful()) return removeGoldResponse;
-				response.payload = this.getGold();
+				response.payload = {
+					finalGold: this.getGold(),
+					purchasedItem: buyItemResponse.payload
+				}
 				return response;
 			} else {
 				return buyItemResponse;
@@ -156,7 +130,9 @@ export class Inventory {
      * @param item - The item to sell, identified by InventoryItem, ItemTemplate, or name
 	 * @param multiplier - Value that the base price is modified by.
 	 * @param quantity - Positive integer amount of item being sold.
-     * @returns InventoryTransactionResponse containing the final gold amount or an error message.
+     * @returns InventoryTransactionResponse containing the following object or an error message.
+	 * {finalGold: number,
+	 *  remainingItem: InventoryItem}
      */
 	 sellItem(item: InventoryItem | ItemTemplate | string, multiplier: number, quantity: number): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
@@ -165,11 +141,11 @@ export class Inventory {
 			return response;
 		}
 
-		let findItem = this.getItem(item);
-		if (!findItem.isSuccessful()) {
-			return findItem;
+		const findItemResponse = this.getItem(item);
+		if (!findItemResponse.isSuccessful()) {
+			return findItemResponse;
 		}
-		let itemCost: number = findItem.payload.itemData.getPrice(multiplier);
+		let itemCost: number = findItemResponse.payload.itemData.getPrice(multiplier);
 
 		const containsItem = this.items.containsAmount(item, quantity);
 		if (!containsItem.payload) {
@@ -186,7 +162,10 @@ export class Inventory {
 		if (sellItemResponse.isSuccessful()) {
 			const addGoldResponse = this.addGold(itemCost * quantity);
 			if (!addGoldResponse.isSuccessful()) return addGoldResponse;
-			response.payload = this.getGold();
+			response.payload = {
+				finalGold: this.getGold(),
+				remainingItem: sellItemResponse.payload
+			}
 			return response;
 		} else {
 			return sellItemResponse;
@@ -221,64 +200,5 @@ export class Inventory {
 		return response;
 	}
 
-	/**
-     * Find an item in the inventory.
-     * @param item - The item to get, identified by InventoryItem, ItemTemplate, or name.
-     * @returns InventoryTransactionResponse containing the found InventoryItem or error message.
-     */
-	getItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
-		const response = this.items.getItem(item);
-		return response;
-	}
-
-	/**
-     * Check if the inventory contains an item.
-     * @param item - The item to check for, identified by InventoryItem, ItemTemplate, or name.
-     * @returns InventoryTransactionResponse containing True/False or error message.
-     */
-	contains(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
-		const response = this.items.contains(item);
-		return response;
-	}
-
-	/**
-     * Add an item to the inventory.
-     * @param item - The item to add.
-     * @param quantity - The quantity of the item to add.
-     * @returns InventoryTransactionResponse containing the added InventoryItem or error message
-     */
-	private addItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
-		const response = this.items.addItem(item, quantity);
-		return response;
-	}
-
-	/**
-     * Update the quantity of an item in the inventory.
-     * @param item - The item to update, identified by InventoryItem, ItemTemplate, or name.
-     * @param delta - The amount to change the quantity by.
-     * @returns InventoryTransactionResponse containing the updated InventoryItem or error message.
-     */
-	private updateQuantity(item: InventoryItem | ItemTemplate | string, delta: number): InventoryTransactionResponse {
-		const response = this.items.updateQuantity(item, delta);
-		return response;
-	}
-
-	/**
-     * Delete an item from the inventory.
-     * @param item - The item to delete, identified by InventoryItem, ItemTemplate, or name.
-     * @returns InventoryTransactionResponse containing the deleted InventoryItem or error message.
-     */
-	private deleteItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
-		const response = this.items.deleteItem(item);
-		return response;
-	}
-
-	/**
-     * Get the size of the inventory.
-     * @returns The number of items in the inventory.
-     */
-	size() {
-		return this.items.size();
-	}
 
 }

@@ -3,7 +3,7 @@ import { InventoryItem } from "../items/inventoryItems/InventoryItem";
 import { Item } from "../items/Item";
 import { ItemTemplate } from "../items/ItemTemplate";
 import { ItemTypes } from "../items/ItemTypes";
-import { InventoryTransactionResponse } from "./InventoryTransactionResponse";
+import { InventoryTransactionResponse } from "./inventory/InventoryTransactionResponse";
 
 export class ItemList {
 	private items: InventoryItem[];
@@ -263,6 +263,17 @@ export class ItemList {
 			response.addErrorMessage("item not in inventory");
 			return response;
 		}
+	}
+
+	/**
+	 * Deletes all items from the inventory.
+	 * @returns InventoryTransactionResponse containing the deleted itemList or error message.
+	 */
+	deleteAll(): InventoryTransactionResponse {
+		const response = new InventoryTransactionResponse();
+		response.payload = this.getAllItems();
+		this.items = [];
+		return response;
 	}
 
 	/**

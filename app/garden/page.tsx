@@ -1,8 +1,8 @@
 'use client'
 import InventoryComponent from "@/components/inventory/inventory";
 import { Garden } from "@/models/garden/Garden";
-import { Inventory } from "@/models/inventory/Inventory";
-import { ItemList } from "@/models/inventory/ItemList";
+import { Inventory } from "@/models/itemStore/inventory/Inventory";
+import { ItemList } from "@/models/itemStore/ItemList";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemTemplate, PlaceholderItemTemplates } from "@/models/items/ItemTemplate";
 import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
@@ -87,16 +87,29 @@ const GardenPage = () => {
   }
 
   function renderGarden() {
-    if (!garden || !inventory) {
-      return <div>Loading Garden...</div>;
+    const findGardenComponent = () => {
+      if (!garden || !inventory) return <div>Loading Garden...</div>;
+      return <GardenComponent garden={garden} inventory={inventory} selected={selected} setSelected={setSelected} inventoryForceRefresh={{value: inventoryForceRefreshKey, setter: setInventoryForceRefreshKey}}/>;
+    }
+
+    const findInventoryComponent = () => {
+      if (!inventory) return <div>Loading Inventory...</div>;
+      return <InventoryComponent key={inventoryForceRefreshKey} inventory={inventory} setSelected={setSelected}/>;
     }
     return <>
-    <GardenComponent garden={garden} inventory={inventory} selected={selected} setSelected={setSelected} inventoryForceRefresh={{value: inventoryForceRefreshKey, setter: setInventoryForceRefreshKey}}></GardenComponent>
-    <InventoryComponent key={inventoryForceRefreshKey} inventory={inventory} setSelected={setSelected}></InventoryComponent>
+    <div className="flex">
+      <div className="w-2/3">
+        {findGardenComponent()}
+      </div>
+      <div className="w-1/3">
+        {findInventoryComponent()}
+      </div>
+    </div>
     </>
   }
 
   return (<>
+    <div className="mx-4 my-4">
       <div> 
         This is the Garden Page!
       </div>
@@ -113,6 +126,7 @@ const GardenPage = () => {
       <div>
       <button onClick={resetGarden} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>reset garden</button>
       </div>
+    </div>
     </>
   );
 }

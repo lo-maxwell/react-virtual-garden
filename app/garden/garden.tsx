@@ -1,7 +1,7 @@
 import PlotComponent, { PlotActions, PlotComponentRef } from "@/components/garden/plot";
 import { Garden } from "@/models/garden/Garden";
 import { Plot } from "@/models/garden/Plot";
-import { Inventory } from "@/models/inventory/Inventory";
+import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { saveGarden } from "@/utils/localStorage/garden";
@@ -72,7 +72,6 @@ const GardenComponent = ({garden, inventory, selected, setSelected, inventoryFor
 	}
 
 	function harvestAll() {
-		setSelected(null);
 		plotRefs.current.forEach(row => {
 			row.forEach(plotRef => {
 			  if (plotRef && plotRef.plot.getItemSubtype() === ItemSubtypes.PLANT.name) {

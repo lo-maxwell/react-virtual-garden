@@ -17,17 +17,23 @@ export class Garden {
 	constructor(userId: string = "Dummy User", rows: number = Garden.getStartingRows(), cols: number = Garden.getStartingCols(), plots: Plot[][] | null = null) {
 		this.userId = userId;
 		this.plotPositions = new Map();
-		if (plots) {
+		if (plots != null) {
 			this.plots = plots;
 		} else {
 			this.plots = Garden.generateEmptyPlots(rows, cols);
 		}
+		this.fillNullWithEmptyPlot(rows, cols);
 		this.updatePlotPositions();
 	}
 
 	static fromPlainObject(plainObject: any): Garden {
+		if (!plainObject || typeof plainObject !== 'object') {
+			throw new Error('Invalid input to fromPlainObject');
+		  }
 		const { userId, plots: plainPlots, plotPositions: plainPlotPositions } = plainObject;
-
+		if (!Array.isArray(plainPlots)) {
+			throw new Error('Invalid plots array');
+		  }
 		// Convert plainPlots to Plot[][]
 		const plots: Plot[][] = plainPlots.map((row: any[]) => row.map((plot: any) => Plot.fromPlainObject(plot)));
 
@@ -125,15 +131,18 @@ export class Garden {
 			)
 		);
 		this.plots = newPlots;
-		this.fillNullWithEmptyPlot();
+		this.fillNullWithEmptyPlot(rows, cols);
 	}
 
 	/**
 	 * Replaces all undefined slots in plots with Empty Plots.
 	 */
-	fillNullWithEmptyPlot(): void {
-		for (let rowIndex = 0; rowIndex < this.getRows(); rowIndex++) {
-			for (let colIndex = 0; colIndex < this.getCols(); colIndex++) {
+	fillNullWithEmptyPlot(rows: number, cols: number): void {
+		for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+			if (this.plots[rowIndex] === undefined) {
+				this.plots[rowIndex] = [];
+			}
+			for (let colIndex = 0; colIndex < cols; colIndex++) {
 				if (this.plots[rowIndex][colIndex] === undefined) {
 					this.plots[rowIndex][colIndex] = Garden.generateEmptyPlot(rowIndex, colIndex);
 				}

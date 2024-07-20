@@ -1,4 +1,4 @@
-import { CustomResponse } from "../utility/CustomResponse";
+import { CustomResponse } from "../../utility/CustomResponse";
 
 export class InventoryTransactionResponse extends CustomResponse {
 	// TODO: make payload only accept inventory items?

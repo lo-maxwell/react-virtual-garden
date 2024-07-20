@@ -1,3 +1,4 @@
+'use client'
 const UserPage = () => {
   return (
     <div> This is the User Account Page!

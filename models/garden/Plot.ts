@@ -1,4 +1,4 @@
-import { Inventory } from "../inventory/Inventory";
+import { Inventory } from "../itemStore/inventory/Inventory";
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
 import { PlaceholderItemTemplates } from "../items/ItemTemplate";
 import { ItemSubtypes, ItemTypes } from "../items/ItemTypes";

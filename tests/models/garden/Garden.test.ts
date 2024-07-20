@@ -1,5 +1,6 @@
 import { Garden } from "@/models/garden/Garden";
 import { Plot } from "@/models/garden/Plot";
+import { ItemTemplate } from "@/models/items/ItemTemplate";
 import { generateNewPlaceholderPlacedItem} from "@/models/items/PlaceholderItems";
 
 test('getEmptyPlots generates new set of plots', () => {
@@ -29,15 +30,15 @@ test('getEmptyPlots generates new set of plots', () => {
 test('Should Initialize Default Garden Object', () => {
 	const newGarden = new Garden();
 	expect(newGarden).toBeTruthy();
-	expect(newGarden.getRows()).toBe(10);
-	expect(newGarden.getCols()).toBe(10);
+	expect(newGarden.getRows()).toBe(Garden.getStartingRows());
+	expect(newGarden.getCols()).toBe(Garden.getStartingCols());
 	expect(newGarden.getUserId()).toBe("Dummy User");
-	expect(newGarden.getPlots().length).toBe(10);
-	expect(newGarden.getPlots()[0].length).toBe(10);
+	expect(newGarden.getPlots().length).toBe(Garden.getStartingRows());
+	expect(newGarden.getPlots()[0].length).toBe(Garden.getStartingCols());
 	expect(newGarden.getPlots()[0][0].getItem().itemData.name).toBe("ground");
-	expect(newGarden.getPlots()[9][9].getItem().itemData.name).toBe("ground");
+	expect(newGarden.getPlots()[Garden.getStartingRows() - 1][Garden.getStartingCols() - 1].getItem().itemData.name).toBe("ground");
 	expect(newGarden.getPlotByRowAndColumn(1,1)!.getItem().itemData.name).toBe("ground");
-	expect(newGarden.size()).toBe(100);
+	expect(newGarden.size()).toBe(Garden.getStartingRows() * Garden.getStartingCols());
 });
 
 test('Should Initialize Specified Garden Object', () => {
@@ -61,23 +62,23 @@ test('Garden Generates Empty Plot', () => {
 
 test('Should Extend Garden Size', () => {
 	const newGarden = new Garden();
-	expect(newGarden.getRows()).toBe(10);
-	expect(newGarden.getCols()).toBe(10);
+	expect(newGarden.getRows()).toBe(Garden.getStartingRows());
+	expect(newGarden.getCols()).toBe(Garden.getStartingCols());
 	newGarden.addRow();
 	newGarden.addRow();
 	newGarden.addColumn();
 	expect(newGarden.getPlotByRowAndColumn(1,1)!.getItem().itemData.name).toBe("ground");
-	expect(newGarden.getRows()).toBe(12);
-	expect(newGarden.getCols()).toBe(11);
+	expect(newGarden.getRows()).toBe(Garden.getStartingRows() + 2);
+	expect(newGarden.getCols()).toBe(Garden.getStartingCols() + 1);
 	expect(newGarden.getPlots()[0][0].getItem().itemData.name).toBe("ground");
-	expect(newGarden.getPlots()[11][10].getItem().itemData.name).toBe("ground");
-	expect(newGarden.getPlots()[10][11]).toBeFalsy();
+	expect(newGarden.getPlots()[Garden.getStartingRows() + 1][Garden.getStartingCols()].getItem().itemData.name).toBe("ground");
+	expect(newGarden.getPlots()[Garden.getStartingRows()][Garden.getStartingRows() + 1]).toBeFalsy();
 })
 
 test('Should Shrink Garden Size', () => {
 	const newGarden = new Garden();
-	expect(newGarden.getRows()).toBe(10);
-	expect(newGarden.getCols()).toBe(10);
+	expect(newGarden.getRows()).toBe(Garden.getStartingRows());
+	expect(newGarden.getCols()).toBe(Garden.getStartingCols());
 	newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("apple", "newItem"));
 	newGarden.setGardenSize(5,5);
 	expect(newGarden.getPlots()[1][1].getItem().itemData.name).toBe("apple");
@@ -189,4 +190,23 @@ test('Should Not Repackage Invalid Plot', () => {
 	const plot3 = new Plot(generateNewPlaceholderPlacedItem("bench", "newItem"));
 	const plot3HarvestResponse = newGarden.harvestPlot(plot3);
 	expect(plot3HarvestResponse.isSuccessful()).toBe(false);
+})
+
+test('Should Fill Null With Empty Plot', () => {
+	const newGarden = new Garden("Dummy User", 10, 10, [[new Plot(generateNewPlaceholderPlacedItem('apple', ''))], [], []]);
+	
+	expect(newGarden.getRows()).toBe(10);
+	expect(newGarden.getCols()).toBe(10);
+	expect(newGarden.size()).toBe(100);
+	const plot = newGarden.getPlotByRowAndColumn(0, 0);
+	expect(plot?.getItem().itemData.name).toBe('apple');
+	expect(newGarden.getPlotByRowAndColumn(9, 9)?.getItem().itemData.name).toBe('ground');
+	
+})
+
+test('Should Create Garden Object From PlainObject', () => {
+	const serializedGarden = JSON.stringify(new Garden());
+	const garden = Garden.fromPlainObject(JSON.parse(serializedGarden));
+	expect(garden.getUserId()).toBe("Dummy User");
+	expect(garden.size()).toBe(36);
 })

@@ -1,6 +1,7 @@
-import { Inventory } from "@/models/inventory/Inventory";
-import { ItemList } from "@/models/inventory/ItemList";
-import { PlaceholderItemTemplates } from "@/models/items/ItemTemplate";
+import { Inventory } from "@/models/itemStore/inventory/Inventory";
+import { ItemList } from "@/models/itemStore/ItemList";
+import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
+import { ItemTemplate, PlaceholderItemTemplates } from "@/models/items/ItemTemplate";
 import { generateNewPlaceholderInventoryItem} from "@/models/items/PlaceholderItems";
 
 
@@ -93,15 +94,18 @@ test('Should Not Trash Nonexistent Item From Inventory', () => {
 	expect(testInventory.size()).toBe(3);
 })
 
+//TODO: Verify payload is correct for buy/sell
 test('Should Buy Item', () => {
 	const response = testInventory.buyItem(PlaceholderItemTemplates.PlaceHolderItems.harvestedApple, 1, 1);
 	expect(response.isSuccessful()).toBe(true);
-	expect(response.payload).toBe(50);
+	expect(response.payload.finalGold).toBe(50);
+	expect(response.payload.purchasedItem.quantity).toBe(1);
 	expect(testInventory.size()).toBe(4);
 	expect(testInventory.contains(PlaceholderItemTemplates.PlaceHolderItems.harvestedApple).payload).toBe(true);
 	const response2 = testInventory.buyItem(generateNewPlaceholderInventoryItem("harvestedApple", 1), 1, 1);
 	expect(response2.isSuccessful()).toBe(true);
-	expect(response2.payload).toBe(0);
+	expect(response2.payload.finalGold).toBe(0);
+	expect(response.payload.purchasedItem.quantity).toBe(2);
 	expect(testInventory.size()).toBe(4);
 	expect(testInventory.contains(PlaceholderItemTemplates.PlaceHolderItems.harvestedApple).payload).toBe(true);
 	expect(testInventory.getItem(PlaceholderItemTemplates.PlaceHolderItems.harvestedApple).payload.quantity).toBe(2);
@@ -127,18 +131,21 @@ test('Should Not Buy Invalid Item', () => {
 test('Should Sell Item', () => {
 	const response = testInventory.sellItem(PlaceholderItemTemplates.PlaceHolderItems.appleSeed, 1, 1);
 	expect(response.isSuccessful()).toBe(true);
-	expect(response.payload).toBe(110);
+	expect(response.payload.finalGold).toBe(110);
+	expect(response.payload.remainingItem.quantity).toBe(0);
 	expect(testInventory.size()).toBe(2);
 	expect(testInventory.contains(PlaceholderItemTemplates.PlaceHolderItems.appleSeed).payload).toBe(false);
 	const response2 = testInventory.sellItem(generateNewPlaceholderInventoryItem("bananaSeed", 1), 2, 1);
 	expect(response2.isSuccessful()).toBe(true);
-	expect(response2.payload).toBe(150);
+	expect(response2.payload.finalGold).toBe(150);
+	expect(response2.payload.remainingItem.quantity).toBe(1);
 	expect(testInventory.size()).toBe(2);
 	expect(testInventory.contains(PlaceholderItemTemplates.PlaceHolderItems.bananaSeed).payload).toBe(true);
 	expect(testInventory.getItem(PlaceholderItemTemplates.PlaceHolderItems.bananaSeed).payload.quantity).toBe(1);
 	const response3 = testInventory.sellItem(PlaceholderItemTemplates.PlaceHolderItems.coconutSeed, 0.5, 2);
 	expect(response3.isSuccessful()).toBe(true);
-	expect(response3.payload).toBe(180);
+	expect(response3.payload.finalGold).toBe(180);
+	expect(response3.payload.remainingItem.quantity).toBe(1);
 	expect(testInventory.size()).toBe(2);
 	expect(testInventory.contains(PlaceholderItemTemplates.PlaceHolderItems.coconutSeed).payload).toBe(true);
 	expect(testInventory.getItem(PlaceholderItemTemplates.PlaceHolderItems.coconutSeed).payload.quantity).toBe(1);
@@ -209,4 +216,12 @@ test('Should Use Item', () => {
 test('Should Not Use Item Lacking Quantity', () => {
 	const response = testInventory.useItem(PlaceholderItemTemplates.PlaceHolderItems.coconutSeed, 5);
 	expect(response.isSuccessful()).toBe(false);
+})
+
+test('Should Create Inventory Object From PlainObject', () => {
+	const serializedInventory = JSON.stringify(new Inventory("Dummy User", 100, new ItemList([generateNewPlaceholderInventoryItem('appleSeed', 10)])));
+	const inv = Inventory.fromPlainObject(JSON.parse(serializedInventory));
+	expect(inv.getUserId()).toBe("Dummy User");
+	expect(inv.size()).toBe(1);
+	expect(inv.contains('apple seed').payload).toBe(true);
 })

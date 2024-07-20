@@ -1,6 +1,6 @@
 import { Plot } from "@/models/garden/Plot";
-import { Inventory } from "@/models/inventory/Inventory";
-import { ItemList } from "@/models/inventory/ItemList";
+import { Inventory } from "@/models/itemStore/inventory/Inventory";
+import { ItemList } from "@/models/itemStore/ItemList";
 import { ItemTemplate, PlaceholderItemTemplates } from "@/models/items/ItemTemplate";
 import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { generateNewPlaceholderInventoryItem, generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";

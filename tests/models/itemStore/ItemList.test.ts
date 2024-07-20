@@ -1,4 +1,4 @@
-import { ItemList } from "@/models/inventory/ItemList";
+import { ItemList } from "@/models/itemStore/ItemList";
 import { PlaceholderItemTemplates } from "@/models/items/ItemTemplate";
 import { generateNewPlaceholderInventoryItem, generateRandomPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
 
@@ -238,4 +238,11 @@ test('Should Use BananaSeed Item', () => {
 test('Should Not Use Item Lacking Quantity', () => {
 	const response = testItemList.useItem(PlaceholderItemTemplates.PlaceHolderItems.coconutSeed, 5);
 	expect(response.isSuccessful()).toBe(false);
+})
+
+test('Should Delete All', () => {
+	const response = testItemList.deleteAll();
+	expect(response.isSuccessful()).toBe(true);
+	expect(testItemList.size()).toBe(0);
+	expect(testItemList.contains('apple seed').payload).toBe(false);
 })

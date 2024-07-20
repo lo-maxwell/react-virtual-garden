@@ -1,6 +1,6 @@
 import { Garden } from "@/models/garden/Garden";
 import { Plot } from "@/models/garden/Plot";
-import { Inventory } from "@/models/inventory/Inventory";
+import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { saveGarden } from "@/utils/localStorage/garden";
