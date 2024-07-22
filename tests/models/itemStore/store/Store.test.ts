@@ -255,3 +255,11 @@ test('Should Rollback on Failing Restock', () => {
 	expect(testStore.getItem('banana seed').payload.getQuantity()).toBe(20);
 	expect(testStore.contains('harvested apple').payload).toBe(false);
 })
+
+test('Should Create Store Object From PlainObject', () => {
+	const serializedStore = JSON.stringify(new Store(0, "Test Store", 1, 1, new ItemList([generateNewPlaceholderInventoryItem('appleSeed', 5)])));
+	const store = Store.fromPlainObject(JSON.parse(serializedStore));
+	expect(store.getStoreId()).toBe(0);
+	expect(store.size()).toBe(1);
+	expect(store.getItem('apple seed').payload.quantity).toBe(5);
+})

@@ -7,23 +7,28 @@ import { InventoryTransactionResponse } from "../inventory/InventoryTransactionR
 
 export class Store extends ItemStore {
 	private id: number;
-	private name: string;
+	private storeName: string;
 	private buyMultiplier: number;
 	private sellMultiplier: number;
 	private stockList: ItemList;
 
-	constructor(id: number, name: string, buyMultiplier: number, sellMultiplier: number, items: ItemList, stockList: ItemList) {
+	constructor(id: number, name: string, buyMultiplier: number = 2, sellMultiplier: number = 1, items: ItemList = new ItemList(), stockList: ItemList = new ItemList()) {
 		super(items);
 		this.id = id;
-		this.name = name;
+		this.storeName = name;
 		this.buyMultiplier = buyMultiplier;
 		this.sellMultiplier = sellMultiplier;
 		this.stockList = stockList;
 	}
 
-	//TODO: Implement localstorage of Store
 	static fromPlainObject(plainObject: any): Store {
-		throw new Error('Not yet implemented!');
+		const { id, storeName, buyMultiplier, sellMultiplier, stockList, items } = plainObject;
+		let rehydratedItemList = ItemList.fromPlainObject(items);
+		if (rehydratedItemList == null) rehydratedItemList = new ItemList();
+		let rehydratedStockList = ItemList.fromPlainObject(stockList);
+		if (rehydratedStockList == null) rehydratedStockList = new ItemList();
+
+		return new Store(id, storeName, buyMultiplier, sellMultiplier, rehydratedItemList, rehydratedStockList);
 	}
 
 	/**
@@ -37,7 +42,7 @@ export class Store extends ItemStore {
 	 * @returns the display name of the store.
 	 */
 	getStoreName(): string {
-		return this.name;
+		return this.storeName;
 	}
 
 	/**

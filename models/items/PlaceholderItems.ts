@@ -31,6 +31,7 @@ export const generateNewPlaceholderPlacedItem = (itemName: string, status: strin
 		case "Ground":
 			return new EmptyItem(itemData, status);
 		default:
+			console.log('Could not find item, generating error item.');
 			return new Plant(PlaceholderItemTemplates.PlaceHolderItems.errorPlacedItem, "error");
 	}
 }
@@ -50,6 +51,7 @@ export const generateNewPlaceholderInventoryItem = (itemName: string, quantity: 
 		case "HarvestedItem":
 			return new HarvestedItem(itemData, quantity);
 		default:
+			console.log('Could not find item, generating error item.');
 			return new Seed(PlaceholderItemTemplates.PlaceHolderItems.errorInventoryItem, 1);
 	}
 }

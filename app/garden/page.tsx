@@ -34,7 +34,7 @@ const GardenPage = () => {
   }
   
   useEffect(() => {
-    const inv = setupInventory("Dummy User");
+    const inv = setupInventory("Test User");
     setInventory(inv);
   }, []);
 
@@ -50,7 +50,7 @@ const GardenPage = () => {
   }
   
   useEffect(() => {
-    const garden = setupGarden("Dummy User", 6, 6);
+    const garden = setupGarden("Test User", 6, 6);
     setGarden(garden);
   }, []);
 
@@ -71,7 +71,7 @@ const GardenPage = () => {
   }
 
   function resetInventory() {
-    const inv = new Inventory("Dummy User", 100, new ItemList([
+    const inv = new Inventory("Test User", 100, new ItemList([
       generateNewPlaceholderInventoryItem('appleSeed', 10), 
       generateNewPlaceholderInventoryItem('benchBlueprint', 5), 
       generateNewPlaceholderInventoryItem('bananaSeed', 10), 
@@ -81,7 +81,7 @@ const GardenPage = () => {
   }
 
   function resetGarden() {
-    const garden = new Garden("Dummy User", 6, 6);
+    const garden = new Garden("Test User", 6, 6);
     setGarden(garden);
     saveGarden(garden);
   }
@@ -94,7 +94,7 @@ const GardenPage = () => {
 
     const findInventoryComponent = () => {
       if (!inventory) return <div>Loading Inventory...</div>;
-      return <InventoryComponent key={inventoryForceRefreshKey} inventory={inventory} setSelected={setSelected}/>;
+      return <InventoryComponent key={inventoryForceRefreshKey} inventory={inventory} onInventoryItemClickFunction={setSelected} costMultiplier={1}/>;
     }
     return <>
     <div className="flex">
