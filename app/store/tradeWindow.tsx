@@ -3,12 +3,14 @@ import PlusSquareFilled from "@/components/icons/buttons/plus-square-filled";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { Store } from "@/models/itemStore/store/Store";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import MinusSquareFilled from "@/components/icons/buttons/minus-square-filled";
 import TradeWindowItemComponent from "./tradeWindowItem";
 import { saveStore } from "@/utils/localStorage/store";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import TrashCanFilled from "@/components/icons/buttons/trash-can-filled";
+import LongPressButton from "@/components/buttons/longPressButton";
+import ChangeQuantityButton from "./changeQuantityButton";
 
 
 const TradeWindowComponent = ({store, inventory, selected, setSelected, owner, costMultiplier}: {store: Store, inventory: Inventory, selected: InventoryItem | null, setSelected: (arg: any) => void, owner: Store | Inventory | null, costMultiplier: number}) => {
@@ -46,25 +48,43 @@ const TradeWindowComponent = ({store, inventory, selected, setSelected, owner, c
 		}
 	}
 
+	//Resets quantity when selected changes
 	useEffect(() => {
 		setQuantity(1);
 		if (selected != null) setTradeWindowMessage(defaultTradeWindowMessage);
 	}, [selected]);
-
-	const onPlusClick = () => {
-		if (!selected) return;
-		if (quantity + 1 <= selected.getQuantity()) {
-			setQuantity(quantity + 1);
+	
+	//Ensures quantity is never above/below bounds
+	useEffect(() => {
+		if (selected && quantity > selected.getQuantity()) {
+		  setQuantity(selected.getQuantity());
 		}
-	}
-
-	const onMinusClick = () => {
-		if (!selected) return;
-		if (quantity - 1 > 0) {
-			setQuantity(quantity - 1);
+		if (selected && quantity <= 0) {
+			setQuantity(1);
 		}
+	  }, [quantity]);
 
-	}
+
+	const onPlusClick = useCallback((delta: number) => {
+		if (!selected) return;
+		setQuantity((quantity) => {
+		  if (quantity + delta <= selected.getQuantity()) {
+			return quantity + delta;
+		  }
+		  return selected.getQuantity();
+		});
+	  }, [selected]);
+
+	const onMinusClick = useCallback((delta: number) => {
+		if (!selected) return;
+		setQuantity((quantity) => {
+			if (quantity - delta > 0) {
+			  return quantity - delta;
+			}
+			return 1;
+		  });
+
+	}, [selected]);
 
 	const onConfirmClick = () => {
 		if (!selected) return;
@@ -98,8 +118,8 @@ const TradeWindowComponent = ({store, inventory, selected, setSelected, owner, c
 		if (selected) {
 			return <>
 				<div className="flex flex-row justify-around my-1">
-					<button onClick={onPlusClick} className="bg-gray-300 rounded w-12 h-12 text-center text-green-500 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"><PlusSquareFilled/></button>
-					<button onClick={onMinusClick} className="bg-gray-300 rounded w-12 h-12 text-center text-red-500 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"><MinusSquareFilled/></button>
+					<ChangeQuantityButton onClick={onPlusClick} currentQuantity={quantity} className={"bg-gray-300 rounded w-12 h-12 text-center text-green-500 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"} contents={<PlusSquareFilled/>}/>
+					<ChangeQuantityButton onClick={onMinusClick} currentQuantity={quantity} className={"bg-gray-300 rounded w-12 h-12 text-center text-red-500 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"} contents={<MinusSquareFilled/>}/>
 					<button onClick={onConfirmClick} className="bg-gray-300 rounded h-12 px-2 text-center text-sm text-purple-600 font-semibold hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2">Confirm Transaction</button>
 				</div>
 				</>

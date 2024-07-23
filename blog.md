@@ -32,15 +32,35 @@
 
 ### Added placeItem function to plot
 
+## Day 6
+
+### Create Store class which holds a list of items for sale and modifies inventories
+
+  * See design doc
+  * Created ItemStore abstract class that is extended by Store and Inventory
+  * Store contains functions to specifically buy/sell things from inventories
+  * Added localStorage save/load to Store, Inventory, Garden
+
+### Refactored ui code
+
+## Day 7
+
+### Added store page and trade window
+
+  * Store page consists of store inventory, player inventory, trade window
+  * Refactored item component to be reusable between player and store inventory
+  * Refactored selector to differentiate player and store items
+  * Trade window contains buttons to modify quantity of item being traded
+  * Added LongPressButton component to continuously run the addQuantity function when holding down a button
+  * Added exponential scaling to addQuantity, so that we can add up to 100000 items in about 10 seconds
+
 
 Stop worrying about proper structure, just write code and see what you need along the way
 
 TODO:
 
-Implement plot actions -> runs when the plot is clicked to place/harvest/repackage items
+Generate multiple store types/switch between stores
+Clean up ui, especially font/scaling using rem, to accommodate more screen width
+Trade Window Multiselect + Total
 
-Ensure data persistence within user sessions + swapping to different pages
-
-Implement way to add to inventory
-Display current gold in inventory
-Implement selling items in inventory
+Sort/Order Inventory by filters - itemid, alphabetical, type?

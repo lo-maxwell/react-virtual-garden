@@ -20,6 +20,7 @@
   * Rows - Int
   * Cols - Int
   * PlotList - Array of Plots
+  * PlotMap - Map of Plot to coordinates, but maybe don't need this - just make things move contents of plots
   * React Component - Grid of Plot Square Components
     * Maybe also some header information, but mostly just holds the plots of land
 
@@ -86,7 +87,9 @@
   * React Component - Header + Item List
 
 ### Store
-  * Global list of items that can be bought by players.
+  * Global list of items that can be bought by players. Stores rotate, so we need multiple instances.
+  * StoreId - Number
+  * StoreName - String
   * CostMultiplier - float -- the shop sells items for higher than their resale price.
   * ItemList - Array of InventoryItems
   * React Component - Header + Item List
