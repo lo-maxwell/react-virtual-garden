@@ -65,6 +65,10 @@
 
 ### Improved serialize/deserialize methods for models, better error handling
 
+## Day 9
+
+### Converted garden and inventory to contexts + custom hook
+
 
 Stop worrying about proper structure, just write code and see what you need along the way
 
@@ -79,6 +83,13 @@ Sort/Order Inventory by filters - itemid, alphabetical, type?
 Make Garden more interactive than plant all -> harvest 
 
 Add ToPlainObject method for all models
+
+Mouse over tooltips for items
+
+Add User class
+
+ExpandRow/Col doesn't automatically rerender garden, might need a force refresh
+Also breaks if you expand col, probably because of not rerendering
 
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time

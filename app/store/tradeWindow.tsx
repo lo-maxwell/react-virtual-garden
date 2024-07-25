@@ -11,9 +11,11 @@ import { saveInventory } from "@/utils/localStorage/inventory";
 import TrashCanFilled from "@/components/icons/buttons/trash-can-filled";
 import ChangeQuantityButton from "./changeQuantityButton";
 import { useStore } from "@/hooks/contexts/StoreContext";
+import { useInventory } from "@/hooks/contexts/InventoryContext";
 
 
-const TradeWindowComponent = ({inventory, selected, setSelected, owner, costMultiplier}: {inventory: Inventory, selected: InventoryItem | null, setSelected: (arg: any) => void, owner: Store | Inventory | null, costMultiplier: number}) => {
+const TradeWindowComponent = ({selected, setSelected, owner, costMultiplier}: {selected: InventoryItem | null, setSelected: (arg: any) => void, owner: Store | Inventory | null, costMultiplier: number}) => {
+	const { inventory } = useInventory();
 	const defaultTradeWindowMessage = 'Trade Window';
 	const resetSelected = () => {
 		setTradeWindowMessage(defaultTradeWindowMessage);

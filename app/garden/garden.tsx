@@ -4,11 +4,13 @@ import { Plot } from "@/models/garden/Plot";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
-import { saveGarden } from "@/utils/localStorage/garden";
-import { saveInventory } from "@/utils/localStorage/inventory";
 import { useRef } from "react";
+import { useInventory } from "@/hooks/contexts/InventoryContext";
+import { useGarden } from "@/hooks/contexts/GardenContext";
 
-const GardenComponent = ({garden, inventory, selected, setSelected, inventoryForceRefresh}: {garden: Garden, inventory: Inventory, selected: InventoryItem | null, setSelected: Function, inventoryForceRefresh: {value: number, setter: Function}}) => {
+const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {selected: InventoryItem | null, setSelected: Function, inventoryForceRefresh: {value: number, setter: Function}}) => {
+	const { inventory } = useInventory();
+	const { garden } = useGarden();
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
 
 	function getPlotAction(plot: Plot, selected: InventoryItem | null) {
@@ -32,8 +34,9 @@ const GardenComponent = ({garden, inventory, selected, setSelected, inventoryFor
 	function generatePlots(plots: Plot[][]) {
 		return (
 			<>
+			<div className="flex flex-col flex-wrap max-w-[100%]">
 			{plots.map((row, rowIndex) => (
-				<div className="flex overflow-hidden" key={rowIndex}>
+				<div className="flex flex-nowrap" key={rowIndex}>
 					{row.map((plot, colIndex) => {
 						const index = rowIndex * plots.length + colIndex;
 						return (
@@ -48,6 +51,7 @@ const GardenComponent = ({garden, inventory, selected, setSelected, inventoryFor
 					})}
 				</div>
 			))}
+			</div>
 			</>
 		);
 	}
@@ -83,11 +87,13 @@ const GardenComponent = ({garden, inventory, selected, setSelected, inventoryFor
 
 	return (
 		<>
+		<div className="flex flex-col items-center overflow-x-auto mx-2">
 		{generatePlots(garden.getPlots())}
+		</div>
 		<div>
 			<button onClick={plantAll} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>Plant All</button>
 		</div>
-		<div>
+		<div className="">
 			<button onClick={harvestAll} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>Harvest All</button>
 		</div>
      	</>

@@ -35,7 +35,7 @@ const LongPressButton = ({ onClick, onLongPress, onLongPressEnd, className, cont
 			intervalRef.current = setInterval(() => {
 				onLongPressRef.current();
 			}, 100);
-		}, 1000); // Long press duration threshold
+		}, 600); // Long press duration threshold
 		setPressTimer(timer);
 	}, [onLongPress]);
 

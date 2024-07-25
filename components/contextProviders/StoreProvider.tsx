@@ -13,6 +13,7 @@ interface StoreProviderProps {
 }
 
 export const StoreProvider = ({ children }: StoreProviderProps) => {
+    const [store, setStore] = useState<Store | null>(null);
 
 	function setupStore(): Store {
 		let store = loadStore();
@@ -37,7 +38,6 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		setStore(initialStore);
 	  }, []);
 	
-    const [store, setStore] = useState<Store | null>(null);
 
     const restockStore = () => {
 		if (store) {

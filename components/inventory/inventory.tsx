@@ -1,8 +1,9 @@
+import { useInventory } from "@/hooks/contexts/InventoryContext";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import InventoryItemComponent from "./inventoryItem";
 
-const InventoryComponent = ({inventory, onInventoryItemClickFunction, costMultiplier}: {inventory: Inventory, onInventoryItemClickFunction: (arg: any) => void, costMultiplier: number}) => {
-
+const InventoryComponent = ({onInventoryItemClickFunction, costMultiplier}: {onInventoryItemClickFunction: (arg: any) => void, costMultiplier: number}) => {
+	const { inventory } = useInventory();
 	return (
 		<>
 		<div className="w-[80%]">
