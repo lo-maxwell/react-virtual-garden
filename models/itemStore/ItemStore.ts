@@ -17,10 +17,6 @@ export class ItemStore {
 		this.items = items;
 	}
 
-	static fromPlainObject(plainObject: any) {
-		throw new Error("Method 'fromPlainObject' must be implemented.");
-	}
-
 	/**
 	 * @returns a copy of the inventory items within the list.
 	 */

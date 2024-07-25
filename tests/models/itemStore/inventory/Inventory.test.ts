@@ -219,7 +219,7 @@ test('Should Not Use Item Lacking Quantity', () => {
 })
 
 test('Should Create Inventory Object From PlainObject', () => {
-	const serializedInventory = JSON.stringify(new Inventory("Dummy User", 100, new ItemList([generateNewPlaceholderInventoryItem('appleSeed', 10)])));
+	const serializedInventory = JSON.stringify((new Inventory("Dummy User", 100, new ItemList([generateNewPlaceholderInventoryItem('appleSeed', 10)]))).toPlainObject());
 	const inv = Inventory.fromPlainObject(JSON.parse(serializedInventory));
 	expect(inv.getUserId()).toBe("Dummy User");
 	expect(inv.size()).toBe(1);

@@ -10,26 +10,96 @@ export class Store extends ItemStore {
 	private storeName: string;
 	private buyMultiplier: number;
 	private sellMultiplier: number;
+	private upgradeMultiplier: number;
 	private stockList: ItemList;
+	private restockTime: number;
 
-	constructor(id: number, name: string, buyMultiplier: number = 2, sellMultiplier: number = 1, items: ItemList = new ItemList(), stockList: ItemList = new ItemList()) {
+	constructor(id: number, name: string, buyMultiplier: number = 2, sellMultiplier: number = 1, upgradeMultiplier: number = 1, items: ItemList = new ItemList(), stockList: ItemList = new ItemList(), restockTime: number = Date.now()) {
 		super(items);
 		this.id = id;
 		this.storeName = name;
 		this.buyMultiplier = buyMultiplier;
 		this.sellMultiplier = sellMultiplier;
+		this.upgradeMultiplier = upgradeMultiplier;
 		this.stockList = stockList;
+		this.restockTime = restockTime;
 	}
 
 	static fromPlainObject(plainObject: any): Store {
-		const { id, storeName, buyMultiplier, sellMultiplier, stockList, items } = plainObject;
-		let rehydratedItemList = ItemList.fromPlainObject(items);
-		if (rehydratedItemList == null) rehydratedItemList = new ItemList();
-		let rehydratedStockList = ItemList.fromPlainObject(stockList);
-		if (rehydratedStockList == null) rehydratedStockList = new ItemList();
+		//Throwing an error will be caught by loadStore
+		// Validate plainObject structure
+		if (!plainObject || typeof plainObject !== 'object') {
+			throw new Error('Invalid plainObject structure for Store');
+		}
+		// Initialize default values
+		let id = 0;
+		let storeName = '';
+		let buyMultiplier = 2;
+		let sellMultiplier = 1;
+		let upgradeMultiplier = 1;
+		let items = new ItemList();
+		let stockList = new ItemList();
+		let restockTime = Date.now();
+	
+		// Validate and assign id
+		if (plainObject && typeof plainObject.id === 'number') {
+			id = plainObject.id;
+		}
+	
+		// Validate and assign storeName
+		if (plainObject && typeof plainObject.storeName === 'string') {
+			storeName = plainObject.storeName;
+		}
+	
+		// Validate and assign buyMultiplier
+		if (plainObject && typeof plainObject.buyMultiplier === 'number') {
+			buyMultiplier = plainObject.buyMultiplier;
+		}
+	
+		// Validate and assign sellMultiplier
+		if (plainObject && typeof plainObject.sellMultiplier === 'number') {
+			sellMultiplier = plainObject.sellMultiplier;
+		}
+	
+		// Validate and assign upgradeMultiplier
+		if (plainObject && typeof plainObject.upgradeMultiplier === 'number') {
+			upgradeMultiplier = plainObject.upgradeMultiplier;
+		}
+	
+		// Validate and assign items
+		if (plainObject && plainObject.items !== undefined) {
+			if (typeof plainObject.items === 'object' && plainObject.items !== null) {
+				items = ItemList.fromPlainObject(plainObject.items) || new ItemList();
+			}
+		}
+	
+		// Validate and assign stockList
+		if (plainObject && plainObject.stockList !== undefined) {
+			if (typeof plainObject.stockList === 'object' && plainObject.stockList !== null) {
+				stockList = ItemList.fromPlainObject(plainObject.stockList) || new ItemList();
+			}
+		}
 
-		return new Store(id, storeName, buyMultiplier, sellMultiplier, rehydratedItemList, rehydratedStockList);
+		// Validate and assign restockTime
+		if (plainObject && typeof plainObject.restockTime === 'number') {
+			restockTime = plainObject.restockTime;
+		}
+	
+		return new Store(id, storeName, buyMultiplier, sellMultiplier, upgradeMultiplier, items, stockList, restockTime);
 	}
+
+	toPlainObject(): any {
+		return {
+			id: this.id,
+			storeName: this.storeName,
+			buyMultiplier: this.buyMultiplier,
+			sellMultiplier: this.sellMultiplier,
+			upgradeMultiplier: this.upgradeMultiplier,
+			stockList: this.stockList.toPlainObject(), // Convert stockList to plain object
+			items: this.items.toPlainObject(), // Convert items to plain object
+			restockTime: this.restockTime,
+		};
+	} 
 
 	/**
 	 * @returns the storeId of the store.
@@ -74,6 +144,20 @@ export class Store extends ItemStore {
 	}
 
 	/**
+	 * @returns the cost multiplier of the store, as a float.
+	 */
+	getUpgradeMultiplier(): number {
+		return this.upgradeMultiplier;
+	}
+
+	/**
+	 * @param multiplier - the new multiplier
+	 */
+	setUpgradeMultiplier(multiplier: number): void {
+		this.upgradeMultiplier = multiplier;
+	}
+
+	/**
 	 * @returns the stock list of the store
 	 */
 	getStockList(): ItemList {
@@ -85,6 +169,20 @@ export class Store extends ItemStore {
 	 */
 	setStockList(stockList: ItemList): void {
 		this.stockList = stockList;
+	}
+
+	/**
+	 * @returns the time the store was last restocked
+	 */
+	getRestockTime(): number {
+		return this.restockTime;
+	}
+
+	/**
+	 * @param restockTime  the time the store was last restocked
+	 */
+	setRestockTime(restockTime: number): void {
+		this.restockTime = restockTime;
 	}
 
 	// Calculate the price to buy an item from the store
@@ -234,5 +332,21 @@ export class Store extends ItemStore {
 		return response;
 	}
 
-
+	/**
+     * Spends gold. Fails if there is not enough gold.
+	 * @param inventory - The inventory that is spending gold
+	 * @param cost - The amount of gold spent
+     * @returns InventoryTransactionResponse containing the final gold or an error message.
+     */
+	buyCustomObjectFromStore(inventory: Inventory, cost: number): InventoryTransactionResponse {
+		const response = new InventoryTransactionResponse();
+		if (inventory.getGold() < cost) {
+			response.addErrorMessage(`Error: requires ${cost} gold but has ${inventory.getGold()}`);
+			return response;
+		}
+		const removeGoldResponse = inventory.removeGold(cost);
+		if (!removeGoldResponse.isSuccessful()) return removeGoldResponse;
+		response.payload = removeGoldResponse.payload;
+		return response;
+	}
 }

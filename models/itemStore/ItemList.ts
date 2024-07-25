@@ -12,9 +12,30 @@ export class ItemList {
 	}
 
 	static fromPlainObject(plainObject: any): ItemList {
-		const items = plainObject.items.map((item: any) => InventoryItem.fromPlainObject(item));
-		return new ItemList(items);
+		try {
+            // Validate plainObject structure
+            if (!plainObject || typeof plainObject !== 'object') {
+                throw new Error('Invalid plainObject structure for ItemList');
+            }
+			const items = plainObject.items.map((item: any) => {
+				const toReturn = InventoryItem.fromPlainObject(item);
+				if (toReturn.itemData.name == 'error') {
+					return null;
+				}
+				return toReturn;
+			}).filter((item: null | InventoryItem) => item !== null);
+			return new ItemList(items);
+		} catch (err) {
+			console.error('Error creating ItemList from plainObject:', err);
+            return new ItemList();
+		}
 	}
+
+	toPlainObject(): any {
+		return {
+			items: this.items.map(item => item.toPlainObject()) // Convert each InventoryItem to a plain object
+		};
+	} 
 
 	/**
      * Check if item is an InventoryItem.

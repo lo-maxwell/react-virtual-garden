@@ -21,9 +21,31 @@ export class ItemTemplate {
 	}
 
 	static fromPlainObject(plainObject: any): ItemTemplate {
-		const { id, name, icon, type, subtype, basePrice, transformId } = plainObject;
-    	return new ItemTemplate(id, name, icon, type, subtype, basePrice, transformId);
+		try {
+            // Validate plainObject structure
+            if (!plainObject || typeof plainObject !== 'object') {
+                throw new Error('Invalid plainObject structure for ItemTemplate');
+            }
+			const { id, name, icon, type, subtype, basePrice, transformId } = plainObject;
+			// Perform additional type checks if necessary
+			return new ItemTemplate(id, name, icon, type, subtype, basePrice, transformId);
+		} catch (err) {
+			console.error('Error creating ItemTemplate from plainObject:', err);
+            return PlaceholderItemTemplates.PlaceHolderItems.errorInventoryItem;
+		}
 	}
+
+	toPlainObject(): any {
+		return {
+			id: this.id,
+			name: this.name,
+			icon: this.icon,
+			type: this.type,
+			subtype: this.subtype,
+			basePrice: this.basePrice,
+			transformId: this.transformId
+		}
+	} 
 
 	getPrice(multiplier: number) {
 		return Math.max(1, Math.floor(this.basePrice * multiplier + 0.5));

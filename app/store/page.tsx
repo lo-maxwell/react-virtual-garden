@@ -47,7 +47,7 @@ const StorePage = () => {
       console.log(store);
       if (!(store instanceof Store)) {
         console.log('store not found, setting up');
-        store = new Store(0, "Test Store", 2, 1, new ItemList(), new ItemList([
+        store = new Store(0, "Test Store", 2, 1, 1, new ItemList(), new ItemList([
           generateNewPlaceholderInventoryItem('appleSeed', 10),
           generateNewPlaceholderInventoryItem('bananaSeed', 10),
           generateNewPlaceholderInventoryItem('coconutSeed', 10),
@@ -81,12 +81,12 @@ const StorePage = () => {
 
     const findStoreComponent = () => {
       if (!store) return <div>Loading Store...</div>;
-      return <StoreComponent store={store} onInventoryItemClickFunction={storeSetSelected}/>;
+      return <StoreComponent onInventoryItemClickFunction={storeSetSelected}/>;
     }
 
     const findTradeWindowComponent = () => {
       if (!inventory || !store) return <div>Loading Trade Window...</div>;
-      return <TradeWindowComponent store={store} inventory={inventory} selected={selected} setSelected={setSelected} owner={owner} costMultiplier={getCostMultiplier()}/>;
+      return <TradeWindowComponent inventory={inventory} selected={selected} setSelected={setSelected} owner={owner} costMultiplier={getCostMultiplier()}/>;
     }
 
     const findInventoryComponent = () => {

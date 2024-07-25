@@ -54,13 +54,34 @@
   * Added LongPressButton component to continuously run the addQuantity function when holding down a button
   * Added exponential scaling to addQuantity, so that we can add up to 100000 items in about 10 seconds
 
+## Day 8
+
+### Converted store to a context + useStore 
+
+  * Added store, restock, reset
+  * TODO: convert garden and inventory to contexts
+
+### Added LevelSystem for garden
+
+### Improved serialize/deserialize methods for models, better error handling
+
 
 Stop worrying about proper structure, just write code and see what you need along the way
 
 TODO:
 
-Generate multiple store types/switch between stores
+Generate multiple store types/switch between stores/restock store
 Clean up ui, especially font/scaling using rem, to accommodate more screen width
 Trade Window Multiselect + Total
 
 Sort/Order Inventory by filters - itemid, alphabetical, type?
+
+Make Garden more interactive than plant all -> harvest 
+
+Add ToPlainObject method for all models
+
+Stretch Goals
+Instead of expanding row/col, have the user add 1 plot at a time
+This is a design flaw, not a coding one -- right now supports exponential growth when it should be linear, also easier to make iterative progress
+Probably requires an entirely new ui though for the user to select their next plot location
+Or don't allow buying expansions/limit it per level

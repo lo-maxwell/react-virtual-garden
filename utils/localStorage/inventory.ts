@@ -15,7 +15,7 @@ export const loadInventory = () => {
   
 export const saveInventory = (inventory: Inventory) => {
 	try {
-		const serializedInventory = JSON.stringify(inventory);
+		const serializedInventory = JSON.stringify(inventory.toPlainObject());
 		localStorage.setItem('inventory', serializedInventory);
 	} catch (err) {
 		console.error('Could not save inventory', err);

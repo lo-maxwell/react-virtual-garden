@@ -15,7 +15,7 @@ export const loadGarden = () => {
   
 export const saveGarden = (garden: Garden) => {
 	try {
-		const serializedGarden = JSON.stringify(garden);
+		const serializedGarden = JSON.stringify(garden.toPlainObject());
 		localStorage.setItem('garden', serializedGarden);
 	} catch (err) {
 		console.error('Could not save garden', err);

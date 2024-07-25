@@ -2,6 +2,7 @@ import { PlaceholderItemTemplates } from "../items/ItemTemplate";
 import { EmptyItem } from "../items/placedItems/EmptyItem";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { generateNewPlaceholderPlacedItem} from "../items/PlaceholderItems";
+import LevelSystem from "../level/LevelSystem";
 import { GardenTransactionResponse } from "./GardenTransactionResponse";
 import { Plot } from "./Plot";
 
@@ -10,11 +11,13 @@ export class Garden {
 	private userId: string;
 	private plots: Plot[][];
 	private plotPositions: Map<Plot, [number, number]>;
+	//TODO: Add methods for adding xp, level, etc
+	private level: LevelSystem;
 	
 	static getStartingRows() {return 6;}
 	static getStartingCols() {return 6;}
 
-	constructor(userId: string = "Dummy User", rows: number = Garden.getStartingRows(), cols: number = Garden.getStartingCols(), plots: Plot[][] | null = null) {
+	constructor(userId: string = "Dummy User", rows: number = Garden.getStartingRows(), cols: number = Garden.getStartingCols(), plots: Plot[][] | null = null, level: LevelSystem | null = null) {
 		this.userId = userId;
 		this.plotPositions = new Map();
 		if (plots != null) {
@@ -24,32 +27,39 @@ export class Garden {
 		}
 		this.fillNullWithEmptyPlot(rows, cols);
 		this.updatePlotPositions();
+		this.level = level || new LevelSystem();
 	}
 
 	static fromPlainObject(plainObject: any): Garden {
 		if (!plainObject || typeof plainObject !== 'object') {
+			//we throw an error here which causes loadgarden to return [], causing it to reset everything.
 			throw new Error('Invalid input to fromPlainObject');
 		  }
-		const { userId, plots: plainPlots, plotPositions: plainPlotPositions } = plainObject;
+		const { userId, plots: plainPlots, level: plainLevel } = plainObject;
+
+		// Convert plainLevel to LevelSystem
+		const levelInstance = plainLevel ? LevelSystem.fromPlainObject(plainLevel) : new LevelSystem();
+
 		if (!Array.isArray(plainPlots)) {
-			throw new Error('Invalid plots array');
-		  }
+			//if plots is not the right shape, throw away the entire thing
+			return new Garden(userId, Garden.getStartingRows(), Garden.getStartingCols(), null, levelInstance);
+		}	
 		// Convert plainPlots to Plot[][]
-		const plots: Plot[][] = plainPlots.map((row: any[]) => row.map((plot: any) => Plot.fromPlainObject(plot)));
-
-		// Convert plainPlotPositions to Map<Plot, [number, number]>
-		// const plotPositions: Map<Plot, [number, number]> = new Map();
-		// for (const [plotPlain, position] of Object.entries(plainPlotPositions)) {
-		// 	const plot = Plot.fromPlainObject(JSON.parse(plotPlain));
-		// 	plotPositions.set(plot, position);	
-		// }
-
-		const garden = new Garden(userId, plainPlots.length, plainPlots[0]?.length || 0, plots);
-		// garden.plotPositions = plotPositions; //unnecessary?
+		const plots = plainPlots.map((row: any[]) => row.map((plot: any) => Plot.fromPlainObject(plot)));
+		
+		const garden = new Garden(userId, plainPlots.length, plainPlots[0]?.length || 0, plots, levelInstance);
 		garden.updatePlotPositions();
 
 		return garden;
 	}
+
+	toPlainObject(): any {
+		return {
+			userId: this.userId,
+			plots: this.plots.map(row => row.map(plot => plot.toPlainObject())),
+			level: this.level.toPlainObject()
+		};
+	} 
 
 	/**
 	 * @returns the userId of the owner of the garden.
@@ -79,6 +89,41 @@ export class Garden {
 		return this.plots;
 		// deep copy instead (?)
 		// return this.plots.map(innerArray => innerArray.map(plot => plot.clone()));
+	}
+
+	/**
+	 * @returns the level of the garden
+	 */
+	getLevel(): number {
+		return this.level.getLevel();
+	}
+
+	/**
+	 * @returns the total xp needed to level up
+	 */
+	getExpToLevelUp(): number {
+		return this.level.getExpToLevelUp();
+	}
+
+	/**
+	 * @returns the garden's current xp
+	 */
+	getCurrentExp(): number {
+		return this.level.getCurrentExp();
+	}
+
+	/**
+	 * @returns the growth rate, higher = faster
+	 */
+	getGrowthRate(): number {
+		return this.level.getGrowthRate();
+	}
+
+	/**
+	 * @param exp the quantity of xp to add
+	 */
+	addExp(exp: number) {
+		return this.level.addExperience(exp);
 	}
 
 	/**

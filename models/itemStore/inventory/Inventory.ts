@@ -19,11 +19,46 @@ export class Inventory extends ItemStore{
 	}
 
 	static fromPlainObject(plainObject: any): Inventory {
-		const { userId, gold, items } = plainObject;
-		const rehydratedItemList = ItemList.fromPlainObject(items);
-		if (rehydratedItemList == null) return new Inventory(userId, gold);
-		return new Inventory(userId, gold, rehydratedItemList);
+		//Throwing an error will be caught by loadInventory
+		// Validate plainObject structure
+		if (!plainObject || typeof plainObject !== 'object') {
+			throw new Error('Invalid plainObject structure for Inventory');
+		}
+		
+		// Initialize default values
+		let userId = '';
+		let gold = 0;
+		let items = new ItemList();
+	
+		// Validate and assign userId
+		if (plainObject && typeof plainObject.userId === 'string') {
+			userId = plainObject.userId;
+		}
+	
+		// Validate and assign gold
+		if (plainObject && typeof plainObject.gold === 'number') {
+			gold = plainObject.gold;
+		}
+	
+		// Validate and assign items
+		if (plainObject && plainObject.items !== undefined) {
+			if (typeof plainObject.items === 'object' && plainObject.items !== null) {
+				items = ItemList.fromPlainObject(plainObject.items) || new ItemList();
+			}
+		}
+	
+		return new Inventory(userId, gold, items);
+		
 	}
+
+	toPlainObject(): any {
+		return {
+			userId: this.userId,
+			gold: this.gold,
+			items: this.items.toPlainObject()
+		}
+	} 
+	
 
 	/**
 	 * @returns the userId of the owner of the inventory.

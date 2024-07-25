@@ -15,7 +15,7 @@ export const loadStore = () => {
   
 export const saveStore = (store: Store) => {
 	try {
-		const serializedStore = JSON.stringify(store);
+		const serializedStore = JSON.stringify(store.toPlainObject());
 		localStorage.setItem('store', serializedStore);
 	} catch (err) {
 		console.error('Could not save store', err);

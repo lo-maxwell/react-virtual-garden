@@ -1,5 +1,6 @@
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { PlaceholderItemTemplates } from "@/models/items/ItemTemplate";
+import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
 
 test('Should Initialize InventoryItem Object', () => {
 	const item = new InventoryItem(PlaceholderItemTemplates.PlaceHolderItems.harvestedApple, 1);
@@ -42,4 +43,12 @@ test('Should Not Use Item With 0 Quantity', () => {
 	const response = item.use(1);
 	expect(item.getQuantity()).toBe(0);
 	expect(response.isSuccessful()).toBe(false);
+})
+
+test('Should Create InventoryItem Object From PlainObject', () => {
+	const serializedInventoryItem = JSON.stringify((generateNewPlaceholderInventoryItem('appleSeed', 1)).toPlainObject());
+	const item = InventoryItem.fromPlainObject(JSON.parse(serializedInventoryItem));
+	expect(item).toBeTruthy();
+	expect(item.itemData.name).toBe('apple seed');
+	expect(item.getQuantity()).toBe(1);
 })

@@ -9,11 +9,11 @@ import TradeWindowItemComponent from "./tradeWindowItem";
 import { saveStore } from "@/utils/localStorage/store";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import TrashCanFilled from "@/components/icons/buttons/trash-can-filled";
-import LongPressButton from "@/components/buttons/longPressButton";
 import ChangeQuantityButton from "./changeQuantityButton";
+import { useStore } from "@/hooks/contexts/StoreContext";
 
 
-const TradeWindowComponent = ({store, inventory, selected, setSelected, owner, costMultiplier}: {store: Store, inventory: Inventory, selected: InventoryItem | null, setSelected: (arg: any) => void, owner: Store | Inventory | null, costMultiplier: number}) => {
+const TradeWindowComponent = ({inventory, selected, setSelected, owner, costMultiplier}: {inventory: Inventory, selected: InventoryItem | null, setSelected: (arg: any) => void, owner: Store | Inventory | null, costMultiplier: number}) => {
 	const defaultTradeWindowMessage = 'Trade Window';
 	const resetSelected = () => {
 		setTradeWindowMessage(defaultTradeWindowMessage);
@@ -22,6 +22,8 @@ const TradeWindowComponent = ({store, inventory, selected, setSelected, owner, c
 	const [quantity, setQuantity] = useState(1);
 	const [tradeWindowMessage, setTradeWindowMessage] = useState(defaultTradeWindowMessage);
 	
+	const {store, restockStore} = useStore();
+
 	const renderInventoryItem = () => {
 		if (selected && owner != null) {
 			let operationString = "";
@@ -86,6 +88,11 @@ const TradeWindowComponent = ({store, inventory, selected, setSelected, owner, c
 
 	}, [selected]);
 
+	const onAllClick = useCallback(() => {
+		if (!selected) return;
+		setQuantity(selected.getQuantity());
+	}, [selected]);
+
 	const onConfirmClick = () => {
 		if (!selected) return;
 		if (owner instanceof Store) {
@@ -111,13 +118,13 @@ const TradeWindowComponent = ({store, inventory, selected, setSelected, owner, c
 		saveStore(store);
 		saveInventory(inventory);
 		setSelected(null);
-
 	}
 
 	const renderQuantityButtons = () => {
 		if (selected) {
 			return <>
 				<div className="flex flex-row justify-around my-1">
+					<ChangeQuantityButton onClick={onAllClick} currentQuantity={quantity} className={"bg-gray-300 rounded w-12 h-12 font-bold text-center text-purple-600 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"} contents={<div>All</div>}/>
 					<ChangeQuantityButton onClick={onPlusClick} currentQuantity={quantity} className={"bg-gray-300 rounded w-12 h-12 text-center text-green-500 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"} contents={<PlusSquareFilled/>}/>
 					<ChangeQuantityButton onClick={onMinusClick} currentQuantity={quantity} className={"bg-gray-300 rounded w-12 h-12 text-center text-red-500 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"} contents={<MinusSquareFilled/>}/>
 					<button onClick={onConfirmClick} className="bg-gray-300 rounded h-12 px-2 text-center text-sm text-purple-600 font-semibold hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2">Confirm Transaction</button>
@@ -130,7 +137,7 @@ const TradeWindowComponent = ({store, inventory, selected, setSelected, owner, c
 	
 	return (<>
 		<div>{tradeWindowMessage}</div>
-		<div className="w-[80%]">
+		<div className="w-[90%]">
 		{renderInventoryItem()}
 		{renderQuantityButtons()}
 		</div>

@@ -135,3 +135,24 @@ test('Should Not Pickup Non Plant/Decoration', () => {
 	expect(newPlot.getItem().itemData.name).toBe("ground");
 	expect(testInventory.size()).toBe(0);
 })
+
+
+test('Should Create Plot Object From PlainObject', () => {
+	const serializedPlot = JSON.stringify((new Plot(generateNewPlaceholderPlacedItem('apple', 'abc'))).toPlainObject());
+	const plot = Plot.fromPlainObject(JSON.parse(serializedPlot));
+	expect(plot).toBeTruthy();
+	expect(plot.getItem()).toBeTruthy();
+	expect(plot.getItem().itemData.name).toBe('apple');
+	expect(plot.getItemStatus()).toBe('abc');
+})
+
+test('Should Create Empty Plot Instead of Error Item On fromPlainObject', () => {
+	//Mute console error
+	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+	const testPlot = new Plot(generateNewPlaceholderPlacedItem('error', ''));
+	const serializedPlot = JSON.stringify(testPlot.toPlainObject());
+	const plot = Plot.fromPlainObject(JSON.parse(serializedPlot));
+	expect(plot.getItem().itemData.name).toBe('ground');
+	// Restore console.error
+	consoleErrorSpy.mockRestore();
+})

@@ -2,6 +2,7 @@ import { Garden } from "@/models/garden/Garden";
 import { Plot } from "@/models/garden/Plot";
 import { ItemTemplate } from "@/models/items/ItemTemplate";
 import { generateNewPlaceholderPlacedItem} from "@/models/items/PlaceholderItems";
+import LevelSystem from "@/models/level/LevelSystem";
 
 test('getEmptyPlots generates new set of plots', () => {
 	const plots1 = Garden.generateEmptyPlots(3, 3);
@@ -42,7 +43,7 @@ test('Should Initialize Default Garden Object', () => {
 });
 
 test('Should Initialize Specified Garden Object', () => {
-	const newGarden = new Garden("Test User", 15, 15, Garden.generateEmptyPlots(15, 15));
+	const newGarden = new Garden("Test User", 15, 15, Garden.generateEmptyPlots(15, 15), new LevelSystem(100, 500, 2));
 	expect(newGarden).toBeTruthy();
 	expect(newGarden.getRows()).toBe(15);
 	expect(newGarden.getCols()).toBe(15);
@@ -52,6 +53,13 @@ test('Should Initialize Specified Garden Object', () => {
 	expect(newGarden.getPlots()[0][0].getItem().itemData.name).toBe("ground");
 	expect(newGarden.getPlots()[14][14].getItem().itemData.name).toBe("ground");
 	expect(newGarden.getPlotByRowAndColumn(1,1)!.getItem().itemData.name).toBe("ground");
+	expect(newGarden.getLevel()).toBe(100);
+	expect(newGarden.getCurrentExp()).toBe(500);
+	expect(newGarden.getExpToLevelUp()).toBe(5050);
+	expect(newGarden.getGrowthRate()).toBe(2);
+	newGarden.addExp(4550);
+	expect(newGarden.getLevel()).toBe(101);
+	expect(newGarden.getCurrentExp()).toBe(0);
 });
 
 test('Garden Generates Empty Plot', () => {
@@ -205,8 +213,45 @@ test('Should Fill Null With Empty Plot', () => {
 })
 
 test('Should Create Garden Object From PlainObject', () => {
-	const serializedGarden = JSON.stringify(new Garden());
+	const serializedGarden = JSON.stringify((new Garden()).toPlainObject());
 	const garden = Garden.fromPlainObject(JSON.parse(serializedGarden));
 	expect(garden.getUserId()).toBe("Dummy User");
+	expect(garden.getRows()).toBe(6);
+	expect(garden.getCols()).toBe(6);
+	expect(garden.getLevel()).toBe(1);
 	expect(garden.size()).toBe(36);
+})
+
+test('Should Only Reset Corrupted Plot On Load', () => {
+	//Mute console error
+	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+	const testGarden = new Garden('test', 10, 10, null, new LevelSystem(100, 0, 2));
+	testGarden.setPlotItem(0, 0, generateNewPlaceholderPlacedItem('error', ''));
+	const serializedGarden = JSON.stringify(testGarden.toPlainObject());
+	const garden = Garden.fromPlainObject(JSON.parse(serializedGarden));
+	expect(garden.getPlotByRowAndColumn(0, 0)?.getItem().itemData.name).not.toBe('error');
+	expect(garden.getLevel()).toBe(100);
+	expect(garden.getRows()).toBe(10);
+	expect(garden.getCols()).toBe(10);
+	// Restore console.error
+	consoleErrorSpy.mockRestore();
+})
+
+
+test('Should Reset All Plots On Invalid Format Load', () => {
+	//Mute console error
+	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+	const testGarden = new Garden('test', 10, 10, null, new LevelSystem(100, 0, 2));
+	testGarden.setPlotItem(0, 0, generateNewPlaceholderPlacedItem('error', ''));
+	testGarden.setPlotItem(1, 1, generateNewPlaceholderPlacedItem('apple', ''));
+	const serializedGarden = JSON.stringify(testGarden.toPlainObject());
+	const corruptedGarden = '{"userId":"test","plots":"asdf","level":{"level":100,"currentExp":0,"growthRate":2}}';
+	const garden = Garden.fromPlainObject(JSON.parse(corruptedGarden));
+	expect(garden.getPlotByRowAndColumn(0, 0)?.getItem().itemData.name).toBe('ground');
+	expect(garden.getPlotByRowAndColumn(1, 1)?.getItem().itemData.name).toBe('ground');
+	expect(garden.getLevel()).toBe(100);
+	expect(garden.getRows()).toBe(6);
+	expect(garden.getCols()).toBe(6);
+	// Restore console.error
+	consoleErrorSpy.mockRestore();
 })

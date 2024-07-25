@@ -17,9 +17,31 @@ export class Plot {
 	}
 
 	static fromPlainObject(plainObject: any): Plot {
-		const item = PlacedItem.fromPlainObject(plainObject.item);
-    	return new Plot(item);
+		try {
+            // Validate plainObject structure
+            if (!plainObject || typeof plainObject !== 'object' || !plainObject.item) {
+                throw new Error('Invalid plainObject structure for Plot');
+            }
+
+            // Convert item if valid
+            const item = PlacedItem.fromPlainObject(plainObject.item);
+			if (item.itemData.name == 'error') {
+				throw new Error('Invalid item in Plot');
+			}
+            return new Plot(item);
+        } catch (error) {
+            console.error('Error creating Plot from plainObject:', error);
+            // Return a default or empty Plot instance in case of error
+			const ground = generateNewPlaceholderPlacedItem("ground", "empty");
+            return new Plot(ground);
+        }
 	}
+
+	toPlainObject(): any {
+		return {
+			item: this.item.toPlainObject()
+		}
+	} 
 
 	/**
 	 * @returns a copy of this plot.

@@ -2,6 +2,7 @@ import { InventoryTransactionResponse } from "@/models/itemStore/inventory/Inven
 import { Item } from "../Item";
 import { ItemTemplate, PlaceholderItemTemplates } from "../ItemTemplate";
 import { ItemSubtypes} from "../ItemTypes";
+import { generateNewPlaceholderInventoryItem } from "../PlaceholderItems";
 
 export class InventoryItem extends Item {
 	private quantity: number;
@@ -12,9 +13,34 @@ export class InventoryItem extends Item {
 	}
 
 	static fromPlainObject(plainObject: any): InventoryItem {
-		const itemData = ItemTemplate.fromPlainObject(plainObject.itemData);
-		return new InventoryItem(itemData, plainObject.quantity);
+		try {
+            // Validate plainObject structure
+            if (!plainObject || typeof plainObject !== 'object' || !plainObject.itemData || !plainObject.quantity) {
+                throw new Error('Invalid plainObject structure for InventoryItem');
+            }
+			// Validate required properties
+			const { itemData, quantity } = plainObject;
+
+			if (!itemData || typeof quantity !== 'number') {
+				throw new Error('Invalid properties in plainObject for InventoryItem');
+			}
+	
+			// Validate itemData structure
+			const validatedItemData = ItemTemplate.fromPlainObject(itemData);
+	
+			return new InventoryItem(validatedItemData, quantity);
+		} catch (err) {
+			console.error('Error creating InventoryItem from plainObject:', err);
+            return new InventoryItem(PlaceholderItemTemplates.PlaceHolderItems.errorInventoryItem, 1);
+		}
 	}
+
+	toPlainObject(): any {
+		return {
+			quantity: this.quantity,
+			itemData: this.itemData.toPlainObject()
+		}
+	} 
 	
 	/**
 	 * @returns the quantity

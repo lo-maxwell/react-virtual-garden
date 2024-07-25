@@ -12,14 +12,14 @@ beforeEach(() => {
 	const item2 = generateNewPlaceholderInventoryItem("bananaSeed", 20);
 	const item3 = generateNewPlaceholderInventoryItem("coconutSeed", 30);
 	const testItemList = new ItemList([item1, item2, item3]);
-	testStore = new Store(1, "Test Store", 2.0, 1.0, testItemList, new ItemList());
+	testStore = new Store(1, "Test Store", 2.0, 1.0, 1, testItemList, new ItemList());
 	const item4 = generateNewPlaceholderInventoryItem("appleSeed", 1);
 	const testItemList2 = new ItemList([item4]);
 	testInventory = new Inventory("Test User", 100, testItemList2);
 });
 
 test('Should Initialize Default Store Object', () => {
-	const inv = new Store(1, "Dummy Store", 2.0, 1.0, new ItemList(), new ItemList());
+	const inv = new Store(1, "Dummy Store", 2.0, 1.0, 1, new ItemList(), new ItemList());
 	expect(inv).not.toBeUndefined();
 	expect(inv).not.toBeNull();
 	expect(inv.getStoreId()).toBe(1);
@@ -248,7 +248,6 @@ test('Should Not Restock Lower Quantity', () => {
 
 test('Should Rollback on Failing Restock', () => {
 	testStore.setStockList(new ItemList([generateNewPlaceholderInventoryItem('appleSeed', -1), generateNewPlaceholderInventoryItem('harvestedApple', -1)]));
-	console.log(testStore.getAllItems());
 	const response = testStore.restockStore();
 	expect(response.isSuccessful()).toBe(false);
 	expect(testStore.getItem('apple seed').payload.getQuantity()).toBe(1);
@@ -257,9 +256,22 @@ test('Should Rollback on Failing Restock', () => {
 })
 
 test('Should Create Store Object From PlainObject', () => {
-	const serializedStore = JSON.stringify(new Store(0, "Test Store", 1, 1, new ItemList([generateNewPlaceholderInventoryItem('appleSeed', 5)])));
+	const serializedStore = JSON.stringify((new Store(0, "Test Store", 1, 1, 1, new ItemList([generateNewPlaceholderInventoryItem('appleSeed', 5)]))).toPlainObject());
 	const store = Store.fromPlainObject(JSON.parse(serializedStore));
 	expect(store.getStoreId()).toBe(0);
 	expect(store.size()).toBe(1);
 	expect(store.getItem('apple seed').payload.quantity).toBe(5);
+})
+
+test('Should Spend Gold On Custom Object', () => {
+	const response = testStore.buyCustomObjectFromStore(testInventory, 100);
+	expect(response.isSuccessful()).toBe(true);
+	expect(response.payload).toBe(0);
+	expect(testInventory.getGold()).toBe(0);
+})
+
+test('Should Not Spend Insufficient Gold On Custom Object', () => {
+	const response = testStore.buyCustomObjectFromStore(testInventory, 200);
+	expect(response.isSuccessful()).toBe(false);
+	expect(testInventory.getGold()).toBe(100);
 })

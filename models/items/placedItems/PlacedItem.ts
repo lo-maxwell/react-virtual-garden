@@ -12,9 +12,34 @@ export class PlacedItem extends Item {
 	}
 
 	static fromPlainObject(plainObject: any): PlacedItem {
-		const itemData = ItemTemplate.fromPlainObject(plainObject.itemData);
-		return new PlacedItem(itemData, plainObject.status);
+		try {
+            // Validate plainObject structure
+            if (!plainObject || typeof plainObject !== 'object') {
+                throw new Error('Invalid plainObject structure for PlacedItem');
+            }
+			// Validate required properties
+			const { itemData, status } = plainObject;
+
+			if (!itemData || typeof status !== 'string') {
+				throw new Error('Invalid properties in plainObject for PlacedItem');
+			}
+	
+			// Validate itemData structure
+			const validatedItemData = ItemTemplate.fromPlainObject(itemData);
+	
+			return new PlacedItem(validatedItemData, status);
+		} catch (err) {
+			console.error('Error creating PlacedItem from plainObject:', err);
+            return new PlacedItem(PlaceholderItemTemplates.PlaceHolderItems.errorPlacedItem, 'error');
+		}
 	}
+
+	toPlainObject(): any {
+		return {
+			status: this.status,
+			itemData: this.itemData.toPlainObject()
+		}
+	} 
 
 	/**
 	 * @returns the status
