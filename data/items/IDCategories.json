@@ -1,0 +1,31 @@
+{
+	"type": {		
+		"PLACED": "0",
+		"INVENTORY": "1"
+	},
+	"subtype": {
+		"GROUND": "00",
+		"SEED": "01",
+		"PLANT": "02",
+		"HARVESTED_ITEM": "03",
+		"DECORATION": "04",
+		"BLUEPRINT": "05"
+	},
+	"item": {
+		"GROUND": "00",
+		"APPLE": "01",
+		"BANANA": "02",
+		"COCONUT": "03",
+		"BENCH": "04",
+		"FLAMINGO": "05",
+		"ERROR": "99"
+	},
+	"variant": {
+		"NORMAL": "00",
+		"RARE": "01",
+		"EPIC": "02",
+		"LEGENDARY": "03",
+		"ERROR": "99"
+	}
+
+  }

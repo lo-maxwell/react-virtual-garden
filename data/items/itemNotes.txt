@@ -1,0 +1,78 @@
+ID - A B C D 
+A = 1 digit Type; 0 = PlacedItem, 1 = InventoryItem
+B = 2 digit Subtype; 00 = Ground, 01 = Seed, 02 = Plant, 03 = HarvestedItem, 04 = Decoration, 05 = Blueprint
+C = 2 digit Item; shows linked items
+D = 2 digit Variant; differentiates items of the same type (red apple vs green apple)
+
+{
+	"PlacedItems": {
+		"Plants": [
+			{
+				"id": 3,
+				"name": "apple",
+				"icon": "🍎",
+				"type": "PlacedItem",
+				"subtype": "Plant",
+				"value": 50,
+				"transformId": 4,
+				"baseExp": 5
+			}
+		],
+		"Decorations": [
+			{
+				"id": 11,
+				"name": "bench",
+				"icon": "🪑",
+				"type": "PlacedItem",
+				"subtype": "Decoration",
+				"value": 100,
+				"transformId": 12
+			}
+		],
+		"Ground": [
+			{
+				"id": 1,
+				"name": "ground",
+				"icon": "_",
+				"type": "PlacedItem",
+				"subtype": "Ground",
+				"value": 0,
+				"transformId": 1
+			}
+		]
+	},
+	"InventoryItems": {
+		"Seeds": [
+			{
+				"id": 2,
+				"name": "apple seed",
+				"icon": "🍎",
+				"type": "InventoryItem",
+				"subtype": "Seed",
+				"value": 10,
+				"transformId": 3
+			}
+		],
+		"HarvestedItems": [
+			{
+				"id": 4,
+				"name": "harvested apple",
+				"icon": "🍎",
+				"type": "InventoryItem",
+				"subtype": "HarvestedItem",
+				"value": 50
+			}
+		],
+		"Blueprints": [
+			{
+				"id": 12,
+				"name": "bench blueprint",
+				"icon": "📜",
+				"type": "InventoryItem",
+				"subtype": "Blueprint",
+				"value": 100,
+				"transformId": 11
+			}
+		]
+	}
+}

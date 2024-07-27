@@ -2,129 +2,138 @@
 	"PlacedItems": {
 		"Plants": [
 			{
-				"id": -1,
+				"id": "0029999",
 				"name": "error",
 				"icon": "❌",
 				"type": "PlacedItem",
 				"subtype": "Plant",
 				"value": 0,
-				"transformId": -5,
+				"transformId": "1039999",
 				"baseExp": 0
 			},
 			{
-				"id": 3,
+				"id": "0020100",
 				"name": "apple",
 				"icon": "🍎",
 				"type": "PlacedItem",
 				"subtype": "Plant",
 				"value": 50,
-				"transformId": 4,
+				"transformId": "1030100",
 				"baseExp": 5
 			},
 			{
-				"id": 6,
+				"id": "0020200",
 				"name": "banana",
 				"icon": "🍌",
 				"type": "PlacedItem",
 				"subtype": "Plant",
 				"value": 100,
-				"transformId": 7,
+				"transformId": "1030200",
 				"baseExp": 10
 			},
 			{
-				"id": 9,
+				"id": "0020300",
 				"name": "coconut",
 				"icon": "🥥",
 				"type": "PlacedItem",
 				"subtype": "Plant",
 				"value": 150,
-				"transformId": 10,
+				"transformId": "1030300",
 				"baseExp": 15
 			}
 		],
 		"Decorations": [
 			{
-				"id": -2,
+				"id": "0049999",
 				"name": "error",
 				"icon": "❌",
 				"type": "PlacedItem",
 				"subtype": "Decoration",
 				"value": 0,
-				"transformId": -6
+				"transformId": "1059999"
 			},
 			{
-				"id": 11,
+				"id": "0040400",
 				"name": "bench",
 				"icon": "🪑",
 				"type": "PlacedItem",
 				"subtype": "Decoration",
 				"value": 100,
-				"transformId": 12
+				"transformId": "1050400"
+			},
+			{
+				"id": "0040500",
+				"name": "flamingo",
+				"icon": "🦩",
+				"type": "PlacedItem",
+				"subtype": "Decoration",
+				"value": 500,
+				"transformId": "1050500"
 			}
 		],
 		"Ground": [
 			{
-				"id": -3,
+				"id": "0009999",
 				"name": "error",
 				"icon": "❌",
 				"type": "PlacedItem",
 				"subtype": "Ground",
 				"value": 0,
-				"transformId": -3
+				"transformId": "0009999"
 			},
 			{
-				"id": 1,
+				"id": "0000000",
 				"name": "ground",
 				"icon": "_",
 				"type": "PlacedItem",
 				"subtype": "Ground",
 				"value": 0,
-				"transformId": 1
+				"transformId": "0000000"
 			}
 		]
 	},
 	"InventoryItems": {
 		"Seeds": [
 			{
-				"id": -4,
+				"id": "1019999",
 				"name": "error",
 				"icon": "❌",
 				"type": "InventoryItem",
 				"subtype": "Seed",
 				"value": 0,
-				"transformId": -1
+				"transformId": "0029999"
 			},
 			{
-				"id": 2,
+				"id": "1010100",
 				"name": "apple seed",
 				"icon": "🍎",
 				"type": "InventoryItem",
 				"subtype": "Seed",
 				"value": 10,
-				"transformId": 3
+				"transformId": "0020100"
 			},
 			{
-				"id": 5,
+				"id": "1010200",
 				"name": "banana seed",
 				"icon": "🍌",
 				"type": "InventoryItem",
 				"subtype": "Seed",
 				"value": 20,
-				"transformId": 6
+				"transformId": "0020200"
 			},
 			{
-				"id": 8,
+				"id": "1010300",
 				"name": "coconut seed",
 				"icon": "🥥",
 				"type": "InventoryItem",
 				"subtype": "Seed",
 				"value": 30,
-				"transformId": 9
+				"transformId": "0020300"
 			}
 		],
 		"HarvestedItems": [
 			{
-				"id": -5,
+				"id": "1039999",
 				"name": "error",
 				"icon": "❌",
 				"type": "InventoryItem",
@@ -132,7 +141,7 @@
 				"value": 0
 			},
 			{
-				"id": 4,
+				"id": "1030100",
 				"name": "harvested apple",
 				"icon": "🍎",
 				"type": "InventoryItem",
@@ -140,7 +149,7 @@
 				"value": 50
 			},
 			{
-				"id": 7,
+				"id": "1030200",
 				"name": "harvested banana",
 				"icon": "🍌",
 				"type": "InventoryItem",
@@ -148,7 +157,7 @@
 				"value": 100
 			},
 			{
-				"id": 10,
+				"id": "1030300",
 				"name": "harvested coconut",
 				"icon": "🥥",
 				"type": "InventoryItem",
@@ -158,22 +167,31 @@
 		],
 		"Blueprints": [
 			{
-				"id": -6,
+				"id": "1059999",
 				"name": "error",
 				"icon": "❌",
 				"type": "InventoryItem",
 				"subtype": "Blueprint",
 				"value": 0,
-				"transformId": -2
+				"transformId": "0049999"
 			},
 			{
-				"id": 12,
+				"id": "1050400",
 				"name": "bench blueprint",
 				"icon": "📜",
 				"type": "InventoryItem",
 				"subtype": "Blueprint",
 				"value": 100,
-				"transformId": 11
+				"transformId": "0040400"
+			},
+			{
+				"id": "1050500",
+				"name": "flamingo blueprint",
+				"icon": "📜",
+				"type": "InventoryItem",
+				"subtype": "Blueprint",
+				"value": 500,
+				"transformId": "0040500"
 			}
 		]
 	}
