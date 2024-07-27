@@ -21,10 +21,10 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		if (!(store instanceof Store)) {
 		  console.log('store not found, setting up');
 		  store = new Store(0, "Test Store", 2, 1, 1, new ItemList(), new ItemList([
-			generateNewPlaceholderInventoryItem('appleSeed', 100),
-			generateNewPlaceholderInventoryItem('bananaSeed', 50),
-			generateNewPlaceholderInventoryItem('coconutSeed', 25),
-			generateNewPlaceholderInventoryItem('benchBlueprint', 10),
+			generateNewPlaceholderInventoryItem('apple seed', 100),
+			generateNewPlaceholderInventoryItem('banana seed', 50),
+			generateNewPlaceholderInventoryItem('coconut seed', 25),
+			generateNewPlaceholderInventoryItem('bench blueprint', 10),
 		  ]));
 		  store.restockStore();
 		  saveStore(store);
@@ -53,15 +53,15 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 
 	const resetStore = () => {
 		const newStore = new Store(0, "Test Store", 2, 1, 1, new ItemList([
-			generateNewPlaceholderInventoryItem('appleSeed', 100),
-			generateNewPlaceholderInventoryItem('bananaSeed', 50),
-			generateNewPlaceholderInventoryItem('coconutSeed', 25),
-			generateNewPlaceholderInventoryItem('benchBlueprint', 10),
+			generateNewPlaceholderInventoryItem('apple seed', 100),
+			generateNewPlaceholderInventoryItem('banana seed', 50),
+			generateNewPlaceholderInventoryItem('coconut seed', 25),
+			generateNewPlaceholderInventoryItem('bench blueprint', 10),
 		  ]), new ItemList([
-			generateNewPlaceholderInventoryItem('appleSeed', 100),
-			generateNewPlaceholderInventoryItem('bananaSeed', 50),
-			generateNewPlaceholderInventoryItem('coconutSeed', 25),
-			generateNewPlaceholderInventoryItem('benchBlueprint', 10),
+			generateNewPlaceholderInventoryItem('apple seed', 100),
+			generateNewPlaceholderInventoryItem('banana seed', 50),
+			generateNewPlaceholderInventoryItem('coconut seed', 25),
+			generateNewPlaceholderInventoryItem('bench blueprint', 10),
 		  ]));
 		setStore(newStore);
 		saveStore(newStore);

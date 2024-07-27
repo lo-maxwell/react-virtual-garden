@@ -1,20 +1,15 @@
 'use client'
 import InventoryComponent from "@/components/inventory/inventory";
-import { Garden } from "@/models/garden/Garden";
-import { Inventory } from "@/models/itemStore/inventory/Inventory";
-import { ItemList } from "@/models/itemStore/ItemList";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
-import { ItemTemplate, PlaceholderItemTemplates } from "@/models/items/ItemTemplate";
-import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
 import { loadGarden, saveGarden } from "@/utils/localStorage/garden";
 import { loadInventory, saveInventory } from "@/utils/localStorage/inventory";
 import { useEffect, useState } from "react";
 import GardenComponent from "./garden";
 import User from "@/models/user/User";
 import UserProfileComponent from "@/components/garden/userProfile";
-import { Plot } from "@/models/garden/Plot";
 import { useInventory } from "@/hooks/contexts/InventoryContext";
 import { useGarden } from "@/hooks/contexts/GardenContext";
+import PlaceholderItemTemplate from "@/models/items/templates/PlaceholderItemTemplate";
 
 
 const GardenPage = () => {
@@ -36,7 +31,8 @@ const GardenPage = () => {
 
   function addAppleSeed() {
     if (!inventory) return;
-    inventory.gainItem(PlaceholderItemTemplates.PlaceHolderItems.appleSeed, 10);
+    const appleSeedTemplate = PlaceholderItemTemplate.getInventoryItemTemplateByName('apple seed');
+    inventory.gainItem(appleSeedTemplate!, 10);
     setSelected(inventory.getItem('apple seed').payload);
     setInventoryForceRefreshKey(inventoryForceRefreshKey + 1);
     saveInventory(inventory);

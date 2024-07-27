@@ -69,10 +69,23 @@
 
 ### Converted garden and inventory to contexts + custom hook
 
+### Redoing item templates and moving data to a data file for ease of content creation later
+
+### Refactored items, item templates, fromPlainObject
+
+  * Rewrote generatePlaceholder items
+  * Added functions to get the class from an item
+  * Turned inventory/placed items into abstract class, implemented subtypes as classes
 
 Stop worrying about proper structure, just write code and see what you need along the way
 
 TODO:
+
+Make Items only take in their respective templates
+
+Refactor PlacedItems
+
+Write tests for refactored code
 
 Generate multiple store types/switch between stores/restock store
 Clean up ui, especially font/scaling using rem, to accommodate more screen width
@@ -82,6 +95,8 @@ Sort/Order Inventory by filters - itemid, alphabetical, type?
 
 Make Garden more interactive than plant all -> harvest 
 
+Timer per plot + timePlaced per plot + green highlight when ready? status as display string?
+
 Add ToPlainObject method for all models
 
 Mouse over tooltips for items
@@ -90,6 +105,10 @@ Add User class
 
 ExpandRow/Col doesn't automatically rerender garden, might need a force refresh
 Also breaks if you expand col, probably because of not rerendering
+
+Redo ItemTemplate so we can add item specific stats ie exp for plants
+
+Redo Placeholder Item Templates so it's easier to add new content
 
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time

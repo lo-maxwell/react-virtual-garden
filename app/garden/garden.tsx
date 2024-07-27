@@ -7,6 +7,7 @@ import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { useRef } from "react";
 import { useInventory } from "@/hooks/contexts/InventoryContext";
 import { useGarden } from "@/hooks/contexts/GardenContext";
+import LevelSystemComponent from "@/components/level/LevelSystem";
 
 const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {selected: InventoryItem | null, setSelected: Function, inventoryForceRefresh: {value: number, setter: Function}}) => {
 	const { inventory } = useInventory();
@@ -90,10 +91,11 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 		<div className="flex flex-col items-center overflow-x-auto mx-2">
 		{generatePlots(garden.getPlots())}
 		</div>
+		<div className="mx-4 my-4">
+			<LevelSystemComponent level={garden.getLevel()} currentExp={garden.getCurrentExp()} expToLevelUp={garden.getExpToLevelUp()}/>
+		</div>
 		<div>
 			<button onClick={plantAll} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>Plant All</button>
-		</div>
-		<div className="">
 			<button onClick={harvestAll} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>Harvest All</button>
 		</div>
      	</>

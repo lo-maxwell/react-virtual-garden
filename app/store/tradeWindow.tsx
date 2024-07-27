@@ -91,8 +91,15 @@ const TradeWindowComponent = ({selected, setSelected, owner, costMultiplier}: {s
 	}, [selected]);
 
 	const onAllClick = useCallback(() => {
-		if (!selected) return;
-		setQuantity(selected.getQuantity());
+		if (!selected || !owner) return;
+		if (owner instanceof Store) {
+			const maxBuy = Math.min(selected.getQuantity(), Math.max(1, Math.floor(inventory.getGold()/(owner.getBuyPrice(selected)))));
+			setQuantity(maxBuy);
+		} else if (owner instanceof Inventory) {
+			setQuantity(selected.getQuantity());
+		} else {
+			//should never occur
+		}
 	}, [selected]);
 
 	const onConfirmClick = () => {

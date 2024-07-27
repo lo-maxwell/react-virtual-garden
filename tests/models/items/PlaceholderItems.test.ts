@@ -27,15 +27,15 @@ test('Should Generate Error PlacedItem', () => {
 });
 
 test('Should Generate InventoryItem', () => {
-	const inventoryItem = generateNewPlaceholderInventoryItem("appleSeed", 0);
+	const inventoryItem = generateNewPlaceholderInventoryItem("apple seed", 0);
 	expect(inventoryItem).toBeTruthy();
 	expect(inventoryItem.itemData.name).toBe("apple seed");
 
-	const inventoryItem2 = generateNewPlaceholderInventoryItem("bananaSeed", 0);
+	const inventoryItem2 = generateNewPlaceholderInventoryItem("banana seed", 0);
 	expect(inventoryItem2).toBeTruthy();
 	expect(inventoryItem2.itemData.name).toBe("banana seed");
 
-	const inventoryItem3 = generateNewPlaceholderInventoryItem("harvestedCoconut", 0);
+	const inventoryItem3 = generateNewPlaceholderInventoryItem("harvested coconut", 0);
 	expect(inventoryItem3).toBeTruthy();
 	expect(inventoryItem3.itemData.name).toBe("harvested coconut");
 

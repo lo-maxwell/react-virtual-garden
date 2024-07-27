@@ -1,9 +1,19 @@
 
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
 import { Item } from "../items/Item";
-import { ItemTemplate } from "../items/ItemTemplate";
-import { ItemTypes } from "../items/ItemTypes";
+import { ItemTemplate } from "../items/templates/ItemTemplate";
+import { ItemType, ItemTypes } from "../items/ItemTypes";
 import { InventoryTransactionResponse } from "./inventory/InventoryTransactionResponse";
+import { Seed } from "../items/inventoryItems/Seed";
+import { Blueprint } from "../items/inventoryItems/Blueprint";
+import { HarvestedItem } from "../items/inventoryItems/HarvestedItem";
+import { Plant } from "../items/placedItems/Plant";
+import { Decoration } from "../items/placedItems/Decoration";
+import { EmptyItem } from "../items/placedItems/EmptyItem";
+import { PlacedItem } from "../items/placedItems/PlacedItem";
+import { getItemClassFromSubtype, ItemConstructor } from "../items/utility/classMaps";
+import { InventoryItemTemplate } from "../items/templates/InventoryItemTemplate";
+
 
 export class ItemList {
 	private items: InventoryItem[];
@@ -18,7 +28,13 @@ export class ItemList {
                 throw new Error('Invalid plainObject structure for ItemList');
             }
 			const items = plainObject.items.map((item: any) => {
-				const toReturn = InventoryItem.fromPlainObject(item);
+				if (!item) return null;
+				const ItemClass = getItemClassFromSubtype(item);
+				if (!ItemClass) {
+					console.warn(`Unknown item type: ${item.subtype}`);
+                    return null;
+				}
+				const toReturn = ItemClass.fromPlainObject(item);
 				if (toReturn.itemData.name == 'error') {
 					return null;
 				}
@@ -32,9 +48,12 @@ export class ItemList {
 	}
 
 	toPlainObject(): any {
-		return {
-			items: this.items.map(item => item.toPlainObject()) // Convert each InventoryItem to a plain object
+		const toReturn = {
+			items: this.items.map(item => {
+				return item.toPlainObject();
+			}) // Convert each InventoryItem to a plain object
 		};
+		return toReturn;
 	} 
 
 	/**
@@ -192,7 +211,7 @@ export class ItemList {
      * @param quantity - The quantity of the item to add.
      * @returns InventoryTransactionResponse containing the added InventoryItem or error message
      */
-	addItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
+	addItem(item: InventoryItem | InventoryItemTemplate, quantity: number): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
 
 		let toUpdate = this.getItem(item);
@@ -213,9 +232,11 @@ export class ItemList {
 			//Add item to inventory
 			let newItem: InventoryItem;
 			if (ItemList.isInventoryItem(item)) {
-				newItem = new InventoryItem(item.itemData, quantity);
+				const itemClass = getItemClassFromSubtype(item, ItemTypes.INVENTORY.name) as ItemConstructor<InventoryItem>;
+				newItem = new itemClass(item.itemData, quantity);
 			} else if (ItemList.isItemTemplate(item)) {
-				newItem = new InventoryItem(item, quantity);
+				const itemClass = getItemClassFromSubtype(item, ItemTypes.INVENTORY.name)  as ItemConstructor<InventoryItem>;
+				newItem = new itemClass(item, quantity);
 				if (item.type === ItemTypes.PLACED.name) {
 					response.addErrorMessage(`Cannot add a placeditem to inventory`);
 					return response;
@@ -231,6 +252,10 @@ export class ItemList {
 			}
 			if (quantity < 0) {
 				response.addErrorMessage('Cannot remove items with add. Try update instead.');
+				return response;
+			}
+			if (newItem.itemData.name === 'error') {
+				response.addErrorMessage('Cannot add error item.');
 				return response;
 			}
 			this.items.push(newItem);

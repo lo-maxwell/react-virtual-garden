@@ -1,46 +1,57 @@
 import { InventoryTransactionResponse } from "@/models/itemStore/inventory/InventoryTransactionResponse";
 import { Item } from "../Item";
-import { ItemTemplate, PlaceholderItemTemplates } from "../ItemTemplate";
 import { ItemSubtypes} from "../ItemTypes";
 import { generateNewPlaceholderInventoryItem } from "../PlaceholderItems";
+import { BlueprintTemplate } from "../templates/BlueprintTemplate";
+import { InventoryItemTemplate } from "../templates/InventoryItemTemplate";
+import { ItemTemplate } from "../templates/ItemTemplate";
+import PlaceholderItemTemplates from "../templates/PlaceholderItemTemplate";
+import { SeedTemplate } from "../templates/SeedTemplate";
 
-export class InventoryItem extends Item {
-	private quantity: number;
+export abstract class InventoryItem extends Item {
+	itemData: InventoryItemTemplate;
+	protected quantity: number;
 	
-	constructor(itemData: ItemTemplate, quantity: number) {
-		super(itemData);
+	constructor(itemData: InventoryItemTemplate, quantity: number) {
+		super();
+		this.itemData = itemData;
 		this.quantity = quantity;
 	}
 
+	// static fromPlainObject(plainObject: any): InventoryItem {
+	// 	try {
+    //         // Validate plainObject structure
+    //         if (!plainObject || typeof plainObject !== 'object' || !plainObject.itemData || !plainObject.quantity) {
+    //             throw new Error('Invalid plainObject structure for InventoryItem');
+    //         }
+	// 		// Validate required properties
+	// 		const { itemData, quantity } = plainObject;
+
+	// 		if (!itemData || typeof quantity !== 'number') {
+	// 			throw new Error('Invalid properties in plainObject for InventoryItem');
+	// 		}
+	
+	// 		// Validate itemData structure
+	// 		const validatedItemData = InventoryItemTemplate.fromPlainObject(itemData);
+	
+	// 		return new InventoryItem(validatedItemData, quantity);
+	// 	} catch (err) {
+	// 		console.error('Error creating InventoryItem from plainObject:', err);
+    //         return new InventoryItem(InventoryItemTemplate.getErrorTemplate(), 1);
+	// 	}
+	// }
+
 	static fromPlainObject(plainObject: any): InventoryItem {
-		try {
-            // Validate plainObject structure
-            if (!plainObject || typeof plainObject !== 'object' || !plainObject.itemData || !plainObject.quantity) {
-                throw new Error('Invalid plainObject structure for InventoryItem');
-            }
-			// Validate required properties
-			const { itemData, quantity } = plainObject;
+        throw new Error("fromPlainObject must be implemented in subclasses");
+    }
 
-			if (!itemData || typeof quantity !== 'number') {
-				throw new Error('Invalid properties in plainObject for InventoryItem');
-			}
-	
-			// Validate itemData structure
-			const validatedItemData = ItemTemplate.fromPlainObject(itemData);
-	
-			return new InventoryItem(validatedItemData, quantity);
-		} catch (err) {
-			console.error('Error creating InventoryItem from plainObject:', err);
-            return new InventoryItem(PlaceholderItemTemplates.PlaceHolderItems.errorInventoryItem, 1);
-		}
-	}
-
-	toPlainObject(): any {
-		return {
-			quantity: this.quantity,
-			itemData: this.itemData.toPlainObject()
-		}
-	} 
+	abstract toPlainObject(): any;
+	// {
+	// 	return {
+	// 		quantity: this.quantity,
+	// 		itemData: this.itemData.toPlainObject()
+	// 	}
+	// } 
 	
 	/**
 	 * @returns the quantity
@@ -77,10 +88,19 @@ export class InventoryItem extends Item {
 		}
 		switch(this.itemData.subtype) {
 			case ItemSubtypes.BLUEPRINT.name:
-			case ItemSubtypes.SEED.name:
+				//TODO: Replace type assertion with guard
+				const blueprintData = this.itemData as BlueprintTemplate;
 				response.payload = {
 					originalItem: this,
-					newTemplate: PlaceholderItemTemplates.getTransformTemplate(this.itemData.transformId),
+					newTemplate: PlaceholderItemTemplates.getPlacedTransformTemplate(blueprintData.transformId),
+				};
+				this.setQuantity(this.getQuantity() - quantity);
+				break;
+			case ItemSubtypes.SEED.name:
+				const seedData = this.itemData as SeedTemplate;
+				response.payload = {
+					originalItem: this,
+					newTemplate: PlaceholderItemTemplates.getPlacedTransformTemplate(seedData.transformId),
 				};
 				this.setQuantity(this.getQuantity() - quantity);
 				break;

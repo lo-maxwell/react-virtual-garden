@@ -6,6 +6,7 @@ import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import { useGarden } from "@/hooks/contexts/GardenContext";
 
 //contains static onclick functions for plot components
 export class PlotActions {
@@ -21,6 +22,7 @@ export class PlotActions {
 	 */
 	static plantSeed(inventory: Inventory, item: InventoryItem, plot: Plot, garden: Garden) {
 		const helper = () => {
+
 			if (item.itemData.subtype != ItemSubtypes.SEED.name) return plot.getItem().itemData.icon;
 			const placeItemResponse = plot.placeItem(inventory, item);
 			if (!placeItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
@@ -61,8 +63,10 @@ export class PlotActions {
 	 static harvestPlant(inventory: Inventory, plot: Plot, garden: Garden) {
 		const helper = () => {
 			if (plot.getItem().itemData.subtype != ItemSubtypes.PLANT.name) return plot.getItem().itemData.icon;
+			const xp = plot.getExpValue();
 			const pickupItemResponse = plot.pickupItem(inventory);
 			if (!pickupItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
+			garden.addExp(xp);
 			saveInventory(inventory);
 			saveGarden(garden);
 			return plot.getItem().itemData.icon;
@@ -109,8 +113,8 @@ export interface PlotComponentRef {
 	click: () => void;
 }
 
-//Need to get global inventory and item to modify with
 const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, onPlotClick, inventoryForceRefresh}, ref) => {
+	const { garden } = useGarden();
 	const [displayIcon, setDisplayIcon] = useState(plot.getItem().itemData.icon);
 
 	useImperativeHandle(ref, () => ({

@@ -1,0 +1,180 @@
+{
+	"PlacedItems": {
+		"Plants": [
+			{
+				"id": -1,
+				"name": "error",
+				"icon": "❌",
+				"type": "PlacedItem",
+				"subtype": "Plant",
+				"value": 0,
+				"transformId": -5,
+				"baseExp": 0
+			},
+			{
+				"id": 3,
+				"name": "apple",
+				"icon": "🍎",
+				"type": "PlacedItem",
+				"subtype": "Plant",
+				"value": 50,
+				"transformId": 4,
+				"baseExp": 5
+			},
+			{
+				"id": 6,
+				"name": "banana",
+				"icon": "🍌",
+				"type": "PlacedItem",
+				"subtype": "Plant",
+				"value": 100,
+				"transformId": 7,
+				"baseExp": 10
+			},
+			{
+				"id": 9,
+				"name": "coconut",
+				"icon": "🥥",
+				"type": "PlacedItem",
+				"subtype": "Plant",
+				"value": 150,
+				"transformId": 10,
+				"baseExp": 15
+			}
+		],
+		"Decorations": [
+			{
+				"id": -2,
+				"name": "error",
+				"icon": "❌",
+				"type": "PlacedItem",
+				"subtype": "Decoration",
+				"value": 0,
+				"transformId": -6
+			},
+			{
+				"id": 11,
+				"name": "bench",
+				"icon": "🪑",
+				"type": "PlacedItem",
+				"subtype": "Decoration",
+				"value": 100,
+				"transformId": 12
+			}
+		],
+		"Ground": [
+			{
+				"id": -3,
+				"name": "error",
+				"icon": "❌",
+				"type": "PlacedItem",
+				"subtype": "Ground",
+				"value": 0,
+				"transformId": -3
+			},
+			{
+				"id": 1,
+				"name": "ground",
+				"icon": "_",
+				"type": "PlacedItem",
+				"subtype": "Ground",
+				"value": 0,
+				"transformId": 1
+			}
+		]
+	},
+	"InventoryItems": {
+		"Seeds": [
+			{
+				"id": -4,
+				"name": "error",
+				"icon": "❌",
+				"type": "InventoryItem",
+				"subtype": "Seed",
+				"value": 0,
+				"transformId": -1
+			},
+			{
+				"id": 2,
+				"name": "apple seed",
+				"icon": "🍎",
+				"type": "InventoryItem",
+				"subtype": "Seed",
+				"value": 10,
+				"transformId": 3
+			},
+			{
+				"id": 5,
+				"name": "banana seed",
+				"icon": "🍌",
+				"type": "InventoryItem",
+				"subtype": "Seed",
+				"value": 20,
+				"transformId": 6
+			},
+			{
+				"id": 8,
+				"name": "coconut seed",
+				"icon": "🥥",
+				"type": "InventoryItem",
+				"subtype": "Seed",
+				"value": 30,
+				"transformId": 9
+			}
+		],
+		"HarvestedItems": [
+			{
+				"id": -5,
+				"name": "error",
+				"icon": "❌",
+				"type": "InventoryItem",
+				"subtype": "HarvestedItem",
+				"value": 0
+			},
+			{
+				"id": 4,
+				"name": "harvested apple",
+				"icon": "🍎",
+				"type": "InventoryItem",
+				"subtype": "HarvestedItem",
+				"value": 50
+			},
+			{
+				"id": 7,
+				"name": "harvested banana",
+				"icon": "🍌",
+				"type": "InventoryItem",
+				"subtype": "HarvestedItem",
+				"value": 100
+			},
+			{
+				"id": 10,
+				"name": "harvested coconut",
+				"icon": "🥥",
+				"type": "InventoryItem",
+				"subtype": "HarvestedItem",
+				"value": 150
+			}
+		],
+		"Blueprints": [
+			{
+				"id": -6,
+				"name": "error",
+				"icon": "❌",
+				"type": "InventoryItem",
+				"subtype": "Blueprint",
+				"value": 0,
+				"transformId": -2
+			},
+			{
+				"id": 12,
+				"name": "bench blueprint",
+				"icon": "📜",
+				"type": "InventoryItem",
+				"subtype": "Blueprint",
+				"value": 100,
+				"transformId": 11
+			}
+		]
+	}
+}

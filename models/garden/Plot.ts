@@ -1,11 +1,14 @@
 import { Inventory } from "../itemStore/inventory/Inventory";
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
-import { PlaceholderItemTemplates } from "../items/ItemTemplate";
 import { ItemSubtypes, ItemTypes } from "../items/ItemTypes";
 import { EmptyItem } from "../items/placedItems/EmptyItem";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { generateNewPlaceholderPlacedItem } from "../items/PlaceholderItems";
 import { GardenTransactionResponse } from "./GardenTransactionResponse";
+import PlaceholderItemTemplates from "../items/templates/PlaceholderItemTemplate";
+import { getItemClassFromSubtype, ItemConstructor, itemTypeMap } from "../items/utility/classMaps";
+import { InventoryItemTemplate } from "../items/templates/InventoryItemTemplate";
+import { PlacedItemTemplate } from "../items/templates/PlacedItemTemplate";
 
 export class Plot {
 	
@@ -16,6 +19,12 @@ export class Plot {
 		this.item = item;
 	}
 
+	private static getGroundTemplate(): PlacedItemTemplate {
+		const template = PlaceholderItemTemplates.getPlacedItemTemplateByName('ground');
+		if (!template) throw new Error(`Error: Ground Template Does Not Exist!`);
+		return template!;
+	}
+
 	static fromPlainObject(plainObject: any): Plot {
 		try {
             // Validate plainObject structure
@@ -24,7 +33,8 @@ export class Plot {
             }
 
             // Convert item if valid
-            const item = PlacedItem.fromPlainObject(plainObject.item);
+			const itemType = getItemClassFromSubtype(plainObject.item) as ItemConstructor<PlacedItem>;
+            const item = itemType.fromPlainObject(plainObject.item);
 			if (item.itemData.name == 'error') {
 				throw new Error('Invalid item in Plot');
 			}
@@ -54,7 +64,9 @@ export class Plot {
 	 * @returns a copy of the item contained by this plot
 	 */
 	getItem(): PlacedItem {
-		return new PlacedItem(this.item.itemData, this.item.getStatus());
+		const itemClass = getItemClassFromSubtype(this.item, ItemTypes.PLACED.name);
+		const newItem = new itemClass(this.item.itemData, this.item.getStatus()) as PlacedItem;
+		return newItem;
 	}
 
 	/** 
@@ -100,7 +112,7 @@ export class Plot {
 	 *  replacedItem: PlacedItem, 
 	 *  newTemplate: ItemTemplate}
 	 */
-	useItem(item: PlacedItem = new EmptyItem(PlaceholderItemTemplates.PlaceHolderItems.ground, '')): GardenTransactionResponse {
+	useItem(item: PlacedItem = new EmptyItem(Plot.getGroundTemplate(), '')): GardenTransactionResponse {
 		const response = new GardenTransactionResponse();
 		const originalItem = this.item;
 		let useItemResponse: GardenTransactionResponse;
@@ -152,11 +164,14 @@ export class Plot {
 		switch(item.itemData.subtype) {
 			case ItemSubtypes.SEED.name:
 			case ItemSubtypes.BLUEPRINT.name:
+				//Type assertion?
 				useItemResponse = inventory.useItem(item, 1);
 				if (!useItemResponse.isSuccessful()) {
 					return useItemResponse;
 				}
-				const newPlacedItem = new PlacedItem(useItemResponse.payload.newTemplate, "");
+				const newItemType = getItemClassFromSubtype(useItemResponse.payload.newTemplate, ItemTypes.PLACED.name);
+				
+				const newPlacedItem = new newItemType(useItemResponse.payload.newTemplate, "") as PlacedItem;
 				this.setItem(newPlacedItem);
 				break;
 			default:
@@ -171,11 +186,11 @@ export class Plot {
 
 	/**
 	 * Converts the item in this plot into an InventoryItem, adds 1 quantity of it to inventory, and replaces the existing item in this plot with a new item.
-	 * Requires that this plot contains an emptyItem.
+	 * Requires that this plot contains a non emptyItem.
 	 * Performs a specific action depending on the item type:
-	 * Blueprint -> returns a new Decoration corresponding to the blueprint
-	 * Seed -> returns a new Plant corresponding to the blueprint
-	 * HarvestedItem -> error
+	 * Plant -> returns a new HarvestedItem
+	 * Decoration -> returns a new Blueprint
+	 * Ground -> Error
 	 * @param inventory the inventory to modify
 	 * @param updatedItem the item to replace with in this plot, defaults to ground.
 	 * @returns a response containing the following object, or an error message
@@ -217,5 +232,16 @@ export class Plot {
 			newItem: findItemResponse.payload
 		}
 		return response;
+	}
+
+	/**
+	 * @returns the amount of xp given by this item
+	 */
+	getExpValue() {
+		if (this.item.itemData.subtype === ItemSubtypes.PLANT.name) {
+			return Math.max(1, Math.floor(this.item.itemData.value/10));
+		} else {
+			return 0;
+		}
 	}
 }

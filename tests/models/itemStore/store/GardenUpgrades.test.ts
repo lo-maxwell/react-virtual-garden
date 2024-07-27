@@ -1,5 +1,4 @@
 import { Garden } from "@/models/garden/Garden";
-import { PlaceholderItemTemplates } from "@/models/items/ItemTemplate";
 import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { ItemList } from "@/models/itemStore/ItemList";

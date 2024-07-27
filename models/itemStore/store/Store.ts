@@ -1,7 +1,7 @@
 import { ItemList } from "../ItemList";
 import { InventoryItem } from "../../items/inventoryItems/InventoryItem";
 import { ItemStore } from "../ItemStore";
-import { ItemTemplate } from "@/models/items/ItemTemplate";
+import { ItemTemplate } from "@/models/items/templates/ItemTemplate";
 import { Inventory } from "../inventory/Inventory";
 import { InventoryTransactionResponse } from "../inventory/InventoryTransactionResponse";
 
@@ -187,12 +187,12 @@ export class Store extends ItemStore {
 
 	// Calculate the price to buy an item from the store
 	getBuyPrice(item: InventoryItem): number {
-		return item.itemData.basePrice * this.buyMultiplier;
+		return item.itemData.value * this.buyMultiplier;
 	}
 	
 	// Calculate the price to sell an item to the store
 	getSellPrice(item: InventoryItem): number {
-		return item.itemData.basePrice * this.sellMultiplier;
+		return item.itemData.value * this.sellMultiplier;
 	}
 
 	/**

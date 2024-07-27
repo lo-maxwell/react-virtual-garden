@@ -1,7 +1,7 @@
-import { PlaceholderItemTemplates } from "../items/ItemTemplate";
 import { EmptyItem } from "../items/placedItems/EmptyItem";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { generateNewPlaceholderPlacedItem} from "../items/PlaceholderItems";
+import PlaceholderItemTemplates from "../items/templates/PlaceholderItemTemplate";
 import LevelSystem from "../level/LevelSystem";
 import { GardenTransactionResponse } from "./GardenTransactionResponse";
 import { Plot } from "./Plot";
@@ -54,6 +54,7 @@ export class Garden {
 	}
 
 	toPlainObject(): any {
+
 		return {
 			userId: this.userId,
 			plots: this.plots.map(row => row.map(plot => plot.toPlainObject())),
@@ -329,7 +330,7 @@ export class Garden {
 	 *  updatedPlot: Plot, 
 	 *  harvestedItemTemplate: ItemTemplate}
 	 */
-	harvestPlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(PlaceholderItemTemplates.PlaceHolderItems.ground, '')): GardenTransactionResponse {
+	harvestPlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(PlaceholderItemTemplates.getPlacedItemTemplateByName('ground'), '')): GardenTransactionResponse {
 		const response = new GardenTransactionResponse();
 		let data: Plot | {row: number, col: number} | null = plot;
 		if (!(plot instanceof Plot)) {
@@ -368,7 +369,7 @@ export class Garden {
 	 *  updatedPlot: Plot, 
 	 *  blueprintItemTemplate: ItemTemplate}
 	 */
-	repackagePlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(PlaceholderItemTemplates.PlaceHolderItems.ground, '')): GardenTransactionResponse {
+	repackagePlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(PlaceholderItemTemplates.getPlacedItemTemplateByName('ground'), '')): GardenTransactionResponse {
 		const response = new GardenTransactionResponse();
 		let data: Plot | {row: number, col: number} | null = plot;
 		if (!(plot instanceof Plot)) {
