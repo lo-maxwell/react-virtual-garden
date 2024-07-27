@@ -96,8 +96,8 @@ class PlaceholderItemTemplates {
 		if (placedItems.length === 1) return placedItems[0];
 		else if (placedItems.length === 0) return null;
 		else {
-			console.log('Error: found multiple items with the same name!');
-			console.log(placedItems);
+			console.error('Error: found multiple items with the same name!');
+			console.error(placedItems);
 			return null;
 		}
 	}
@@ -111,8 +111,8 @@ class PlaceholderItemTemplates {
 		if (inventoryItems.length === 1) return inventoryItems[0];
 		else if (inventoryItems.length === 0) return null;
 		else {
-			console.log('Error: found multiple items with the same name!');
-			console.log(inventoryItems);
+			console.error('Error: found multiple items with the same name!');
+			console.error(inventoryItems);
 			return null;
 		}
 	}
@@ -131,8 +131,8 @@ class PlaceholderItemTemplates {
 		if (placedItems.length === 1) return placedItems[0];
 		else if (placedItems.length === 0) return null;
 		else {
-			console.log('Error: found multiple items with the same transformid!');
-			console.log(placedItems);
+			console.error('Error: found multiple items with the same transformid!');
+			console.error(placedItems);
 			return null;
 		}
 	}
@@ -146,8 +146,8 @@ class PlaceholderItemTemplates {
 		if (inventoryItems.length === 1) return inventoryItems[0];
 		else if (inventoryItems.length === 0) return null;
 		else {
-			console.log('Error: found multiple items with the same transformid!');
-			console.log(inventoryItems);
+			console.error('Error: found multiple items with the same transformid!');
+			console.error(inventoryItems);
 			return null;
 		}
 	}

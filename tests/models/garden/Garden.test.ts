@@ -213,6 +213,7 @@ test('Should Fill Null With Empty Plot', () => {
 })
 
 test('Should Create Garden Object From PlainObject', () => {
+	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 	const serializedGarden = JSON.stringify((new Garden()).toPlainObject());
 	const garden = Garden.fromPlainObject(JSON.parse(serializedGarden));
 	expect(garden.getUserId()).toBe("Dummy User");
@@ -220,6 +221,7 @@ test('Should Create Garden Object From PlainObject', () => {
 	expect(garden.getCols()).toBe(6);
 	expect(garden.getLevel()).toBe(1);
 	expect(garden.size()).toBe(36);
+	consoleErrorSpy.mockRestore();
 })
 
 test('Should Only Reset Corrupted Plot On Load', () => {

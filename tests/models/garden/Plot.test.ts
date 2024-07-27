@@ -51,16 +51,6 @@ test('Should Not Use EmptyItem Item', () => {
 	expect(newPlot.getItemStatus()).toBe('newItem');
 })
 
-test('Should Not Use Item And Replace With InventoryItem', () => {
-	//TODO: Look at this test
-	// const newPlot = new Plot(generateNewPlaceholderPlacedItem("apple", "newItem"));
-	// const response = newPlot.useItem(generateNewPlaceholderPlacedItem('apple', 'invalid'));
-	// expect(response.isSuccessful()).toBe(false);
-	// expect(newPlot.getItem().itemData.name).toBe('apple');
-	// expect(newPlot.getItemStatus()).toBe('newItem');
-})
-
-
 test('Should Place Apple Seed Item', () => {
 	const newPlot = new Plot(generateNewPlaceholderPlacedItem("ground", "newItem"));
 	const testInventory = new Inventory("Dummy", 100, new ItemList([generateNewPlaceholderInventoryItem('apple seed', 1)]));
@@ -138,12 +128,14 @@ test('Should Not Pickup Non Plant/Decoration', () => {
 
 
 test('Should Create Plot Object From PlainObject', () => {
+	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 	const serializedPlot = JSON.stringify((new Plot(generateNewPlaceholderPlacedItem('apple', 'abc'))).toPlainObject());
 	const plot = Plot.fromPlainObject(JSON.parse(serializedPlot));
 	expect(plot).toBeTruthy();
 	expect(plot.getItem()).toBeTruthy();
 	expect(plot.getItem().itemData.name).toBe('apple');
 	expect(plot.getItemStatus()).toBe('abc');
+	consoleErrorSpy.mockRestore();
 })
 
 test('Should Create Empty Plot Instead of Error Item On fromPlainObject', () => {
