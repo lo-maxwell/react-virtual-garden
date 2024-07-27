@@ -2,15 +2,15 @@ import { ItemSubtype, ItemType } from "../ItemTypes";
 import { ItemTemplate } from "./ItemTemplate";
 
 export class PlacedItemTemplate extends ItemTemplate{
-	transformId: number;
+	transformId: string;
 	
-	constructor(id: number, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: number) {
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: string) {
 		super(id, name, icon, type, subtype, value);
 		this.transformId = transformId;
 	}
 
 	static getErrorTemplate() {
-		return new PlacedItemTemplate(-1, "error", "❌", "PlacedItem", "Plant", 0, -1);
+		return new PlacedItemTemplate("-1", "error", "❌", "PlacedItem", "Plant", 0, "-1");
 	}
 	
 	static fromPlainObject(plainObject: any): PlacedItemTemplate {
@@ -25,7 +25,7 @@ export class PlacedItemTemplate extends ItemTemplate{
 		} catch (err) {
 			//TODO: Replace with Placeholder Template
 			console.error('Error creating ItemTemplate from plainObject:', err);
-            return new PlacedItemTemplate(-1, "error", "❌", "PlacedItem", "Plant", 0, -1);
+            return this.getErrorTemplate();
 		}
 	}
 

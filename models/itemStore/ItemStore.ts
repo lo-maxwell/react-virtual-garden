@@ -1,4 +1,5 @@
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
+import { InventoryItemTemplate } from "../items/templates/InventoryItemTemplate";
 import { ItemTemplate } from "../items/templates/ItemTemplate";
 import { InventoryTransactionResponse } from "./inventory/InventoryTransactionResponse";
 import { ItemList } from "./ItemList";
@@ -78,7 +79,7 @@ export class ItemStore {
      * @param quantity - The quantity of the item to add.
      * @returns InventoryTransactionResponse containing the added InventoryItem or error message
      */
-	protected addItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
+	protected addItem(item: InventoryItem | InventoryItemTemplate, quantity: number): InventoryTransactionResponse {
 		const response = this.items.addItem(item, quantity);
 		return response;
 	}
@@ -89,7 +90,7 @@ export class ItemStore {
      * @param delta - The amount to change the quantity by.
      * @returns InventoryTransactionResponse containing the updated InventoryItem or error message.
      */
-	protected updateQuantity(item: InventoryItem | ItemTemplate | string, delta: number): InventoryTransactionResponse {
+	protected updateQuantity(item: InventoryItem | InventoryItemTemplate | string, delta: number): InventoryTransactionResponse {
 		const response = this.items.updateQuantity(item, delta);
 		return response;
 	}
@@ -99,7 +100,7 @@ export class ItemStore {
      * @param item - The item to delete, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the deleted InventoryItem or error message.
      */
-	protected deleteItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
+	protected deleteItem(item: InventoryItem | InventoryItemTemplate | string): InventoryTransactionResponse {
 		const response = this.items.deleteItem(item);
 		return response;
 	}

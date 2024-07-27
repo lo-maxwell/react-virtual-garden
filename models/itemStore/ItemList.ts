@@ -192,7 +192,7 @@ export class ItemList {
 	 * {originalItem: InventoryItem
 	 *  newTemplate: ItemTemplate}
 	 */
-	useItem(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
+	useItem(item: InventoryItem | InventoryItemTemplate | string, quantity: number): InventoryTransactionResponse {
 		let toUse = this.getItem(item);
 		if (toUse.isSuccessful()) {
 			const response = toUse.payload.use(quantity);
@@ -231,11 +231,12 @@ export class ItemList {
 		} else {
 			//Add item to inventory
 			let newItem: InventoryItem;
+			//TODO: Investigate type assertion
 			if (ItemList.isInventoryItem(item)) {
-				const itemClass = getItemClassFromSubtype(item, ItemTypes.INVENTORY.name) as ItemConstructor<InventoryItem>;
+				const itemClass = getItemClassFromSubtype(item) as ItemConstructor<InventoryItem>;
 				newItem = new itemClass(item.itemData, quantity);
-			} else if (ItemList.isItemTemplate(item)) {
-				const itemClass = getItemClassFromSubtype(item, ItemTypes.INVENTORY.name)  as ItemConstructor<InventoryItem>;
+			} else if (ItemList.isItemTemplate(item) && item instanceof InventoryItemTemplate) {
+				const itemClass = getItemClassFromSubtype(item)  as ItemConstructor<InventoryItem>;
 				newItem = new itemClass(item, quantity);
 				if (item.type === ItemTypes.PLACED.name) {
 					response.addErrorMessage(`Cannot add a placeditem to inventory`);
@@ -270,7 +271,7 @@ export class ItemList {
      * @param delta - The amount to change the quantity by. If negative and the final quantity ends up at or below 0, deletes the item from the list.
      * @returns InventoryTransactionResponse containing the updated InventoryItem or error message.
      */
-	updateQuantity(item: InventoryItem | ItemTemplate | string, delta: number): InventoryTransactionResponse {
+	updateQuantity(item: InventoryItem | InventoryItemTemplate | string, delta: number): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
 		let toUpdate = this.getItem(item);
 		if (toUpdate.isSuccessful()) {
@@ -294,7 +295,7 @@ export class ItemList {
      * @param item - The item to delete, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the deleted InventoryItem with quantity set to 0 or error message.
      */
-	deleteItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
+	deleteItem(item: InventoryItem | InventoryItemTemplate | string): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
 		let toDelete = this.getItem(item);
 		if (toDelete.isSuccessful()) {

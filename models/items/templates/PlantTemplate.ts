@@ -4,13 +4,13 @@ import { PlacedItemTemplate } from "./PlacedItemTemplate";
 export class PlantTemplate extends PlacedItemTemplate{
 	baseExp: number;
 	
-	constructor(id: number, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: number, baseExp: number) {
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: string, baseExp: number) {
 		super(id, name, icon, type, subtype, value, transformId);
 		this.baseExp = baseExp;
 	}
 
 	static getErrorTemplate() {
-		return new PlantTemplate(-1, "error", "❌", "PlacedItem", "Plant", 0, -1, 0);
+		return new PlantTemplate("0029999", "error", "❌", "PlacedItem", "Plant", 0, "1039999", 0);
 	}
 
 	static fromPlainObject(plainObject: any): PlantTemplate {
@@ -25,7 +25,7 @@ export class PlantTemplate extends PlacedItemTemplate{
 		} catch (err) {
 			//TODO: Replace with Placeholder Template
 			console.error('Error creating ItemTemplate from plainObject:', err);
-            return new PlantTemplate(-1, "error", "❌", "PlacedItem", "Plant", 0, -1, 0);
+            return this.getErrorTemplate();
 		}
 	}
 

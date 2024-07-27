@@ -2,14 +2,14 @@ import { ItemSubtype, ItemType } from "../ItemTypes";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
 
 export class BlueprintTemplate extends InventoryItemTemplate{
-	transformId: number;
-	constructor(id: number, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: number) {
+	transformId: string;
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: string) {
 		super(id, name, icon, type, subtype, value);
 		this.transformId = transformId;
 	}
 
 	static getErrorTemplate() {
-		return new BlueprintTemplate(-2, "error", "❌", "InventoryItem", "Blueprint", 0, -2);
+		return new BlueprintTemplate("1059999", "error", "❌", "InventoryItem", "Blueprint", 0, "0049999");
 	}
 
 	static fromPlainObject(plainObject: any): BlueprintTemplate {
@@ -24,7 +24,7 @@ export class BlueprintTemplate extends InventoryItemTemplate{
 		} catch (err) {
 			//TODO: Replace with Placeholder Template
 			console.error('Error creating InventoryItemTemplate from plainObject:', err);
-            return new BlueprintTemplate(-2, "error", "❌", "InventoryItem", "Blueprint", 0, -2);
+            return this.getErrorTemplate();
 		}
 	}
 

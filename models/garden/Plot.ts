@@ -64,7 +64,8 @@ export class Plot {
 	 * @returns a copy of the item contained by this plot
 	 */
 	getItem(): PlacedItem {
-		const itemClass = getItemClassFromSubtype(this.item, ItemTypes.PLACED.name);
+		//TODO: Investigate type correction
+		const itemClass = getItemClassFromSubtype(this.item);
 		const newItem = new itemClass(this.item.itemData, this.item.getStatus()) as PlacedItem;
 		return newItem;
 	}
@@ -169,7 +170,8 @@ export class Plot {
 				if (!useItemResponse.isSuccessful()) {
 					return useItemResponse;
 				}
-				const newItemType = getItemClassFromSubtype(useItemResponse.payload.newTemplate, ItemTypes.PLACED.name);
+				//TODO: Investigate type correction
+				const newItemType = getItemClassFromSubtype(useItemResponse.payload.newTemplate);
 				
 				const newPlacedItem = new newItemType(useItemResponse.payload.newTemplate, "") as PlacedItem;
 				this.setItem(newPlacedItem);

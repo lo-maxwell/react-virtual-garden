@@ -2,14 +2,14 @@ import { ItemSubtype, ItemType } from "../ItemTypes";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
 
 export class SeedTemplate extends InventoryItemTemplate{
-	transformId: number;
-	constructor(id: number, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: number) {
+	transformId: string;
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: string) {
 		super(id, name, icon, type, subtype, value);
 		this.transformId = transformId;
 	}
 
 	static getErrorTemplate() {
-		return new SeedTemplate(-2, "error", "❌", "InventoryItem", "Seed", 0, -2);
+		return new SeedTemplate("1019999", "error", "❌", "InventoryItem", "Seed", 0, "0029999");
 	}
 
 	static fromPlainObject(plainObject: any): SeedTemplate {
@@ -24,7 +24,7 @@ export class SeedTemplate extends InventoryItemTemplate{
 		} catch (err) {
 			//TODO: Replace with Placeholder Template
 			console.error('Error creating InventoryItemTemplate from plainObject:', err);
-            return new SeedTemplate(-2, "error", "❌", "InventoryItem", "Seed", 0, -2);
+            return this.getErrorTemplate();
 		}
 	}
 

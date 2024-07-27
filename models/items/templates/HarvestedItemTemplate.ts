@@ -2,12 +2,12 @@ import { ItemSubtype, ItemType } from "../ItemTypes";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
 
 export class HarvestedItemTemplate extends InventoryItemTemplate{
-	constructor(id: number, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number) {
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number) {
 		super(id, name, icon, type, subtype, value);
 	}
 
 	static getErrorTemplate() {
-		return new HarvestedItemTemplate(-2, "error", "❌", "InventoryItem", "HarvestedItem", 0);
+		return new HarvestedItemTemplate("1039999", "error", "❌", "InventoryItem", "HarvestedItem", 0);
 	}
 
 	static fromPlainObject(plainObject: any): HarvestedItemTemplate {
@@ -22,7 +22,7 @@ export class HarvestedItemTemplate extends InventoryItemTemplate{
 		} catch (err) {
 			//TODO: Replace with Placeholder Template
 			console.error('Error creating InventoryItemTemplate from plainObject:', err);
-            return new HarvestedItemTemplate(-2, "error", "❌", "InventoryItem", "HarvestedItem", 0);
+            return this.getErrorTemplate();
 		}
 	}
 

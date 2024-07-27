@@ -2,14 +2,14 @@ import { ItemSubtype, ItemType } from "../ItemTypes";
 
 export abstract class ItemTemplate {
 	
-	id: number;
+	id: string;
 	name: string;
 	icon: string;
 	type: ItemType;
 	subtype: ItemSubtype;
 	value: number;
 	
-	constructor(id: number, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number) {
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number) {
 		this.id = id;
 		this.name = name;
 		this.icon = icon;

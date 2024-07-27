@@ -125,7 +125,7 @@ class PlaceholderItemTemplates {
 	 * Placeholder, replace with grabbing from db later
 	 * Grabs the placedItemTemplate matching transformId
 	 */
-	static getPlacedTransformTemplate(transformId: number): PlacedItemTemplate | null {
+	static getPlacedTransformTemplate(transformId: string): PlacedItemTemplate | null {
 		const placedItems = Object.values(PlaceholderItemTemplates.PlacedItems).flat().filter(item => item.id === transformId);
 		
 		if (placedItems.length === 1) return placedItems[0];
@@ -141,7 +141,7 @@ class PlaceholderItemTemplates {
 	 * Placeholder, replace with grabbing from db later
 	 * Grabs the inventoryItemTemplate matching transformId
 	 */
-	 static getInventoryTransformTemplate(transformId: number): InventoryItemTemplate | null {
+	 static getInventoryTransformTemplate(transformId: string): InventoryItemTemplate | null {
 		const inventoryItems = Object.values(PlaceholderItemTemplates.InventoryItems).flat().filter(item => item.id === transformId);
 		if (inventoryItems.length === 1) return inventoryItems[0];
 		else if (inventoryItems.length === 0) return null;

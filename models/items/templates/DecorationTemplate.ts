@@ -3,12 +3,12 @@ import { PlacedItemTemplate } from "./PlacedItemTemplate";
 
 export class DecorationTemplate extends PlacedItemTemplate{
 	
-	constructor(id: number, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: number) {
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: string) {
 		super(id, name, icon, type, subtype, value, transformId);
 	}
 
 	static getErrorTemplate() {
-		return new DecorationTemplate(-1, "error", "❌", "PlacedItem", "Decoration", 0, -1);
+		return new DecorationTemplate("0049999", "error", "❌", "PlacedItem", "Decoration", 0, "1059999");
 	}
 
 	static fromPlainObject(plainObject: any): DecorationTemplate {
@@ -23,7 +23,7 @@ export class DecorationTemplate extends PlacedItemTemplate{
 		} catch (err) {
 			//TODO: Replace with Placeholder Template
 			console.error('Error creating ItemTemplate from plainObject:', err);
-            return new DecorationTemplate(-1, "error", "❌", "PlacedItem", "Decoration", 0, -1);
+            return this.getErrorTemplate();
 		}
 	}
 

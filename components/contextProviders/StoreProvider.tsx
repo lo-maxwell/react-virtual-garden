@@ -57,11 +57,13 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 			generateNewPlaceholderInventoryItem('banana seed', 50),
 			generateNewPlaceholderInventoryItem('coconut seed', 25),
 			generateNewPlaceholderInventoryItem('bench blueprint', 10),
+			generateNewPlaceholderInventoryItem('lawn flamingo blueprint', 2),
 		  ]), new ItemList([
 			generateNewPlaceholderInventoryItem('apple seed', 100),
 			generateNewPlaceholderInventoryItem('banana seed', 50),
 			generateNewPlaceholderInventoryItem('coconut seed', 25),
 			generateNewPlaceholderInventoryItem('bench blueprint', 10),
+			generateNewPlaceholderInventoryItem('lawn flamingo blueprint', 2),
 		  ]));
 		setStore(newStore);
 		saveStore(newStore);

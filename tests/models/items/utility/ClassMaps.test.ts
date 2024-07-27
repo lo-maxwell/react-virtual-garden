@@ -1,6 +1,7 @@
 import { Blueprint } from "@/models/items/inventoryItems/Blueprint";
 import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { Seed } from "@/models/items/inventoryItems/Seed";
+import { ItemTypes } from "@/models/items/ItemTypes";
 import { Decoration } from "@/models/items/placedItems/Decoration";
 import { EmptyItem } from "@/models/items/placedItems/EmptyItem";
 import { Plant } from "@/models/items/placedItems/Plant";
@@ -11,7 +12,7 @@ import { HarvestedItemTemplate } from "@/models/items/templates/HarvestedItemTem
 import PlaceholderItemTemplates from "@/models/items/templates/PlaceholderItemTemplate";
 import { PlantTemplate } from "@/models/items/templates/PlantTemplate";
 import { SeedTemplate } from "@/models/items/templates/SeedTemplate";
-import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
+import { getItemClassFromSubtype, getItemTemplateFromSubtype } from "@/models/items/utility/classMaps";
 
 
 let seedItem: Seed;
@@ -20,20 +21,26 @@ let harvestedItem: HarvestedItem;
 let plantItem: Plant;
 let decorationItem: Decoration;
 let emptyItem: EmptyItem;
+let seedTemplate: SeedTemplate;
+let blueprintTemplate: BlueprintTemplate;
+let harvestedTemplate: HarvestedItemTemplate;
+let plantTemplate: PlantTemplate;
+let decorationTemplate: DecorationTemplate;
+let emptyTemplate: EmptyItemTemplate;
 
 beforeEach(() => {
-	let template = PlaceholderItemTemplates.getInventoryItemTemplateByName('apple seed') as SeedTemplate;
-	seedItem = new Seed(template, 1);
-	let template2 = PlaceholderItemTemplates.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
-	blueprintItem = new Blueprint(template2, 1);
-	let template3 = PlaceholderItemTemplates.getInventoryItemTemplateByName('harvested apple') as HarvestedItemTemplate;
-	harvestedItem = new HarvestedItem(template3, 1);
-	let template4 = PlaceholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate;
-	plantItem = new Plant(template4, '');
-	let template5 = PlaceholderItemTemplates.getPlacedItemTemplateByName('bench') as DecorationTemplate;
-	decorationItem = new Decoration(template5, '');
-	let template6 = PlaceholderItemTemplates.getPlacedItemTemplateByName('ground') as EmptyItemTemplate;
-	emptyItem = new EmptyItem(template6, 'ground');
+	seedTemplate = PlaceholderItemTemplates.getInventoryItemTemplateByName('apple seed') as SeedTemplate;
+	seedItem = new Seed(seedTemplate, 1);
+	blueprintTemplate = PlaceholderItemTemplates.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
+	blueprintItem = new Blueprint(blueprintTemplate, 1);
+	harvestedTemplate = PlaceholderItemTemplates.getInventoryItemTemplateByName('harvested apple') as HarvestedItemTemplate;
+	harvestedItem = new HarvestedItem(harvestedTemplate, 1);
+	plantTemplate = PlaceholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate;
+	plantItem = new Plant(plantTemplate, '');
+	decorationTemplate = PlaceholderItemTemplates.getPlacedItemTemplateByName('bench') as DecorationTemplate;
+	decorationItem = new Decoration(decorationTemplate, '');
+	emptyTemplate = PlaceholderItemTemplates.getPlacedItemTemplateByName('ground') as EmptyItemTemplate;
+	emptyItem = new EmptyItem(emptyTemplate, 'ground');
 })
 
 test('Should Get Class From Subtype', () => {
@@ -52,3 +59,18 @@ test('Should Get Class From Subtype', () => {
 })
 
 //TODO Test unhappy path
+
+test('Should Get Template From Subtype', () => {
+	const template1 = getItemTemplateFromSubtype(seedTemplate);
+	expect(template1).toBe(SeedTemplate);
+	const template2 = getItemTemplateFromSubtype(blueprintTemplate);
+	expect(template2).toBe(BlueprintTemplate);
+	const template3 = getItemTemplateFromSubtype(harvestedTemplate);
+	expect(template3).toBe(HarvestedItemTemplate);
+	const template4 = getItemTemplateFromSubtype(plantTemplate);
+	expect(template4).toBe(PlantTemplate);
+	const template5 = getItemTemplateFromSubtype(decorationTemplate);
+	expect(template5).toBe(DecorationTemplate);
+	const template6 = getItemTemplateFromSubtype(emptyTemplate);
+	expect(template6).toBe(EmptyItemTemplate);
+})
