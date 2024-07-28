@@ -33,6 +33,7 @@ export const GardenProvider = ({ children }: GardenProviderProps) => {
 		const garden = new Garden("Test User");
 		setGarden(garden);
 		saveGarden(garden);
+		console.log('finished reset');
 	  }
 
     return (

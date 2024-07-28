@@ -4,14 +4,16 @@ import { Plot } from "@/models/garden/Plot";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useInventory } from "@/hooks/contexts/InventoryContext";
 import { useGarden } from "@/hooks/contexts/GardenContext";
 import LevelSystemComponent from "@/components/level/LevelSystem";
+import { saveGarden } from "@/utils/localStorage/garden";
 
 const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {selected: InventoryItem | null, setSelected: Function, inventoryForceRefresh: {value: number, setter: Function}}) => {
 	const { inventory } = useInventory();
 	const { garden } = useGarden();
+	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
 
 	function getPlotAction(plot: Plot, selected: InventoryItem | null) {
@@ -30,7 +32,6 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 		}
 		return PlotActions.doNothing(plot);
 	}
-	
 
 	function generatePlots(plots: Plot[][]) {
 		return (
@@ -40,6 +41,12 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 				<div className="flex flex-nowrap" key={rowIndex}>
 					{row.map((plot, colIndex) => {
 						const index = rowIndex * plots.length + colIndex;
+						if (plotRefs.current.length <= rowIndex) {
+							//If plotRefs is not big enough, we expand it first.
+							//Note that we never shrink plotRefs, but it'll be null and 
+							//cleaned up once the user save/loads by switching pages.
+							plotRefs.current[rowIndex] = [];
+						}
 						return (
 							<PlotComponent 
 								key={index} 
@@ -51,7 +58,8 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 						);
 					})}
 				</div>
-			))}
+				)
+			)}
 			</div>
 			</>
 		);
@@ -86,10 +94,38 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 		  });
 	}
 
+
+	function expandRow() {
+		if (!garden) {
+		  return;
+		}
+		garden?.addColumn();
+		saveGarden(garden);
+		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+	  }
+	
+	  function expandCol() {
+		if (!garden) {
+		  return;
+		}
+		garden?.addRow();
+		saveGarden(garden);
+		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+	  }
+	
+	  function levelUp() {
+		if (!garden) {
+		  return;
+		}
+		garden.addExp(garden.getExpToLevelUp());
+		saveGarden(garden);
+		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+	  }
+
 	return (
 		<>
-		<div className="flex flex-col items-center overflow-x-auto mx-2">
-		{generatePlots(garden.getPlots())}
+		<div key={gardenForceRefreshKey} className="flex flex-col items-center overflow-x-auto mx-2">
+			{generatePlots(garden.getPlots())}
 		</div>
 		<div className="mx-4 my-4">
 			<LevelSystemComponent level={garden.getLevel()} currentExp={garden.getCurrentExp()} expToLevelUp={garden.getExpToLevelUp()}/>
@@ -97,6 +133,11 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 		<div>
 			<button onClick={plantAll} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>Plant All</button>
 			<button onClick={harvestAll} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>Harvest All</button>
+		</div>
+		<div>
+			<button onClick={expandRow} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>expand row</button>
+			<button onClick={expandCol} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>expand col</button>
+			<button onClick={levelUp} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>levelup</button>
 		</div>
      	</>
 	);

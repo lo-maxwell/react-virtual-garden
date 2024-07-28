@@ -38,24 +38,6 @@ const GardenPage = () => {
     saveInventory(inventory);
   }
 
-  function expandRow() {
-    if (!garden) {
-      return;
-    }
-    garden?.addColumn();
-    saveGarden(garden);
-    setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
-  }
-
-  function expandCol() {
-    if (!garden) {
-      return;
-    }
-    garden?.addRow();
-    saveGarden(garden);
-    setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
-  }
-
   function renderUser() {
     if (!user) return <div>Loading User...</div>;
     return <UserProfileComponent/>
@@ -69,6 +51,12 @@ const GardenPage = () => {
   function renderInventory() {
     if (!inventory) return <div>Loading Inventory...</div>;
     return <InventoryComponent key={inventoryForceRefreshKey} onInventoryItemClickFunction={setSelected} costMultiplier={1}/>;
+  }
+
+  function handleResetGarden() {
+    if (!garden) return;
+    resetGarden();
+    setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
   }
 
   return (<>
@@ -98,12 +86,9 @@ const GardenPage = () => {
       <button onClick={resetInventory} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>reset inventory</button>
       </div>
       <div>
-      <button onClick={resetGarden} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>reset garden</button>
+      <button onClick={handleResetGarden} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>reset garden</button>
       </div>
-      <div>
-      <button onClick={expandRow} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>expand row</button>
-      <button onClick={expandCol} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>expand col</button>
-      </div>
+      
     </div>
     </>
   );

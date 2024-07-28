@@ -52,6 +52,11 @@ export class GardenUpgrades {
 	 */
 	static expandRow(garden: Garden, store: Store, inventory: Inventory): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
+		if (!garden.canAddColumn()) {
+			const levelRequired = (garden.getCols() + 1 - 5) * 5;
+			response.addErrorMessage(`Need to be level ${levelRequired} to expand row, currently level ${garden.getLevel()}`);
+			return response;
+		}
 		const buyResponse = store.buyCustomObjectFromStore(inventory, this.getRowExpansionCost(garden, store));
 		if (!buyResponse.isSuccessful()) return buyResponse;
 		garden.addRow();
@@ -68,6 +73,11 @@ export class GardenUpgrades {
 	 */
 	 static expandColumn(garden: Garden, store: Store, inventory: Inventory): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
+		if (!garden.canAddRow()) {
+			const levelRequired = (garden.getRows() + 1 - 5) * 5;
+			response.addErrorMessage(`Need to be level ${levelRequired} to expand column, currently level ${garden.getLevel()}`);
+			return response;
+		}
 		const buyResponse = store.buyCustomObjectFromStore(inventory, this.getColExpansionCost(garden, store));
 		if (!buyResponse.isSuccessful()) return buyResponse;
 		garden.addColumn();

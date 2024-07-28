@@ -70,6 +70,7 @@ test('Garden Generates Empty Plot', () => {
 
 test('Should Extend Garden Size', () => {
 	const newGarden = new Garden();
+	newGarden.addExp(100000000);
 	expect(newGarden.getRows()).toBe(Garden.getStartingRows());
 	expect(newGarden.getCols()).toBe(Garden.getStartingCols());
 	newGarden.addRow();
@@ -84,9 +85,9 @@ test('Should Extend Garden Size', () => {
 })
 
 test('Should Shrink Garden Size', () => {
-	const newGarden = new Garden();
-	expect(newGarden.getRows()).toBe(Garden.getStartingRows());
-	expect(newGarden.getCols()).toBe(Garden.getStartingCols());
+	const newGarden = new Garden("Dummy User", Garden.getStartingRows() + 5, Garden.getStartingCols() + 5);
+	expect(newGarden.getRows()).toBe(Garden.getStartingRows() + 5);
+	expect(newGarden.getCols()).toBe(Garden.getStartingCols() + 5);
 	newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("apple", "newItem"));
 	newGarden.setGardenSize(5,5);
 	expect(newGarden.getPlots()[1][1].getItem().itemData.name).toBe("apple");
@@ -214,13 +215,13 @@ test('Should Fill Null With Empty Plot', () => {
 
 test('Should Create Garden Object From PlainObject', () => {
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-	const serializedGarden = JSON.stringify((new Garden()).toPlainObject());
+	const serializedGarden = JSON.stringify((new Garden("Test", 10, 10, null, new LevelSystem(10))).toPlainObject());
 	const garden = Garden.fromPlainObject(JSON.parse(serializedGarden));
-	expect(garden.getUserId()).toBe("Dummy User");
-	expect(garden.getRows()).toBe(6);
-	expect(garden.getCols()).toBe(6);
-	expect(garden.getLevel()).toBe(1);
-	expect(garden.size()).toBe(36);
+	expect(garden.getUserId()).toBe("Test");
+	expect(garden.getRows()).toBe(10);
+	expect(garden.getCols()).toBe(10);
+	expect(garden.getLevel()).toBe(10);
+	expect(garden.size()).toBe(100);
 	consoleErrorSpy.mockRestore();
 })
 
@@ -252,8 +253,8 @@ test('Should Reset All Plots On Invalid Format Load', () => {
 	expect(garden.getPlotByRowAndColumn(0, 0)?.getItem().itemData.name).toBe('ground');
 	expect(garden.getPlotByRowAndColumn(1, 1)?.getItem().itemData.name).toBe('ground');
 	expect(garden.getLevel()).toBe(100);
-	expect(garden.getRows()).toBe(6);
-	expect(garden.getCols()).toBe(6);
+	expect(garden.getRows()).toBe(Garden.getStartingRows());
+	expect(garden.getCols()).toBe(Garden.getStartingCols());
 	// Restore console.error
 	consoleErrorSpy.mockRestore();
 })

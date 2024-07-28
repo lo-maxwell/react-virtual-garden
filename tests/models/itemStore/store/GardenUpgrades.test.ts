@@ -4,6 +4,7 @@ import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { ItemList } from "@/models/itemStore/ItemList";
 import { GardenUpgrades } from "@/models/itemStore/store/GardenUpgrades";
 import { Store } from "@/models/itemStore/store/Store";
+import LevelSystem from "@/models/level/LevelSystem";
 
 let testStore: Store;
 let testInventory: Inventory;
@@ -18,7 +19,7 @@ beforeEach(() => {
 	const item4 = generateNewPlaceholderInventoryItem("appleSeed", 1);
 	const testItemList2 = new ItemList([item4]);
 	testInventory = new Inventory("Test User", 1000, testItemList2);
-	testGarden = new Garden("Test User", 6, 6, Garden.generateEmptyPlots(6, 6));
+	testGarden = new Garden("Test User", 6, 6, Garden.generateEmptyPlots(6, 6), new LevelSystem(100));
 });
 
 test('Should Get Row Expansion Cost', () => {

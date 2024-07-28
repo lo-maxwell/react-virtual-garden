@@ -19,7 +19,7 @@
 				"subtype": "Plant",
 				"value": 50,
 				"transformId": "1030100",
-				"baseExp": 5
+				"baseExp": 2
 			},
 			{
 				"id": "0020200",
@@ -29,7 +29,7 @@
 				"subtype": "Plant",
 				"value": 100,
 				"transformId": "1030200",
-				"baseExp": 10
+				"baseExp": 4
 			},
 			{
 				"id": "0020300",
@@ -39,7 +39,7 @@
 				"subtype": "Plant",
 				"value": 150,
 				"transformId": "1030300",
-				"baseExp": 15
+				"baseExp": 6
 			}
 		],
 		"Decorations": [

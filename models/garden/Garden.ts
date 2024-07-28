@@ -14,8 +14,8 @@ export class Garden {
 	private plotPositions: Map<Plot, [number, number]>;
 	private level: LevelSystem;
 	
-	static getStartingRows() {return 6;}
-	static getStartingCols() {return 6;}
+	static getStartingRows() {return 5;}
+	static getStartingCols() {return 5;}
 
 	private static getGroundTemplate(): PlacedItemTemplate {
 		const template = PlaceholderItemTemplates.getPlacedItemTemplateByName('ground');
@@ -158,17 +158,43 @@ export class Garden {
 	}
 
 	/**
- 	 * Adds an additional row to the garden.
+	 * Calculates if this garden can add a row (expand column).
+	 * Can only add a row if number of rows is less than 5 + (level / 5).
+	 * @returns true or false
 	 */
-	addRow(): void {
+	canAddRow() : boolean {
+		if (this.getRows() + 1 <= 5 + Math.floor(this.level.getLevel()/5)) return true;
+		return false;
+	}
+
+	/**
+	 * Calculates if this garden can add a column (expand row).
+	 * Can only add a column if number of columns is less than 5 + (level / 5).
+	 * @returns true or false
+	 */
+	canAddColumn() : boolean {
+		if (this.getCols() + 1 <= 5 + Math.floor(this.level.getLevel()/5)) return true;
+		return false;
+	}
+
+	/**
+ 	 * Adds an additional row to the garden.
+	 * @returns success or failure
+	 */
+	addRow(): boolean {
+		if (!this.canAddRow()) return false;
 		this.setGardenSize(this.getRows() + 1, this.getCols());
+		return true;
 	}
 
 	/**
  	 * Adds an additional column to the garden.
+	 * @returns success or failure
 	 */
-	addColumn(): void {
+	addColumn(): boolean {
+		if (!this.canAddColumn()) return false;
 		this.setGardenSize(this.getRows(), this.getCols() + 1);
+		return true;
 	}
 
 	/**
