@@ -15,7 +15,7 @@ import { useStore } from "@/hooks/contexts/StoreContext";
 import { useInventory } from "@/hooks/contexts/InventoryContext";
 
 const StorePage = () => {
-  function renderStore() {
+  function RenderStore() {
     const {store} = useStore();
     const { inventory } = useInventory();
     //Hack to force refresh inventory when its contents change in another component
@@ -81,7 +81,7 @@ const StorePage = () => {
   return (<>
     <div className="mx-4 my-4"> 
       <div>This is the Store Page! </div>
-      {renderStore()}
+      {RenderStore()}
     </div>
     </>
   );

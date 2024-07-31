@@ -66,7 +66,7 @@ const TradeWindowComponent = ({selected, setSelected, owner, costMultiplier}: {s
 		if (selected && quantity <= 0) {
 			setQuantity(1);
 		}
-	  }, [quantity]);
+	  }, [quantity, selected]);
 
 
 	const onPlusClick = useCallback((delta: number) => {
@@ -100,7 +100,7 @@ const TradeWindowComponent = ({selected, setSelected, owner, costMultiplier}: {s
 		} else {
 			//should never occur
 		}
-	}, [selected]);
+	}, [selected, inventory, owner]);
 
 	const onConfirmClick = () => {
 		if (!selected) return;

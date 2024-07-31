@@ -7,7 +7,7 @@ const InventoryComponent = ({onInventoryItemClickFunction, costMultiplier}: {onI
 	return (
 		<>
 		<div className="w-[80%]">
-			<div>{inventory.getUserId()}'s Inventory</div>
+			<div>{inventory.getUserId()}{"'s Inventory"}</div>
 			<div>Gold: {inventory.getGold()}</div>
 			{inventory.getAllItems().map((item, itemIndex) => (
 				<div key={itemIndex}>

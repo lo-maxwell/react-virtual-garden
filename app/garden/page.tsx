@@ -38,17 +38,17 @@ const GardenPage = () => {
     saveInventory(inventory);
   }
 
-  function renderUser() {
+  function RenderUser() {
     if (!user) return <div>Still in development...</div>;
     return <UserProfileComponent/>
   }
 
-  function renderGarden() {
+  function RenderGarden() {
     if (!garden || !inventory) return <div>Loading Garden...</div>;
     return <GardenComponent key={gardenForceRefreshKey} selected={selected} setSelected={setSelected} inventoryForceRefresh={{value: inventoryForceRefreshKey, setter: setInventoryForceRefreshKey}}/>;
   }
 
-  function renderInventory() {
+  function RenderInventory() {
     if (!inventory) return <div>Loading Inventory...</div>;
     return <InventoryComponent key={inventoryForceRefreshKey} onInventoryItemClickFunction={setSelected} costMultiplier={1}/>;
   }
@@ -66,13 +66,13 @@ const GardenPage = () => {
       </div>
       <div className="flex">
         <div className="w-1/4">
-          {renderUser()}
+          {RenderUser()}
         </div>
         <div className="w-1/2 flex-col">
-          {renderGarden()}
+          {RenderGarden()}
         </div>
         <div className="w-1/4">
-          {renderInventory()}
+          {RenderInventory()}
         </div>
       </div>
 

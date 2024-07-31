@@ -18,7 +18,7 @@ const LongPressButton = ({ onClick, onLongPress, onLongPressEnd, className, cont
 			clearInterval(intervalRef.current);
 		  }
 		};
-	  }, [pressTimer]);
+	  }, [pressTimer, onLongPressEnd]);
 
 	const startPressTimer = useCallback(() => {
 		if (pressTimer) {
@@ -37,7 +37,7 @@ const LongPressButton = ({ onClick, onLongPress, onLongPressEnd, className, cont
 			}, 100);
 		}, 600); // Long press duration threshold
 		setPressTimer(timer);
-	}, [onLongPress]);
+	}, [onLongPress, onLongPressEnd, pressTimer]);
 
 	const clearPressTimer = useCallback(() => {
 		if (pressTimer) {
@@ -49,7 +49,7 @@ const LongPressButton = ({ onClick, onLongPress, onLongPressEnd, className, cont
 			clearInterval(intervalRef.current);
 			intervalRef.current = null;
 		}
-	}, [pressTimer]);
+	}, [pressTimer, onLongPressEnd]);
 
 	const handleMouseDown = useCallback(() => {
 		startPressTimer();

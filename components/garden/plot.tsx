@@ -114,6 +114,7 @@ export interface PlotComponentRef {
 }
 
 const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, onPlotClick, inventoryForceRefresh}, ref) => {
+	PlotComponent.displayName = "Plot";
 	const { garden } = useGarden();
 	const [displayIcon, setDisplayIcon] = useState(plot.getItem().itemData.icon);
 
