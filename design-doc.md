@@ -7,9 +7,10 @@
 ## Features
   * Build a virtual garden by planting seeds, placing decorations, and harvesting/selling crops to expand your land
   * Each user owns their own garden and has a separate money supply
-  * All users share a global store with a rotating selection of items
-  * User Authentication with Auth0
-  * Data storage with PostgreSQL
+  * All user data stored in localStorage
+  * ~~All users share a global store with a rotating selection of items~~
+  * ~~User Authentication with Auth0~~
+  * ~~Data storage with PostgreSQL~~
   * Multiple pages routed with NextJS App Router
 
 ## Models
@@ -17,19 +18,14 @@
 ### Garden
   * Contains the user's entire sum of land
   * UserId - String
-  * Rows - Int
-  * Cols - Int
   * PlotList - Array of Plots
-  * PlotMap - Map of Plot to coordinates, but maybe don't need this - just make things move contents of plots
-  * React Component - Grid of Plot Square Components
-    * Maybe also some header information, but mostly just holds the plots of land
+  * PlotMap - Map of Plot to coordinates (not currently in use, but might be useful to have)
+  * Level - instance of LevelSystem
 
 ### Plot
   * A single square representing an area of land. Can contain a single plant, decoration, or nothing.
   * PlacedItem - The contained object (plant, decoration, empty)
-  * XPosition - Int
-  * YPosition - Int
-  * React Component - Basically a square that contains the item
+  * PlantTime - The starting time that an item was placed in this plot, used to track if a plant is ready to harvest
 
 ### ItemTemplate
   * Contains the shared information about an item, but is not an instance of one
@@ -39,60 +35,56 @@
   * Icon - String (Emoji)
   * Type - String (Placed, Inventory)
   * Subtype - String (Plant, Decoration, Ground, Seed, HarvestedItem, Blueprint)
-  * BasePrice - Value for selling to the shop. Shop sells back items for BasePrice * multiplier.
+  * Value - Value for selling to the shop. Shop sells back items for BasePrice * multiplier.
   * TransformId - Int -- Seed -> plant, plant -> ground (+ generate a harvested item in inventory), ground -> ground, blueprint -> decoration, decoration -> ground (+ generate a blueprint item in inventory)
+  
 
 ### PlacedItem
   * Placed in individual plots
   * ItemData - ItemTemplate
   * Status - String? Enum? -- Various statuses like alive, dead, needs watering, not sure yet
-  * React Component - Clickable button that displays the icon, onClick = bring up selection menu to harvest/move/remove etc
 
 ### Plant
   * Extends PlacedItem, can be harvested to turn the plot into ground, and place a harvestedItem into inventory.
-  * EndGrowTime - DateTime -- Determines if the plant is harvestable or not
-  * Specific selection of icons to represent plants
+  * GrowTime - Number of seconds that have to pass since the plantTime for this plant to be harvested
+  * BaseExp - Exp value for harvesting, unique to plants
 
 ### Decoration
   * Extends PlacedItem, can be moved, can be removed to turn the plot into ground, and place a blueprint into inventory.
-  * Specific selection of icons to represent decorations
 
 ### EmptyItem (Ground)
   * Extends PlacedItem
-  * Specific selection of icons to represent dirt/ground/water
+  * The default item to represent a blank plot
 
 ### InventoryItem
   * Held in inventory
   * ItemData - ItemTemplate
   * Quantity - Number of this item owned
-  * React Component - Clickable button that displays the icon, onClick = bring up selection menu to buy/sell/place etc
 
 ### Seed
   * Extends InventoryItem, creates a plant upon being placed
-  * Specific selection of icons to represent seeds
 
 ### HarvestedItem
   * Extends InventoryItem, cannot be planted, only sold
-  * Same selection of icons as plants
 
 ### Blueprint
   * Extends InventoryItem, creates a decoration upon being placed
-  * Specific selection of icons to represent decorations
+
+### ItemStore
+  * ItemList - Array of InventoryItems
 
 ### Inventory
-  * Tied to a specific user
+  * Extends ItemStore, tied to a specific user
   * UserId - String
   * Gold - Int
-  * ItemList - Array of InventoryItems
-  * React Component - Header + Item List
 
 ### Store
-  * Global list of items that can be bought by players. Stores rotate, so we need multiple instances.
+  * Extends ItemStore, Global list of items that can be bought by players. Stores rotate, so we need multiple instances.
   * StoreId - Number
   * StoreName - String
-  * CostMultiplier - float -- the shop sells items for higher than their resale price.
-  * ItemList - Array of InventoryItems
-  * React Component - Header + Item List
+  * BuyMultiplier - Number - cost to buy from store
+  * SellMultiplier - Number - money gained from selling to store
+  * UpgradeMultiplier - Number - cost to upgrade garden (special action)
 
 ### User
   * Username - String
@@ -101,10 +93,10 @@
   * React Component - User Bubble
     * Displays Username, Icon, clickable link to user page
 
-Might need a controller to pass data from user to garden?
 
 ## Database
-  * PostgreSQL
+  * LocalStorage
+  * PostgreSQL eventually
 
 ### Users Table
   * UserId [Primary Key] String
