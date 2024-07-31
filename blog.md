@@ -76,8 +76,24 @@
   * Rewrote generatePlaceholder items
   * Added functions to get the class from an item
   * Turned inventory/placed items into abstract class, implemented subtypes as classes
+  * Turned inventory/placed templates into abstract class, implemented subtypes
+  * Wrote tests for to/fromPlainObject
 
-Stop worrying about proper structure, just write code and see what you need along the way
+## Day 10
+
+### Added expand/shrink row buttons
+
+  * Can only expand to 5 + level/5
+  * Can shrink to 1
+
+### Added tests to verify save/loading of item templates
+
+  * Still need to add tests for items
+
+### Added plantTime to plots and time to grow to plants
+
+  * Setup for adding grow timers to plants
+
 
 TODO:
 
