@@ -39,7 +39,7 @@ const GardenPage = () => {
   }
 
   function renderUser() {
-    if (!user) return <div>Loading User...</div>;
+    if (!user) return <div>Still in development...</div>;
     return <UserProfileComponent/>
   }
 

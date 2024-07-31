@@ -1,5 +1,5 @@
 import { ItemTemplate } from "./ItemTemplate";
-import itemsData from '@/data/items/items.json';
+import itemsData from '@/data/items/Items.json';
 import { PlantTemplate } from "./PlantTemplate";
 import { DecorationTemplate } from "./DecorationTemplate";
 import { EmptyItemTemplate } from "./EmptyItemTemplate";

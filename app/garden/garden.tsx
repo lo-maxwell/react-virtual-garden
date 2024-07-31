@@ -97,30 +97,48 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 
 	function expandRow() {
 		if (!garden) {
-		  return;
+			return;
 		}
 		garden?.addColumn();
 		saveGarden(garden);
 		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
-	  }
-	
-	  function expandCol() {
+	}
+
+	function expandCol() {
 		if (!garden) {
-		  return;
+			return;
 		}
 		garden?.addRow();
 		saveGarden(garden);
 		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
-	  }
-	
-	  function levelUp() {
+	}
+
+	function shrinkRow() {
 		if (!garden) {
-		  return;
+			return;
+		}
+		garden?.removeColumn();
+		saveGarden(garden);
+		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+	}
+
+	function shrinkCol() {
+		if (!garden) {
+			return;
+		}
+		garden?.removeRow();
+		saveGarden(garden);
+		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+	}
+
+	function levelUp() {
+		if (!garden) {
+			return;
 		}
 		garden.addExp(garden.getExpToLevelUp());
 		saveGarden(garden);
 		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
-	  }
+	}
 
 	return (
 		<>
@@ -138,6 +156,10 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 			<button onClick={expandRow} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>expand row</button>
 			<button onClick={expandCol} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>expand col</button>
 			<button onClick={levelUp} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>levelup</button>
+		</div>
+		<div>
+			<button onClick={shrinkRow} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>shrink row</button>
+			<button onClick={shrinkCol} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>shrink col</button>
 		</div>
      	</>
 	);

@@ -1,7 +1,7 @@
 'use client'
 const LoginPage = () => {
   return (
-    <div> This is the Login Page!
+    <div> Still in development...
     </div>
   );
 }
