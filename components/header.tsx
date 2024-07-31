@@ -5,7 +5,7 @@ export default function Header () {
 
 	return (
 		<header className="bg-blue-200 ">
-			<h3 className="text-4xl px-8 pt-4 text-black">This is the header!</h3>
+			<h3 className="text-4xl px-8 pt-4 text-black">Virtual Garden</h3>
 		  <nav>
 			{
 				<div className="flex px-8 py-4">
