@@ -1,5 +1,5 @@
 import { ItemTemplate } from "./ItemTemplate";
-import itemsData from '../../../data/items/items.json';
+import itemsData from '@/data/items/items.json';
 import { PlantTemplate } from "./PlantTemplate";
 import { DecorationTemplate } from "./DecorationTemplate";
 import { EmptyItemTemplate } from "./EmptyItemTemplate";
@@ -24,7 +24,8 @@ class PlaceholderItemTemplates {
         item.subtype,
         item.value,
         item.transformId,
-        item.baseExp // Optional
+        item.baseExp,
+		item.growTime
       )
     );
 	PlaceholderItemTemplates.PlacedItems['Decorations'] = itemsData.PlacedItems.Decorations.map((item: any) =>
