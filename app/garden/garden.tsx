@@ -50,7 +50,7 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 						return (
 							<PlotComponent 
 								key={index} 
-								ref={el => plotRefs.current[rowIndex][colIndex] = el!}
+								ref={el => {plotRefs.current[rowIndex][colIndex] = el!}}
 								plot={plot} 
 								onPlotClick={getPlotAction(plot, selected)} 
 								inventoryForceRefresh={inventoryForceRefresh}
