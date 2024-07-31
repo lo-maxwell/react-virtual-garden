@@ -1,4 +1,4 @@
-import { ItemSubtype, ItemType } from "../ItemTypes";
+import { ItemSubtype, ItemSubtypes, ItemType, ItemTypes } from "../ItemTypes";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
 
 export class HarvestedItemTemplate extends InventoryItemTemplate{
@@ -18,10 +18,27 @@ export class HarvestedItemTemplate extends InventoryItemTemplate{
             }
 			const { id, name, icon, type, subtype, value } = plainObject;
 			// Perform additional type checks if necessary
+			if (typeof id !== 'string') {
+				throw new Error('Invalid id property in plainObject for HarvestedItemTemplate');
+			}
+			if (typeof name !== 'string') {
+				throw new Error('Invalid name property in plainObject for HarvestedItemTemplate');
+			}
+			if (typeof icon !== 'string') {
+				throw new Error('Invalid icon property in plainObject for HarvestedItemTemplate');
+			}
+			if (typeof type !== 'string' || type !== ItemTypes.INVENTORY.name) {
+				throw new Error('Invalid type property in plainObject for HarvestedItemTemplate');
+			}
+			if (typeof subtype !== 'string' || subtype !== ItemSubtypes.HARVESTED.name) {
+				throw new Error('Invalid subtype property in plainObject for HarvestedItemTemplate');
+			}
+			if (typeof value !== 'number') {
+				throw new Error('Invalid value property in plainObject for HarvestedItemTemplate');
+			}
 			return new HarvestedItemTemplate(id, name, icon, type, subtype, value);
 		} catch (err) {
-			//TODO: Replace with Placeholder Template
-			console.error('Error creating InventoryItemTemplate from plainObject:', err);
+			console.error('Error creating HarvestedItemTemplate from plainObject:', err);
             return this.getErrorTemplate();
 		}
 	}

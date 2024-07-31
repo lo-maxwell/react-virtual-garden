@@ -47,3 +47,35 @@ test('Should Create HarvestedItemTemplate Object From PlainObject', () => {
 	expect(item.name).toBe('harvested apple');
 	expect(item.id).toBe("1030100");
 })
+
+
+test('Should Not Create HarvestedItemTemplate Object From Corrupted Data', () => {
+	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+	const errorTemplate1 = HarvestedItemTemplate.fromPlainObject(123);
+	expect(errorTemplate1.name).toBe('error');
+	const errorTemplate2 = HarvestedItemTemplate.fromPlainObject({name: "a", icon: "abc", type: "InventoryItem", subtype: "HarvestedItem", value: 0});
+	expect(errorTemplate2.name).toBe('error');
+	const errorTemplate3 = HarvestedItemTemplate.fromPlainObject({id: "1", icon: "abc", type: "InventoryItem", subtype: "HarvestedItem", value: 0});
+	expect(errorTemplate3.name).toBe('error');
+	const errorTemplate4 = HarvestedItemTemplate.fromPlainObject({id: "1", name: "a", type: "InventoryItem", subtype: "HarvestedItem", value: 0});
+	expect(errorTemplate4.name).toBe('error');
+	const errorTemplate5 = HarvestedItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", subtype: "HarvestedItem", value: 0});
+	expect(errorTemplate5.name).toBe('error');
+	const errorTemplate6 = HarvestedItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "InventoryItem", value: 0});
+	expect(errorTemplate6.name).toBe('error');
+	const errorTemplate7 = HarvestedItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "InventoryItem", subtype: "HarvestedItem"});
+	expect(errorTemplate7.name).toBe('error');
+	const errorTemplate9 = HarvestedItemTemplate.fromPlainObject({id: 1, name: "a", icon: "abc", type: "InventoryItem", subtype: "HarvestedItem", value: 0});
+	expect(errorTemplate9.name).toBe('error');
+	const errorTemplate10 = HarvestedItemTemplate.fromPlainObject({id: "1", name: 1, icon: "abc", type: "InventoryItem", subtype: "HarvestedItem", value: 0});
+	expect(errorTemplate10.name).toBe('error');
+	const errorTemplate11 = HarvestedItemTemplate.fromPlainObject({id: "1", name: "a", icon: 1, type: "InventoryItem", subtype: "HarvestedItem", value: 0});
+	expect(errorTemplate11.name).toBe('error');
+	const errorTemplate12 = HarvestedItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "PlacedItem", subtype: "HarvestedItem", value: 0});
+	expect(errorTemplate12.name).toBe('error');
+	const errorTemplate13 = HarvestedItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "InventoryItem", subtype: "Plant", value: 0});
+	expect(errorTemplate13.name).toBe('error');
+	const errorTemplate14 = HarvestedItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "InventoryItem", subtype: "HarvestedItem", value: "0"});
+	expect(errorTemplate14.name).toBe('error');
+	consoleErrorSpy.mockRestore();
+})

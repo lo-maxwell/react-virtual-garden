@@ -9,7 +9,8 @@
 				"subtype": "Plant",
 				"value": 0,
 				"transformId": "1039999",
-				"baseExp": 0
+				"baseExp": 0, 
+				"growTime": 0
 			},
 			{
 				"id": "0020100",
@@ -19,7 +20,8 @@
 				"subtype": "Plant",
 				"value": 50,
 				"transformId": "1030100",
-				"baseExp": 2
+				"baseExp": 2, 
+				"growTime": 10
 			},
 			{
 				"id": "0020200",
@@ -29,7 +31,8 @@
 				"subtype": "Plant",
 				"value": 100,
 				"transformId": "1030200",
-				"baseExp": 4
+				"baseExp": 4, 
+				"growTime": 60
 			},
 			{
 				"id": "0020300",
@@ -39,7 +42,8 @@
 				"subtype": "Plant",
 				"value": 150,
 				"transformId": "1030300",
-				"baseExp": 6
+				"baseExp": 6, 
+				"growTime": 300
 			}
 		],
 		"Decorations": [

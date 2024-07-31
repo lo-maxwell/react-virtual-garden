@@ -1,4 +1,4 @@
-import { ItemSubtype, ItemType } from "../ItemTypes";
+import { ItemSubtype, ItemSubtypes, ItemType, ItemTypes } from "../ItemTypes";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
 
 export class SeedTemplate extends InventoryItemTemplate{
@@ -16,14 +16,34 @@ export class SeedTemplate extends InventoryItemTemplate{
 		try {
             // Validate plainObject structure
             if (!plainObject || typeof plainObject !== 'object') {
-                throw new Error('Invalid plainObject structure for InventoryItemTemplate');
+                throw new Error('Invalid plainObject structure for SeedTemplate');
             }
 			const { id, name, icon, type, subtype, value, transformId } = plainObject;
 			// Perform additional type checks if necessary
+			if (typeof id !== 'string') {
+				throw new Error('Invalid id property in plainObject for SeedTemplate');
+			}
+			if (typeof name !== 'string') {
+				throw new Error('Invalid name property in plainObject for SeedTemplate');
+			}
+			if (typeof icon !== 'string') {
+				throw new Error('Invalid icon property in plainObject for SeedTemplate');
+			}
+			if (typeof type !== 'string' || type !== ItemTypes.INVENTORY.name) {
+				throw new Error('Invalid type property in plainObject for SeedTemplate');
+			}
+			if (typeof subtype !== 'string' || subtype !== ItemSubtypes.SEED.name) {
+				throw new Error('Invalid subtype property in plainObject for SeedTemplate');
+			}
+			if (typeof value !== 'number') {
+				throw new Error('Invalid value property in plainObject for SeedTemplate');
+			}
+			if (typeof transformId !== 'string') {
+				throw new Error('Invalid transformId property in plainObject for SeedTemplate');
+			}
 			return new SeedTemplate(id, name, icon, type, subtype, value, transformId);
 		} catch (err) {
-			//TODO: Replace with Placeholder Template
-			console.error('Error creating InventoryItemTemplate from plainObject:', err);
+			console.error('Error creating SeedTemplate from plainObject:', err);
             return this.getErrorTemplate();
 		}
 	}

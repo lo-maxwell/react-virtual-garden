@@ -1,4 +1,4 @@
-import { ItemSubtype, ItemType } from "../ItemTypes";
+import { ItemSubtype, ItemSubtypes, ItemType, ItemTypes } from "../ItemTypes";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
 
 export class BlueprintTemplate extends InventoryItemTemplate{
@@ -20,10 +20,30 @@ export class BlueprintTemplate extends InventoryItemTemplate{
             }
 			const { id, name, icon, type, subtype, value, transformId } = plainObject;
 			// Perform additional type checks if necessary
+			if (typeof id !== 'string') {
+				throw new Error('Invalid id property in plainObject for BlueprintTemplate');
+			}
+			if (typeof name !== 'string') {
+				throw new Error('Invalid name property in plainObject for BlueprintTemplate');
+			}
+			if (typeof icon !== 'string') {
+				throw new Error('Invalid icon property in plainObject for BlueprintTemplate');
+			}
+			if (typeof type !== 'string' || type !== ItemTypes.INVENTORY.name) {
+				throw new Error('Invalid type property in plainObject for BlueprintTemplate');
+			}
+			if (typeof subtype !== 'string' || subtype !== ItemSubtypes.BLUEPRINT.name) {
+				throw new Error('Invalid subtype property in plainObject for BlueprintTemplate');
+			}
+			if (typeof value !== 'number') {
+				throw new Error('Invalid value property in plainObject for BlueprintTemplate');
+			}
+			if (typeof transformId !== 'string') {
+				throw new Error('Invalid transformId property in plainObject for BlueprintTemplate');
+			}
 			return new BlueprintTemplate(id, name, icon, type, subtype, value, transformId);
 		} catch (err) {
-			//TODO: Replace with Placeholder Template
-			console.error('Error creating InventoryItemTemplate from plainObject:', err);
+			console.error('Error creating BlueprintTemplate from plainObject:', err);
             return this.getErrorTemplate();
 		}
 	}

@@ -153,7 +153,7 @@ export class Garden {
      */
 	static generateEmptyPlot(rowIndex: number, colIndex: number): Plot {
 		const ground = generateNewPlaceholderPlacedItem("ground", "empty");
-		const newPlot = new Plot(ground);
+		const newPlot = new Plot(ground, Date.now());
 		return newPlot;
 	}
 
@@ -194,6 +194,28 @@ export class Garden {
 	addColumn(): boolean {
 		if (!this.canAddColumn()) return false;
 		this.setGardenSize(this.getRows(), this.getCols() + 1);
+		return true;
+	}
+
+
+	//TODO: Make this add decorations back to your inventory as blueprints
+	/**
+ 	 * Removes a row from the garden. Items in that row are destroyed!
+	 * @returns success or failure
+	 */
+	removeRow(): boolean {
+		if (this.getRows() <= 1) return false;
+		this.setGardenSize(this.getRows() - 1, this.getCols());
+		return true;
+	}
+
+	/**
+ 	 * Removes a column from the garden. Items in that row are destroyed!
+	 * @returns success or failure
+	 */
+	removeColumn(): boolean {
+		if (this.getCols() <= 1) return false;
+		this.setGardenSize(this.getRows(), this.getCols() - 1);
 		return true;
 	}
 

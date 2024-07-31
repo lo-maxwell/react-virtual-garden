@@ -1,3 +1,5 @@
+import { InventoryItemTemplate } from "@/models/items/templates/InventoryItemTemplate";
+import { PlacedItemTemplate } from "@/models/items/templates/PlacedItemTemplate";
 import { SeedTemplate } from "@/models/items/templates/SeedTemplate";
 
 //TODO: Add tests for different template types
@@ -14,3 +16,18 @@ test('Initialize itemTemplate', () => {
 // 	expect(item.name).toBe('apple seed');
 // 	expect(item.value).toBe(10);
 // })
+
+test('Should Not Call FromPlainObject on Inventory/PlacedItemTemplates', () => {
+	try {
+		const invalidTemplate = InventoryItemTemplate.fromPlainObject({});
+		// Fail test if above expression doesn't throw anything.
+		fail();
+	} catch (e) {
+	}
+	try {
+		const invalidTemplate = PlacedItemTemplate.fromPlainObject({});
+		// Fail test if above expression doesn't throw anything.
+		fail();
+	} catch (e) {
+	}
+})

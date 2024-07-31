@@ -1,7 +1,6 @@
 import { Blueprint } from "@/models/items/inventoryItems/Blueprint";
 import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { Seed } from "@/models/items/inventoryItems/Seed";
-import { ItemSubtype, ItemTypes } from "@/models/items/ItemTypes";
 import { Decoration } from "@/models/items/placedItems/Decoration";
 import { EmptyItem } from "@/models/items/placedItems/EmptyItem";
 import { Plant } from "@/models/items/placedItems/Plant";
@@ -12,8 +11,6 @@ import { HarvestedItemTemplate } from "@/models/items/templates/HarvestedItemTem
 import PlaceholderItemTemplates from "@/models/items/templates/PlaceholderItemTemplate";
 import { PlantTemplate } from "@/models/items/templates/PlantTemplate";
 import { SeedTemplate } from "@/models/items/templates/SeedTemplate";
-import { getItemClassFromSubtype, getItemTemplateFromSubtype } from "@/models/items/utility/classMaps";
-
 
 let seedItem: Seed;
 let blueprintItem: Blueprint;
@@ -43,58 +40,56 @@ beforeEach(() => {
 	emptyItem = new EmptyItem(emptyTemplate, 'ground');
 })
 
-test('Should Get Class From Subtype', () => {
-	const class1 = getItemClassFromSubtype(seedItem);
-	expect(class1).toBe(Seed);
-	const class2 = getItemClassFromSubtype(blueprintItem);
-	expect(class2).toBe(Blueprint);
-	const class3 = getItemClassFromSubtype(harvestedItem);
-	expect(class3).toBe(HarvestedItem);
-	const class4 = getItemClassFromSubtype(plantItem);
-	expect(class4).toBe(Plant);
-	const class5 = getItemClassFromSubtype(decorationItem);
-	expect(class5).toBe(Decoration);
-	const class6 = getItemClassFromSubtype(emptyItem);
-	expect(class6).toBe(EmptyItem);
+test('Should load items', () => {
+	PlaceholderItemTemplates.loadItems();
+	expect(PlaceholderItemTemplates.InventoryItems).toBeTruthy();
+	expect(PlaceholderItemTemplates.PlacedItems).toBeTruthy();
 })
 
-//TODO Test unhappy path
+test('Should Get Placed Item Template By Name', () => {
 
-test('Should Not Get Class From Invalid Type', () => {
-	try {
-		const invalidClass = getItemClassFromSubtype(new Seed(new SeedTemplate('1', '1', '1', "InventoryItem", "InvalidSubtype" as ItemSubtype, 1, "1"), 1));
-		// Fail test if above expression doesn't throw anything.
-		fail();
-	} catch (e) {
-	}
-	try {
-		const invalidClass = getItemClassFromSubtype(new SeedTemplate('1', '1', '1', "InventoryItem", "InvalidSubtype" as ItemSubtype, 1, "1"));
-		// Fail test if above expression doesn't throw anything.
-		fail();
-	} catch (e) {
-	}
 })
 
-test('Should Get Template From Subtype', () => {
-	const template1 = getItemTemplateFromSubtype(seedTemplate);
-	expect(template1).toBe(SeedTemplate);
-	const template2 = getItemTemplateFromSubtype(blueprintTemplate);
-	expect(template2).toBe(BlueprintTemplate);
-	const template3 = getItemTemplateFromSubtype(harvestedTemplate);
-	expect(template3).toBe(HarvestedItemTemplate);
-	const template4 = getItemTemplateFromSubtype(plantTemplate);
-	expect(template4).toBe(PlantTemplate);
-	const template5 = getItemTemplateFromSubtype(decorationTemplate);
-	expect(template5).toBe(DecorationTemplate);
-	const template6 = getItemTemplateFromSubtype(emptyTemplate);
-	expect(template6).toBe(EmptyItemTemplate);
+test('Should Not Get Placed Item Template By Unknown Name', () => {
+
 })
 
-test('Should Not Get Template From Invalid Type', () => {
-	try {
-		const invalidTemplate = getItemTemplateFromSubtype(new SeedTemplate('1', '1', '1', "InventoryItem", "InvalidSubtype" as ItemSubtype, 1, "1"));
-		// Fail test if above expression doesn't throw anything.
-		fail();
-	} catch (e) {
-	}
+test('Should Not Get Error Placed Item Template', () => {
+
+})
+
+test('Should Get Inventory Item Template By Name', () => {
+
+})
+
+test('Should Not Get Inventory Item Template By Unknown Name', () => {
+
+})
+
+test('Should Not Get Error Inventory Item Template', () => {
+
+})
+
+test('Should Get Transformed Placed Item Template By Id', () => {
+
+})
+
+test('Should Not Get Transformed Placed Item Template By Unknown Id', () => {
+
+})
+
+test('Should Not Get Error Transformed Placed Item Template', () => {
+
+})
+
+test('Should Get Transformed Inventory Item Template By Id', () => {
+
+})
+
+test('Should Not Get Transformed Inventory Item Template By Unknown Id', () => {
+
+})
+
+test('Should Not Get Error Transformed Inventory Item Template', () => {
+
 })

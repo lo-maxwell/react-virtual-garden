@@ -98,6 +98,17 @@ test('Should Shrink Garden Size', () => {
 	expect(newGarden.getPlots()[4][4].getItem().itemData.name).toBe("ground");
 	expect(newGarden.getPlots()[9]).toBeFalsy();
 	expect(newGarden.size()).toBe(25);
+	newGarden.removeRow();
+	newGarden.removeRow();
+	newGarden.removeColumn();
+	expect(newGarden.getRows()).toBe(3);
+	expect(newGarden.getCols()).toBe(4);
+	newGarden.removeRow();
+	newGarden.removeRow();
+	newGarden.removeRow();
+	expect(newGarden.removeRow()).toBe(false);
+	expect(newGarden.getRows()).toBe(1);
+	expect(newGarden.getCols()).toBe(4);
 })
 
 test('Should Get Plot Position', () => {
@@ -159,7 +170,7 @@ test('Should Not Harvest Invalid Plot', () => {
 	expect(plot1HarvestResponse.isSuccessful()).toBe(false);
 	expect(newGarden.getPlotByRowAndColumn(1, 1)?.getItem().itemData.name).toBe('apple');
 	expect(newGarden.getPlotByRowAndColumn(2, 2)?.getItem().itemData.name).toBe('banana');
-	const plot3 = new Plot(generateNewPlaceholderPlacedItem("banana", "newItem"));
+	const plot3 = new Plot(generateNewPlaceholderPlacedItem("banana", "newItem"), Date.now());
 	const plot3HarvestResponse = newGarden.harvestPlot(plot3);
 	expect(plot3HarvestResponse.isSuccessful()).toBe(false);
 })
@@ -196,13 +207,13 @@ test('Should Not Repackage Invalid Plot', () => {
 	expect(plot1HarvestResponse.isSuccessful()).toBe(false);
 	expect(newGarden.getPlotByRowAndColumn(1, 1)?.getItem().itemData.name).toBe('bench');
 	expect(newGarden.getPlotByRowAndColumn(2, 2)?.getItem().itemData.name).toBe('banana');
-	const plot3 = new Plot(generateNewPlaceholderPlacedItem("bench", "newItem"));
+	const plot3 = new Plot(generateNewPlaceholderPlacedItem("bench", "newItem"), Date.now());
 	const plot3HarvestResponse = newGarden.harvestPlot(plot3);
 	expect(plot3HarvestResponse.isSuccessful()).toBe(false);
 })
 
 test('Should Fill Null With Empty Plot', () => {
-	const newGarden = new Garden("Dummy User", 10, 10, [[new Plot(generateNewPlaceholderPlacedItem('apple', ''))], [], []]);
+	const newGarden = new Garden("Dummy User", 10, 10, [[new Plot(generateNewPlaceholderPlacedItem('apple', ''), Date.now())], [], []]);
 	
 	expect(newGarden.getRows()).toBe(10);
 	expect(newGarden.getCols()).toBe(10);

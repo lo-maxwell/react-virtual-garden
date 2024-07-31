@@ -14,9 +14,11 @@ export class Plot {
 	
 	
 	private item: PlacedItem;
+	private plantTime: number;
 
-	constructor(item: PlacedItem) {
+	constructor(item: PlacedItem, plantTime: number = Date.now()) {
 		this.item = item;
+		this.plantTime = plantTime;
 	}
 
 	private static getGroundTemplate(): PlacedItemTemplate {
@@ -31,25 +33,27 @@ export class Plot {
             if (!plainObject || typeof plainObject !== 'object' || !plainObject.item) {
                 throw new Error('Invalid plainObject structure for Plot');
             }
+			const { item, plantTime } = plainObject;
 
             // Convert item if valid
-			const itemType = getItemClassFromSubtype(plainObject.item) as ItemConstructor<PlacedItem>;
-            const item = itemType.fromPlainObject(plainObject.item);
-			if (item.itemData.name == 'error') {
+			const itemType = getItemClassFromSubtype(item) as ItemConstructor<PlacedItem>;
+            const hydratedItem = itemType.fromPlainObject(item);
+			if (hydratedItem.itemData.name == 'error') {
 				throw new Error('Invalid item in Plot');
 			}
-            return new Plot(item);
+            return new Plot(hydratedItem, plantTime);
         } catch (error) {
             console.error('Error creating Plot from plainObject:', error);
             // Return a default or empty Plot instance in case of error
 			const ground = generateNewPlaceholderPlacedItem("ground", "empty");
-            return new Plot(ground);
+            return new Plot(ground, Date.now());
         }
 	}
 
 	toPlainObject(): any {
 		return {
-			item: this.item.toPlainObject()
+			item: this.item.toPlainObject(),
+			plantTime: this.plantTime,
 		}
 	} 
 
@@ -57,7 +61,7 @@ export class Plot {
 	 * @returns a copy of this plot.
 	 */
 	clone() {
-		return new Plot(this.item);
+		return new Plot(this.item, this.plantTime);
 	}
 
 	/**
@@ -71,13 +75,29 @@ export class Plot {
 	}
 
 	/** 
-	 * Replaces the existing item with a new one.
+	 * Replaces the existing item with a new one. Changes the plantTime.
 	 * @param item the item to replace with
+	 * @param plantTime the new plantTime, defaults to Date.now()
 	 * @returns the changed item.
 	 */
-	setItem(item: PlacedItem): PlacedItem {
+	setItem(item: PlacedItem, plantTime: number = Date.now()): PlacedItem {
 		this.item = item;
+		this.plantTime = plantTime;
 		return this.item;
+	}
+
+	/**
+	 * @returns the time planted (as milliseconds from epoch time)
+	 */
+	getPlantTime(): number {
+		return this.plantTime;
+	}
+
+	/** 
+	 * @param plantTime the new time planted (as milliseconds from epoch time), defaults to Date.now()
+	 */
+	setPlantTime(plantTime: number = Date.now()): void {
+		this.plantTime = plantTime;
 	}
 
 	/**

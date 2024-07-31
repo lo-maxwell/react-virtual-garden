@@ -5,14 +5,17 @@ import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { generateNewPlaceholderInventoryItem, generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";
 
 test('Should Initialize Plot Object', () => {
-	const newPlot = new Plot(generateNewPlaceholderPlacedItem("apple", "newItem"));
+	const newPlot = new Plot(generateNewPlaceholderPlacedItem("apple", "newItem"), 1);
 	expect(newPlot).toBeTruthy();
 	expect(newPlot.getItem().itemData.name).toBe("apple");
 	expect(newPlot.getItemStatus()).toBe("newItem");
-	newPlot.setItem(generateNewPlaceholderPlacedItem("banana", "new item"));
+	newPlot.setItem(generateNewPlaceholderPlacedItem("banana", "new item"), 1);
 	newPlot.setItemStatus("old item");
 	expect(newPlot.getItem().itemData.name).toBe("banana");
 	expect(newPlot.getItemStatus()).toBe("old item");
+	expect(newPlot.getPlantTime()).toBe(1);
+	newPlot.setPlantTime(100);
+	expect(newPlot.getPlantTime()).toBe(100);
 
 })
 
@@ -41,6 +44,16 @@ test('Should Use And Replace With Ground', () => {
 	expect(newPlot.getItem().itemData.name).toBe('ground');
 	expect(newPlot.getItemStatus()).toBe('');
 	expect(response.payload.newTemplate.name).toBe('harvested apple');
+})
+
+test('Should Change Time on Use', () => {
+	const newPlot = new Plot(generateNewPlaceholderPlacedItem("apple", "newItem"), 1);
+	const response = newPlot.useItem(generateNewPlaceholderPlacedItem("banana", "replaced"));
+	expect(response.isSuccessful()).toBe(true);
+	expect(newPlot.getItem().itemData.name).toBe('banana');
+	expect(newPlot.getItemStatus()).toBe('replaced');
+	expect(response.payload.newTemplate.name).toBe('harvested apple');
+	expect(newPlot.getPlantTime()).not.toBe(1);
 })
 
 test('Should Not Use EmptyItem Item', () => {

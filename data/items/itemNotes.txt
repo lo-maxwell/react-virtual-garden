@@ -15,7 +15,8 @@ D = 2 digit Variant; differentiates items of the same type (red apple vs green a
 				"subtype": "Plant",
 				"value": 50,
 				"transformId": 4,
-				"baseExp": 5
+				"baseExp": 5,
+				"growTime": 10
 			}
 		],
 		"Decorations": [

@@ -22,7 +22,7 @@ beforeEach(() => {
 
 test('Should Create HarvestedItem Object From PlainObject', () => {
 	const serializedInventoryItem = JSON.stringify((generateNewPlaceholderInventoryItem('harvested apple', 1)).toPlainObject());
-	const item = Blueprint.fromPlainObject(JSON.parse(serializedInventoryItem));
+	const item = HarvestedItem.fromPlainObject(JSON.parse(serializedInventoryItem));
 	expect(item).toBeTruthy();
 	expect(item.itemData.name).toBe('harvested apple');
 	expect(item.getQuantity()).toBe(1);

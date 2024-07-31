@@ -47,3 +47,39 @@ test('Should Create EmptyItemTemplate Object From PlainObject', () => {
 	expect(item.name).toBe('ground');
 	expect(item.id).toBe("0000000");
 })
+
+
+test('Should Not Create EmptyItemTemplate Object From Corrupted Data', () => {
+	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+	const errorTemplate1 = EmptyItemTemplate.fromPlainObject(123);
+	expect(errorTemplate1.name).toBe('error');
+	const errorTemplate2 = EmptyItemTemplate.fromPlainObject({name: "a", icon: "abc", type: "PlacedItem", subtype: "Ground", value: 0, transformId: "1"});
+	expect(errorTemplate2.name).toBe('error');
+	const errorTemplate3 = EmptyItemTemplate.fromPlainObject({id: "1", icon: "abc", type: "PlacedItem", subtype: "Ground", value: 0, transformId: "1"});
+	expect(errorTemplate3.name).toBe('error');
+	const errorTemplate4 = EmptyItemTemplate.fromPlainObject({id: "1", name: "a", type: "PlacedItem", subtype: "Ground", value: 0, transformId: "1"});
+	expect(errorTemplate4.name).toBe('error');
+	const errorTemplate5 = EmptyItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", subtype: "Ground", value: 0, transformId: "1"});
+	expect(errorTemplate5.name).toBe('error');
+	const errorTemplate6 = EmptyItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "PlacedItem", value: 0, transformId: "1"});
+	expect(errorTemplate6.name).toBe('error');
+	const errorTemplate7 = EmptyItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "PlacedItem", subtype: "Ground", transformId: "1"});
+	expect(errorTemplate7.name).toBe('error');
+	const errorTemplate8 = EmptyItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "PlacedItem", subtype: "Ground", value: 0});
+	expect(errorTemplate8.name).toBe('error');
+	const errorTemplate9 = EmptyItemTemplate.fromPlainObject({id: 1, name: "a", icon: "abc", type: "PlacedItem", subtype: "Ground", value: 0, transformId: "1"});
+	expect(errorTemplate9.name).toBe('error');
+	const errorTemplate10 = EmptyItemTemplate.fromPlainObject({id: "1", name: 1, icon: "abc", type: "PlacedItem", subtype: "Ground", value: 0, transformId: "1"});
+	expect(errorTemplate10.name).toBe('error');
+	const errorTemplate11 = EmptyItemTemplate.fromPlainObject({id: "1", name: "a", icon: 1, type: "PlacedItem", subtype: "Ground", value: 0, transformId: "1"});
+	expect(errorTemplate11.name).toBe('error');
+	const errorTemplate12 = EmptyItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "InventoryItem", subtype: "Ground", value: 0, transformId: "1"});
+	expect(errorTemplate12.name).toBe('error');
+	const errorTemplate13 = EmptyItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "PlacedItem", subtype: "Seed", value: 0, transformId: "1"});
+	expect(errorTemplate13.name).toBe('error');
+	const errorTemplate14 = EmptyItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "PlacedItem", subtype: "Ground", value: "0", transformId: "1"});
+	expect(errorTemplate14.name).toBe('error');
+	const errorTemplate15 = EmptyItemTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "PlacedItem", subtype: "Ground", value: 0, transformId: 1});
+	expect(errorTemplate15.name).toBe('error');
+	consoleErrorSpy.mockRestore();
+})
