@@ -14,7 +14,7 @@ const ChangeQuantityButton = ({onClick, currentQuantity, className, contents}: {
 		// Handle quantity update based on the currentQuantity
 		onClick(Math.max(2, Math.floor(1.1 ** timeElapsed)));
 		setTimeElapsed((timeElapsed) => timeElapsed + 1);
-	  }, [onClick, timeElapsed]);
+	  }, [onClick, currentQuantity, timeElapsed]);
 
 	return <LongPressButton 
 		onClick={handleClick} 
