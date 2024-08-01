@@ -20,12 +20,18 @@ export const usePlotActions = () => {
 	const plantSeed = (item: InventoryItem, plot: Plot) => {
 		const helper = () => {
 
-			if (item.itemData.subtype != ItemSubtypes.SEED.name) return plot.getItem().itemData.icon;
+			if (item.itemData.subtype != ItemSubtypes.SEED.name) {
+				setGardenMessage(` `);
+				return plot.getItem().itemData.icon;
+			}
 			const placeItemResponse = plot.placeItem(inventory, item);
-			if (!placeItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
+			if (!placeItemResponse.isSuccessful()) {
+				setGardenMessage(` `);
+				return plot.getItem().itemData.icon; 
+			}
 			saveInventory(inventory);
 			saveGarden(garden);
-			setGardenMessage(`Planted ${placeItemResponse.payload.newItem.itemData.name}.`);
+			setGardenMessage(`Planted ${item.itemData.name}.`);
 			return plot.getItem().itemData.icon;
 		}
 		return helper;
@@ -39,9 +45,15 @@ export const usePlotActions = () => {
 	 */
 	const placeDecoration = (item: InventoryItem, plot: Plot) => {
 		const helper = () => {
-			if (item.itemData.subtype != ItemSubtypes.BLUEPRINT.name) return plot.getItem().itemData.icon;
+			if (item.itemData.subtype != ItemSubtypes.BLUEPRINT.name) {
+				setGardenMessage(` `);
+				return plot.getItem().itemData.icon;
+			}
 			const placeItemResponse = plot.placeItem(inventory, item);
-			if (!placeItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
+			if (!placeItemResponse.isSuccessful()) {
+				setGardenMessage(` `);
+				return plot.getItem().itemData.icon; 
+			}
 			saveInventory(inventory);
 			saveGarden(garden);
 			setGardenMessage(`Placed ${placeItemResponse.payload.newItem.itemData.name}.`);
@@ -58,10 +70,16 @@ export const usePlotActions = () => {
 	 */
 	const clickPlant = (plot: Plot, instantGrow: boolean = false) => {
 		const helper = () => {
-			if (plot.getItem().itemData.subtype != ItemSubtypes.PLANT.name) return plot.getItem().itemData.icon;
+			if (plot.getItem().itemData.subtype != ItemSubtypes.PLANT.name) {
+				setGardenMessage(` `);
+				return plot.getItem().itemData.icon;
+			}
 			const xp = plot.getExpValue();
 			const harvestItemResponse = plot.harvestItem(inventory, instantGrow);
-			if (!harvestItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
+			if (!harvestItemResponse.isSuccessful()) {
+				setGardenMessage(` `);
+				return plot.getItem().itemData.icon;
+			} 
 			garden.addExp(xp);
 			saveInventory(inventory);
 			saveGarden(garden);
@@ -78,9 +96,15 @@ export const usePlotActions = () => {
 	 */
 	const clickDecoration = (plot: Plot) => {
 		const helper = () => {
-			if (plot.getItem().itemData.subtype != ItemSubtypes.DECORATION.name) return plot.getItem().itemData.icon;
+			if (plot.getItem().itemData.subtype != ItemSubtypes.DECORATION.name) {
+				setGardenMessage(` `);
+				return plot.getItem().itemData.icon;
+			}
 			const pickupItemResponse = plot.pickupItem(inventory);
-			if (!pickupItemResponse.isSuccessful()) return plot.getItem().itemData.icon; //unnecessary?
+			if (!pickupItemResponse.isSuccessful()) {
+				setGardenMessage(` `);
+				return plot.getItem().itemData.icon;
+			}
 			saveInventory(inventory);
 			saveGarden(garden);
 			setGardenMessage(`Picked up ${pickupItemResponse.payload.pickedItem.itemData.name}.`);
