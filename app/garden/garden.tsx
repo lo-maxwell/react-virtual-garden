@@ -16,7 +16,7 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 	const [instantGrow, setInstantGrow] = useState(false); //for debug purposes
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
 
-	function getPlotAction(plot: Plot, selected: InventoryItem | null) {
+	function GetPlotAction(plot: Plot, selected: InventoryItem | null) {
 		const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
 		if (plot.getItemSubtype() == ItemSubtypes.GROUND.name && selected != null) {
 			if (selected.itemData.subtype == ItemSubtypes.SEED.name) {
@@ -53,7 +53,7 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 								key={index} 
 								ref={el => {plotRefs.current[rowIndex][colIndex] = el!}}
 								plot={plot} 
-								onPlotClick={getPlotAction(plot, selected)} 
+								onPlotClick={GetPlotAction(plot, selected)} 
 								inventoryForceRefresh={inventoryForceRefresh}
 							/>
 						);

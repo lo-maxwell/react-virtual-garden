@@ -43,7 +43,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 			clearInterval(interval);
 		  }
 		};
-	  }, [plot.getItem(), plot.getPlantTime()]);
+	  }, [plot.getItem(), plot.getPlantTime(), getColor(), plot]);
 
 	const handleClick = () => {
 		const updatedIcon = onPlotClick();
