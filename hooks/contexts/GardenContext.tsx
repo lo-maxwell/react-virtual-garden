@@ -5,6 +5,8 @@ import React, { createContext, Dispatch, SetStateAction, useContext, useState } 
 interface GardenContextType {
     garden: Garden;
     resetGarden: () => void;
+    gardenMessage: string;
+    setGardenMessage: React.Dispatch<React.SetStateAction<string>>;
     // Add any other actions or state you need
 }
 

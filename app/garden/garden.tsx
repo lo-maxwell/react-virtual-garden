@@ -1,7 +1,5 @@
-import PlotComponent, { PlotActions, PlotComponentRef } from "@/components/garden/plot";
-import { Garden } from "@/models/garden/Garden";
+import PlotComponent, { PlotComponentRef } from "@/components/garden/plot";
 import { Plot } from "@/models/garden/Plot";
-import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { useRef, useState } from "react";
@@ -9,28 +7,31 @@ import { useInventory } from "@/hooks/contexts/InventoryContext";
 import { useGarden } from "@/hooks/contexts/GardenContext";
 import LevelSystemComponent from "@/components/level/LevelSystem";
 import { saveGarden } from "@/utils/localStorage/garden";
+import { usePlotActions } from "@/hooks/garden/plotActions";
 
 const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {selected: InventoryItem | null, setSelected: Function, inventoryForceRefresh: {value: number, setter: Function}}) => {
 	const { inventory } = useInventory();
-	const { garden } = useGarden();
+	const { garden, gardenMessage, setGardenMessage } = useGarden();
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
+	const [instantGrow, setInstantGrow] = useState(false); //for debug purposes
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
 
 	function getPlotAction(plot: Plot, selected: InventoryItem | null) {
+		const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
 		if (plot.getItemSubtype() == ItemSubtypes.GROUND.name && selected != null) {
 			if (selected.itemData.subtype == ItemSubtypes.SEED.name) {
-				return PlotActions.plantSeed(inventory, selected, plot, garden);
+				return plantSeed(selected, plot);
 			} else if (selected.itemData.subtype == ItemSubtypes.BLUEPRINT.name) {
-				return PlotActions.placeDecoration(inventory, selected, plot, garden);
+				return placeDecoration(selected, plot);
 			}
 		}
 		if (plot.getItemSubtype() == ItemSubtypes.PLANT.name) {
-			return PlotActions.harvestPlant(inventory, plot, garden);
+			return clickPlant(plot, instantGrow);
 		}
 		if (plot.getItemSubtype() == ItemSubtypes.DECORATION.name) {
-			return PlotActions.repackageDecoration(inventory, plot, garden);
+			return clickDecoration(plot);
 		}
-		return PlotActions.doNothing(plot);
+		return doNothing(plot);
 	}
 
 	function generatePlots(plots: Plot[][]) {
@@ -70,11 +71,12 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 		const getItemResponse = inventory.getItem(selected);
 		if (!getItemResponse.isSuccessful()) return;
 		let numRemaining = getItemResponse.payload.getQuantity();
-
+		let numPlanted = 0;
 		for (const row of plotRefs.current) {
 			for (const plotRef of row) {
 				if (plotRef && plotRef.plot.getItemSubtype() === ItemSubtypes.GROUND.name) {
 					plotRef.click();
+					numPlanted++;
 					numRemaining--;
 					if (numRemaining <= 0) {
 						return;
@@ -82,9 +84,18 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 				}
 			}
 		}
+		setGardenMessage(`Planted ${numPlanted} ${getItemResponse.payload.itemData.name}.`);
 	}
 
 	function harvestAll() {
+		let currentPlants = 0;
+		for (let i = 0; i < garden.getRows(); i++) {
+			for (let j = 0; j < garden.getCols(); j++) {
+				if (garden.getPlotByRowAndColumn(i, j)?.getItemSubtype() === ItemSubtypes.PLANT.name) {
+					currentPlants++;
+				}
+			}
+		}
 		plotRefs.current.forEach(row => {
 			row.forEach(plotRef => {
 			  if (plotRef && plotRef.plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
@@ -92,6 +103,16 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 			  }
 			});
 		  });
+
+		let newCurrentPlants = 0;
+		for (let i = 0; i < garden.getRows(); i++) {
+			for (let j = 0; j < garden.getCols(); j++) {
+				if (garden.getPlotByRowAndColumn(i, j)?.getItemSubtype() === ItemSubtypes.PLANT.name) {
+					newCurrentPlants++;
+				}
+			}
+		}
+		setGardenMessage(`Harvested ${currentPlants - newCurrentPlants} plants.`);
 	}
 
 
@@ -140,8 +161,15 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 	}
 
+	function toggleInstantGrow() {
+		//Yes this is reversed, because instantGrow hasn't updated until the next render
+		setGardenMessage(`instant grow is now: ${!instantGrow ? `on` : `off`}`);
+		setInstantGrow((instantGrow) => !instantGrow);
+	}
+
 	return (
 		<>
+		<div className="min-h-8">{gardenMessage}</div>
 		<div key={gardenForceRefreshKey} className="flex flex-col items-center overflow-x-auto mx-2">
 			{generatePlots(garden.getPlots())}
 		</div>
@@ -160,6 +188,9 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 		<div>
 			<button onClick={shrinkRow} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>shrink row</button>
 			<button onClick={shrinkCol} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>shrink col</button>
+		</div>
+		<div>
+			<button onClick={toggleInstantGrow} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>toggle instant harvest mode</button>
 		</div>
      	</>
 	);

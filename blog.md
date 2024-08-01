@@ -94,6 +94,8 @@
 
   * Setup for adding grow timers to plants
   * Plot background now changes colors when plants are finished growing
+  * Plants can only be harvested when enough time has passed
+  * Added messages to garden to display when plants are placed/harvested
 
 
 TODO:
@@ -128,6 +130,8 @@ Redo ItemTemplate so we can add item specific stats ie exp for plants
 Redo Placeholder Item Templates so it's easier to add new content
 
 Add level requirement to plants/seeds
+
+Add way to delete in progress plants, some sort of select delete tool
 
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time

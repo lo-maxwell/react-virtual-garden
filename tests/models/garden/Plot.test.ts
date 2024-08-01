@@ -139,6 +139,41 @@ test('Should Not Pickup Non Plant/Decoration', () => {
 	expect(testInventory.size()).toBe(0);
 })
 
+test('Should Harvest Apple', () => {
+	const newPlot = new Plot(generateNewPlaceholderPlacedItem("apple", "newItem"), 0);
+	const testInventory = new Inventory("Dummy", 100);
+	const response = newPlot.harvestItem(testInventory, false, generateNewPlaceholderPlacedItem('ground', ''), 10000);
+	expect(response.isSuccessful()).toBe(true);
+	expect(newPlot.getItem().itemData.name).toBe('ground');
+	expect(response.payload.newItem.itemData.name).toBe('harvested apple');
+	expect(testInventory.contains('harvested apple').payload).toBe(true);
+	expect(testInventory.getItem('harvested apple').payload.quantity).toBe(1);
+})
+
+test('Should Not Harvest Ungrown Apple', () => {
+	const newPlot = new Plot(generateNewPlaceholderPlacedItem("apple", "newItem"), 0);
+	const testInventory = new Inventory("Dummy", 100);
+	const response = newPlot.harvestItem(testInventory, false, generateNewPlaceholderPlacedItem('ground', ''), 5000);
+	expect(response.isSuccessful()).toBe(false);
+})
+
+test('Should Harvest Ungrown Apple If InstantGrow On', () => {
+	const newPlot = new Plot(generateNewPlaceholderPlacedItem("apple", "newItem"), 0);
+	const testInventory = new Inventory("Dummy", 100);
+	const response = newPlot.harvestItem(testInventory, true, generateNewPlaceholderPlacedItem('ground', ''), 5000);
+	expect(response.isSuccessful()).toBe(true);
+	expect(newPlot.getItem().itemData.name).toBe('ground');
+	expect(response.payload.newItem.itemData.name).toBe('harvested apple');
+	expect(testInventory.contains('harvested apple').payload).toBe(true);
+	expect(testInventory.getItem('harvested apple').payload.quantity).toBe(1);
+})
+
+test('Should Not Harvest Non Plant', () => {
+	const newPlot = new Plot(generateNewPlaceholderPlacedItem("bench", "newItem"), 0);
+	const testInventory = new Inventory("Dummy", 100);
+	const response = newPlot.harvestItem(testInventory, true, generateNewPlaceholderPlacedItem('ground', ''), 5000);
+	expect(response.isSuccessful()).toBe(false);
+})
 
 test('Should Create Plot Object From PlainObject', () => {
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});

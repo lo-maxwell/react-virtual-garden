@@ -11,6 +11,7 @@ interface GardenProviderProps {
 
 export const GardenProvider = ({ children }: GardenProviderProps) => {
     const [garden, setGarden] = useState<Garden | null>(null);
+	const [gardenMessage, setGardenMessage] = useState('');
 
 	function setupGarden(userId: string): Garden {
 		let garden = loadGarden();
@@ -37,7 +38,7 @@ export const GardenProvider = ({ children }: GardenProviderProps) => {
 	  }
 
     return (
-        <GardenContext.Provider value={{ garden: garden!, resetGarden }}>
+        <GardenContext.Provider value={{ garden: garden!, resetGarden, gardenMessage, setGardenMessage }}>
             {children}
         </GardenContext.Provider>
     );

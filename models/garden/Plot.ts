@@ -9,6 +9,7 @@ import PlaceholderItemTemplates from "../items/templates/PlaceholderItemTemplate
 import { getItemClassFromSubtype, ItemConstructor, itemTypeMap } from "../items/utility/classMaps";
 import { InventoryItemTemplate } from "../items/templates/InventoryItemTemplate";
 import { PlacedItemTemplate } from "../items/templates/PlacedItemTemplate";
+import { Plant } from "../items/placedItems/Plant";
 
 export class Plot {
 	
@@ -254,6 +255,35 @@ export class Plot {
 			newItem: findItemResponse.payload
 		}
 		return response;
+	}
+
+	/**
+	 * Checks if the plant in this plot is finished growing, then picks it up and adds a harvestedItem to inventory.
+	 * @param inventory the inventory to modify
+	 * @param instantHarvest if set to true, ignores grow times
+	 * @param updatedItem the item to replace with in this plot, defaults to ground.
+	 * @param currentTime the time in milliseconds since epoch time. Only used for testing.
+	 * @returns a response containing the following object, or an error message
+	 *  {
+			pickedItem: PlacedItem
+			newItem: InventoryItem
+		}
+	 */
+	harvestItem(inventory: Inventory, instantHarvest: boolean = false, updatedItem: PlacedItem = generateNewPlaceholderPlacedItem("ground", ""), currentTime: number = Date.now()) {
+		const response = new GardenTransactionResponse();
+		//verify this plot contains a plant
+		if (this.item.itemData.subtype !== ItemSubtypes.PLANT.name) {
+			response.addErrorMessage(`Error: cannot harvest item of subtype ${this.item.itemData.subtype}`);
+			return response;
+		}
+		// check if enough time passed
+		const plant = this.item as Plant;
+		const timeElapsed = currentTime - this.plantTime;
+		if (!instantHarvest && timeElapsed < plant.itemData.growTime * 1000) {
+			response.addErrorMessage(`Error: Plant is not ready to harvest. Needs ${plant.itemData.growTime - Math.floor(timeElapsed / 1000)} more seconds.`);
+			return response;
+		}
+		return this.pickupItem(inventory, updatedItem);
 	}
 
 	/**
