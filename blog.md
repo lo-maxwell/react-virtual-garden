@@ -93,6 +93,7 @@
 ### Added plantTime to plots and time to grow to plants
 
   * Setup for adding grow timers to plants
+  * Plot background now changes colors when plants are finished growing
 
 
 TODO:
@@ -126,8 +127,11 @@ Redo ItemTemplate so we can add item specific stats ie exp for plants
 
 Redo Placeholder Item Templates so it's easier to add new content
 
+Add level requirement to plants/seeds
+
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time
 This is a design flaw, not a coding one -- right now supports exponential growth when it should be linear, also easier to make iterative progress
 Probably requires an entirely new ui though for the user to select their next plot location
 Or don't allow buying expansions/limit it per level
+Add random events/natural disasters that interact with decorations ie. scarecrows, fences

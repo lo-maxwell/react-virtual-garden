@@ -4,8 +4,11 @@ import { ItemTemplate } from "../templates/ItemTemplate";
 import { InventoryItem } from "./InventoryItem";
 
 export class Blueprint extends InventoryItem {
+	itemData: BlueprintTemplate;
+
 	constructor(itemData: BlueprintTemplate, quantity: number) {
 		super(itemData, quantity);
+		this.itemData = itemData;
 	}
 
 	static fromPlainObject(plainObject: any): Blueprint {

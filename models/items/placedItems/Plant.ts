@@ -4,8 +4,10 @@ import { PlantTemplate } from "../templates/PlantTemplate";
 import { PlacedItem } from "./PlacedItem";
 
 export class Plant extends PlacedItem{
+	itemData: PlantTemplate;
 	constructor(itemData: PlantTemplate, status: string) {
 		super(itemData, status);
+		this.itemData = itemData;
 	}
 	
 	static fromPlainObject(plainObject: any): Plant {

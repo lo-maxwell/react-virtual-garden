@@ -4,9 +4,11 @@ import { ItemTemplate } from "../templates/ItemTemplate";
 import { InventoryItem } from "./InventoryItem";
 
 export class HarvestedItem extends InventoryItem {
+	itemData: HarvestedItemTemplate;
 
 	constructor(itemData: HarvestedItemTemplate, quantity: number) {
 		super(itemData, quantity);
+		this.itemData = itemData;
 	}
 
 

@@ -5,8 +5,10 @@ import PlaceholderItemTemplates from "../templates/PlaceholderItemTemplate";
 import { PlacedItem } from "./PlacedItem";
 
 export class EmptyItem extends PlacedItem{
+	itemData: EmptyItemTemplate;
 	constructor(itemData: EmptyItemTemplate, status: string) {
 		super(itemData, status);
+		this.itemData = itemData;
 	}
 
 	static fromPlainObject(plainObject: any): EmptyItem {

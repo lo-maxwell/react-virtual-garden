@@ -5,8 +5,10 @@ import PlaceholderItemTemplates from "../templates/PlaceholderItemTemplate";
 import { PlacedItem } from "./PlacedItem";
 
 export class Decoration extends PlacedItem {
+	itemData: DecorationTemplate;
 	constructor(itemData: DecorationTemplate, status: string) {
 		super(itemData, status);
+		this.itemData = itemData;
 	}
 
 
