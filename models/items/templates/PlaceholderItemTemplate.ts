@@ -90,7 +90,7 @@ class PlaceholderItemTemplates {
 
 	/**
 	 * @param name the item name, ie apple. Note that there cannot be 2 placedItems with the same name, unless it is error
-	 * @returns the found ItemTemplate or an error ItemTemplate
+	 * @returns the found ItemTemplate or null
 	 */
 	static getPlacedItemTemplateByName(name: string): PlacedItemTemplate | null {
 		const placedItems = Object.values(PlaceholderItemTemplates.PlacedItems).flat().filter(item => item.name === name);
@@ -105,7 +105,7 @@ class PlaceholderItemTemplates {
 
 	/**
 	 * @param name the item name, ie apple seed. Note that there cannot be 2 inventoryItems with the same name, unless it is error
-	 * @returns the found ItemTemplate or an error ItemTemplate
+	 * @returns the found ItemTemplate or null
 	 */
 	static getInventoryItemTemplateByName(name: string): InventoryItemTemplate | null {
 		const inventoryItems = Object.values(PlaceholderItemTemplates.InventoryItems).flat().filter(item => item.name === name);

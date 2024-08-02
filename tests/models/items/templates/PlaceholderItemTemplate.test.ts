@@ -47,49 +47,66 @@ test('Should load items', () => {
 })
 
 test('Should Get Placed Item Template By Name', () => {
+	const template = PlaceholderItemTemplates.getPlacedItemTemplateByName('apple');
+	expect(template).toBeTruthy;
+	expect(template?.name).toBe('apple');
 
 })
 
 test('Should Not Get Placed Item Template By Unknown Name', () => {
-
+	const template = PlaceholderItemTemplates.getPlacedItemTemplateByName('invalidName');
+	expect(template).toBe(null);
 })
 
 test('Should Not Get Error Placed Item Template', () => {
-
+	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+	const template = PlaceholderItemTemplates.getPlacedItemTemplateByName('error');
+	expect(template).toBe(null);
+	consoleErrorSpy.mockRestore();
 })
 
 test('Should Get Inventory Item Template By Name', () => {
-
+	const template = PlaceholderItemTemplates.getInventoryItemTemplateByName('apple seed');
+	expect(template).toBeTruthy;
+	expect(template?.name).toBe('apple seed');
 })
 
 test('Should Not Get Inventory Item Template By Unknown Name', () => {
-
+	const template = PlaceholderItemTemplates.getInventoryItemTemplateByName('invalidName');
+	expect(template).toBe(null);
 })
 
 test('Should Not Get Error Inventory Item Template', () => {
-
+	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+	const template = PlaceholderItemTemplates.getInventoryItemTemplateByName('error');
+	expect(template).toBe(null);
+	consoleErrorSpy.mockRestore();
 })
 
 test('Should Get Transformed Placed Item Template By Id', () => {
-
+	const template = PlaceholderItemTemplates.getPlacedTransformTemplate(seedItem.itemData.transformId);
+	expect(template).toBeTruthy;
+	expect(template?.name).toBe('apple');
 })
 
 test('Should Not Get Transformed Placed Item Template By Unknown Id', () => {
-
+	const template = PlaceholderItemTemplates.getPlacedTransformTemplate(plantItem.itemData.transformId);
+	expect(template).toBeFalsy();
 })
 
-test('Should Not Get Error Transformed Placed Item Template', () => {
-
-})
+// test('Should Not Get Error Transformed Placed Item Template', () => {
+// })
 
 test('Should Get Transformed Inventory Item Template By Id', () => {
-
+	const template = PlaceholderItemTemplates.getInventoryTransformTemplate(plantItem.itemData.transformId);
+	expect(template).toBeTruthy;
+	expect(template?.name).toBe('harvested apple');
 })
 
 test('Should Not Get Transformed Inventory Item Template By Unknown Id', () => {
-
+	const template = PlaceholderItemTemplates.getInventoryTransformTemplate(seedItem.itemData.transformId);
+	expect(template).toBeFalsy();
 })
 
-test('Should Not Get Error Transformed Inventory Item Template', () => {
-
-})
+// test('Should Not Get Error Transformed Inventory Item Template', () => {
+// })
