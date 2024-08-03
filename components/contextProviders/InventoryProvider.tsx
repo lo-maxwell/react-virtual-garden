@@ -14,16 +14,17 @@ interface InventoryProviderProps {
 export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     const [inventory, setInventory] = useState<Inventory | null>(null);
 
+	function generateDefaultNewInventory(): Inventory {
+		return new Inventory("Test User", 100, new ItemList([
+			generateNewPlaceholderInventoryItem('apple seed', 100)]));
+	}
+
 	function setupInventory(): Inventory {
 		let inv = loadInventory();
 		console.log(inv);
 		if (!(inv instanceof Inventory)) {
 		  console.log('inventory not found, setting up');
-		  inv = new Inventory("Test User", 100, new ItemList([
-			generateNewPlaceholderInventoryItem('apple seed', 25), 
-			generateNewPlaceholderInventoryItem('bench blueprint', 5), 
-			generateNewPlaceholderInventoryItem('banana seed', 10), 
-			generateNewPlaceholderInventoryItem('coconut seed', 5)]));
+		  inv = generateDefaultNewInventory();
 		  saveInventory(inv);
 		}
 		return inv;
@@ -37,11 +38,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
 	
 
 	const resetInventory = () => {
-		const newInventory = new Inventory("Test User", 100, new ItemList([
-			generateNewPlaceholderInventoryItem('apple seed', 25), 
-			generateNewPlaceholderInventoryItem('bench blueprint', 5), 
-			generateNewPlaceholderInventoryItem('banana seed', 10), 
-			generateNewPlaceholderInventoryItem('coconut seed', 5)]));
+		const newInventory = generateDefaultNewInventory();
 		setInventory(newInventory);
 		saveInventory(newInventory);
 		console.log(newInventory.toPlainObject());

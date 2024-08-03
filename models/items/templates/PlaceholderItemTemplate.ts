@@ -125,6 +125,7 @@ class PlaceholderItemTemplates {
 	/**
 	 * Placeholder, replace with grabbing from db later
 	 * Grabs the placedItemTemplate matching transformId
+	 * Can return error templates
 	 */
 	static getPlacedTransformTemplate(transformId: string): PlacedItemTemplate | null {
 		const placedItems = Object.values(PlaceholderItemTemplates.PlacedItems).flat().filter(item => item.id === transformId);
@@ -141,6 +142,7 @@ class PlaceholderItemTemplates {
 	/**
 	 * Placeholder, replace with grabbing from db later
 	 * Grabs the inventoryItemTemplate matching transformId
+	 * Can return error templates
 	 */
 	 static getInventoryTransformTemplate(transformId: string): InventoryItemTemplate | null {
 		const inventoryItems = Object.values(PlaceholderItemTemplates.InventoryItems).flat().filter(item => item.id === transformId);

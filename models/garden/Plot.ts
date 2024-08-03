@@ -10,6 +10,7 @@ import { getItemClassFromSubtype, ItemConstructor, itemTypeMap } from "../items/
 import { InventoryItemTemplate } from "../items/templates/InventoryItemTemplate";
 import { PlacedItemTemplate } from "../items/templates/PlacedItemTemplate";
 import { Plant } from "../items/placedItems/Plant";
+import { PlantTemplate } from "../items/templates/PlantTemplate";
 
 export class Plot {
 	
@@ -291,7 +292,8 @@ export class Plot {
 	 */
 	getExpValue() {
 		if (this.item.itemData.subtype === ItemSubtypes.PLANT.name) {
-			return Math.max(1, Math.floor(this.item.itemData.value/10));
+			const template = this.item.itemData as PlantTemplate;
+			return Math.max(1, template.baseExp);
 		} else {
 			return 0;
 		}
