@@ -28,8 +28,8 @@ test('Should Initialize Default Store Object', () => {
 	expect(inv.getBuyMultiplier()).toBe(2);
 	expect(inv.getSellMultiplier()).toBe(1);
 	const item = generateNewPlaceholderInventoryItem("apple seed", 1);
-	expect(inv.getBuyPrice(item)).toBe(20);
-	expect(inv.getSellPrice(item)).toBe(10);
+	expect(inv.getBuyPrice(item)).toBe(inv.getBuyMultiplier() * item.itemData.value);
+	expect(inv.getSellPrice(item)).toBe(inv.getSellMultiplier() * item.itemData.value);
 	inv.setBuyMultiplier(100);
 	inv.setSellMultiplier(100);
 	expect(inv.getBuyMultiplier()).toBe(100);
