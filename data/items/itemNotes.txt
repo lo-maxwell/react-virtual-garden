@@ -4,6 +4,43 @@ B = 2 digit Subtype; 00 = Ground, 01 = Seed, 02 = Plant, 03 = HarvestedItem, 04 
 C = 2 digit Item; shows linked items
 D = 2 digit Variant; differentiates items of the same type (red apple vs green apple)
 
+Plant value = HarvestedItem value
+Plant value = some multiplier * time to grow + cost to buy (2x seed value)
+Seed value = 10% of plant sell price (20% if you buy from store) = (plant value - cost to buy) / 8
+Note that this is not the same as a multiplier of seed price; value should be linear-ish on time
+Longer times should give less money though (?)
+Can balance by having different xp-gold ratios
+Base gold per second: 1
+Base xp per second: 0.1
+
+Plants are split into 4 speeds: Fast, Medium, Slow, Molasses
+Fast = 0-15 min, can finish growing in 1 playsession, possibly faster. Within 5 min
+Medium = 20-120 min, might finish if the user has a very long session, but more likely to be finished the first time they come back to the game
+Slow = 120 min+, must be planned around, started right before sleeping, etc. Not expected to finish until the next large session, ie. once every 8 hours
+Molasses = Takes an extremely long time. Mostly for special events, don't put any moneymaking crops in this category
+
+Fast plants give 1.5x xp and 0.8x gold
+Medium plants give 1x xp and 1x gold
+Slow plants give 0.8x xp and 1.2x gold
+
+Fast plants have a ROI of 200%
+Medium plants have a ROI of 300%
+Slow plants have a ROI of 500%
+
+(cut seed value in half for store prices)
+if roi is 200%
+seed value * 200% = harvested value = seed value + plant value
+=> seed value = plant value
+if roi is 300%
+seed value * 300% = harvested value = seed value + plant value
+=> seed value = 0.5 * plant value
+if roi is 500%
+seed value * 500% = seed value + plant value
+=> seed value = 0.25 * plant value
+
+if roi is x
+seed value = 1/(x - 100%) * plant value
+
 {
 	"PlacedItems": {
 		"Plants": [
@@ -13,10 +50,10 @@ D = 2 digit Variant; differentiates items of the same type (red apple vs green a
 				"icon": "🍎",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"value": 50,
+				"value": 8, //the profit from this plant
 				"transformId": 4,
-				"baseExp": 5,
-				"growTime": 10
+				"baseExp": 3,
+				"growTime": 20
 			}
 		],
 		"Decorations": [
@@ -50,7 +87,7 @@ D = 2 digit Variant; differentiates items of the same type (red apple vs green a
 				"icon": "🍎",
 				"type": "InventoryItem",
 				"subtype": "Seed",
-				"value": 10,
+				"value": 2,
 				"transformId": 3
 			}
 		],
@@ -61,7 +98,7 @@ D = 2 digit Variant; differentiates items of the same type (red apple vs green a
 				"icon": "🍎",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"value": 50
+				"value": 12 //should be the value of the seed x 2 + the plant = 2 * 2 + 8
 			}
 		],
 		"Blueprints": [
