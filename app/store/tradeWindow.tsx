@@ -60,13 +60,14 @@ const TradeWindowComponent = ({selected, setSelected, owner, costMultiplier}: {s
 	
 	//Ensures quantity is never above/below bounds
 	useEffect(() => {
+		if (!selected) return;
 		if (selected && quantity > selected.getQuantity()) {
 		  setQuantity(selected.getQuantity());
 		}
 		if (selected && quantity <= 0) {
 			setQuantity(1);
 		}
-	  }, [quantity, selected]);
+	  }, [quantity]);
 
 
 	const onPlusClick = useCallback((delta: number) => {

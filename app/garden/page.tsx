@@ -60,7 +60,7 @@ const GardenPage = () => {
   }
 
   return (<>
-    <div className="mx-4 my-4">
+    <div className="px-4 py-4 bg-reno-sand-200 text-black">
       <div> 
         This is the Garden Page!
       </div>

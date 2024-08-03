@@ -100,7 +100,7 @@
 ### Built tooltip component
 
   * Plots now show tooltips on hover, displaying the value of the harvested item and how much grow time is remaining
-  
+
 
 
 TODO:
@@ -132,6 +132,8 @@ Add way to delete in progress plants, some sort of select delete tool
 Add multiple harvests to some plants
 
 Add description to itemTemplate
+
+Add fertilizer item - chance for double harvest, or reduce grow time
 
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time
