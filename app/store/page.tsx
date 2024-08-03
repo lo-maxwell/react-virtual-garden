@@ -79,7 +79,7 @@ const StorePage = () => {
   }
 
   return (<>
-    <div className="px-4 py-4 bg-reno-sand-100 text-black"> 
+    <div className="px-4 py-4 bg-reno-sand-200 text-black"> 
       <div>This is the Store Page! </div>
       {RenderStore()}
     </div>
