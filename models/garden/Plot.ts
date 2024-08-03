@@ -124,6 +124,25 @@ export class Plot {
 	}
 
 	/**
+	 * Returns the amount of time remaining for growing, as a readable string.
+	 * @param currentTime the current time
+	 * @param plantedTime the time the plant was planted
+	 * @returns a string containing the time
+	 */
+	getRemainingGrowTime(currentTime: number = Date.now(), plantedTime: number = this.plantTime) {
+		if (this.item.itemData.subtype !== ItemSubtypes.PLANT.name) {
+			console.error('Error: attempting to get grow time of a non plant');
+			return "Error: Not a plant!";
+		}
+		const item = this.item as Plant;
+		if (currentTime > plantedTime + item.itemData.growTime * 1000) {
+			return "Ready to harvest!";
+		}
+		const remainingTime = Math.floor((plantedTime + item.itemData.growTime * 1000 - currentTime) / 1000);
+		return `${remainingTime} seconds left to grow!`;
+	}
+
+	/**
 	 * Removes the item from this plot and replaces it with the specified item. Removes status messages.
 	 * Performs a specific action depending on the item type:
 	 * Decoration -> returns the Blueprint ItemTemplate corresponding to the Decoration

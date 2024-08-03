@@ -97,6 +97,11 @@
   * Plants can only be harvested when enough time has passed
   * Added messages to garden to display when plants are placed/harvested
 
+### Built tooltip component
+
+  * Plots now show tooltips on hover, displaying the value of the harvested item and how much grow time is remaining
+  
+
 
 TODO:
 
@@ -114,24 +119,19 @@ Sort/Order Inventory by filters - itemid, alphabetical, type?
 
 Make Garden more interactive than plant all -> harvest 
 
-Timer per plot + timePlaced per plot + green highlight when ready? status as display string?
-
 Add ToPlainObject method for all models
 
 Mouse over tooltips for items
 
 Add User class
 
-ExpandRow/Col doesn't automatically rerender garden, might need a force refresh
-Also breaks if you expand col, probably because of not rerendering
-
-Redo ItemTemplate so we can add item specific stats ie exp for plants
-
-Redo Placeholder Item Templates so it's easier to add new content
-
 Add level requirement to plants/seeds
 
 Add way to delete in progress plants, some sort of select delete tool
+
+Add multiple harvests to some plants
+
+Add description to itemTemplate
 
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time
