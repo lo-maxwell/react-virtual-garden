@@ -101,6 +101,7 @@
 
   * Plots now show tooltips on hover, displaying the value of the harvested item and how much grow time is remaining
   * Added infrastructure for inventory/trade window tooltips, though the content is to be desired
+  * Added tooltips for inventory items
 
 
 
@@ -137,6 +138,8 @@ Add description to itemTemplate
 Add fertilizer item - chance for double harvest, or reduce grow time
 
 Add toolkit - select (plant, harvest, pickup, place); delete (only in progress plants)
+
+Store sells seeds for base price, not 2x (?)
 
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time

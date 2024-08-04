@@ -69,7 +69,7 @@ const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVi
           ${position === 'right' ? 'transform -translate-y-1/2' : ''}
           ${position === 'bottom' ? 'transform -translate-x-1/2' : ''}
           ${position === 'left' ? 'transform -translate-y-1/2 -translate-x-full' : ''}`}
-          style={{ top: `${coords.top}px`, left: `${coords.left}px`, maxWidth: tooltipWidth, whiteSpace: 'normal'}}
+          style={{ top: `${coords.top}px`, left: `${coords.left}px`, minWidth: `100px`, maxWidth: tooltipWidth, whiteSpace: 'normal'}}
         >
           {content}
         </div>
