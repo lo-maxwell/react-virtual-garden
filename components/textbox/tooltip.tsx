@@ -1,15 +1,15 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 
-const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVisible = '' }: { children: React.ReactNode, content: React.ReactNode, position: string, backgroundColor: string, forceVisible: string}) => {
+const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVisible = '', boxWidth = '20vw' }: { children: React.ReactNode, content: React.ReactNode, position: string, backgroundColor: string, forceVisible: string, boxWidth: string}) => {
   const [visible, setVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
-  const [tooltipWidth, setTooltipWidth] = useState('20vw'); // Default value
+  const [tooltipWidth, setTooltipWidth] = useState(boxWidth); // Default value
 
   useEffect(() => {
     // Update tooltip width on window resize
     const handleResize = () => {
-      const newWidth = `${Math.min(window.innerWidth * 0.2, 400)}px`; // 20% of viewport width or 400px max
+      const newWidth = `${Math.max(Math.min(window.innerWidth * 0.2, 300), 100)}px`; // 20% of viewport width or 400px max
       setTooltipWidth(newWidth);
     };
 
@@ -59,10 +59,10 @@ const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVi
     <div
       onMouseEnter={showTooltip}
       onMouseLeave={hideTooltip}
-      className="relative inline-block"
+      className="w-full relative inline-block"
     >
       {children}
-      {(visible && forceVisible !== 'OFF') && (
+      {(forceVisible === 'ON' || (visible && forceVisible !== 'OFF')) && (
         <div
           className={`fixed z-10 px-2 py-1 text-sm text-purple-800 text-semibold ${backgroundColor} rounded shadow-lg
           ${position === 'top' ? 'transform -translate-x-1/2 -translate-y-full' : ''}

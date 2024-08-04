@@ -84,18 +84,18 @@ const PlotTooltip = ({ children, plot }: { children: React.ReactNode, plot: Plot
 		const currentItem = plot.getItem();
 		switch(currentItem.itemData.subtype) {
 			case ItemSubtypes.DECORATION.name:
-				return "bg-gray-300";
+				return colors.decoration.plotTooltipBackground;
 			case ItemSubtypes.PLANT.name:
-				return colors.plant.tooltipBackgroundColor;
+				return colors.plant.plotTooltipBackground;
 			default:
-				return "bg-gray-300";
+				return colors.ground.plotTooltipBackground;
 		}
 	}
 
-	const showTooltip = plot.getItemSubtype() === ItemSubtypes.GROUND.name ? 'OFF' : 'ON';
+	const showTooltip = plot.getItemSubtype() === ItemSubtypes.GROUND.name ? 'OFF' : '';
 
 	return (
-		<Tooltip content={RenderPlotTooltipInfo()} position="top" backgroundColor={getBackgroundColor()} forceVisible={showTooltip}>
+		<Tooltip content={RenderPlotTooltipInfo()} position="top" backgroundColor={getBackgroundColor()} forceVisible={showTooltip} boxWidth={'20vw'}>
 			{children}
 		</Tooltip>);
 }

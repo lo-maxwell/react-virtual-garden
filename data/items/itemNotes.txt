@@ -41,6 +41,8 @@ seed value * 500% = seed value + plant value
 if roi is x
 seed value = 1/(x - 100%) * plant value
 
+Give each category a unique text color, background color, and tooltip color
+
 {
 	"PlacedItems": {
 		"Plants": [

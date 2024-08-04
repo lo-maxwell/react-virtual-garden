@@ -100,6 +100,7 @@
 ### Built tooltip component
 
   * Plots now show tooltips on hover, displaying the value of the harvested item and how much grow time is remaining
+  * Added infrastructure for inventory/trade window tooltips, though the content is to be desired
 
 
 
@@ -119,7 +120,7 @@ Sort/Order Inventory by filters - itemid, alphabetical, type?
 
 Make Garden more interactive than plant all -> harvest 
 
-Add ToPlainObject method for all models
+Fix save/load of items to grab the new itemtemplates so that people can't stay on old items
 
 Mouse over tooltips for items
 
@@ -134,6 +135,8 @@ Add multiple harvests to some plants
 Add description to itemTemplate
 
 Add fertilizer item - chance for double harvest, or reduce grow time
+
+Add toolkit - select (plant, harvest, pickup, place); delete (only in progress plants)
 
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time

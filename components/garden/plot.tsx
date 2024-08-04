@@ -58,7 +58,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 
 	function getColor() {
 		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name) {
-			return `bg-gray-300 border ${colors.plant.defaultBorderColor}`;
+			return `border ${colors.ground.plotBackgroundColor} ${colors.ground.defaultBorderColor}`;
 		} else if (plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
 			const plant = plot.getItem() as Plant;
 			const timeElapsed = Date.now() - plot.getPlantTime();
@@ -75,7 +75,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 			}
 
 		} else if (plot.getItemSubtype() === ItemSubtypes.DECORATION.name) {
-			return `bg-gray-100 border ${colors.plant.defaultBorderColor}`;
+			return `border ${colors.decoration.plotBackgroundColor} ${colors.decoration.defaultBorderColor}`;
 		} else {
 			//should never occur
 			return `bg-gray-300 border ${colors.plant.defaultBorderColor}`;
