@@ -57,7 +57,7 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 			<div className={`${colors.blueprint.categoryTextColor} text-left`}>Seed</div>
 			<div>When planted: </div>
 			<div className="flex flex-row justify-between">
-				<div>
+				<div className="flex flex-row">
 					<span className="w-6">{plantedItem.icon}</span>
 					{/* Might not display properly if screen size is small or name is too long */}
 					<span>{plantedItem.name}</span>
@@ -78,7 +78,7 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 		return <>
 		<div className="flex flex-col items-left min-w-0 flex-grow">
 			<div className="flex flex-row justify-between flex-grow min-w-max">
-				<div>
+				<div className="flex flex-row">
 					<span className="w-6">{currentItem.itemData.icon}</span>
 					{/* Might not display properly if screen size is small or name is too long */}
 					<span>{currentItem.itemData.name}</span>

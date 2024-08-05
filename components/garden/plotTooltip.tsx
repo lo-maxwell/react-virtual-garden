@@ -1,7 +1,8 @@
 import { Plot } from "@/models/garden/Plot";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
+import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import PlaceholderItemTemplates from "@/models/items/templates/PlaceholderItemTemplate";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import colors from "../colors/colors";
 import Tooltip from "../textbox/tooltip";
 
@@ -43,18 +44,23 @@ const PlotTooltip = ({ children, plot }: { children: React.ReactNode, plot: Plot
 			</>
 		}
 
-		return <>
-			<div className="flex items-center min-w-0 flex-grow">
-				<span className="w-6">{currentItem.itemData.icon}</span>
-				{/* Might not display properly if screen size is small or name is too long */}
-				<span className="flex items-left truncate min-w-0 max-w-[80%]">{currentItem.itemData.name}</span>
+		return (<>
+			<div className="flex flex-col items-left min-w-0 flex-grow">
+				<div className="flex flex-row justify-between flex-grow min-w-max">
+					<div>
+						<span className="w-6">{currentItem.itemData.icon}</span>
+						{/* Might not display properly if screen size is small or name is too long */}
+						<span>{currentItem.itemData.name}</span>
+					</div>
+					<span className="ml-2 flex ">
+						<span className="">💰</span> {/* Gold icon */}
+						{harvestedItem.value}
+					</span>
+				</div>
+				<div className={`${colors.harvested.categoryTextColor} text-left`}>Plant</div>
+				<div>{plot.getRemainingGrowTime(currentTime)}</div>
 			</div>
-			<span className="flex min-w-[55px] max-w-[55px]">
-				<span className="mr-1">💰</span> {/* Gold icon */}
-				{harvestedItem.value}
-			</span>
-			<div>{plot.getRemainingGrowTime(currentTime)}</div>
-		</>
+		</>);
 	}
 
 	const RenderDecorationTooltip = () => {
@@ -67,17 +73,41 @@ const PlotTooltip = ({ children, plot }: { children: React.ReactNode, plot: Plot
 			</>
 		}
 
-		return <>
-			<div className="flex items-center min-w-0 flex-grow">
-				<span className="w-6">{currentItem.itemData.icon}</span>
-				{/* Might not display properly if screen size is small or name is too long */}
-				<span className="flex items-left truncate min-w-0 max-w-[80%]">{currentItem.itemData.name}</span>
+		return  <>
+		<div className="flex flex-col items-left min-w-0 flex-grow">
+			<div className="flex flex-row justify-between flex-grow min-w-max">
+				<div>
+					<span className="w-6">{currentItem.itemData.icon}</span>
+					{/* Might not display properly if screen size is small or name is too long */}
+					<span>{currentItem.itemData.name}</span>
+				</div>
+				<span className="ml-2 flex ">
+						<span className="">💰</span> {/* Gold icon */}
+						{blueprint.value}
+					</span>
 			</div>
-		</>
+			<div className={`${colors.decoration.categoryTextColor} text-left`}>Decoration</div>
+		</div>
+	</>
 	}
 
 	const RenderEmptyItemTooltip = () => {
-		return <></>;
+		const currentItem = plot.getItem();
+		if (currentItem.itemData.name === 'error') {
+			return <>
+				<div> An error occurred! Please report this to the developers.</div>
+			</>
+		}
+
+		return  <>
+		<div className="flex flex-col items-left min-w-0 flex-grow">
+			<div className="flex flex-row justify-between flex-grow min-w-max">
+				<div>
+					<span>Empty Plot</span>
+				</div>
+			</div>
+		</div>
+	</>
 	}
 
 	const getBackgroundColor = () => {

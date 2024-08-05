@@ -24,7 +24,7 @@ const TradeWindowComponent = ({selected, setSelected, owner, costMultiplier}: {s
 	const [quantity, setQuantity] = useState(1);
 	const [tradeWindowMessage, setTradeWindowMessage] = useState(defaultTradeWindowMessage);
 	
-	const {store, restockStore} = useStore();
+	const {store, restockStore, updateRestockTimer} = useStore();
 
 	const renderInventoryItem = () => {
 		if (selected && owner != null) {
@@ -113,6 +113,7 @@ const TradeWindowComponent = ({selected, setSelected, owner, costMultiplier}: {s
 				return;
 			}
 			setTradeWindowMessage('Purchase Successful!');
+			updateRestockTimer();
 		} else if (owner instanceof Inventory) {
 			const response = store.sellItemToStore(inventory, selected, quantity);
 			if (!response.isSuccessful()) {

@@ -12,14 +12,14 @@ beforeEach(() => {
 	const item2 = generateNewPlaceholderInventoryItem("banana seed", 20);
 	const item3 = generateNewPlaceholderInventoryItem("coconut seed", 30);
 	const testItemList = new ItemList([item1, item2, item3]);
-	testStore = new Store(1, "Test Store", 2.0, 1.0, 1, testItemList, new ItemList());
+	testStore = new Store(1, "Test Store", 2.0, 1.0, 1, testItemList, new ItemList(), 0, 60000);
 	const item4 = generateNewPlaceholderInventoryItem("apple seed", 1);
 	const testItemList2 = new ItemList([item4]);
 	testInventory = new Inventory("Test User", 100, testItemList2);
 });
 
 test('Should Initialize Default Store Object', () => {
-	const inv = new Store(1, "Dummy Store", 2.0, 1.0, 1, new ItemList(), new ItemList());
+	const inv = new Store(1, "Dummy Store", 2.0, 1.0, 1, new ItemList(), new ItemList(), 0, 60000);
 	expect(inv).not.toBeUndefined();
 	expect(inv).not.toBeNull();
 	expect(inv.getStoreId()).toBe(1);
@@ -240,10 +240,7 @@ test('Should Not Restock Lower Quantity', () => {
 	testStore.gainItem(generateNewPlaceholderInventoryItem('apple seed', 100), 100);
 	testStore.setStockList(new ItemList([generateNewPlaceholderInventoryItem('apple seed', 1), generateNewPlaceholderInventoryItem('banana seed', 1)]));
 	const response = testStore.restockStore();
-	expect(response.isSuccessful()).toBe(true);
-	expect(response.payload).toBe(true);
-	expect(testStore.getItem('apple seed').payload.getQuantity()).toBe(101);
-	expect(testStore.getItem('banana seed').payload.getQuantity()).toBe(20);
+	expect(response.isSuccessful()).toBe(false);
 })
 
 test('Should Rollback on Failing Restock', () => {
@@ -256,7 +253,7 @@ test('Should Rollback on Failing Restock', () => {
 })
 
 test('Should Create Store Object From PlainObject', () => {
-	const serializedStore = JSON.stringify((new Store(0, "Test Store", 1, 1, 1, new ItemList([generateNewPlaceholderInventoryItem('apple seed', 5)]))).toPlainObject());
+	const serializedStore = JSON.stringify((new Store(0, "Test Store", 1, 1, 1, new ItemList([generateNewPlaceholderInventoryItem('apple seed', 5)]), new ItemList([]), 0, 60000)).toPlainObject());
 	const store = Store.fromPlainObject(JSON.parse(serializedStore));
 	expect(store.getStoreId()).toBe(0);
 	expect(store.size()).toBe(1);
@@ -274,4 +271,21 @@ test('Should Not Spend Insufficient Gold On Custom Object', () => {
 	const response = testStore.buyCustomObjectFromStore(testInventory, 200);
 	expect(response.isSuccessful()).toBe(false);
 	expect(testInventory.getGold()).toBe(100);
+})
+
+test('Should Need Restock', () => {
+	testStore.setStockList(new ItemList([generateNewPlaceholderInventoryItem('apple seed', 2)]));
+	const restock = testStore.needsRestock();
+	expect(restock).toBe(true);
+	const restock2 = testStore.needsRestock(new ItemList([generateNewPlaceholderInventoryItem('harvested apple', 1)]))
+	expect(restock2).toBe(true);
+})
+
+test('Should Not Need Restock', () => {
+	testStore.setStockList(new ItemList([generateNewPlaceholderInventoryItem('apple seed', 1)]));
+	const restock = testStore.needsRestock();
+	expect(restock).toBe(false);
+	testStore.gainItem(generateNewPlaceholderInventoryItem('harvested apple', 100), 100);
+	const restock2 = testStore.needsRestock(new ItemList([generateNewPlaceholderInventoryItem('harvested apple', 1)]))
+	expect(restock2).toBe(false);
 })

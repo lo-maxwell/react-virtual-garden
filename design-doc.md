@@ -85,6 +85,16 @@
   * BuyMultiplier - Number - cost to buy from store
   * SellMultiplier - Number - money gained from selling to store
   * UpgradeMultiplier - Number - cost to upgrade garden (special action)
+  * StockList - ItemList, defines what items get restocked
+	* RestockTime - Number - marks when the next restock is available for this store
+  * RestockInterval - Number - after restocking, requires this much time before the next restock
+  * Restock Logic
+    * The needsRestock() function tells whether the store is missing items from the stocklist
+    * On loading the store (refresh page), if the store needs restock and it is past the restockTime, it will restock
+    * If it has not yet reached restockTime, we set a timeout and restock the store when we hit restockTime
+    * Once the store is restocked, it stays like that until the user purchases an item to hit needsRestock()
+    * Then we update the restockTime and create another timeout to restock after the interval
+    * The end result is that we always restock \[restockInterval\] seconds after the user purchases something that would bring us below the stock list quantity.
 
 ### User
   * Username - String

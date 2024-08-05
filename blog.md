@@ -97,11 +97,21 @@
   * Plants can only be harvested when enough time has passed
   * Added messages to garden to display when plants are placed/harvested
 
+## Day 11
+
 ### Built tooltip component
 
   * Plots now show tooltips on hover, displaying the value of the harvested item and how much grow time is remaining
   * Added infrastructure for inventory/trade window tooltips, though the content is to be desired
   * Added tooltips for inventory items
+
+### Reworked store restock function
+
+  * restockTime is now set to the time when restock is ready
+  * New restockInterval field to determine the new restockTime
+  * Loading a store (on refresh) will immediately restock if necessary
+  * If restocking does not add any items, restockInterval is not changed
+  * Store now restocks properly (interval seconds after items are purchased)
 
 
 
@@ -147,3 +157,4 @@ This is a design flaw, not a coding one -- right now supports exponential growth
 Probably requires an entirely new ui though for the user to select their next plot location
 Or don't allow buying expansions/limit it per level
 Add random events/natural disasters that interact with decorations ie. scarecrows, fences
+Small, medium, large stores with different restock intervals and stock limits
