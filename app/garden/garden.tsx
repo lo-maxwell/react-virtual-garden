@@ -171,7 +171,7 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 		<>
 		<div className="min-h-8">{gardenMessage}</div>
 		<div key={gardenForceRefreshKey} className=" px-2 py-2 flex flex-col items-center mx-2">
-			<div className="overflow-x-auto w-full">
+			<div className="overflow-x-auto max-w-full">
 				{generatePlots(garden.getPlots())}
 			</div>
 		</div>
