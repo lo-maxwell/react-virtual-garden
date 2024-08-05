@@ -9,17 +9,6 @@ const StoreComponent = ({onInventoryItemClickFunction}: {onInventoryItemClickFun
 	const [timeRemaining, setTimeRemaining] = useState<number>(0);
 	const [canRestock, setCanRestock] = useState<boolean>(false);
 
-	// useEffect(() => {
-	// 	const timeRemainingUntilRestock = Math.max(0, store.getRestockTime() - Date.now());
-	// 	const initialRestockTimeout = setTimeout(() => {
-	// 		restockStore();
-	// 	}, timeRemainingUntilRestock);
-	// 	// Cleanup function to clear the timeout on unmount
-	// 	return () => {
-	// 		clearTimeout(initialRestockTimeout);
-	// 	  };
-	// }, []);
-
 	useEffect(() => {
 		const updateTimer = () => {
 			const now = Date.now();

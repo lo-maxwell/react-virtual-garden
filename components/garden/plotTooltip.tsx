@@ -47,7 +47,7 @@ const PlotTooltip = ({ children, plot }: { children: React.ReactNode, plot: Plot
 		return (<>
 			<div className="flex flex-col items-left min-w-0 flex-grow">
 				<div className="flex flex-row justify-between flex-grow min-w-max">
-					<div>
+					<div className="flex flex-row min-w-0">
 						<span className="w-6">{currentItem.itemData.icon}</span>
 						{/* Might not display properly if screen size is small or name is too long */}
 						<span>{currentItem.itemData.name}</span>
@@ -76,7 +76,7 @@ const PlotTooltip = ({ children, plot }: { children: React.ReactNode, plot: Plot
 		return  <>
 		<div className="flex flex-col items-left min-w-0 flex-grow">
 			<div className="flex flex-row justify-between flex-grow min-w-max">
-				<div>
+				<div className="flex flex-row min-w-0">
 					<span className="w-6">{currentItem.itemData.icon}</span>
 					{/* Might not display properly if screen size is small or name is too long */}
 					<span>{currentItem.itemData.name}</span>
