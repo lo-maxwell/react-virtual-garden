@@ -117,6 +117,8 @@
 
   * Added item interfaces to prevent circular dependencies
   * Reworked fromPlainObject to only serialize the id, name, and type, and grab all relevant data from the items.json file
+  * This causes items to update automatically when the user refreshes
+  * If this ever goes live service might want to force a refresh when a new patch comes out, or users will see the wrong display
 
 
 
