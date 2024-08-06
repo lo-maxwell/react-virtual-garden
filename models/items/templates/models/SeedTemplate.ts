@@ -1,4 +1,5 @@
-import { ItemSubtype, ItemSubtypes, ItemType, ItemTypes } from "../ItemTypes";
+import { ItemSubtype, ItemSubtypes, ItemType, ItemTypes } from "../../ItemTypes";
+import { itemTemplateInterfaceRepository } from "../interfaces/ItemTemplateRepository";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
 
 export class SeedTemplate extends InventoryItemTemplate{
@@ -18,30 +19,42 @@ export class SeedTemplate extends InventoryItemTemplate{
             if (!plainObject || typeof plainObject !== 'object') {
                 throw new Error('Invalid plainObject structure for SeedTemplate');
             }
-			const { id, name, icon, type, subtype, value, transformId } = plainObject;
+			const { id, name, subtype } = plainObject;
 			// Perform additional type checks if necessary
 			if (typeof id !== 'string') {
 				throw new Error('Invalid id property in plainObject for SeedTemplate');
 			}
+			let template = itemTemplateInterfaceRepository.getInventoryTemplateInterface(id);
+			if (template) {
+				if (template.name === 'error') {
+					throw new Error('Cannot create error template');
+				}
+				if (template.subtype !== ItemSubtypes.SEED.name) {
+					throw new Error('Found non Seed for Seed template');
+				}
+				const typedTemplate = template as SeedTemplate;
+				return new SeedTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.value, typedTemplate.transformId);
+			}
 			if (typeof name !== 'string') {
 				throw new Error('Invalid name property in plainObject for SeedTemplate');
 			}
-			if (typeof icon !== 'string') {
-				throw new Error('Invalid icon property in plainObject for SeedTemplate');
-			}
-			if (typeof type !== 'string' || type !== ItemTypes.INVENTORY.name) {
-				throw new Error('Invalid type property in plainObject for SeedTemplate');
-			}
+			
 			if (typeof subtype !== 'string' || subtype !== ItemSubtypes.SEED.name) {
 				throw new Error('Invalid subtype property in plainObject for SeedTemplate');
 			}
-			if (typeof value !== 'number') {
-				throw new Error('Invalid value property in plainObject for SeedTemplate');
+			
+			template = itemTemplateInterfaceRepository.getInventoryItemTemplateInterfaceByName(name);
+			if (template) {
+				if (template.name === 'error') {
+					throw new Error('Cannot create error template');
+				}
+				if (template.subtype !== ItemSubtypes.SEED.name) {
+					throw new Error('Found non decoration for Seed template');
+				}
+				const typedTemplate = template as SeedTemplate;
+				return new SeedTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.value, typedTemplate.transformId);
 			}
-			if (typeof transformId !== 'string') {
-				throw new Error('Invalid transformId property in plainObject for SeedTemplate');
-			}
-			return new SeedTemplate(id, name, icon, type, subtype, value, transformId);
+			throw new Error('Could not find valid id or name for SeedTemplate');
 		} catch (err) {
 			console.error('Error creating SeedTemplate from plainObject:', err);
             return this.getErrorTemplate();
@@ -52,11 +65,7 @@ export class SeedTemplate extends InventoryItemTemplate{
 		return {
 			id: this.id,
 			name: this.name,
-			icon: this.icon,
-			type: this.type,
 			subtype: this.subtype,
-			value: this.value,
-			transformId: this.transformId
 		}
 	} 
 }

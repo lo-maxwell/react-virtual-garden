@@ -1,9 +1,9 @@
 import { InventoryItem } from "../../items/inventoryItems/InventoryItem";
-import { ItemTemplate } from "../../items/templates/ItemTemplate";
 import { ItemTypes } from "../../items/ItemTypes";
 import { InventoryTransactionResponse } from "./InventoryTransactionResponse";
 import { ItemList } from "../ItemList";
 import { ItemStore } from "../ItemStore";
+import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
 
 export class Inventory extends ItemStore{
 	

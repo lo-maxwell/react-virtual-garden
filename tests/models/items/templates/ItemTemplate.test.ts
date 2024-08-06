@@ -1,6 +1,7 @@
-import { InventoryItemTemplate } from "@/models/items/templates/InventoryItemTemplate";
-import { PlacedItemTemplate } from "@/models/items/templates/PlacedItemTemplate";
-import { SeedTemplate } from "@/models/items/templates/SeedTemplate";
+import { InventoryItemTemplate } from "@/models/items/templates/models/InventoryItemTemplate";
+import { PlacedItemTemplate } from "@/models/items/templates/models/PlacedItemTemplate";
+import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
+
 
 //TODO: Add tests for different template types
 test('Initialize itemTemplate', () => {

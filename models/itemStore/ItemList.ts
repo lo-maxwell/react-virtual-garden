@@ -1,18 +1,10 @@
 
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
-import { Item } from "../items/Item";
-import { ItemTemplate } from "../items/templates/ItemTemplate";
 import { ItemType, ItemTypes } from "../items/ItemTypes";
 import { InventoryTransactionResponse } from "./inventory/InventoryTransactionResponse";
-import { Seed } from "../items/inventoryItems/Seed";
-import { Blueprint } from "../items/inventoryItems/Blueprint";
-import { HarvestedItem } from "../items/inventoryItems/HarvestedItem";
-import { Plant } from "../items/placedItems/Plant";
-import { Decoration } from "../items/placedItems/Decoration";
-import { EmptyItem } from "../items/placedItems/EmptyItem";
-import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { getItemClassFromSubtype, ItemConstructor } from "../items/utility/classMaps";
-import { InventoryItemTemplate } from "../items/templates/InventoryItemTemplate";
+import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplate";
+import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 
 
 export class ItemList {

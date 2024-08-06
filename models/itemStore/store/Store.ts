@@ -1,9 +1,9 @@
 import { ItemList } from "../ItemList";
 import { InventoryItem } from "../../items/inventoryItems/InventoryItem";
 import { ItemStore } from "../ItemStore";
-import { ItemTemplate } from "@/models/items/templates/ItemTemplate";
 import { Inventory } from "../inventory/Inventory";
 import { InventoryTransactionResponse } from "../inventory/InventoryTransactionResponse";
+import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
 
 export class Store extends ItemStore {
 	private id: number;

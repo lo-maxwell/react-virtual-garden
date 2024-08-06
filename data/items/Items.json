@@ -18,9 +18,9 @@
 				"icon": "🍎",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"value": 8,
+				"value": 10,
 				"transformId": "1030100",
-				"baseExp": 1, 
+				"baseExp": 2, 
 				"growTime": 10
 			},
 			{
@@ -29,9 +29,9 @@
 				"icon": "🍌",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"value": 60,
+				"value": 15,
 				"transformId": "1030200",
-				"baseExp": 6, 
+				"baseExp": 4, 
 				"growTime": 60
 			},
 			{
@@ -40,9 +40,9 @@
 				"icon": "🥥",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"value": 360,
+				"value": 20,
 				"transformId": "1030300",
-				"baseExp": 24, 
+				"baseExp": 6, 
 				"growTime": 300
 			}
 		],
@@ -71,7 +71,7 @@
 				"icon": "🦩",
 				"type": "PlacedItem",
 				"subtype": "Decoration",
-				"value": 500,
+				"value": 5000,
 				"transformId": "1050500"
 			}
 		],
@@ -113,7 +113,7 @@
 				"icon": "🍎",
 				"type": "InventoryItem",
 				"subtype": "Seed",
-				"value": 4,
+				"value": 5,
 				"transformId": "0020100"
 			},
 			{
@@ -131,7 +131,7 @@
 				"icon": "🥥",
 				"type": "InventoryItem",
 				"subtype": "Seed",
-				"value": 45,
+				"value": 50,
 				"transformId": "0020300"
 			}
 		],
@@ -150,7 +150,7 @@
 				"icon": "🍎",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"value": 16
+				"value": 20
 			},
 			{
 				"id": "1030200",
@@ -158,7 +158,7 @@
 				"icon": "🍌",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"value": 90
+				"value": 45
 			},
 			{
 				"id": "1030300",
@@ -166,7 +166,7 @@
 				"icon": "🥥",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"value": 450
+				"value": 120
 			}
 		],
 		"Blueprints": [
@@ -194,7 +194,7 @@
 				"icon": "📜",
 				"type": "InventoryItem",
 				"subtype": "Blueprint",
-				"value": 500,
+				"value": 5000,
 				"transformId": "0040500"
 			}
 		]

@@ -1,7 +1,5 @@
-import { DecorationTemplate } from "../templates/DecorationTemplate";
-import { ItemTemplate } from "../templates/ItemTemplate";
-import { PlacedItemTemplate } from "../templates/PlacedItemTemplate";
-import PlaceholderItemTemplates from "../templates/PlaceholderItemTemplate";
+
+import { DecorationTemplate } from "../templates/models/DecorationTemplate";
 import { PlacedItem } from "./PlacedItem";
 
 export class Decoration extends PlacedItem {

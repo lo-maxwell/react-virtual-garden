@@ -5,13 +5,13 @@ import { ItemSubtype, ItemTypes } from "@/models/items/ItemTypes";
 import { Decoration } from "@/models/items/placedItems/Decoration";
 import { EmptyItem } from "@/models/items/placedItems/EmptyItem";
 import { Plant } from "@/models/items/placedItems/Plant";
-import { BlueprintTemplate } from "@/models/items/templates/BlueprintTemplate";
-import { DecorationTemplate } from "@/models/items/templates/DecorationTemplate";
-import { EmptyItemTemplate } from "@/models/items/templates/EmptyItemTemplate";
-import { HarvestedItemTemplate } from "@/models/items/templates/HarvestedItemTemplate";
-import PlaceholderItemTemplates from "@/models/items/templates/PlaceholderItemTemplate";
-import { PlantTemplate } from "@/models/items/templates/PlantTemplate";
-import { SeedTemplate } from "@/models/items/templates/SeedTemplate";
+import { BlueprintTemplate } from "@/models/items/templates/models/BlueprintTemplate";
+import { DecorationTemplate } from "@/models/items/templates/models/DecorationTemplate";
+import { EmptyItemTemplate } from "@/models/items/templates/models/EmptyItemTemplate";
+import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
+import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
+import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
 import { getItemClassFromSubtype, getItemTemplateFromSubtype } from "@/models/items/utility/classMaps";
 
 
@@ -29,17 +29,17 @@ let decorationTemplate: DecorationTemplate;
 let emptyTemplate: EmptyItemTemplate;
 
 beforeEach(() => {
-	seedTemplate = PlaceholderItemTemplates.getInventoryItemTemplateByName('apple seed') as SeedTemplate;
+	seedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple seed') as SeedTemplate;
 	seedItem = new Seed(seedTemplate, 1);
-	blueprintTemplate = PlaceholderItemTemplates.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
+	blueprintTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
 	blueprintItem = new Blueprint(blueprintTemplate, 1);
-	harvestedTemplate = PlaceholderItemTemplates.getInventoryItemTemplateByName('harvested apple') as HarvestedItemTemplate;
+	harvestedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple') as HarvestedItemTemplate;
 	harvestedItem = new HarvestedItem(harvestedTemplate, 1);
-	plantTemplate = PlaceholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate;
+	plantTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate;
 	plantItem = new Plant(plantTemplate, '');
-	decorationTemplate = PlaceholderItemTemplates.getPlacedItemTemplateByName('bench') as DecorationTemplate;
+	decorationTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('bench') as DecorationTemplate;
 	decorationItem = new Decoration(decorationTemplate, '');
-	emptyTemplate = PlaceholderItemTemplates.getPlacedItemTemplateByName('ground') as EmptyItemTemplate;
+	emptyTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('ground') as EmptyItemTemplate;
 	emptyItem = new EmptyItem(emptyTemplate, 'ground');
 })
 

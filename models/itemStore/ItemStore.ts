@@ -1,6 +1,6 @@
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
-import { InventoryItemTemplate } from "../items/templates/InventoryItemTemplate";
-import { ItemTemplate } from "../items/templates/ItemTemplate";
+import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplate";
+import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 import { InventoryTransactionResponse } from "./inventory/InventoryTransactionResponse";
 import { ItemList } from "./ItemList";
 

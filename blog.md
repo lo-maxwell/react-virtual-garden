@@ -113,6 +113,11 @@
   * If restocking does not add any items, restockInterval is not changed
   * Store now restocks properly (interval seconds after items are purchased)
 
+### Refactored items
+
+  * Added item interfaces to prevent circular dependencies
+  * Reworked fromPlainObject to only serialize the id, name, and type, and grab all relevant data from the items.json file
+
 
 
 TODO:
@@ -143,13 +148,19 @@ Add way to delete in progress plants, some sort of select delete tool
 
 Add multiple harvests to some plants
 
+Add crop rotation - either assign plant families or just individual plants + soil health; low soil health -> cannot be fertilized for a duration + yield reduction, high soil health -> free stronger fertilizer
+
 Add description to itemTemplate
 
-Add fertilizer item - chance for double harvest, or reduce grow time
+Add fertilizer item - chance for double harvest, or reduce grow time. fertilizer lasts x seconds and affects any plants that start (finish?) growing during that time. or linearly diminishing effect based on time since fertilizer application
 
 Add toolkit - select (plant, harvest, pickup, place); delete (only in progress plants)
 
 Store sells seeds for base price, not 2x (?)
+
+Daily login bonus to prevent softlock - gives some money and a random assortment of seeds that add up to some value
+
+Change value of slow plants so they aren't super efficient, amke them high risk high reward by having high seed costs + add random events that can destroy them + fertilizer that makes them super efficient
 
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time
@@ -158,3 +169,4 @@ Probably requires an entirely new ui though for the user to select their next pl
 Or don't allow buying expansions/limit it per level
 Add random events/natural disasters that interact with decorations ie. scarecrows, fences
 Small, medium, large stores with different restock intervals and stock limits
+Item metadata migration tool

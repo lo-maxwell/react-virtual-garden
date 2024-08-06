@@ -1,7 +1,7 @@
 import { Plot } from "@/models/garden/Plot";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
-import PlaceholderItemTemplates from "@/models/items/templates/PlaceholderItemTemplate";
+import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import React, { useEffect, useState } from "react";
 import colors from "../colors/colors";
 import Tooltip from "../textbox/tooltip";
@@ -36,7 +36,7 @@ const PlotTooltip = ({ children, plot }: { children: React.ReactNode, plot: Plot
 		}, []);
 
 		const currentItem = plot.getItem();
-		const harvestedItem = PlaceholderItemTemplates.getInventoryTransformTemplate(currentItem.itemData.transformId);
+		const harvestedItem = placeholderItemTemplates.getInventoryTemplate(currentItem.itemData.transformId);
 		if (!harvestedItem) return <></>;
 		if (currentItem.itemData.name === 'error') {
 			return <>
@@ -65,7 +65,7 @@ const PlotTooltip = ({ children, plot }: { children: React.ReactNode, plot: Plot
 
 	const RenderDecorationTooltip = () => {
 		const currentItem = plot.getItem();
-		const blueprint = PlaceholderItemTemplates.getInventoryTransformTemplate(currentItem.itemData.transformId);
+		const blueprint = placeholderItemTemplates.getInventoryTemplate(currentItem.itemData.transformId);
 		if (!blueprint) return <></>;
 		if (currentItem.itemData.name === 'error') {
 			return <>

@@ -9,7 +9,7 @@ import User from "@/models/user/User";
 import UserProfileComponent from "@/components/garden/userProfile";
 import { useInventory } from "@/hooks/contexts/InventoryContext";
 import { useGarden } from "@/hooks/contexts/GardenContext";
-import PlaceholderItemTemplate from "@/models/items/templates/PlaceholderItemTemplate";
+import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 
 
 const GardenPage = () => {
@@ -31,7 +31,7 @@ const GardenPage = () => {
 
   function addAppleSeed() {
     if (!inventory) return;
-    const appleSeedTemplate = PlaceholderItemTemplate.getInventoryItemTemplateByName('apple seed');
+    const appleSeedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple seed');
     inventory.gainItem(appleSeedTemplate!, 10);
     setSelected(inventory.getItem('apple seed').payload);
     setInventoryForceRefreshKey(inventoryForceRefreshKey + 1);

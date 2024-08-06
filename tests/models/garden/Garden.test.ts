@@ -1,6 +1,5 @@
 import { Garden } from "@/models/garden/Garden";
 import { Plot } from "@/models/garden/Plot";
-import { ItemTemplate } from "@/models/items/templates/ItemTemplate";
 import { generateNewPlaceholderPlacedItem} from "@/models/items/PlaceholderItems";
 import LevelSystem from "@/models/level/LevelSystem";
 

@@ -1,8 +1,8 @@
 import { EmptyItem } from "../items/placedItems/EmptyItem";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { generateNewPlaceholderPlacedItem} from "../items/PlaceholderItems";
-import { PlacedItemTemplate } from "../items/templates/PlacedItemTemplate";
-import PlaceholderItemTemplates from "../items/templates/PlaceholderItemTemplate";
+import { PlacedItemTemplate } from "../items/templates/models/PlacedItemTemplate";
+import { placeholderItemTemplates } from "../items/templates/models/PlaceholderItemTemplate";
 import LevelSystem from "../level/LevelSystem";
 import { GardenTransactionResponse } from "./GardenTransactionResponse";
 import { Plot } from "./Plot";
@@ -18,7 +18,7 @@ export class Garden {
 	static getStartingCols() {return 5;}
 
 	private static getGroundTemplate(): PlacedItemTemplate {
-		const template = PlaceholderItemTemplates.getPlacedItemTemplateByName('ground');
+		const template = placeholderItemTemplates.getPlacedItemTemplateByName('ground');
 		if (!template) throw new Error(`Error: Ground Template Does Not Exist!`);
 		return template!;
 	}

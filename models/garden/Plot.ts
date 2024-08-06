@@ -5,12 +5,11 @@ import { EmptyItem } from "../items/placedItems/EmptyItem";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { generateNewPlaceholderPlacedItem } from "../items/PlaceholderItems";
 import { GardenTransactionResponse } from "./GardenTransactionResponse";
-import PlaceholderItemTemplates from "../items/templates/PlaceholderItemTemplate";
 import { getItemClassFromSubtype, ItemConstructor, itemTypeMap } from "../items/utility/classMaps";
-import { InventoryItemTemplate } from "../items/templates/InventoryItemTemplate";
-import { PlacedItemTemplate } from "../items/templates/PlacedItemTemplate";
 import { Plant } from "../items/placedItems/Plant";
-import { PlantTemplate } from "../items/templates/PlantTemplate";
+import { PlacedItemTemplate } from "../items/templates/models/PlacedItemTemplate";
+import { placeholderItemTemplates } from "../items/templates/models/PlaceholderItemTemplate";
+import { PlantTemplate } from "../items/templates/models/PlantTemplate";
 
 export class Plot {
 	
@@ -24,7 +23,7 @@ export class Plot {
 	}
 
 	private static getGroundTemplate(): PlacedItemTemplate {
-		const template = PlaceholderItemTemplates.getPlacedItemTemplateByName('ground');
+		const template = placeholderItemTemplates.getPlacedItemTemplateByName('ground');
 		if (!template) throw new Error(`Error: Ground Template Does Not Exist!`);
 		return template!;
 	}

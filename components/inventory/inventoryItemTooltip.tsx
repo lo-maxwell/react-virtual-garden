@@ -3,13 +3,10 @@ import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { Seed } from "@/models/items/inventoryItems/Seed";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
-import { Plant } from "@/models/items/placedItems/Plant";
-import { HarvestedItemTemplate } from "@/models/items/templates/HarvestedItemTemplate";
-import PlaceholderItemTemplates from "@/models/items/templates/PlaceholderItemTemplate";
-import { PlantTemplate } from "@/models/items/templates/PlantTemplate";
-import { useRef, useState, useEffect } from "react";
+import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
+import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
 import colors from "../colors/colors";
-import plot from "../garden/plot";
 import Tooltip from "../textbox/tooltip";
 
 const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, item: InventoryItem}) => {
@@ -29,10 +26,10 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 
 	const RenderSeedTooltip = () => {
 		const currentItem = item as Seed;
-		const plantedItem = PlaceholderItemTemplates.getPlacedTransformTemplate(currentItem.itemData.transformId);
+		const plantedItem = placeholderItemTemplates.getPlacedTemplate(currentItem.itemData.transformId);
 		if (!plantedItem || plantedItem.subtype !== ItemSubtypes.PLANT.name) return <></>;
 		const plantTemplate = plantedItem as PlantTemplate;
-		const harvestedItem = PlaceholderItemTemplates.getInventoryTransformTemplate(plantedItem.transformId);
+		const harvestedItem = placeholderItemTemplates.getInventoryTemplate(plantedItem.transformId);
 		if (!harvestedItem|| harvestedItem.subtype !== ItemSubtypes.HARVESTED.name) return <></>;
 		const harvestedTemplate = harvestedItem as HarvestedItemTemplate;
 		if (currentItem.itemData.name === 'error') {
@@ -95,7 +92,7 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 
 	const RenderBlueprintTooltip = () => {
 		const currentItem = item as Blueprint;
-		const decoration = PlaceholderItemTemplates.getPlacedTransformTemplate(currentItem.itemData.transformId);
+		const decoration = placeholderItemTemplates.getPlacedTemplate(currentItem.itemData.transformId);
 		if (!decoration) return <></>;
 		if (currentItem.itemData.name === 'error') {
 			return <>
