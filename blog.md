@@ -120,15 +120,28 @@
   * This causes items to update automatically when the user refreshes
   * If this ever goes live service might want to force a refresh when a new patch comes out, or users will see the wrong display
 
+## Day 12
+
+### Refactored items
+
+  * Added item categories (mostly used for plant families) and descriptions
+  * Updated templates + interfaces to reflect this change
+  * Updated id formula to reflect this change
+  * Renamed harvested x to just x; sharing names is okay because we split between plants and harvested
+
+### UI Changes
+
+  * Added item categories to the tooltips
+  * Updated StoreProvider to more easily add new items to store
+  * Tooltips currently display strangely when scrolling, working on a fix
+
+
+
 
 
 TODO:
 
-Make Items only take in their respective templates
-
-Refactor PlacedItems
-
-Write tests for refactored code
+Fix Tooltips being off when scrolling
 
 Generate multiple store types/switch between stores/restock store
 Clean up ui, especially font/scaling using rem, to accommodate more screen width

@@ -1,6 +1,7 @@
 import { Plot } from "@/models/garden/Plot";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
+import { Plant } from "@/models/items/placedItems/Plant";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import React, { useEffect, useState } from "react";
 import colors from "../colors/colors";
@@ -22,20 +23,36 @@ const PlotTooltip = ({ children, plot }: { children: React.ReactNode, plot: Plot
 		}
 	}
 
+	//Can pull this out to a separate file if we ever need multiple formats for tooltips
 	const RenderPlantTooltip = () => {
 		const [currentTime, setCurrentTime] = useState(Date.now());
+		const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 
 		// This effect will run once to set up the interval
 		useEffect(() => {
-			const intervalId = setInterval(() => {
-			setCurrentTime(Date.now());
+			const id = setInterval(() => {
+				// Update currentTime
+				setCurrentTime(Date.now());
 			}, 1000); // Update every second
+	
+			setIntervalId(id);
+	
+			return () => clearInterval(id); // Cleanup function to clear the interval on unmount
+		}, []); // Empty dependency array ensures this effect runs only once
+	
 
-			// Cleanup function to clear the interval when component unmounts
-			return () => clearInterval(intervalId);
-		}, []);
+		useEffect(() => {
+			// Run this effect whenever currentTime updates
+			if (plot.getRemainingGrowTime(currentTime) === "Ready to harvest!") {
+				// Stop the interval
+				if (intervalId) {
+					clearInterval(intervalId);
+				}
+			}
+		}, [currentTime, intervalId]); // Dependency array includes currentTime and intervalId
+	
 
-		const currentItem = plot.getItem();
+		const currentItem = plot.getItem() as Plant;
 		const harvestedItem = placeholderItemTemplates.getInventoryTemplate(currentItem.itemData.transformId);
 		if (!harvestedItem) return <></>;
 		if (currentItem.itemData.name === 'error') {
@@ -58,7 +75,9 @@ const PlotTooltip = ({ children, plot }: { children: React.ReactNode, plot: Plot
 					</span>
 				</div>
 				<div className={`${colors.harvested.categoryTextColor} text-left`}>Plant</div>
+				<div className={`${colors.harvested.categoryTextColor} text-left`}>Category: {currentItem.itemData.category}</div>
 				<div>{plot.getRemainingGrowTime(currentTime)}</div>
+				<div>XP Gained: {currentItem.itemData.baseExp}</div>
 			</div>
 		</>);
 	}

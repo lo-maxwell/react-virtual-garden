@@ -24,6 +24,7 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 		}
 	}
 
+	//Can pull this out to a separate file if we ever need multiple formats for tooltips
 	const RenderSeedTooltip = () => {
 		const currentItem = item as Seed;
 		const plantedItem = placeholderItemTemplates.getPlacedTemplate(currentItem.itemData.transformId);
@@ -52,6 +53,7 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 				</span>
 			</div>
 			<div className={`${colors.blueprint.categoryTextColor} text-left`}>Seed</div>
+			<div className={`${colors.harvested.categoryTextColor} text-left`}>Category: {currentItem.itemData.category}</div>
 			<div>When planted: </div>
 			<div className="flex flex-row justify-between">
 				<div className="flex flex-row">
@@ -64,7 +66,8 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 					{harvestedItem.value}
 				</span>
 			</div>
-			<div>Grow time: {plantTemplate.growTime} seconds</div>
+			<div>Grow Time: {plantTemplate.growTime} seconds</div>
+			<div>XP Gained: {plantTemplate.baseExp}</div>
 		</div>
 	</>
 	}
@@ -86,6 +89,7 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 				</span>
 			</div>
 			<div className={`${colors.harvested.categoryTextColor} text-left`}>Harvested</div>
+			<div className={`${colors.harvested.categoryTextColor} text-left`}>Category: {currentItem.itemData.category}</div>
 		</div>
 	</>
 	}
