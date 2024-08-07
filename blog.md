@@ -133,7 +133,7 @@
 
   * Added item categories to the tooltips
   * Updated StoreProvider to more easily add new items to store
-  * Tooltips currently display strangely when scrolling, working on a fix
+  * Fixed issue with tooltips not properly updating when the page is scrolled
 
 
 

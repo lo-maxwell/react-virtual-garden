@@ -24,14 +24,13 @@ const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVi
     const { top, left, width, height } = rect;
     
     let tooltipTop, tooltipLeft;
-
     switch (position) {
-      case 'top':
-        tooltipTop = top - 10;
-        tooltipLeft = left + width / 2;
+      case 'top': //We're only using top right now, so didn't bother with the scroll for other cases.
+        tooltipTop = top - window.scrollY - 10; // Account for scroll
+        tooltipLeft = left + width / 2 + 10;
         break;
       case 'right':
-        tooltipTop = top + height / 2;
+        tooltipTop = top + height / 2 ;
         tooltipLeft = left + width + 10;
         break;
       case 'bottom':
@@ -43,7 +42,7 @@ const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVi
         tooltipLeft = left - 10;
         break;
       default:
-        tooltipTop = top - 10;
+        tooltipTop = top + window.scrollY - 10;
         tooltipLeft = left + width / 2;
     }
 
