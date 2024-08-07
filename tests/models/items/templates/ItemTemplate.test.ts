@@ -5,7 +5,7 @@ import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
 
 //TODO: Add tests for different template types
 test('Initialize itemTemplate', () => {
-	const testSeedTemplate = new SeedTemplate("0", 'test', '', "InventoryItem", "Seed", 0, "0");
+	const testSeedTemplate = new SeedTemplate("0", 'test', '', "InventoryItem", "Seed", "", "", 0, "0");
 	expect(testSeedTemplate).toBeTruthy();
 });
 

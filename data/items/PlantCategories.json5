@@ -1,0 +1,89 @@
+Plant: {
+	Allium: {
+		ID: '01'
+		Crops: Red Onion, Yellow Onion, Green Onion, Shallot, Garlic, Leek
+		Description: Alliums are a group of bulbous plants known for their strong flavors and aromas, commonly used in cooking. They are often grown for their edible bulbs, stalks, and leaves, and are valued for their ability to add depth to a variety of dishes.
+		Bonus: Growing multiple Alliums together increases growth speed or yield.
+	},
+	Brassica: {
+		ID: '02'
+		Crops: Cabbage, Broccoli, Cauliflower, Kale
+		Description: Brassicas, also known as cruciferous vegetables, are hardy, leafy plants that thrive in cooler weather. They are rich in nutrients and are often recognized for their health benefits, including high vitamin content and antioxidant properties.
+		Bonus: Growing multiple Brassicas improves resistance to pests.
+	},
+	Nightshade: {
+		ID: '03'
+		Crops: Tomato, Bell Pepper, Eggplant, Potato
+		Description: Nightshades are a diverse family of plants that include some of the most widely consumed vegetables in the world. They are typically warm-season crops known for their vibrant colors and rich flavors. These plants are often used in a variety of culinary dishes across different cultures.
+		Bonus: Growing multiple Nightshades enhances fruit quality.
+	},
+	Legume: {
+		ID: '04'
+		Crops: Peas, Beans, Lentils, Chickpeas
+		Description: Legumes are a family of plants known for their ability to fix nitrogen in the soil, making them beneficial for crop rotation and soil health. They produce seeds in pods and are an important source of protein in many diets around the world.
+		Bonus: Growing multiple Legumes boosts soil fertility.
+	},
+	Grain: {
+		ID: '05'
+		Crops: Wheat, Barley, Corn, Rice
+		Description: Grains are the staple crops of many civilizations, providing the base for numerous foods like bread, pasta, and rice dishes. They are typically grown in large fields and are valued for their high yield and versatility in food production.
+		Bonus: Growing multiple Grains provides a harvest quantity bonus.
+	},
+	Cucurbit: {
+		ID: '06'
+		Crops: Cucumber, Pumpkin, Zucchini, Melon
+		Description: Cucurbits are vining plants that often produce large, fleshy fruits. They thrive in warm weather and are commonly grown in gardens and fields. These fruits are usually harvested in late summer and fall, offering a variety of flavors and textures.
+		Bonus: Growing multiple Cucurbits improves plant health.
+	},
+	Herb: {
+		ID: '07'
+		Crops: Basil, Thyme, Rosemary, Mint
+		Description: Herbs are aromatic plants that are used primarily for flavoring food, as well as for medicinal and decorative purposes. They are typically small, leafy plants that can be grown in gardens, containers, or indoors.
+		Bonus: Growing multiple Herbs increases the potency of herb-based products.
+	},
+	Root Vegetables: {
+		ID: '08'
+		Crops: Carrot, Beet, Radish, Turnip, Sweet Potato, Parsnip
+		Description: Root vegetables are underground plants that store nutrients in their roots, making them hearty and nutrient-dense. They are often grown for their edible roots, which are staples in many diets due to their versatility and long storage life.
+		Bonus: Growing multiple Root Vegetables together improves resistance to soil-borne diseases or increases the size of the harvest.
+	},
+	Pome: {
+		ID: '09'
+		Crops: Apple, Pear, Quince
+		Description: Pomes are fruits with a core of several small seeds, surrounded by a tough membrane. They typically grow on trees.
+		Bonus: Growing multiple Pomes increases fruit yield or improves fruit quality.
+	},
+	Tropical: {
+		ID: '10'
+		Crops: Banana, Mango, Pineapple, Papaya
+		Description: Tropical fruits are typically grown in warm climates and often have a sweet, juicy flesh.
+		Bonus: Growing multiple Tropicals together enhances resistance to heat or increases growth speed in warmer climates.
+	},
+	Drupe: {
+		ID: '11'
+		Crops: Coconut, Peach, Cherry, Plum
+		Description: Drupes are fruits with a single large seed or "stone" surrounded by fleshy fruit. They often have a hard outer shell or skin.
+		Bonus: Growing multiple Drupes together improves resistance to drought or increases the size of the fruit.
+	},
+	Berry: {
+		ID: '12'
+		Crops: Strawberry, Blueberry, Raspberry, Blackberry
+		Description: Berries are small, juicy fruits that grow on shrubs or vines. They are popular for their sweet taste and are often eaten fresh, used in desserts, or processed into jams and preserves. Berries are also high in antioxidants and other beneficial nutrients.
+		Bonus: Growing multiple Berries together enhances sweetness or improves disease resistance.
+	},
+	Citrus: {
+		ID: '13'
+		Crops: Orange, Lemon, Lime, Grapefruit
+		Description: Citrus fruits are acidic fruits typically grown on small evergreen trees or shrubs. They are rich in vitamin C.
+		Bonus: Growing multiple Citrus fruits increases vitamin content or reduces pest damage.
+	},
+	Vine: {
+		ID: '14'
+		Crops: Melon, Grape, Passionfruit, Kiwi
+		Description: Vine fruits grow on climbing or sprawling plants. They often require support structures and produce fruits that hang from the plant.
+		Bonus: Growing multiple Vine fruits together enhances vine growth or improves fruit setting.
+	},
+	Error: {
+		ID: '99'
+	}
+}

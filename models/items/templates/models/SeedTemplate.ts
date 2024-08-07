@@ -4,13 +4,13 @@ import { InventoryItemTemplate } from "./InventoryItemTemplate";
 
 export class SeedTemplate extends InventoryItemTemplate{
 	transformId: string;
-	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: string) {
-		super(id, name, icon, type, subtype, value);
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, transformId: string) {
+		super(id, name, icon, type, subtype, category, description, value);
 		this.transformId = transformId;
 	}
 
 	static getErrorTemplate() {
-		return new SeedTemplate("1019999", "error", "❌", "InventoryItem", "Seed", 0, "0029999");
+		return new SeedTemplate("1-01-99-99-99", "error", "❌", "InventoryItem", "Seed", "Error", "Error", 0, "0-0-29-99-99");
 	}
 
 	static fromPlainObject(plainObject: any): SeedTemplate {
@@ -33,7 +33,7 @@ export class SeedTemplate extends InventoryItemTemplate{
 					throw new Error('Found non Seed for Seed template');
 				}
 				const typedTemplate = template as SeedTemplate;
-				return new SeedTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.value, typedTemplate.transformId);
+				return new SeedTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId);
 			}
 			if (typeof name !== 'string') {
 				throw new Error('Invalid name property in plainObject for SeedTemplate');
@@ -52,7 +52,7 @@ export class SeedTemplate extends InventoryItemTemplate{
 					throw new Error('Found non decoration for Seed template');
 				}
 				const typedTemplate = template as SeedTemplate;
-				return new SeedTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.value, typedTemplate.transformId);
+				return new SeedTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId);
 			}
 			throw new Error('Could not find valid id or name for SeedTemplate');
 		} catch (err) {

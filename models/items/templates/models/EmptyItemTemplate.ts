@@ -5,12 +5,12 @@ import { PlacedItemTemplate } from "./PlacedItemTemplate";
 
 export class EmptyItemTemplate extends PlacedItemTemplate{
 	
-	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: string) {
-		super(id, name, icon, type, subtype, value, transformId);
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, transformId: string) {
+		super(id, name, icon, type, subtype, category, description, value, transformId);
 	}
 
 	static getErrorTemplate() {
-		return new EmptyItemTemplate("0009999", "error", "❌", "PlacedItem", "Ground", 0, "0009999");
+		return new EmptyItemTemplate("0-00-99-99-99", "error", "❌", "PlacedItem", "Ground", "Error", "Error", 0, "0-00-99-99-99");
 	}
 
 	static fromPlainObject(plainObject: any): EmptyItemTemplate {
@@ -33,7 +33,7 @@ export class EmptyItemTemplate extends PlacedItemTemplate{
 					throw new Error('Found non EmptyItem for EmptyItem template');
 				}
 				const typedTemplate = template as EmptyItemTemplate;
-				return new EmptyItemTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.value, typedTemplate.transformId);
+				return new EmptyItemTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId);
 			}
 			if (typeof name !== 'string') {
 				throw new Error('Invalid name property in plainObject for EmptyItemTemplate');
@@ -52,7 +52,7 @@ export class EmptyItemTemplate extends PlacedItemTemplate{
 					throw new Error('Found non decoration for EmptyItem template');
 				}
 				const typedTemplate = template as EmptyItemTemplate;
-				return new EmptyItemTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.value, typedTemplate.transformId);
+				return new EmptyItemTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId);
 			}
 			throw new Error('Could not find valid id or name for EmptyItemTemplate');
 		} catch (err) {

@@ -30,7 +30,7 @@ beforeEach(() => {
 	seedItem = new Seed(seedTemplate, 1);
 	blueprintTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
 	blueprintItem = new Blueprint(blueprintTemplate, 1);
-	harvestedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple') as HarvestedItemTemplate;
+	harvestedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple') as HarvestedItemTemplate;
 	harvestedItem = new HarvestedItem(harvestedTemplate, 1);
 	plantTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate;
 	plantItem = new Plant(plantTemplate, '');
@@ -44,8 +44,11 @@ test('Should Create SeedTemplate Object From PlainObject', () => {
 	const serializedItemTemplate = JSON.stringify(seedTemplate.toPlainObject());
 	const item = SeedTemplate.fromPlainObject(JSON.parse(serializedItemTemplate));
 	expect(item).toBeTruthy();
-	expect(item.name).toBe('apple seed');
-	expect(item.id).toBe("1010100");
+	expect(item.name).toBe(seedTemplate.name);
+	expect(item.id).toBe(seedTemplate.id);
+	expect(item.icon).toBe(seedTemplate.icon);
+	expect(item.subtype).toBe(seedTemplate.subtype);
+	expect(item.category).toBe(seedTemplate.category);
 })
 
 test('Should Not Create SeedTemplate Object From Corrupted Data', () => {

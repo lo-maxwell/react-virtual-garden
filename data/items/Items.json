@@ -2,200 +2,308 @@
 	"PlacedItems": {
 		"Plants": [
 			{
-				"id": "0029999",
+				"id": "0-02-99-99-99",
 				"name": "error",
 				"icon": "❌",
 				"type": "PlacedItem",
 				"subtype": "Plant",
+				"category": "Error",
+				"description": "Error",
 				"value": 0,
-				"transformId": "1039999",
+				"transformId": "1-03-99-99-99",
 				"baseExp": 0, 
 				"growTime": 0
 			},
 			{
-				"id": "0020100",
+				"id": "0-02-09-01-00",
 				"name": "apple",
 				"icon": "🍎",
 				"type": "PlacedItem",
 				"subtype": "Plant",
+				"category": "Pome",
+				"description": "Error",
 				"value": 10,
-				"transformId": "1030100",
+				"transformId": "1-03-09-01-00",
 				"baseExp": 2, 
-				"growTime": 10
+				"growTime": 30
 			},
 			{
-				"id": "0020200",
+				"id": "0-02-10-01-00",
 				"name": "banana",
 				"icon": "🍌",
 				"type": "PlacedItem",
 				"subtype": "Plant",
+				"category": "Tropical",
+				"description": "Error",
 				"value": 15,
-				"transformId": "1030200",
+				"transformId": "1-03-10-01-00",
 				"baseExp": 4, 
-				"growTime": 60
+				"growTime": 180
 			},
 			{
-				"id": "0020300",
+				"id": "0-02-11-01-00",
 				"name": "coconut",
 				"icon": "🥥",
 				"type": "PlacedItem",
 				"subtype": "Plant",
+				"category": "Drupe",
+				"description": "Error",
 				"value": 20,
-				"transformId": "1030300",
+				"transformId": "1-03-11-01-00",
 				"baseExp": 6, 
-				"growTime": 300
+				"growTime": 600
+			},
+			{
+				"id": "0-02-01-02-00",
+				"name": "yellow onion",
+				"icon": "🧅",
+				"type": "PlacedItem",
+				"subtype": "Plant",
+				"category": "Allium",
+				"description": "Error",
+				"value": 30,
+				"transformId": "1-03-01-02-00",
+				"baseExp": 9, 
+				"growTime": 900
+			},
+			{
+				"id": "0-02-01-05-00",
+				"name": "garlic",
+				"icon": "🧄",
+				"type": "PlacedItem",
+				"subtype": "Plant",
+				"category": "Allium",
+				"description": "Error",
+				"value": 15,
+				"transformId": "1-03-01-05-00",
+				"baseExp": 18, 
+				"growTime": 900
 			}
 		],
 		"Decorations": [
 			{
-				"id": "0049999",
+				"id": "0-04-99-99-99",
 				"name": "error",
 				"icon": "❌",
 				"type": "PlacedItem",
 				"subtype": "Decoration",
+				"category": "Error",
+				"description": "Error",
 				"value": 0,
-				"transformId": "1059999"
+				"transformId": "1-05-99-99-99"
 			},
 			{
-				"id": "0040400",
+				"id": "0-04-01-01-00",
 				"name": "bench",
 				"icon": "🪑",
 				"type": "PlacedItem",
 				"subtype": "Decoration",
+				"category": "Normal",
+				"description": "Error",
 				"value": 100,
-				"transformId": "1050400"
+				"transformId": "1-05-01-01-00"
 			},
 			{
-				"id": "0040500",
+				"id": "0-04-01-02-00",
 				"name": "flamingo",
 				"icon": "🦩",
 				"type": "PlacedItem",
 				"subtype": "Decoration",
+				"category": "Normal",
+				"description": "Error",
 				"value": 5000,
-				"transformId": "1050500"
+				"transformId": "1-05-01-02-00"
 			}
 		],
 		"Ground": [
 			{
-				"id": "0009999",
+				"id": "0-00-99-99-99",
 				"name": "error",
 				"icon": "❌",
 				"type": "PlacedItem",
 				"subtype": "Ground",
+				"category": "Error",
+				"description": "Error",
 				"value": 0,
-				"transformId": "0009999"
+				"transformId": "0-00-99-99-99"
 			},
 			{
-				"id": "0000000",
+				"id": "0-00-00-00-00",
 				"name": "ground",
 				"icon": "_",
 				"type": "PlacedItem",
 				"subtype": "Ground",
+				"category": "Ground",
+				"description": "Error",
 				"value": 0,
-				"transformId": "0000000"
+				"transformId": "0-00-00-00-00"
 			}
 		]
 	},
 	"InventoryItems": {
 		"Seeds": [
 			{
-				"id": "1019999",
+				"id": "1-01-99-99-99",
 				"name": "error",
 				"icon": "❌",
 				"type": "InventoryItem",
 				"subtype": "Seed",
+				"category": "Error",
+				"description": "Error",
 				"value": 0,
-				"transformId": "0029999"
+				"transformId": "0-02-99-99-99"
 			},
 			{
-				"id": "1010100",
+				"id": "1-01-09-01-00",
 				"name": "apple seed",
 				"icon": "🍎",
 				"type": "InventoryItem",
 				"subtype": "Seed",
+				"category": "Pome",
+				"description": "Error",
 				"value": 5,
-				"transformId": "0020100"
+				"transformId": "0-02-09-01-00"
 			},
 			{
-				"id": "1010200",
+				"id": "1-01-10-01-00",
 				"name": "banana seed",
 				"icon": "🍌",
 				"type": "InventoryItem",
 				"subtype": "Seed",
+				"category": "Tropical",
+				"description": "Error",
 				"value": 15,
-				"transformId": "0020200"
+				"transformId": "0-02-10-01-00"
 			},
 			{
-				"id": "1010300",
+				"id": "1-01-11-01-00",
 				"name": "coconut seed",
 				"icon": "🥥",
 				"type": "InventoryItem",
 				"subtype": "Seed",
+				"category": "Drupe",
+				"description": "Error",
 				"value": 50,
-				"transformId": "0020300"
+				"transformId": "0-02-11-01-00"
+			},
+			{
+				"id": "1-01-01-02-00",
+				"name": "yellow onion seed",
+				"icon": "🧅",
+				"type": "InventoryItem",
+				"subtype": "Seed",
+				"category": "Allium",
+				"description": "Error",
+				"value": 60,
+				"transformId": "0-02-01-02-00"
+			},
+			{
+				"id": "1-01-01-05-00",
+				"name": "garlic bulb",
+				"icon": "🧄",
+				"type": "InventoryItem",
+				"subtype": "Seed",
+				"category": "Allium",
+				"description": "Error",
+				"value": 60,
+				"transformId": "0-02-01-05-00"
 			}
 		],
 		"HarvestedItems": [
 			{
-				"id": "1039999",
+				"id": "1-03-99-99-99",
 				"name": "error",
 				"icon": "❌",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
+				"category": "Error",
+				"description": "Error",
 				"value": 0
 			},
 			{
-				"id": "1030100",
-				"name": "harvested apple",
+				"id": "1-03-09-01-00",
+				"name": "apple",
 				"icon": "🍎",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
+				"category": "Pome",
+				"description": "Error",
 				"value": 20
 			},
 			{
-				"id": "1030200",
-				"name": "harvested banana",
+				"id": "1-03-10-01-00",
+				"name": "banana",
 				"icon": "🍌",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
+				"category": "Tropical",
+				"description": "Error",
 				"value": 45
 			},
 			{
-				"id": "1030300",
-				"name": "harvested coconut",
+				"id": "1-03-11-01-00",
+				"name": "coconut",
 				"icon": "🥥",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
+				"category": "Drupe",
+				"description": "Error",
 				"value": 120
+			},
+			{
+				"id": "1-03-01-02-00",
+				"name": "yellow onion",
+				"icon": "🧅",
+				"type": "InventoryItem",
+				"subtype": "HarvestedItem",
+				"category": "Allium",
+				"description": "Error",
+				"value": 150
+			},
+			{
+				"id": "1-03-01-05-00",
+				"name": "garlic",
+				"icon": "🧄",
+				"type": "InventoryItem",
+				"subtype": "HarvestedItem",
+				"category": "Allium",
+				"description": "Error",
+				"value": 135
 			}
 		],
 		"Blueprints": [
 			{
-				"id": "1059999",
+				"id": "1-05-99-99-99",
 				"name": "error",
 				"icon": "❌",
 				"type": "InventoryItem",
 				"subtype": "Blueprint",
+				"category": "Error",
+				"description": "Error",
 				"value": 0,
-				"transformId": "0049999"
+				"transformId": "0-04-99-99-99"
 			},
 			{
-				"id": "1050400",
+				"id": "1-05-01-01-00",
 				"name": "bench blueprint",
 				"icon": "📜",
 				"type": "InventoryItem",
 				"subtype": "Blueprint",
+				"category": "Normal",
+				"description": "Error",
 				"value": 100,
-				"transformId": "0040400"
+				"transformId": "0-04-01-01-00"
 			},
 			{
-				"id": "1050500",
+				"id": "1-05-01-02-00",
 				"name": "flamingo blueprint",
 				"icon": "📜",
 				"type": "InventoryItem",
 				"subtype": "Blueprint",
+				"category": "Normal",
+				"description": "Error",
 				"value": 5000,
-				"transformId": "0040500"
+				"transformId": "0-04-01-02-00"
 			}
 		]
 	}

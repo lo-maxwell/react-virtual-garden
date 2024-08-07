@@ -30,7 +30,7 @@ beforeEach(() => {
 	seedItem = new Seed(seedTemplate, 1);
 	blueprintTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
 	blueprintItem = new Blueprint(blueprintTemplate, 1);
-	harvestedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple') as HarvestedItemTemplate;
+	harvestedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple') as HarvestedItemTemplate;
 	harvestedItem = new HarvestedItem(harvestedTemplate, 1);
 	plantTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate;
 	plantItem = new Plant(plantTemplate, '');
@@ -94,7 +94,7 @@ test('Should Not Get Transformed Placed Item Template By Unknown Id', () => {
 test('Should Get Transformed Inventory Item Template By Id', () => {
 	const template = placeholderItemTemplates.getInventoryTemplate(plantItem.itemData.transformId);
 	expect(template).toBeTruthy;
-	expect(template?.name).toBe('harvested apple');
+	expect(template?.name).toBe('apple');
 })
 
 test('Should Not Get Transformed Inventory Item Template By Unknown Id', () => {

@@ -26,6 +26,8 @@ export class ItemTemplateRepository {
         item.icon,
         item.type,
         item.subtype,
+        item.category,
+        item.description,
         item.value,
         item.transformId,
         item.baseExp,
@@ -39,6 +41,8 @@ export class ItemTemplateRepository {
         item.icon,
         item.type,
         item.subtype,
+        item.category,
+        item.description,
         item.value,
         item.transformId,
       )
@@ -50,6 +54,8 @@ export class ItemTemplateRepository {
         item.icon,
         item.type,
         item.subtype,
+        item.category,
+        item.description,
         item.value,
         item.transformId
       )
@@ -61,6 +67,8 @@ export class ItemTemplateRepository {
         item.icon,
         item.type,
         item.subtype,
+        item.category,
+        item.description,
         item.value,
         item.transformId
       )
@@ -72,6 +80,8 @@ export class ItemTemplateRepository {
         item.icon,
         item.type,
         item.subtype,
+        item.category,
+        item.description,
         item.value
       )
     );
@@ -82,23 +92,12 @@ export class ItemTemplateRepository {
         item.icon,
         item.type,
         item.subtype,
+        item.category,
+        item.description,
         item.value,
         item.transformId
       )
     );
     // Repeat for other categories if needed
   	}
-
-    private createBlueprintTemplate(item: any): BlueprintTemplateInterface {
-      return {
-        id: item.id,
-        name: item.name,
-        icon: item.icon,
-        type: item.type,
-        subtype: item.subtype,
-        value: item.value,
-        transformId: item.transformId,
-        // Add additional properties if needed
-      };
-    }
 }

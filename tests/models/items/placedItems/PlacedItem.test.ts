@@ -49,7 +49,7 @@ test('Should Use Plant Item', () => {
 	const response = item.use();
 	expect(item.getStatus()).toBe('removed');
 	expect(response.isSuccessful()).toBe(true);
-	expect(response.payload.newTemplate.name).toBe('harvested apple');
+	expect(response.payload.newTemplate.name).toBe('apple');
 })
 
 test('Should Not Use EmptyItem Item', () => {

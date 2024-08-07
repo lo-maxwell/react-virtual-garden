@@ -46,6 +46,8 @@ class ItemTemplateInterfaceRepository {
 		  icon: item.icon,
 		  type: item.type,
 		  subtype: item.subtype,
+		  category: item.category,
+		  description: item.description,
 		  value: item.value,
 		  transformId: item.transformId,
 		  baseExp: item.baseExp,
@@ -61,6 +63,8 @@ class ItemTemplateInterfaceRepository {
 		  icon: item.icon,
 		  type: item.type,
 		  subtype: item.subtype,
+		  category: item.category,
+		  description: item.description,
 		  value: item.value,
 		  transformId: item.transformId,
 		  // Add additional properties if needed
@@ -74,6 +78,8 @@ class ItemTemplateInterfaceRepository {
 		  icon: item.icon,
 		  type: item.type,
 		  subtype: item.subtype,
+		  category: item.category,
+		  description: item.description,
 		  value: item.value,
 		  transformId: item.transformId,
 		  // Add additional properties if needed
@@ -87,6 +93,8 @@ class ItemTemplateInterfaceRepository {
 		  icon: item.icon,
 		  type: item.type,
 		  subtype: item.subtype,
+		  category: item.category,
+		  description: item.description,
 		  value: item.value,
 		  transformId: item.transformId,
 		  // Add additional properties if needed
@@ -100,6 +108,8 @@ class ItemTemplateInterfaceRepository {
 		  icon: item.icon,
 		  type: item.type,
 		  subtype: item.subtype,
+		  category: item.category,
+		  description: item.description,
 		  value: item.value,
 		  // Add additional properties if needed
 		};
@@ -112,6 +122,8 @@ class ItemTemplateInterfaceRepository {
         icon: item.icon,
         type: item.type,
         subtype: item.subtype,
+		category: item.category,
+		description: item.description,
         value: item.value,
         transformId: item.transformId,
         // Add additional properties if needed

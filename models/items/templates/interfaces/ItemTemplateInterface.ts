@@ -6,5 +6,7 @@ export interface ItemTemplateInterface {
 	icon: string;
 	type: ItemType;
 	subtype: ItemSubtype;
+	category: string;
+	description: string;
 	value: number;
   }

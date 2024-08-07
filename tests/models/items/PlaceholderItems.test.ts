@@ -35,9 +35,9 @@ test('Should Generate InventoryItem', () => {
 	expect(inventoryItem2).toBeTruthy();
 	expect(inventoryItem2.itemData.name).toBe("banana seed");
 
-	const inventoryItem3 = generateNewPlaceholderInventoryItem("harvested coconut", 0);
+	const inventoryItem3 = generateNewPlaceholderInventoryItem("coconut", 0);
 	expect(inventoryItem3).toBeTruthy();
-	expect(inventoryItem3.itemData.name).toBe("harvested coconut");
+	expect(inventoryItem3.itemData.name).toBe("coconut");
 
 	for (let i = 0; i < 100; i++) {
 		const inventoryItem4 = generateRandomPlaceholderInventoryItem();

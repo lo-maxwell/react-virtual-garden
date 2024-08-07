@@ -1,8 +1,9 @@
-ID - A B C D 
+ID - A-B-C-D-E 
 A = 1 digit Type; 0 = PlacedItem, 1 = InventoryItem
 B = 2 digit Subtype; 00 = Ground, 01 = Seed, 02 = Plant, 03 = HarvestedItem, 04 = Decoration, 05 = Blueprint
-C = 2 digit Item; shows linked items
-D = 2 digit Variant; differentiates items of the same type (red apple vs green apple)
+C = 2 digit Category
+D = 2 digit Specific Item
+E = 2 digit Variant; differentiates items of the same type (red apple vs green apple)
 
 Plant value = HarvestedItem value
 Plant value = some multiplier * time to grow + cost to buy (2x seed value)
@@ -47,72 +48,84 @@ Give each category a unique text color, background color, and tooltip color
 	"PlacedItems": {
 		"Plants": [
 			{
-				"id": 3,
+				"id": "0-02-09-01-00",
 				"name": "apple",
 				"icon": "🍎",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"value": 8, //the profit from this plant
-				"transformId": 4,
-				"baseExp": 3,
-				"growTime": 20
-			}
+				"category": "Error",
+				"description": "Error",
+				"value": 10,
+				"transformId": "1-03-09-01-00",
+				"baseExp": 2, 
+				"growTime": 30
+			},
 		],
 		"Decorations": [
 			{
-				"id": 11,
+				"id": "0-04-01-01-00",
 				"name": "bench",
 				"icon": "🪑",
 				"type": "PlacedItem",
 				"subtype": "Decoration",
+				"category": "Normal",
+				"description": "Error",
 				"value": 100,
-				"transformId": 12
-			}
+				"transformId": "1-05-01-01-00"
+			},
 		],
 		"Ground": [
 			{
-				"id": 1,
+				"id": "0-00-00-00-00",
 				"name": "ground",
 				"icon": "_",
 				"type": "PlacedItem",
 				"subtype": "Ground",
+				"category": "Ground",
+				"description": "Error",
 				"value": 0,
-				"transformId": 1
+				"transformId": "0-00-00-00-00"
 			}
 		]
 	},
 	"InventoryItems": {
 		"Seeds": [
 			{
-				"id": 2,
+				"id": "1-01-09-01-00",
 				"name": "apple seed",
 				"icon": "🍎",
 				"type": "InventoryItem",
 				"subtype": "Seed",
-				"value": 2,
-				"transformId": 3
-			}
+				"category": "Pome",
+				"description": "Error",
+				"value": 5,
+				"transformId": "0-02-09-01-00"
+			},
 		],
 		"HarvestedItems": [
 			{
-				"id": 4,
-				"name": "harvested apple",
+				"id": "1-03-09-01-00",
+				"name": "apple",
 				"icon": "🍎",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"value": 12 //should be the value of the seed x 2 + the plant = 2 * 2 + 8
-			}
+				"category": "Pome",
+				"description": "Error",
+				"value": 20
+			},
 		],
 		"Blueprints": [
 			{
-				"id": 12,
+				"id": "1-05-01-01-00",
 				"name": "bench blueprint",
 				"icon": "📜",
 				"type": "InventoryItem",
 				"subtype": "Blueprint",
+				"category": "Normal",
+				"description": "Error",
 				"value": 100,
-				"transformId": 11
-			}
+				"transformId": "0-04-01-01-00"
+			},
 		]
 	}
 }

@@ -16,7 +16,7 @@ beforeEach(() => {
 	seedItem = new Seed(template, 1);
 	let template2 = placeholderItemTemplates.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
 	blueprintItem = new Blueprint(template2, 1);
-	let template3 = placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple') as HarvestedItemTemplate;
+	let template3 = placeholderItemTemplates.getInventoryItemTemplateByName('apple') as HarvestedItemTemplate;
 	harvestedItem = new HarvestedItem(template3, 1);
 })
 

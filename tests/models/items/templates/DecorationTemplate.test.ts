@@ -30,7 +30,7 @@ beforeEach(() => {
 	seedItem = new Seed(seedTemplate, 1);
 	blueprintTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
 	blueprintItem = new Blueprint(blueprintTemplate, 1);
-	harvestedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple') as HarvestedItemTemplate;
+	harvestedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple') as HarvestedItemTemplate;
 	harvestedItem = new HarvestedItem(harvestedTemplate, 1);
 	plantTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate;
 	plantItem = new Plant(plantTemplate, '');
@@ -44,8 +44,11 @@ test('Should Create DecorationTemplate Object From PlainObject', () => {
 	const serializedItemTemplate = JSON.stringify(decorationTemplate.toPlainObject());
 	const item = DecorationTemplate.fromPlainObject(JSON.parse(serializedItemTemplate));
 	expect(item).toBeTruthy();
-	expect(item.name).toBe('bench');
-	expect(item.id).toBe("0040400");
+	expect(item.name).toBe(decorationTemplate.name);
+	expect(item.id).toBe(decorationTemplate.id);
+	expect(item.icon).toBe(decorationTemplate.icon);
+	expect(item.subtype).toBe(decorationTemplate.subtype);
+	expect(item.category).toBe(decorationTemplate.category);
 })
 
 

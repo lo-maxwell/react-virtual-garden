@@ -4,12 +4,12 @@ import { PlacedItemTemplate } from "./PlacedItemTemplate";
 
 export class DecorationTemplate extends PlacedItemTemplate{
 	
-	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: string) {
-		super(id, name, icon, type, subtype, value, transformId);
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, transformId: string) {
+		super(id, name, icon, type, subtype, category, description, value, transformId);
 	}
 
 	static getErrorTemplate() {
-		return new DecorationTemplate("0049999", "error", "❌", "PlacedItem", "Decoration", 0, "1059999");
+		return new DecorationTemplate("0-04-99-99-99", "error", "❌", "PlacedItem", "Decoration", "Error", "Error", 0, "1-05-99-99-99");
 	}
 
 	static fromPlainObject(plainObject: any): DecorationTemplate {
@@ -32,7 +32,7 @@ export class DecorationTemplate extends PlacedItemTemplate{
 					throw new Error('Found non decoration for decoration template');
 				}
 				const typedTemplate = template as DecorationTemplate;
-				return new DecorationTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.value, typedTemplate.transformId);
+				return new DecorationTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId);
 			}
 			if (typeof name !== 'string') {
 				throw new Error('Invalid name property in plainObject for DecorationTemplate');
@@ -51,7 +51,7 @@ export class DecorationTemplate extends PlacedItemTemplate{
 					throw new Error('Found non decoration for decoration template');
 				}
 				const typedTemplate = template as DecorationTemplate;
-				return new DecorationTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.value, typedTemplate.transformId);
+				return new DecorationTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId);
 			}
 			throw new Error('Could not find valid id or name for DecorationTemplate');
 		} catch (err) {

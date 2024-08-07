@@ -40,7 +40,7 @@ test('Should Not Get Nonexistent Item', () => {
 	const response = testItemList.getItem('not a real item');
 	expect(response.isSuccessful()).toBe(false);
 	expect(response.payload).toBeNull();
-	const response2 = testItemList.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('harvested banana')!);
+	const response2 = testItemList.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('banana')!);
 	expect(response2.isSuccessful()).toBe(false);
 	expect(response2.payload).toBeNull();
 	const response3 = testItemList.getItem(placeholderItemTemplates.getPlacedItemTemplateByName('banana')!);
@@ -61,10 +61,10 @@ test('Should Check Contains Existing Item', () => {
 });
 
 test('Should Check Does Not Contain Nonexistent Item', () => {
-	const response = testItemList.contains('harvested apple');
+	const response = testItemList.contains('apple');
 	expect(response.payload).toBe(false);
 	expect(response.isSuccessful()).toBe(true);
-	const response2 = testItemList.contains(placeholderItemTemplates.getInventoryItemTemplateByName('harvested banana')!);
+	const response2 = testItemList.contains(placeholderItemTemplates.getInventoryItemTemplateByName('banana')!);
 	expect(response2.payload).toBe(false);
 	expect(response2.isSuccessful()).toBe(true);
 	const response3 = testItemList.contains('not a real item');
@@ -95,10 +95,10 @@ test('Should Check Does Not Contain Amount of Lacking Item', () => {
 });
 
 test('Should Check Does Not Contain Amount of Nonexistent Item', () => {
-	const response = testItemList.containsAmount('harvested apple', 1);
+	const response = testItemList.containsAmount('apple', 1);
 	expect(response.payload).toBe(false);
 	expect(response.isSuccessful()).toBe(true);
-	const response2 = testItemList.containsAmount(placeholderItemTemplates.getInventoryItemTemplateByName('harvested banana')!, 2);
+	const response2 = testItemList.containsAmount(placeholderItemTemplates.getInventoryItemTemplateByName('banana')!, 2);
 	expect(response2.payload).toBe(false);
 	expect(response2.isSuccessful()).toBe(true);
 	const response3 = testItemList.containsAmount('not a real item', 3);
@@ -133,7 +133,7 @@ test('Should Not Add Invalid Item', () => {
 	const response = testItemList.addItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!, 0);
 	expect(response.isSuccessful()).toBe(false);
 	expect(testItemList.size()).toBe(3);
-	const response2 = testItemList.addItem(placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple')!, -1);
+	const response2 = testItemList.addItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!, -1);
 	expect(response2.isSuccessful()).toBe(false);
 	expect(testItemList.size()).toBe(3);
 	const response3 = testItemList.addItem(placeholderItemTemplates.getPlacedItemTemplateByName('apple')!, 1);
@@ -162,10 +162,10 @@ test('Should Not Add Invalid Quantity', () => {
 	const response2 = testItemList.addItem(generateNewPlaceholderInventoryItem("banana seed", 1), -2);
 	expect(response2.isSuccessful()).toBe(false);
 	expect(testItemList.getItem('banana seed').payload.quantity).toBe(2);
-	const response3 = testItemList.addItem(generateNewPlaceholderInventoryItem("harvested apple", 1), 0);
+	const response3 = testItemList.addItem(generateNewPlaceholderInventoryItem("apple", 1), 0);
 	expect(response3.isSuccessful()).toBe(false);
 	expect(testItemList.size()).toBe(3);
-	const response4 = testItemList.addItem(generateNewPlaceholderInventoryItem("harvested banana", 1), -1);
+	const response4 = testItemList.addItem(generateNewPlaceholderInventoryItem("banana", 1), -1);
 	expect(response4.isSuccessful()).toBe(false);
 	expect(testItemList.size()).toBe(3);
 });

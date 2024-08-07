@@ -52,22 +52,22 @@ test('Should Find Item', () => {
 })
 
 test('Should Not Find Nonexistent Item', () => {
-	const getResponse = testStore.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple')!);
+	const getResponse = testStore.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!);
 	expect(getResponse.isSuccessful()).toBe(false);
-	const containsResponse = testStore.contains(placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple')!);
+	const containsResponse = testStore.contains(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!);
 	expect(containsResponse.isSuccessful()).toBe(true);
 	expect(containsResponse.payload).toBe(false);
 })
 
 test('Should Gain Item To Store', () => {
-	const response = testStore.gainItem(placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple')!, 1);
+	const response = testStore.gainItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!, 1);
 	expect(response.isSuccessful()).toBe(true);
 	expect(testStore.size()).toBe(4);
-	expect(testStore.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple')!).payload.quantity).toBe(1);
-	const response2 = testStore.gainItem(placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple')!, 3);
+	expect(testStore.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!).payload.quantity).toBe(1);
+	const response2 = testStore.gainItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!, 3);
 	expect(response2.isSuccessful()).toBe(true);
 	expect(testStore.size()).toBe(4);
-	expect(testStore.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple')!).payload.quantity).toBe(4);
+	expect(testStore.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!).payload.quantity).toBe(4);
 })
 
 test('Should Not Gain Invalid Item', () => {
@@ -96,7 +96,7 @@ test('Should Trash Item From Store', () => {
 })
 
 test('Should Not Trash Nonexistent Item From Store', () => {
-	const response = testStore.trashItem(placeholderItemTemplates.getInventoryItemTemplateByName('harvested apple')!, 1);
+	const response = testStore.trashItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!, 1);
 	expect(response.isSuccessful()).toBe(false);
 	expect(testStore.size()).toBe(3);
 	const response2 = testStore.trashItem(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, 0);
@@ -249,7 +249,7 @@ test('Should Rollback on Failing Restock', () => {
 	expect(response.isSuccessful()).toBe(false);
 	expect(testStore.getItem('apple seed').payload.getQuantity()).toBe(1);
 	expect(testStore.getItem('banana seed').payload.getQuantity()).toBe(20);
-	expect(testStore.contains('harvested apple').payload).toBe(false);
+	expect(testStore.contains('apple').payload).toBe(false);
 })
 
 test('Should Create Store Object From PlainObject', () => {
@@ -277,7 +277,7 @@ test('Should Need Restock', () => {
 	testStore.setStockList(new ItemList([generateNewPlaceholderInventoryItem('apple seed', 2)]));
 	const restock = testStore.needsRestock();
 	expect(restock).toBe(true);
-	const restock2 = testStore.needsRestock(new ItemList([generateNewPlaceholderInventoryItem('harvested apple', 1)]))
+	const restock2 = testStore.needsRestock(new ItemList([generateNewPlaceholderInventoryItem('apple', 1)]))
 	expect(restock2).toBe(true);
 })
 
@@ -285,7 +285,7 @@ test('Should Not Need Restock', () => {
 	testStore.setStockList(new ItemList([generateNewPlaceholderInventoryItem('apple seed', 1)]));
 	const restock = testStore.needsRestock();
 	expect(restock).toBe(false);
-	testStore.gainItem(generateNewPlaceholderInventoryItem('harvested apple', 100), 100);
-	const restock2 = testStore.needsRestock(new ItemList([generateNewPlaceholderInventoryItem('harvested apple', 1)]))
+	testStore.gainItem(generateNewPlaceholderInventoryItem('apple', 100), 100);
+	const restock2 = testStore.needsRestock(new ItemList([generateNewPlaceholderInventoryItem('apple', 1)]))
 	expect(restock2).toBe(false);
 })

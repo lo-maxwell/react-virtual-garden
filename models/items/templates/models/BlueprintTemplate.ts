@@ -1,17 +1,16 @@
 import { ItemSubtype, ItemSubtypes, ItemType, ItemTypes } from "../../ItemTypes";
 import { itemTemplateInterfaceRepository } from "../interfaces/ItemTemplateRepository";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
-import { placeholderItemTemplates } from "./PlaceholderItemTemplate";
 
 export class BlueprintTemplate extends InventoryItemTemplate{
 	transformId: string;
-	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number, transformId: string) {
-		super(id, name, icon, type, subtype, value);
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, transformId: string) {
+		super(id, name, icon, type, subtype, category, description, value);
 		this.transformId = transformId;
 	}
 
 	static getErrorTemplate() {
-		return new BlueprintTemplate("1059999", "error", "❌", "InventoryItem", "Blueprint", 0, "0049999");
+		return new BlueprintTemplate("1-05-99-99-99", "error", "❌", "InventoryItem", "Blueprint", "Error", "Error", 0, "0-04-99-99-99");
 	}
 
 	static fromPlainObject(plainObject: any): BlueprintTemplate {
@@ -34,7 +33,7 @@ export class BlueprintTemplate extends InventoryItemTemplate{
 					throw new Error('Found non blueprint for blueprint template');
 				}
 				const blueprintTemplate = template as BlueprintTemplate;
-				return new BlueprintTemplate(blueprintTemplate.id, blueprintTemplate.name, blueprintTemplate.icon, blueprintTemplate.type, blueprintTemplate.subtype, blueprintTemplate.value, blueprintTemplate.transformId);
+				return new BlueprintTemplate(blueprintTemplate.id, blueprintTemplate.name, blueprintTemplate.icon, blueprintTemplate.type, blueprintTemplate.subtype, blueprintTemplate.category, blueprintTemplate.description, blueprintTemplate.value, blueprintTemplate.transformId);
 				
 			}
 			if (typeof name !== 'string') {
@@ -52,7 +51,7 @@ export class BlueprintTemplate extends InventoryItemTemplate{
 					throw new Error('Found non blueprint for blueprint template');
 				}
 				const typedTemplate = template as BlueprintTemplate;
-				return new BlueprintTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.value, typedTemplate.transformId);
+				return new BlueprintTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId);
 			}
 			throw new Error('Could not find valid id or name for BlueprintTemplate');
 		} catch (err) {

@@ -11,14 +11,11 @@
 		"DECORATION": "04",
 		"BLUEPRINT": "05"
 	},
+	"category": {
+		"_comment": "2 digits depending on the subtype. For example, an apple is a pome which has id '09' in PlantCategories"
+	},
 	"item": {
-		"GROUND": "00",
-		"APPLE": "01",
-		"BANANA": "02",
-		"COCONUT": "03",
-		"BENCH": "04",
-		"FLAMINGO": "05",
-		"ERROR": "99"
+		"_comment": "2 digits depending on the category. For example, an apple is the first pome in the list which has id '01'"
 	},
 	"variant": {
 		"NORMAL": "00",

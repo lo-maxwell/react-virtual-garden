@@ -1,14 +1,15 @@
+import { stringify } from "querystring";
 import { ItemSubtype, ItemSubtypes, ItemType, ItemTypes } from "../../ItemTypes";
 import { itemTemplateInterfaceRepository } from "../interfaces/ItemTemplateRepository";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
 
 export class HarvestedItemTemplate extends InventoryItemTemplate{
-	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, value: number) {
-		super(id, name, icon, type, subtype, value);
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number) {
+		super(id, name, icon, type, subtype, category, description, value);
 	}
 
 	static getErrorTemplate() {
-		return new HarvestedItemTemplate("1039999", "error", "❌", "InventoryItem", "HarvestedItem", 0);
+		return new HarvestedItemTemplate("1-03-99-99-99", "error", "❌", "InventoryItem", "HarvestedItem", "Error", "Error", 0);
 	}
 
 	static fromPlainObject(plainObject: any): HarvestedItemTemplate {
@@ -31,7 +32,7 @@ export class HarvestedItemTemplate extends InventoryItemTemplate{
 					throw new Error('Found non HarvestedItem for HarvestedItem template');
 				}
 				const typedTemplate = template as HarvestedItemTemplate;
-				return new HarvestedItemTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.value);
+				return new HarvestedItemTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value);
 			}
 			if (typeof name !== 'string') {
 				throw new Error('Invalid name property in plainObject for HarvestedItemTemplate');
@@ -50,7 +51,7 @@ export class HarvestedItemTemplate extends InventoryItemTemplate{
 					throw new Error('Found non decoration for HarvestedItem template');
 				}
 				const typedTemplate = template as HarvestedItemTemplate;
-				return new HarvestedItemTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.value);
+				return new HarvestedItemTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value);
 			}
 			throw new Error('Could not find valid id or name for HarvestedItemTemplate');
 		} catch (err) {
