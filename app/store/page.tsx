@@ -1,18 +1,14 @@
 'use client'
 import InventoryComponent from "@/components/inventory/inventory";
-import { Garden } from "@/models/garden/Garden";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
-import { ItemList } from "@/models/itemStore/ItemList";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
-import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
-import { loadInventory, saveInventory } from "@/utils/localStorage/inventory";
 import { useEffect, useState } from "react";
 import StoreComponent from "./store";
 import { Store } from "@/models/itemStore/store/Store";
-import { loadStore, saveStore } from "@/utils/localStorage/store";
 import TradeWindowComponent from "./tradeWindow";
 import { useStore } from "@/hooks/contexts/StoreContext";
 import { useInventory } from "@/hooks/contexts/InventoryContext";
+import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
 
 const StorePage = () => {
   function RenderStore() {
@@ -20,22 +16,21 @@ const StorePage = () => {
     const { inventory } = useInventory();
     //Hack to force refresh inventory when its contents change in another component
     const [inventoryForceRefreshKey, setInventoryForceRefreshKey] = useState(0);
-    const [selected, setSelected] = useState<InventoryItem | null>(null);
-    const [owner, setOwner] = useState<Store | Inventory | null>(null);
+    const {selectedItem, toggleSelectedItem, owner, setOwner} = useSelectedItem();
 
     const inventorySetSelected = (arg: InventoryItem | null) => {
       setOwner(inventory);
-      setSelected(arg);
+      toggleSelectedItem(arg);
     }
 
     const tradeWindowSetSelected = (arg: InventoryItem | null) => {
       setOwner(null);
-      setSelected(arg);
+      toggleSelectedItem(arg);
     }
 
     const storeSetSelected = (arg: InventoryItem | null) => {
       setOwner(store);
-      setSelected(arg);
+      toggleSelectedItem(arg);
     }
 
     const findStoreComponent = () => {
@@ -45,7 +40,7 @@ const StorePage = () => {
 
     const findTradeWindowComponent = () => {
       if (!inventory || !store) return <div>Loading Trade Window...</div>;
-      return <TradeWindowComponent selected={selected} setSelected={setSelected} owner={owner} costMultiplier={getCostMultiplier()}/>;
+      return <TradeWindowComponent costMultiplier={getCostMultiplier()}/>;
     }
 
     const findInventoryComponent = () => {

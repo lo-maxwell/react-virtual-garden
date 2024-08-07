@@ -135,13 +135,25 @@
   * Updated StoreProvider to more easily add new items to store
   * Fixed issue with tooltips not properly updating when the page is scrolled
 
+## Day 13
+
+### UI Changes
+
+  * Moved selectedItem and owner to a provider/context, allowing easier access from internal components
+  * SelectedItem now sets to null if you click an already selected item
+  * Added tooltips for empty plots when a blueprint or seed is selected
+
 
 
 
 
 TODO:
 
-Fix Tooltips being off when scrolling
+Add selected indicator and/or make plots show what is going to be planted/placed
+
+To get stores to autoupdate, have to store store information in a json file and pull from it for the stocklist/itemlist without destroying the existing items
+
+Change grow time to say minutes/hours if more than 60s remaining
 
 Generate multiple store types/switch between stores/restock store
 Clean up ui, especially font/scaling using rem, to accommodate more screen width
@@ -150,10 +162,6 @@ Trade Window Multiselect + Total
 Sort/Order Inventory by filters - itemid, alphabetical, type?
 
 Make Garden more interactive than plant all -> harvest 
-
-Fix save/load of items to grab the new itemtemplates so that people can't stay on old items
-
-Mouse over tooltips for items
 
 Add User class
 
@@ -165,8 +173,6 @@ Add multiple harvests to some plants
 
 Add crop rotation - either assign plant families or just individual plants + soil health; low soil health -> cannot be fertilized for a duration + yield reduction, high soil health -> free stronger fertilizer
 
-Add description to itemTemplate
-
 Add fertilizer item - chance for double harvest, or reduce grow time. fertilizer lasts x seconds and affects any plants that start (finish?) growing during that time. or linearly diminishing effect based on time since fertilizer application
 
 Add toolkit - select (plant, harvest, pickup, place); delete (only in progress plants)
@@ -176,6 +182,8 @@ Store sells seeds for base price, not 2x (?)
 Daily login bonus to prevent softlock - gives some money and a random assortment of seeds that add up to some value
 
 Change value of slow plants so they aren't super efficient, amke them high risk high reward by having high seed costs + add random events that can destroy them + fertilizer that makes them super efficient
+
+Tooltips should not go off the screen; make them below if normally on top, or on top if normally below
 
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time

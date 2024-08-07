@@ -8,10 +8,12 @@ import { useGarden } from "@/hooks/contexts/GardenContext";
 import LevelSystemComponent from "@/components/level/LevelSystem";
 import { saveGarden } from "@/utils/localStorage/garden";
 import { usePlotActions } from "@/hooks/garden/plotActions";
+import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
 
-const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {selected: InventoryItem | null, setSelected: Function, inventoryForceRefresh: {value: number, setter: Function}}) => {
+const GardenComponent = ({inventoryForceRefresh}: {inventoryForceRefresh: {value: number, setter: Function}}) => {
 	const { inventory } = useInventory();
 	const { garden, gardenMessage, setGardenMessage } = useGarden();
+	const {selectedItem, toggleSelectedItem} = useSelectedItem();
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 	const [instantGrow, setInstantGrow] = useState(false); //for debug purposes
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
@@ -53,7 +55,7 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 								key={index} 
 								ref={el => {plotRefs.current[rowIndex][colIndex] = el!}}
 								plot={plot} 
-								onPlotClick={GetPlotAction(plot, selected)} 
+								onPlotClick={GetPlotAction(plot, selectedItem)} 
 								inventoryForceRefresh={inventoryForceRefresh}
 							/>
 						);
@@ -67,8 +69,8 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 	}
 
 	function plantAll() {
-		if (selected == null || selected.itemData.subtype != ItemSubtypes.SEED.name) return;
-		const getItemResponse = inventory.getItem(selected);
+		if (selectedItem == null || selectedItem.itemData.subtype != ItemSubtypes.SEED.name) return;
+		const getItemResponse = inventory.getItem(selectedItem);
 		if (!getItemResponse.isSuccessful()) return;
 		let numRemaining = getItemResponse.payload.getQuantity();
 		let numPlanted = 0;

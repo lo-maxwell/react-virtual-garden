@@ -10,6 +10,7 @@ import UserProfileComponent from "@/components/garden/userProfile";
 import { useInventory } from "@/hooks/contexts/InventoryContext";
 import { useGarden } from "@/hooks/contexts/GardenContext";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
 
 
 const GardenPage = () => {
@@ -21,7 +22,7 @@ const GardenPage = () => {
   //Hack to force refresh garden when its contents change in another component
   const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 
-  const [selected, setSelected] = useState<InventoryItem | null>(null);
+  const {selectedItem, toggleSelectedItem} = useSelectedItem();
 
   function printGarden() {
     if (!garden || !inventory) return;
@@ -33,7 +34,7 @@ const GardenPage = () => {
     if (!inventory) return;
     const appleSeedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple seed');
     inventory.gainItem(appleSeedTemplate!, 10);
-    setSelected(inventory.getItem('apple seed').payload);
+    toggleSelectedItem(inventory.getItem('apple seed').payload);
     setInventoryForceRefreshKey(inventoryForceRefreshKey + 1);
     saveInventory(inventory);
   }
@@ -45,12 +46,12 @@ const GardenPage = () => {
 
   function RenderGarden() {
     if (!garden || !inventory) return <div>Loading Garden...</div>;
-    return <GardenComponent key={gardenForceRefreshKey} selected={selected} setSelected={setSelected} inventoryForceRefresh={{value: inventoryForceRefreshKey, setter: setInventoryForceRefreshKey}}/>;
+    return <GardenComponent key={gardenForceRefreshKey} inventoryForceRefresh={{value: inventoryForceRefreshKey, setter: setInventoryForceRefreshKey}}/>;
   }
 
   function RenderInventory() {
     if (!inventory) return <div>Loading Inventory...</div>;
-    return <InventoryComponent key={inventoryForceRefreshKey} onInventoryItemClickFunction={setSelected} costMultiplier={1}/>;
+    return <InventoryComponent key={inventoryForceRefreshKey} onInventoryItemClickFunction={toggleSelectedItem} costMultiplier={1}/>;
   }
 
   function handleResetGarden() {

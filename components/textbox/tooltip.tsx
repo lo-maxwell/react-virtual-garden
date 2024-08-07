@@ -61,6 +61,7 @@ const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVi
       className="w-full relative inline-block"
     >
       {children}
+      {/* ON = always show, OFF = never show, other = show if moused over */}
       {(forceVisible === 'ON' || (visible && forceVisible !== 'OFF')) && (
         <div
           className={`fixed z-10 px-2 py-1 text-sm text-purple-800 text-semibold ${backgroundColor} rounded shadow-lg
