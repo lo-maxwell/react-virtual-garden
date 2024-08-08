@@ -2,7 +2,7 @@ import PlotComponent, { PlotComponentRef } from "@/components/garden/plot";
 import { Plot } from "@/models/garden/Plot";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
-import { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useInventory } from "@/hooks/contexts/InventoryContext";
 import { useGarden } from "@/hooks/contexts/GardenContext";
 import LevelSystemComponent from "@/components/level/LevelSystem";
@@ -10,13 +10,24 @@ import { saveGarden } from "@/utils/localStorage/garden";
 import { usePlotActions } from "@/hooks/garden/plotActions";
 import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
 
-const GardenComponent = ({inventoryForceRefresh}: {inventoryForceRefresh: {value: number, setter: Function}}) => {
+const GardenComponent = () => {
 	const { inventory } = useInventory();
 	const { garden, gardenMessage, setGardenMessage } = useGarden();
 	const {selectedItem, toggleSelectedItem} = useSelectedItem();
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 	const [instantGrow, setInstantGrow] = useState(false); //for debug purposes
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
+
+	const [currentTime, setCurrentTime] = useState(Date.now());
+	// const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
+	useEffect(() => {
+		const id = setInterval(() => {
+			// Update currentTime
+			setCurrentTime(Date.now());
+		}, 1000); // Update every second
+		// setIntervalId(id);
+		return () => clearInterval(id); // Cleanup function to clear the interval on unmount
+	}, []);
 
 	function GetPlotAction(plot: Plot, selected: InventoryItem | null) {
 		const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
@@ -56,7 +67,7 @@ const GardenComponent = ({inventoryForceRefresh}: {inventoryForceRefresh: {value
 								ref={el => {plotRefs.current[rowIndex][colIndex] = el!}}
 								plot={plot} 
 								onPlotClick={GetPlotAction(plot, selectedItem)} 
-								inventoryForceRefresh={inventoryForceRefresh}
+								currentTime={currentTime}
 							/>
 						);
 					})}

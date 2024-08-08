@@ -1,6 +1,7 @@
 import { ItemList } from "@/models/itemStore/ItemList";
 import { generateNewPlaceholderInventoryItem, generateRandomPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { ItemSubtypes } from "@/models/items/ItemTypes";
 
 let testItemList: ItemList;
 	
@@ -22,6 +23,29 @@ test('Should Initialize Default ItemList Object', () => {
 test('Should Get All Items', () => {
 	const items = testItemList.getAllItems();
 	expect(items.length).toBe(3);
+})
+
+
+test('Should Get Items By Subtype', () => {
+	testItemList.addItem(generateNewPlaceholderInventoryItem('apple', 1), 1);
+	let items = testItemList.getItemsBySubtype(ItemSubtypes.SEED.name);
+	expect(items.length).toBe(3);
+	items = testItemList.getItemsBySubtype(ItemSubtypes.HARVESTED.name);
+	expect(items.length).toBe(1);
+	items = testItemList.getItemsBySubtype(ItemSubtypes.BLUEPRINT.name);
+	expect(items.length).toBe(0);
+})
+
+test('Should Get Items By Subtype and Category', () => {
+	testItemList.addItem(generateNewPlaceholderInventoryItem('apple', 1), 1);
+	let items = testItemList.getItemsBySubtype(ItemSubtypes.SEED.name, "Pome");
+	expect(items.length).toBe(1);
+	items = testItemList.getItemsBySubtype(ItemSubtypes.SEED.name, "Allium");
+	expect(items.length).toBe(0);
+	items = testItemList.getItemsBySubtype(ItemSubtypes.HARVESTED.name, "Pome");
+	expect(items.length).toBe(1);
+	items = testItemList.getItemsBySubtype(ItemSubtypes.BLUEPRINT.name);
+	expect(items.length).toBe(0);
 })
 
 test('Should Get Existing Item', () => {

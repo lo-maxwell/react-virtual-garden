@@ -1,4 +1,4 @@
-import InventoryItemComponent from "@/components/inventory/inventoryItem";
+import ItemStoreComponent from "@/components/itemStore/itemStore";
 import { useStore } from "@/hooks/contexts/StoreContext";
 import { useEffect, useState } from "react";
 
@@ -56,19 +56,8 @@ const StoreComponent = ({onInventoryItemClickFunction}: {onInventoryItemClickFun
 		<>
 		<div className="w-[80%]">
 			<div>{store.getStoreName()}</div>
-			{store.getAllItems().map((item, itemIndex) => (
-				<div key={itemIndex}>
-					<InventoryItemComponent item={item} onClickFunction={onInventoryItemClickFunction} costMultiplier={store.getBuyMultiplier()}></InventoryItemComponent>
-				</div>
-			))}
+			<ItemStoreComponent itemStore={store} onInventoryItemClickFunction={onInventoryItemClickFunction} costMultiplier={store.getBuyMultiplier()}/>
 			<div>
-				{/* <button
-					onClick={handleRestock}
-					disabled={!canRestock}
-					className={`bg-gray-300 px-4 py-1 mt-2 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2 ${!canRestock ? 'opacity-50 cursor-not-allowed' : ''}`}
-				>
-					Restock Store
-				</button> */}
 				<div className="mt-2 text-sm text-gray-600">
 					{canRestock ? 'Store is fully stocked' : `Restock in: ${Math.ceil(timeRemaining / 1000)}s`}
 				</div>

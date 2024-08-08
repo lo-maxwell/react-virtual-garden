@@ -3,22 +3,22 @@ import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { useGarden } from "@/hooks/contexts/GardenContext";
 import { Plant } from "@/models/items/placedItems/Plant";
-import Tooltip from "../textbox/tooltip";
 import PlotTooltip from "./plotTooltip";
 import colors from "../colors/colors";
 
 type PlotComponentProps = {
 	plot: Plot;
 	onPlotClick: () => string;
-	inventoryForceRefresh: {value: number, setter: Function};
+	currentTime: number;
   };
 
 export interface PlotComponentRef {
 	plot: Plot;
 	click: () => void;
+	currentTime: number;
 }
 
-const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, onPlotClick, inventoryForceRefresh}, ref) => {
+const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, onPlotClick, currentTime}, ref) => {
 	PlotComponent.displayName = "Plot";
 	const { garden } = useGarden();
 	const [displayIcon, setDisplayIcon] = useState(plot.getItem().itemData.icon);
@@ -28,7 +28,8 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 		click() {
 			handleClick();
 		},
-		plot
+		plot,
+		currentTime
 	}));
 
 	useEffect(() => {
@@ -52,7 +53,6 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 		const updatedIcon = onPlotClick();
 		if (displayIcon != updatedIcon) {
 			setDisplayIcon(updatedIcon);
-			inventoryForceRefresh.setter(inventoryForceRefresh.value + 1);
 		}
 	}
 
@@ -83,7 +83,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 	}
 
 	return (
-		<PlotTooltip plot={plot}>
+		<PlotTooltip plot={plot} currentTime={currentTime}>
 			<button onClick={handleClick} className={`flex items-center justify-center text-4xl ${color} w-12 h-12 text-purple-600 font-semibold hover:text-white hover:bg-purple-600 hover:border-transparent`}>{displayIcon}</button>
 		</PlotTooltip>
 	  );

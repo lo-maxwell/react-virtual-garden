@@ -142,12 +142,15 @@
   * Moved selectedItem and owner to a provider/context, allowing easier access from internal components
   * SelectedItem now sets to null if you click an already selected item
   * Added tooltips for empty plots when a blueprint or seed is selected
-
-
-
+  * Added dropdowns for filtering inventories by subtype and category
+  * Refactored store and inventory for code reuse
+  * Fixed issue with inventory not updating when garden is interacted with
+    * Added inventoryForceRefreshKey as a hack to the inventoryProvider, used to refresh the item list manually
 
 
 TODO:
+Filter inventory - sort inventory by alphabet, price, category
+
 
 Add selected indicator and/or make plots show what is going to be planted/placed
 
@@ -158,8 +161,6 @@ Change grow time to say minutes/hours if more than 60s remaining
 Generate multiple store types/switch between stores/restock store
 Clean up ui, especially font/scaling using rem, to accommodate more screen width
 Trade Window Multiselect + Total
-
-Sort/Order Inventory by filters - itemid, alphabetical, type?
 
 Make Garden more interactive than plant all -> harvest 
 

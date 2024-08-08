@@ -13,6 +13,7 @@ interface InventoryProviderProps {
 
 export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     const [inventory, setInventory] = useState<Inventory | null>(null);
+	const [inventoryForceRefreshKey, setInventoryForceRefreshKey] = useState(0);
 
 	function generateDefaultNewInventory(): Inventory {
 		return new Inventory("Test User", 100, new ItemList([
@@ -42,10 +43,14 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
 		setInventory(newInventory);
 		saveInventory(newInventory);
 		console.log(newInventory.toPlainObject());
-;	}
+	}
+
+	const updateInventoryForceRefreshKey = () => {
+		setInventoryForceRefreshKey((inventoryForceRefreshKey) => inventoryForceRefreshKey + 1);
+	}
 
     return (
-        <InventoryContext.Provider value={{ inventory: inventory!, resetInventory }}>
+        <InventoryContext.Provider value={{ inventory: inventory!, resetInventory, inventoryForceRefreshKey, updateInventoryForceRefreshKey }}>
             {children}
         </InventoryContext.Provider>
     );

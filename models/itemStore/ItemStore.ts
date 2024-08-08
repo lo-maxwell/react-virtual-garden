@@ -1,4 +1,5 @@
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
+import { ItemSubtype } from "../items/ItemTypes";
 import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplate";
 import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 import { InventoryTransactionResponse } from "./inventory/InventoryTransactionResponse";
@@ -21,8 +22,34 @@ export class ItemStore {
 	/**
 	 * @returns a copy of the inventory items within the list.
 	 */
-	 getAllItems(): InventoryItem[] {
+	getAllItems(): InventoryItem[] {
 		return this.items.getAllItems();
+	}
+
+	/**
+	 * @param subtype the subtype string, ie. SEED, HARVESTED, BLUEPRINT
+	 * @param category (optional) the category string, ie. Allium, Normal
+	 * @returns a copy of the inventory items matching the given subtype
+	 */
+	getItemsBySubtype(subtype: ItemSubtype, category: string | null = null): InventoryItem[] {
+		return this.items.getItemsBySubtype(subtype, category);
+	}
+
+	//TODO: Needs unit tests
+	/**
+	 * @returns a list of strings containing all the subtypes of items in this itemlist
+	 */
+	 getAllSubtypes(): string[] {
+		return this.items.getAllSubtypes();
+	}
+
+	//TODO: Needs unit tests
+	/**
+	 * @param subtype the subtype to search within
+	 * @returns a list of strings containing all the categories of items in this itemlist
+	 */
+	getAllCategories(subtype: ItemSubtype): string[] {
+		return this.items.getAllCategories(subtype);
 	}
 
 	/**

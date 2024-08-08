@@ -1,5 +1,4 @@
 'use client'
-import InventoryComponent from "@/components/inventory/inventory";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { useEffect, useState } from "react";
@@ -9,13 +8,12 @@ import TradeWindowComponent from "./tradeWindow";
 import { useStore } from "@/hooks/contexts/StoreContext";
 import { useInventory } from "@/hooks/contexts/InventoryContext";
 import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
+import InventoryComponent from "@/components/inventory/inventory";
 
 const StorePage = () => {
   function RenderStore() {
     const {store} = useStore();
     const { inventory } = useInventory();
-    //Hack to force refresh inventory when its contents change in another component
-    const [inventoryForceRefreshKey, setInventoryForceRefreshKey] = useState(0);
     const {selectedItem, toggleSelectedItem, owner, setOwner} = useSelectedItem();
 
     const inventorySetSelected = (arg: InventoryItem | null) => {
@@ -45,7 +43,7 @@ const StorePage = () => {
 
     const findInventoryComponent = () => {
       if (!inventory || !store) return <div>Loading Inventory...</div>;
-      return <InventoryComponent key={inventoryForceRefreshKey} onInventoryItemClickFunction={inventorySetSelected} costMultiplier={store.getSellMultiplier()}/>;
+      return <InventoryComponent onInventoryItemClickFunction={inventorySetSelected} costMultiplier={store.getSellMultiplier()}/>;
     }
 
     const getCostMultiplier = () => {

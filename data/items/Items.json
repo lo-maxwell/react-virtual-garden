@@ -199,7 +199,7 @@
 			},
 			{
 				"id": "1-01-01-05-00",
-				"name": "garlic bulb",
+				"name": "garlic seed",
 				"icon": "🧄",
 				"type": "InventoryItem",
 				"subtype": "Seed",

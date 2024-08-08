@@ -5,11 +5,12 @@ import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { useGarden } from "../contexts/GardenContext";
 import { useInventory } from "../contexts/InventoryContext";
+import { useSelectedItem } from "../contexts/SelectedItemContext";
 
 //contains static onclick functions for plot components
 export const usePlotActions = () => {
 	const {garden, setGardenMessage } = useGarden();
-	const {inventory} = useInventory();
+	const {inventory, updateInventoryForceRefreshKey} = useInventory();
 
 	/**
 	 * Can only be used in an empty plot. Converts an inventoryItem seed into a plant and places it in this plot.
@@ -29,6 +30,7 @@ export const usePlotActions = () => {
 				setGardenMessage(` `);
 				return plot.getItem().itemData.icon; 
 			}
+			updateInventoryForceRefreshKey();
 			saveInventory(inventory);
 			saveGarden(garden);
 			setGardenMessage(`Planted ${item.itemData.name}.`);
@@ -54,6 +56,7 @@ export const usePlotActions = () => {
 				setGardenMessage(` `);
 				return plot.getItem().itemData.icon; 
 			}
+			updateInventoryForceRefreshKey();
 			saveInventory(inventory);
 			saveGarden(garden);
 			setGardenMessage(`Placed ${placeItemResponse.payload.newItem.itemData.name}.`);
@@ -80,6 +83,8 @@ export const usePlotActions = () => {
 				setGardenMessage(` `);
 				return plot.getItem().itemData.icon;
 			} 
+			updateInventoryForceRefreshKey();
+
 			garden.addExp(xp);
 			saveInventory(inventory);
 			saveGarden(garden);
@@ -105,6 +110,7 @@ export const usePlotActions = () => {
 				setGardenMessage(` `);
 				return plot.getItem().itemData.icon;
 			}
+			updateInventoryForceRefreshKey();
 			saveInventory(inventory);
 			saveGarden(garden);
 			setGardenMessage(`Picked up ${pickupItemResponse.payload.pickedItem.itemData.name}.`);

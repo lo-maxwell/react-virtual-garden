@@ -1,6 +1,6 @@
 
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
-import { ItemType, ItemTypes } from "../items/ItemTypes";
+import { ItemSubtype, ItemType, ItemTypes } from "../items/ItemTypes";
 import { InventoryTransactionResponse } from "./inventory/InventoryTransactionResponse";
 import { getItemClassFromSubtype, ItemConstructor } from "../items/utility/classMaps";
 import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplate";
@@ -71,6 +71,62 @@ export class ItemList {
 	 */
 	getAllItems(): InventoryItem[] {
 		return this.items.slice();
+	}
+
+	
+	/**
+	 * @param subtype the subtype string, ie. SEED, HARVESTED, BLUEPRINT
+	 * @param category (optional) the category string, ie. Allium, Normal
+	 * @returns a copy of the inventory items matching the given subtype
+	 */
+	getItemsBySubtype(subtype: ItemSubtype, category: string | null = null): InventoryItem[] {
+		if (!category) {
+			return this.items.slice().filter((item) => item.itemData.subtype === subtype);
+		}
+		return this.items.slice().filter((item) => item.itemData.subtype === subtype && item.itemData.category === category);
+	}
+
+	//TODO: Needs unit tests
+	/**
+	 * @returns a list of strings containing all the subtypes of items in this itemlist
+	 */
+	getAllSubtypes(): string[] {
+		const fixedOrder = ['Seed', 'HarvestedItem', 'Blueprint']; // Desired order
+		const subtypes: string[] = [];
+		this.items.forEach((item) => {
+			if (!subtypes.includes(item.itemData.subtype)) {
+				subtypes.push(item.itemData.subtype);
+			}
+		})
+		// Sort subtypes based on their index in the fixedOrder array
+		subtypes.sort((a, b) => {
+			const indexA = fixedOrder.indexOf(a);
+			const indexB = fixedOrder.indexOf(b);
+	
+			// If a subtype is not in the fixedOrder array, it gets a large index number.
+			// This keeps unknown subtypes at the end of the sorted array.
+			const orderA = indexA !== -1 ? indexA : fixedOrder.length;
+			const orderB = indexB !== -1 ? indexB : fixedOrder.length;
+	
+			return orderA - orderB;
+		});
+		return subtypes;
+	}
+
+	//TODO: Needs unit tests
+	/**
+	 * @param subtype the subtype to search within
+	 * @returns a list of strings containing all the categories of items in this itemlist
+	 */
+	getAllCategories(subtype: ItemSubtype): string[] {
+		const categories: string[] = [];
+		this.items.forEach((item) => {
+			if (item.itemData.subtype === subtype && !categories.includes(item.itemData.category)) {
+				categories.push(item.itemData.category);
+			}
+		})
+		categories.sort();
+		return categories;
 	}
 
 	/**

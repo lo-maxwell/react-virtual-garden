@@ -1,3 +1,4 @@
+import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
@@ -40,6 +41,28 @@ test('Should Initialize Default Store Object', () => {
 test('Should Get All Items', () => {
 	const items = testStore.getAllItems();
 	expect(items.length).toBe(3);
+})
+
+test('Should Get Items By Subtype', () => {
+	testStore.gainItem(generateNewPlaceholderInventoryItem('apple', 1), 1);
+	let items = testStore.getItemsBySubtype(ItemSubtypes.SEED.name);
+	expect(items.length).toBe(3);
+	items = testStore.getItemsBySubtype(ItemSubtypes.HARVESTED.name);
+	expect(items.length).toBe(1);
+	items = testStore.getItemsBySubtype(ItemSubtypes.BLUEPRINT.name);
+	expect(items.length).toBe(0);
+})
+
+test('Should Get Items By Subtype and Category', () => {
+	testStore.gainItem(generateNewPlaceholderInventoryItem('apple', 1), 1);
+	let items = testStore.getItemsBySubtype(ItemSubtypes.SEED.name, "Pome");
+	expect(items.length).toBe(1);
+	items = testStore.getItemsBySubtype(ItemSubtypes.SEED.name, "Allium");
+	expect(items.length).toBe(0);
+	items = testStore.getItemsBySubtype(ItemSubtypes.HARVESTED.name, "Pome");
+	expect(items.length).toBe(1);
+	items = testStore.getItemsBySubtype(ItemSubtypes.BLUEPRINT.name);
+	expect(items.length).toBe(0);
 })
 
 test('Should Find Item', () => {

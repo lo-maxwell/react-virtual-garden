@@ -3,7 +3,6 @@ import { Plot } from "@/models/garden/Plot";
 import { Blueprint } from "@/models/items/inventoryItems/Blueprint";
 import { Seed } from "@/models/items/inventoryItems/Seed";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
-import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { Plant } from "@/models/items/placedItems/Plant";
 import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
@@ -12,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import colors from "../colors/colors";
 import Tooltip from "../textbox/tooltip";
 
-const PlotTooltip = ({ children, plot }: { children: React.ReactNode, plot: Plot}) => {
+const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNode, plot: Plot, currentTime: number}) => {
 
 	const {selectedItem} = useSelectedItem();
 
@@ -32,33 +31,6 @@ const PlotTooltip = ({ children, plot }: { children: React.ReactNode, plot: Plot
 
 	//Can pull this out to a separate file if we ever need multiple formats for tooltips
 	const RenderPlantTooltip = () => {
-		const [currentTime, setCurrentTime] = useState(Date.now());
-		const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
-
-		// This effect will run once to set up the interval
-		useEffect(() => {
-			const id = setInterval(() => {
-				// Update currentTime
-				setCurrentTime(Date.now());
-			}, 1000); // Update every second
-	
-			setIntervalId(id);
-	
-			return () => clearInterval(id); // Cleanup function to clear the interval on unmount
-		}, []); // Empty dependency array ensures this effect runs only once
-	
-
-		useEffect(() => {
-			// Run this effect whenever currentTime updates
-			if (plot.getRemainingGrowTime(currentTime) === "Ready to harvest!") {
-				// Stop the interval
-				if (intervalId) {
-					clearInterval(intervalId);
-				}
-			}
-		}, [currentTime, intervalId]); // Dependency array includes currentTime and intervalId
-	
-
 		const currentItem = plot.getItem() as Plant;
 		const harvestedItem = placeholderItemTemplates.getInventoryTemplate(currentItem.itemData.transformId);
 		if (!harvestedItem) return <></>;
