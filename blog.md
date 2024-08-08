@@ -146,6 +146,7 @@
   * Refactored store and inventory for code reuse
   * Fixed issue with inventory not updating when garden is interacted with
     * Added inventoryForceRefreshKey as a hack to the inventoryProvider, used to refresh the item list manually
+  * Updated text on plot tooltips to display more useful information on remaining time/grow time
 
 
 TODO:

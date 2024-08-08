@@ -138,7 +138,27 @@ export class Plot {
 			return "Ready to harvest!";
 		}
 		const remainingTime = Math.floor((plantedTime + item.itemData.growTime * 1000 - currentTime) / 1000);
-		return `${remainingTime} seconds left to grow!`;
+		// Calculate days, hours, minutes, and seconds
+		const remainingDays = Math.floor(remainingTime / (24 * 3600));
+		const remainingHours = Math.floor((remainingTime % (24 * 3600)) / 3600);
+		const remainingMinutes = Math.floor((remainingTime % 3600) / 60);
+		const remainingSeconds = Math.floor(remainingTime % 60);
+
+		// Format components with leading zeros
+		const formattedDays = remainingDays.toString();
+		const formattedHours = remainingHours.toString().padStart(2, '0');
+		const formattedMinutes = remainingMinutes.toString().padStart(2, '0');
+		const formattedSeconds = remainingSeconds.toString().padStart(2, '0');
+		
+		if (remainingTime < 60) {
+			return `Fully Grown in: ${remainingTime} seconds`;
+		} else if (remainingTime < 3600) {
+			return `Fully Grown in: ${remainingMinutes}:${formattedSeconds}`;
+		} else if (remainingTime < 3600 * 24) {
+			return `Fully Grown in: ${remainingHours}:${formattedMinutes}:${formattedSeconds}`;
+		} else {
+			return `Fully Grown in: ${formattedDays}d ${formattedHours}:${formattedMinutes}`;
+		}
 	}
 
 	/**

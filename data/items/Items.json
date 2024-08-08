@@ -48,10 +48,10 @@
 				"subtype": "Plant",
 				"category": "Drupe",
 				"description": "Error",
-				"value": 20,
+				"value": 2000,
 				"transformId": "1-03-11-01-00",
-				"baseExp": 6, 
-				"growTime": 600
+				"baseExp": 600, 
+				"growTime": 21600
 			},
 			{
 				"id": "0-02-01-02-00",
@@ -183,7 +183,7 @@
 				"subtype": "Seed",
 				"category": "Drupe",
 				"description": "Error",
-				"value": 50,
+				"value": 5000,
 				"transformId": "0-02-11-01-00"
 			},
 			{
@@ -248,7 +248,7 @@
 				"subtype": "HarvestedItem",
 				"category": "Drupe",
 				"description": "Error",
-				"value": 120
+				"value": 12000
 			},
 			{
 				"id": "1-03-01-02-00",

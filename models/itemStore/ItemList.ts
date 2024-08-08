@@ -9,8 +9,25 @@ import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 
 export class ItemList {
 	private items: InventoryItem[];
+	static fixedOrder = ['Seed', 'HarvestedItem', 'Blueprint'];
 	constructor(items: InventoryItem[] = []) {
 		this.items = items;
+		this.items.sort((a, b) => {
+			const indexA = ItemList.fixedOrder.indexOf(a.itemData.subtype);
+			const indexB = ItemList.fixedOrder.indexOf(b.itemData.subtype);
+	
+			// If a subtype is not in the fixedOrder array, it gets a large index number.
+			// This keeps unknown subtypes at the end of the sorted array.
+			const orderA = indexA !== -1 ? indexA : ItemList.fixedOrder.length;
+			const orderB = indexB !== -1 ? indexB : ItemList.fixedOrder.length;
+			
+			if (orderA !== orderB) {
+				return orderA - orderB;
+			}
+
+			//if subtype is the same, sort by name
+			return a.itemData.name.localeCompare(b.itemData.name);
+		});
 	}
 
 	static fromPlainObject(plainObject: any): ItemList {
@@ -91,7 +108,6 @@ export class ItemList {
 	 * @returns a list of strings containing all the subtypes of items in this itemlist
 	 */
 	getAllSubtypes(): string[] {
-		const fixedOrder = ['Seed', 'HarvestedItem', 'Blueprint']; // Desired order
 		const subtypes: string[] = [];
 		this.items.forEach((item) => {
 			if (!subtypes.includes(item.itemData.subtype)) {
@@ -100,13 +116,13 @@ export class ItemList {
 		})
 		// Sort subtypes based on their index in the fixedOrder array
 		subtypes.sort((a, b) => {
-			const indexA = fixedOrder.indexOf(a);
-			const indexB = fixedOrder.indexOf(b);
+			const indexA = ItemList.fixedOrder.indexOf(a);
+			const indexB = ItemList.fixedOrder.indexOf(b);
 	
 			// If a subtype is not in the fixedOrder array, it gets a large index number.
 			// This keeps unknown subtypes at the end of the sorted array.
-			const orderA = indexA !== -1 ? indexA : fixedOrder.length;
-			const orderB = indexB !== -1 ? indexB : fixedOrder.length;
+			const orderA = indexA !== -1 ? indexA : ItemList.fixedOrder.length;
+			const orderB = indexB !== -1 ? indexB : ItemList.fixedOrder.length;
 	
 			return orderA - orderB;
 		});
@@ -307,7 +323,8 @@ export class ItemList {
 				response.addErrorMessage('Cannot add error item.');
 				return response;
 			}
-			this.items.push(newItem);
+			//push to front of list
+			this.items.unshift(newItem);
 			response.payload = newItem;
 			return response;
 		}

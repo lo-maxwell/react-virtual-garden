@@ -72,4 +72,36 @@ export class PlantTemplate extends PlacedItemTemplate{
 		}
 	} 
 
+	getGrowTimeString(): string {
+		const growTime = this.growTime;
+		// Calculate days, hours, minutes, and seconds
+		const growDays = Math.floor(growTime / (24 * 3600));
+		const growHours = Math.floor((growTime % (24 * 3600)) / 3600);
+		const growMinutes = Math.floor((growTime % 3600) / 60);
+		const growSeconds = Math.floor(growTime % 60);
+	
+		// Format components with leading zeros
+		const formattedDays = growDays > 0 ? `${growDays} day${growDays > 1 ? 's' : ''}` : '';
+		const formattedHours = growHours > 0 ? `${growHours} hour${growHours > 1 ? 's' : ''}` : '';
+		const formattedMinutes = growMinutes > 0 ? `${growMinutes} min` : '';
+		const formattedSeconds = growSeconds > 0 ? `${growSeconds} s` : '';
+	
+		// Combine the components
+		let formattedString = 'Grow Time:';
+		if (formattedDays) {
+			formattedString += ` ${formattedDays}`;
+		}
+		if (formattedHours) {
+			formattedString += ` ${formattedHours}`;
+		}
+		if (formattedMinutes && !formattedDays) {
+			formattedString += ` ${formattedMinutes}`;
+		}
+		if (formattedSeconds && !formattedDays && !formattedHours) {
+			formattedString += ` ${formattedSeconds}`;
+		}
+	
+		return formattedString.trim(); // Remove any leading or trailing spaces
+	}
+
 }
