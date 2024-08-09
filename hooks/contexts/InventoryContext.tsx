@@ -5,6 +5,8 @@ import React, { createContext, Dispatch, SetStateAction, useContext, useState } 
 interface InventoryContextType {
     inventory: Inventory;
     resetInventory: () => void;
+    inventoryForceRefreshKey: number;
+    updateInventoryForceRefreshKey: () => void;
     // Add any other actions or state you need
 }
 

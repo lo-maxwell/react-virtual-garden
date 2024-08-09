@@ -1,6 +1,5 @@
 import { Garden } from "@/models/garden/Garden";
 import { Plot } from "@/models/garden/Plot";
-import { ItemTemplate } from "@/models/items/templates/ItemTemplate";
 import { generateNewPlaceholderPlacedItem} from "@/models/items/PlaceholderItems";
 import LevelSystem from "@/models/level/LevelSystem";
 
@@ -140,7 +139,7 @@ test('Should Harvest Plant In Plot', () => {
 	expect(plot1HarvestResponse.payload.originalItem.itemData.name).toBe('apple');
 	expect(plot1HarvestResponse.payload.updatedPlot.getItem().itemData.name).toBe('ground');
 	expect(plot1HarvestResponse.payload.updatedPlot.getItemStatus()).toBe('');
-	expect(plot1HarvestResponse.payload.harvestedItemTemplate.name).toBe('harvested apple');
+	expect(plot1HarvestResponse.payload.harvestedItemTemplate.name).toBe('apple');
 	expect(newGarden.getPlotByRowAndColumn(1, 1)?.getItem().itemData.name).toBe('ground');
 	expect(newGarden.getPlotByRowAndColumn(2, 2)?.getItem().itemData.name).toBe('banana');
 	const plot2HarvestResponse = newGarden.harvestPlot(plot2);
@@ -148,7 +147,7 @@ test('Should Harvest Plant In Plot', () => {
 	expect(plot2HarvestResponse.payload.originalItem.itemData.name).toBe('banana');
 	expect(plot2HarvestResponse.payload.updatedPlot.getItem().itemData.name).toBe('ground');
 	expect(plot2HarvestResponse.payload.updatedPlot.getItemStatus()).toBe('');
-	expect(plot2HarvestResponse.payload.harvestedItemTemplate.name).toBe('harvested banana');
+	expect(plot2HarvestResponse.payload.harvestedItemTemplate.name).toBe('banana');
 	expect(newGarden.getPlotByRowAndColumn(2, 2)?.getItem().itemData.name).toBe('ground');
 });
 

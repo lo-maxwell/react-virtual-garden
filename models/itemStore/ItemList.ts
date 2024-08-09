@@ -1,24 +1,33 @@
 
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
-import { Item } from "../items/Item";
-import { ItemTemplate } from "../items/templates/ItemTemplate";
-import { ItemType, ItemTypes } from "../items/ItemTypes";
+import { ItemSubtype, ItemType, ItemTypes } from "../items/ItemTypes";
 import { InventoryTransactionResponse } from "./inventory/InventoryTransactionResponse";
-import { Seed } from "../items/inventoryItems/Seed";
-import { Blueprint } from "../items/inventoryItems/Blueprint";
-import { HarvestedItem } from "../items/inventoryItems/HarvestedItem";
-import { Plant } from "../items/placedItems/Plant";
-import { Decoration } from "../items/placedItems/Decoration";
-import { EmptyItem } from "../items/placedItems/EmptyItem";
-import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { getItemClassFromSubtype, ItemConstructor } from "../items/utility/classMaps";
-import { InventoryItemTemplate } from "../items/templates/InventoryItemTemplate";
+import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplate";
+import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 
 
 export class ItemList {
 	private items: InventoryItem[];
+	static fixedOrder = ['Seed', 'HarvestedItem', 'Blueprint'];
 	constructor(items: InventoryItem[] = []) {
 		this.items = items;
+		this.items.sort((a, b) => {
+			const indexA = ItemList.fixedOrder.indexOf(a.itemData.subtype);
+			const indexB = ItemList.fixedOrder.indexOf(b.itemData.subtype);
+	
+			// If a subtype is not in the fixedOrder array, it gets a large index number.
+			// This keeps unknown subtypes at the end of the sorted array.
+			const orderA = indexA !== -1 ? indexA : ItemList.fixedOrder.length;
+			const orderB = indexB !== -1 ? indexB : ItemList.fixedOrder.length;
+			
+			if (orderA !== orderB) {
+				return orderA - orderB;
+			}
+
+			//if subtype is the same, sort by name
+			return a.itemData.name.localeCompare(b.itemData.name);
+		});
 	}
 
 	static fromPlainObject(plainObject: any): ItemList {
@@ -79,6 +88,61 @@ export class ItemList {
 	 */
 	getAllItems(): InventoryItem[] {
 		return this.items.slice();
+	}
+
+	
+	/**
+	 * @param subtype the subtype string, ie. SEED, HARVESTED, BLUEPRINT
+	 * @param category (optional) the category string, ie. Allium, Normal
+	 * @returns a copy of the inventory items matching the given subtype
+	 */
+	getItemsBySubtype(subtype: ItemSubtype, category: string | null = null): InventoryItem[] {
+		if (!category) {
+			return this.items.slice().filter((item) => item.itemData.subtype === subtype);
+		}
+		return this.items.slice().filter((item) => item.itemData.subtype === subtype && item.itemData.category === category);
+	}
+
+	//TODO: Needs unit tests
+	/**
+	 * @returns a list of strings containing all the subtypes of items in this itemlist
+	 */
+	getAllSubtypes(): string[] {
+		const subtypes: string[] = [];
+		this.items.forEach((item) => {
+			if (!subtypes.includes(item.itemData.subtype)) {
+				subtypes.push(item.itemData.subtype);
+			}
+		})
+		// Sort subtypes based on their index in the fixedOrder array
+		subtypes.sort((a, b) => {
+			const indexA = ItemList.fixedOrder.indexOf(a);
+			const indexB = ItemList.fixedOrder.indexOf(b);
+	
+			// If a subtype is not in the fixedOrder array, it gets a large index number.
+			// This keeps unknown subtypes at the end of the sorted array.
+			const orderA = indexA !== -1 ? indexA : ItemList.fixedOrder.length;
+			const orderB = indexB !== -1 ? indexB : ItemList.fixedOrder.length;
+	
+			return orderA - orderB;
+		});
+		return subtypes;
+	}
+
+	//TODO: Needs unit tests
+	/**
+	 * @param subtype the subtype to search within
+	 * @returns a list of strings containing all the categories of items in this itemlist
+	 */
+	getAllCategories(subtype: ItemSubtype): string[] {
+		const categories: string[] = [];
+		this.items.forEach((item) => {
+			if (item.itemData.subtype === subtype && !categories.includes(item.itemData.category)) {
+				categories.push(item.itemData.category);
+			}
+		})
+		categories.sort();
+		return categories;
 	}
 
 	/**
@@ -259,7 +323,8 @@ export class ItemList {
 				response.addErrorMessage('Cannot add error item.');
 				return response;
 			}
-			this.items.push(newItem);
+			//push to front of list
+			this.items.unshift(newItem);
 			response.payload = newItem;
 			return response;
 		}

@@ -5,12 +5,11 @@ import { EmptyItem } from "../items/placedItems/EmptyItem";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { generateNewPlaceholderPlacedItem } from "../items/PlaceholderItems";
 import { GardenTransactionResponse } from "./GardenTransactionResponse";
-import PlaceholderItemTemplates from "../items/templates/PlaceholderItemTemplate";
 import { getItemClassFromSubtype, ItemConstructor, itemTypeMap } from "../items/utility/classMaps";
-import { InventoryItemTemplate } from "../items/templates/InventoryItemTemplate";
-import { PlacedItemTemplate } from "../items/templates/PlacedItemTemplate";
 import { Plant } from "../items/placedItems/Plant";
-import { PlantTemplate } from "../items/templates/PlantTemplate";
+import { PlacedItemTemplate } from "../items/templates/models/PlacedItemTemplate";
+import { placeholderItemTemplates } from "../items/templates/models/PlaceholderItemTemplate";
+import { PlantTemplate } from "../items/templates/models/PlantTemplate";
 
 export class Plot {
 	
@@ -24,7 +23,7 @@ export class Plot {
 	}
 
 	private static getGroundTemplate(): PlacedItemTemplate {
-		const template = PlaceholderItemTemplates.getPlacedItemTemplateByName('ground');
+		const template = placeholderItemTemplates.getPlacedItemTemplateByName('ground');
 		if (!template) throw new Error(`Error: Ground Template Does Not Exist!`);
 		return template!;
 	}
@@ -139,7 +138,27 @@ export class Plot {
 			return "Ready to harvest!";
 		}
 		const remainingTime = Math.floor((plantedTime + item.itemData.growTime * 1000 - currentTime) / 1000);
-		return `${remainingTime} seconds left to grow!`;
+		// Calculate days, hours, minutes, and seconds
+		const remainingDays = Math.floor(remainingTime / (24 * 3600));
+		const remainingHours = Math.floor((remainingTime % (24 * 3600)) / 3600);
+		const remainingMinutes = Math.floor((remainingTime % 3600) / 60);
+		const remainingSeconds = Math.floor(remainingTime % 60);
+
+		// Format components with leading zeros
+		const formattedDays = remainingDays.toString();
+		const formattedHours = remainingHours.toString().padStart(2, '0');
+		const formattedMinutes = remainingMinutes.toString().padStart(2, '0');
+		const formattedSeconds = remainingSeconds.toString().padStart(2, '0');
+		
+		if (remainingTime < 60) {
+			return `Fully Grown in: ${remainingTime} seconds`;
+		} else if (remainingTime < 3600) {
+			return `Fully Grown in: ${remainingMinutes}:${formattedSeconds}`;
+		} else if (remainingTime < 3600 * 24) {
+			return `Fully Grown in: ${remainingHours}:${formattedMinutes}:${formattedSeconds}`;
+		} else {
+			return `Fully Grown in: ${formattedDays}d ${formattedHours}:${formattedMinutes}`;
+		}
 	}
 
 	/**

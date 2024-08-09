@@ -1,7 +1,5 @@
-import { EmptyItemTemplate } from "../templates/EmptyItemTemplate";
-import { ItemTemplate } from "../templates/ItemTemplate";
-import { PlacedItemTemplate } from "../templates/PlacedItemTemplate";
-import PlaceholderItemTemplates from "../templates/PlaceholderItemTemplate";
+
+import { EmptyItemTemplate } from "../templates/models/EmptyItemTemplate";
 import { PlacedItem } from "./PlacedItem";
 
 export class EmptyItem extends PlacedItem{

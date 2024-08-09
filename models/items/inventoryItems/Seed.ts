@@ -1,6 +1,4 @@
-import { InventoryItemTemplate } from "../templates/InventoryItemTemplate";
-import { ItemTemplate } from "../templates/ItemTemplate";
-import { SeedTemplate } from "../templates/SeedTemplate";
+import { SeedTemplate } from "../templates/models/SeedTemplate";
 import { InventoryItem } from "./InventoryItem";
 
 export class Seed extends InventoryItem {

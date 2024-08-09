@@ -1,6 +1,5 @@
-import { ItemTemplate } from "../templates/ItemTemplate";
-import { PlacedItemTemplate } from "../templates/PlacedItemTemplate";
-import { PlantTemplate } from "../templates/PlantTemplate";
+
+import { PlantTemplate } from "../templates/models/PlantTemplate";
 import { PlacedItem } from "./PlacedItem";
 
 export class Plant extends PlacedItem{

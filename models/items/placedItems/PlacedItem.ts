@@ -1,9 +1,8 @@
 import { GardenTransactionResponse } from "@/models/garden/GardenTransactionResponse";
 import { Item } from "../Item";
 import { ItemSubtypes } from "../ItemTypes";
-import { ItemTemplate } from "../templates/ItemTemplate";
-import { PlacedItemTemplate } from "../templates/PlacedItemTemplate";
-import PlaceholderItemTemplates from "../templates/PlaceholderItemTemplate";
+import { PlacedItemTemplate } from "../templates/models/PlacedItemTemplate";
+import { placeholderItemTemplates } from "../templates/models/PlaceholderItemTemplate";
 
 export abstract class PlacedItem extends Item { 
 	itemData: PlacedItemTemplate;
@@ -83,7 +82,7 @@ export abstract class PlacedItem extends Item {
 			case ItemSubtypes.PLANT.name:
 				response.payload = {
 					originalItem: this,
-					newTemplate: PlaceholderItemTemplates.getInventoryTransformTemplate(this.itemData.transformId),
+					newTemplate: placeholderItemTemplates.getInventoryTemplate(this.itemData.transformId),
 				};
 				this.setStatus('removed');
 				break;

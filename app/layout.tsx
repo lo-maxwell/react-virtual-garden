@@ -1,7 +1,9 @@
 import { GardenProvider } from "@/components/contextProviders/GardenProvider";
 import { InventoryProvider } from "@/components/contextProviders/InventoryProvider";
+import { SelectedItemProvider } from "@/components/contextProviders/SelectedItemProvider";
 import { StoreProvider } from "@/components/contextProviders/StoreProvider";
 import Layout from "@/components/layout";
+import { Analytics } from '@vercel/analytics/react';
 // import type { Metadata } from "next";
 import "./globals.css";
 
@@ -18,9 +20,12 @@ export default function RootLayout({children,}: Readonly<{children: React.ReactN
         <GardenProvider>
           <StoreProvider>
             <InventoryProvider>
-              <Layout>
-                {children}
-              </Layout>
+              <SelectedItemProvider>
+                <Layout>
+                  {children}
+                  <Analytics />
+                </Layout>
+              </SelectedItemProvider>
             </InventoryProvider>
           </StoreProvider>
         </GardenProvider>

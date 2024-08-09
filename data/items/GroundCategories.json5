@@ -1,0 +1,9 @@
+Ground: {
+	Ground: {
+		ID: '00',
+		//does nothing
+	},
+	Error: {
+		ID: '99'
+	}
+}

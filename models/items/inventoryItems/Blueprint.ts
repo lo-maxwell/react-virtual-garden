@@ -1,6 +1,4 @@
-import { BlueprintTemplate } from "../templates/BlueprintTemplate";
-import { InventoryItemTemplate } from "../templates/InventoryItemTemplate";
-import { ItemTemplate } from "../templates/ItemTemplate";
+import { BlueprintTemplate } from "../templates/models/BlueprintTemplate";
 import { InventoryItem } from "./InventoryItem";
 
 export class Blueprint extends InventoryItem {

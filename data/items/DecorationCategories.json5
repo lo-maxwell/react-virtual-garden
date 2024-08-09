@@ -1,0 +1,22 @@
+Decoration: {
+	Normal: {
+		ID: '01',
+		Decorations: ['bench', 'flamingo'],
+		//Does not grant stat bonuses
+	},
+	Bountiful: {
+		//Gives + harvest chance
+		ID: '02',
+	},
+	Speedy: {
+		//Speeds up grow time
+		ID: '03',
+	},
+	Protective: {
+		//Reduces negative effects
+		ID: '04',
+	},
+	Error: {
+		ID: '99'
+	}
+}

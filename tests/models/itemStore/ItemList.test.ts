@@ -1,6 +1,7 @@
 import { ItemList } from "@/models/itemStore/ItemList";
 import { generateNewPlaceholderInventoryItem, generateRandomPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
-import PlaceholderItemTemplates from "@/models/items/templates/PlaceholderItemTemplate";
+import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { ItemSubtypes } from "@/models/items/ItemTypes";
 
 let testItemList: ItemList;
 	
@@ -24,11 +25,34 @@ test('Should Get All Items', () => {
 	expect(items.length).toBe(3);
 })
 
+
+test('Should Get Items By Subtype', () => {
+	testItemList.addItem(generateNewPlaceholderInventoryItem('apple', 1), 1);
+	let items = testItemList.getItemsBySubtype(ItemSubtypes.SEED.name);
+	expect(items.length).toBe(3);
+	items = testItemList.getItemsBySubtype(ItemSubtypes.HARVESTED.name);
+	expect(items.length).toBe(1);
+	items = testItemList.getItemsBySubtype(ItemSubtypes.BLUEPRINT.name);
+	expect(items.length).toBe(0);
+})
+
+test('Should Get Items By Subtype and Category', () => {
+	testItemList.addItem(generateNewPlaceholderInventoryItem('apple', 1), 1);
+	let items = testItemList.getItemsBySubtype(ItemSubtypes.SEED.name, "Pome");
+	expect(items.length).toBe(1);
+	items = testItemList.getItemsBySubtype(ItemSubtypes.SEED.name, "Allium");
+	expect(items.length).toBe(0);
+	items = testItemList.getItemsBySubtype(ItemSubtypes.HARVESTED.name, "Pome");
+	expect(items.length).toBe(1);
+	items = testItemList.getItemsBySubtype(ItemSubtypes.BLUEPRINT.name);
+	expect(items.length).toBe(0);
+})
+
 test('Should Get Existing Item', () => {
 	const appleSeed = testItemList.getItem('apple seed');
 	expect(appleSeed.payload.itemData.name).toBe('apple seed');
 	expect(appleSeed.isSuccessful()).toBe(true);
-	const bananaSeed = testItemList.getItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('banana seed')!);
+	const bananaSeed = testItemList.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!);
 	expect(bananaSeed.payload.itemData.name).toBe('banana seed');
 	expect(bananaSeed.isSuccessful()).toBe(true);
 	const coconutSeed = testItemList.getItem(generateNewPlaceholderInventoryItem("coconut seed", 1));
@@ -40,10 +64,10 @@ test('Should Not Get Nonexistent Item', () => {
 	const response = testItemList.getItem('not a real item');
 	expect(response.isSuccessful()).toBe(false);
 	expect(response.payload).toBeNull();
-	const response2 = testItemList.getItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('harvested banana')!);
+	const response2 = testItemList.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('banana')!);
 	expect(response2.isSuccessful()).toBe(false);
 	expect(response2.payload).toBeNull();
-	const response3 = testItemList.getItem(PlaceholderItemTemplates.getPlacedItemTemplateByName('banana')!);
+	const response3 = testItemList.getItem(placeholderItemTemplates.getPlacedItemTemplateByName('banana')!);
 	expect(response3.isSuccessful()).toBe(false);
 	expect(response3.payload).toBeNull();
 });
@@ -52,7 +76,7 @@ test('Should Check Contains Existing Item', () => {
 	const appleSeed = testItemList.contains('apple seed');
 	expect(appleSeed.payload).toBe(true);
 	expect(appleSeed.isSuccessful()).toBe(true);
-	const bananaSeed = testItemList.contains(PlaceholderItemTemplates.getInventoryItemTemplateByName('banana seed')!);
+	const bananaSeed = testItemList.contains(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!);
 	expect(bananaSeed.payload).toBe(true);
 	expect(bananaSeed.isSuccessful()).toBe(true);
 	const coconutSeed = testItemList.contains(generateNewPlaceholderInventoryItem("coconut seed", 1));
@@ -61,10 +85,10 @@ test('Should Check Contains Existing Item', () => {
 });
 
 test('Should Check Does Not Contain Nonexistent Item', () => {
-	const response = testItemList.contains('harvested apple');
+	const response = testItemList.contains('apple');
 	expect(response.payload).toBe(false);
 	expect(response.isSuccessful()).toBe(true);
-	const response2 = testItemList.contains(PlaceholderItemTemplates.getInventoryItemTemplateByName('harvested banana')!);
+	const response2 = testItemList.contains(placeholderItemTemplates.getInventoryItemTemplateByName('banana')!);
 	expect(response2.payload).toBe(false);
 	expect(response2.isSuccessful()).toBe(true);
 	const response3 = testItemList.contains('not a real item');
@@ -76,7 +100,7 @@ test('Should Check Contains Amount of Existing Item', () => {
 	const appleSeed = testItemList.containsAmount('apple seed', 1);
 	expect(appleSeed.payload).toBe(true);
 	expect(appleSeed.isSuccessful()).toBe(true);
-	const bananaSeed = testItemList.containsAmount(PlaceholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, 2);
+	const bananaSeed = testItemList.containsAmount(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, 2);
 	expect(bananaSeed.payload).toBe(true);
 	expect(bananaSeed.isSuccessful()).toBe(true);
 	const coconutSeed = testItemList.containsAmount(generateNewPlaceholderInventoryItem("coconut seed", 1), 1);
@@ -88,17 +112,17 @@ test('Should Check Does Not Contain Amount of Lacking Item', () => {
 	const appleSeed = testItemList.containsAmount('apple seed', 2);
 	expect(appleSeed.payload).toBe(false);
 	expect(appleSeed.isSuccessful()).toBe(true);
-	const bananaSeed = testItemList.containsAmount(PlaceholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, 0);
+	const bananaSeed = testItemList.containsAmount(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, 0);
 	expect(bananaSeed.isSuccessful()).toBe(false);
 	const coconutSeed = testItemList.containsAmount(generateNewPlaceholderInventoryItem("coconut seed", 1), -1);
 	expect(coconutSeed.isSuccessful()).toBe(false);
 });
 
 test('Should Check Does Not Contain Amount of Nonexistent Item', () => {
-	const response = testItemList.containsAmount('harvested apple', 1);
+	const response = testItemList.containsAmount('apple', 1);
 	expect(response.payload).toBe(false);
 	expect(response.isSuccessful()).toBe(true);
-	const response2 = testItemList.containsAmount(PlaceholderItemTemplates.getInventoryItemTemplateByName('harvested banana')!, 2);
+	const response2 = testItemList.containsAmount(placeholderItemTemplates.getInventoryItemTemplateByName('banana')!, 2);
 	expect(response2.payload).toBe(false);
 	expect(response2.isSuccessful()).toBe(true);
 	const response3 = testItemList.containsAmount('not a real item', 3);
@@ -122,7 +146,7 @@ test('Should Add New Item If Not Existing', () => {
 	const response = inv.addItem(generateNewPlaceholderInventoryItem("apple seed", 1), 1);
 	expect(response.isSuccessful()).toBe(true);
 	expect(inv.size()).toBe(1);
-	const response2 = inv.addItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, 2);
+	const response2 = inv.addItem(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, 2);
 	expect(response2.isSuccessful()).toBe(true);
 	expect(inv.size()).toBe(2);
 	expect(inv.getItem("apple seed").payload.quantity).toBe(1);
@@ -130,13 +154,13 @@ test('Should Add New Item If Not Existing', () => {
 });
 
 test('Should Not Add Invalid Item', () => {
-	const response = testItemList.addItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('apple seed')!, 0);
+	const response = testItemList.addItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!, 0);
 	expect(response.isSuccessful()).toBe(false);
 	expect(testItemList.size()).toBe(3);
-	const response2 = testItemList.addItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('harvested apple')!, -1);
+	const response2 = testItemList.addItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!, -1);
 	expect(response2.isSuccessful()).toBe(false);
 	expect(testItemList.size()).toBe(3);
-	const response3 = testItemList.addItem(PlaceholderItemTemplates.getPlacedItemTemplateByName('apple')!, 1);
+	const response3 = testItemList.addItem(placeholderItemTemplates.getPlacedItemTemplateByName('apple')!, 1);
 	expect(response3.isSuccessful()).toBe(false);
 	expect(testItemList.size()).toBe(3);
 })
@@ -149,23 +173,23 @@ test('Should Update Quantity When Adding Item', () => {
 	const response = inv.addItem(generateNewPlaceholderInventoryItem("apple seed", 1), 1);
 	expect(response.isSuccessful()).toBe(true);
 	expect(inv.size()).toBe(1);
-	const response2 = inv.addItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('apple seed')!, 2);
+	const response2 = inv.addItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!, 2);
 	expect(response2.isSuccessful()).toBe(true);
 	expect(inv.size()).toBe(1);
 	expect(inv.getItem("apple seed").payload.quantity).toBe(3);
 });
 
 test('Should Not Add Invalid Quantity', () => {
-	const response = testItemList.addItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('apple seed')!, 0);
+	const response = testItemList.addItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!, 0);
 	expect(response.isSuccessful()).toBe(false);
 	expect(testItemList.getItem('apple seed').payload.quantity).toBe(1);
 	const response2 = testItemList.addItem(generateNewPlaceholderInventoryItem("banana seed", 1), -2);
 	expect(response2.isSuccessful()).toBe(false);
 	expect(testItemList.getItem('banana seed').payload.quantity).toBe(2);
-	const response3 = testItemList.addItem(generateNewPlaceholderInventoryItem("harvested apple", 1), 0);
+	const response3 = testItemList.addItem(generateNewPlaceholderInventoryItem("apple", 1), 0);
 	expect(response3.isSuccessful()).toBe(false);
 	expect(testItemList.size()).toBe(3);
-	const response4 = testItemList.addItem(generateNewPlaceholderInventoryItem("harvested banana", 1), -1);
+	const response4 = testItemList.addItem(generateNewPlaceholderInventoryItem("banana", 1), -1);
 	expect(response4.isSuccessful()).toBe(false);
 	expect(testItemList.size()).toBe(3);
 });
@@ -174,7 +198,7 @@ test('Should Update Quantity of Existing Item', () => {
 	const response = testItemList.updateQuantity('apple seed', 1);
 	expect(response.isSuccessful()).toBe(true);
 	expect(response.payload.quantity).toBe(2);
-	const response2 = testItemList.updateQuantity(PlaceholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, 2);
+	const response2 = testItemList.updateQuantity(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, 2);
 	expect(response2.isSuccessful()).toBe(true);
 	expect(response2.payload.quantity).toBe(4);
 	const response3 = testItemList.updateQuantity(generateNewPlaceholderInventoryItem('coconut seed', 1), -1);
@@ -187,7 +211,7 @@ test('Should Delete When Updating Quantity to Zero', () => {
 	expect(response.isSuccessful()).toBe(true);
 	expect(response.payload.quantity).toBe(0);
 	expect(testItemList.size()).toBe(2);
-	const response2 = testItemList.updateQuantity(PlaceholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, -3);
+	const response2 = testItemList.updateQuantity(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, -3);
 	expect(response2.isSuccessful()).toBe(true);
 	expect(response2.payload.quantity).toBe(0);
 	expect(testItemList.size()).toBe(1);
@@ -204,7 +228,7 @@ test('Should Delete Existing Item', () => {
 	const response = testItemList.deleteItem('apple seed');
 	expect(response.isSuccessful()).toBe(true);
 	expect(testItemList.size()).toBe(2);
-	const response2 = testItemList.deleteItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('banana seed')!);
+	const response2 = testItemList.deleteItem(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!);
 	expect(response2.isSuccessful()).toBe(true);
 	expect(testItemList.size()).toBe(1);
 	const response3 = testItemList.deleteItem(generateNewPlaceholderInventoryItem('coconut seed', 1));
@@ -220,23 +244,23 @@ test('Should Not Delete Nonexistent Item', () => {
 });
 
 test('Should Use AppleSeed Item', () => {
-	const response = testItemList.useItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('apple seed')!, 1);
+	const response = testItemList.useItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!, 1);
 	expect(response.payload.originalItem.quantity).toBe(0);
 	expect(response.isSuccessful()).toBe(true);
 	expect(response.payload.newTemplate.name).toBe('apple');
-	expect(testItemList.getItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('apple seed')!).payload.quantity).toBe(0);
+	expect(testItemList.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!).payload.quantity).toBe(0);
 })
 
 test('Should Use BananaSeed Item', () => {
-	const response = testItemList.useItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, 1);
+	const response = testItemList.useItem(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, 1);
 	expect(response.payload.originalItem.quantity).toBe(1);
 	expect(response.isSuccessful()).toBe(true);
 	expect(response.payload.newTemplate.name).toBe('banana');
-	expect(testItemList.getItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('apple seed')!).payload.quantity).toBe(1);
+	expect(testItemList.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!).payload.quantity).toBe(1);
 })
 
 test('Should Not Use Item Lacking Quantity', () => {
-	const response = testItemList.useItem(PlaceholderItemTemplates.getInventoryItemTemplateByName('coconut seed')!, 5);
+	const response = testItemList.useItem(placeholderItemTemplates.getInventoryItemTemplateByName('coconut seed')!, 5);
 	expect(response.isSuccessful()).toBe(false);
 })
 

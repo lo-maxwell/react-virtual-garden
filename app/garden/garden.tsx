@@ -2,19 +2,32 @@ import PlotComponent, { PlotComponentRef } from "@/components/garden/plot";
 import { Plot } from "@/models/garden/Plot";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
-import { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useInventory } from "@/hooks/contexts/InventoryContext";
 import { useGarden } from "@/hooks/contexts/GardenContext";
 import LevelSystemComponent from "@/components/level/LevelSystem";
 import { saveGarden } from "@/utils/localStorage/garden";
 import { usePlotActions } from "@/hooks/garden/plotActions";
+import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
 
-const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {selected: InventoryItem | null, setSelected: Function, inventoryForceRefresh: {value: number, setter: Function}}) => {
+const GardenComponent = () => {
 	const { inventory } = useInventory();
 	const { garden, gardenMessage, setGardenMessage } = useGarden();
+	const {selectedItem, toggleSelectedItem} = useSelectedItem();
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 	const [instantGrow, setInstantGrow] = useState(false); //for debug purposes
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
+
+	const [currentTime, setCurrentTime] = useState(Date.now());
+	// const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
+	useEffect(() => {
+		const id = setInterval(() => {
+			// Update currentTime
+			setCurrentTime(Date.now());
+		}, 1000); // Update every second
+		// setIntervalId(id);
+		return () => clearInterval(id); // Cleanup function to clear the interval on unmount
+	}, []);
 
 	function GetPlotAction(plot: Plot, selected: InventoryItem | null) {
 		const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
@@ -53,8 +66,8 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 								key={index} 
 								ref={el => {plotRefs.current[rowIndex][colIndex] = el!}}
 								plot={plot} 
-								onPlotClick={GetPlotAction(plot, selected)} 
-								inventoryForceRefresh={inventoryForceRefresh}
+								onPlotClick={GetPlotAction(plot, selectedItem)} 
+								currentTime={currentTime}
 							/>
 						);
 					})}
@@ -67,8 +80,8 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 	}
 
 	function plantAll() {
-		if (selected == null || selected.itemData.subtype != ItemSubtypes.SEED.name) return;
-		const getItemResponse = inventory.getItem(selected);
+		if (selectedItem == null || selectedItem.itemData.subtype != ItemSubtypes.SEED.name) return;
+		const getItemResponse = inventory.getItem(selectedItem);
 		if (!getItemResponse.isSuccessful()) return;
 		let numRemaining = getItemResponse.payload.getQuantity();
 		let numPlanted = 0;
@@ -170,8 +183,10 @@ const GardenComponent = ({selected, setSelected, inventoryForceRefresh}: {select
 	return (
 		<>
 		<div className="min-h-8">{gardenMessage}</div>
-		<div key={gardenForceRefreshKey} className=" px-2 py-2 flex flex-col items-center overflow-x-auto overflow-y-auto overscroll-none mx-2">
-			{generatePlots(garden.getPlots())}
+		<div key={gardenForceRefreshKey} className=" px-2 py-2 flex flex-col items-center mx-2">
+			<div className="overflow-x-auto max-w-full py-1">
+				{generatePlots(garden.getPlots())}
+			</div>
 		</div>
 		<div className="mx-4 my-4">
 			<LevelSystemComponent level={garden.getLevel()} currentExp={garden.getCurrentExp()} expToLevelUp={garden.getExpToLevelUp()}/>

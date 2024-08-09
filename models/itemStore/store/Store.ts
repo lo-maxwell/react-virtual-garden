@@ -1,9 +1,9 @@
 import { ItemList } from "../ItemList";
 import { InventoryItem } from "../../items/inventoryItems/InventoryItem";
 import { ItemStore } from "../ItemStore";
-import { ItemTemplate } from "@/models/items/templates/ItemTemplate";
 import { Inventory } from "../inventory/Inventory";
 import { InventoryTransactionResponse } from "../inventory/InventoryTransactionResponse";
+import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
 
 export class Store extends ItemStore {
 	private id: number;
@@ -13,8 +13,9 @@ export class Store extends ItemStore {
 	private upgradeMultiplier: number;
 	private stockList: ItemList;
 	private restockTime: number;
+	private restockInterval: number;
 
-	constructor(id: number, name: string, buyMultiplier: number = 2, sellMultiplier: number = 1, upgradeMultiplier: number = 1, items: ItemList = new ItemList(), stockList: ItemList = new ItemList(), restockTime: number = Date.now()) {
+	constructor(id: number, name: string, buyMultiplier: number = 2, sellMultiplier: number = 1, upgradeMultiplier: number = 1, items: ItemList = new ItemList(), stockList: ItemList = new ItemList(), restockTime: number = Date.now(), restockInterval: number = 300000) {
 		super(items);
 		this.id = id;
 		this.storeName = name;
@@ -23,6 +24,10 @@ export class Store extends ItemStore {
 		this.upgradeMultiplier = upgradeMultiplier;
 		this.stockList = stockList;
 		this.restockTime = restockTime;
+		this.restockInterval = restockInterval;
+		if (this.restockTime < Date.now()) {
+			this.restockStore();
+		}
 	}
 
 	static fromPlainObject(plainObject: any): Store {
@@ -40,6 +45,7 @@ export class Store extends ItemStore {
 		let items = new ItemList();
 		let stockList = new ItemList();
 		let restockTime = Date.now();
+		let restockInterval = 60000;
 	
 		// Validate and assign id
 		if (plainObject && typeof plainObject.id === 'number') {
@@ -84,8 +90,13 @@ export class Store extends ItemStore {
 		if (plainObject && typeof plainObject.restockTime === 'number') {
 			restockTime = plainObject.restockTime;
 		}
+
+		// Validate and assign restockInterval
+		if (plainObject && typeof plainObject.restockInterval === 'number') {
+			restockInterval = plainObject.restockInterval;
+		}
 	
-		return new Store(id, storeName, buyMultiplier, sellMultiplier, upgradeMultiplier, items, stockList, restockTime);
+		return new Store(id, storeName, buyMultiplier, sellMultiplier, upgradeMultiplier, items, stockList, restockTime, restockInterval);
 	}
 
 	toPlainObject(): any {
@@ -98,6 +109,7 @@ export class Store extends ItemStore {
 			stockList: this.stockList.toPlainObject(), // Convert stockList to plain object
 			items: this.items.toPlainObject(), // Convert items to plain object
 			restockTime: this.restockTime,
+			restockInterval: this.restockInterval,
 		};
 	} 
 
@@ -183,6 +195,20 @@ export class Store extends ItemStore {
 	 */
 	setRestockTime(restockTime: number): void {
 		this.restockTime = restockTime;
+	}
+
+	/**
+	 * @returns the time in milliseconds between restocks
+	 */
+	 getRestockInterval(): number {
+		return this.restockInterval;
+	}
+
+	/**
+	 * @param restockInterval the time in milliseconds between restocks
+	 */
+	setRestockInterval(restockInterval: number): void {
+		this.restockInterval = restockInterval;
 	}
 
 	// Calculate the price to buy an item from the store
@@ -284,14 +310,47 @@ export class Store extends ItemStore {
 	}
 
 	/**
-	 * Adds items to the store if their quantity is lower than the quantity in the stockList
+	 * Checks if all of the items (and quantities) are contained within this store's inventory
+	 * @param stockList the ItemList of items to check for
+	 * @returns true/false
+	 */
+	needsRestock(stockList: ItemList = this.stockList): boolean {
+		const currentItems = this.getAllItems();
+		return stockList.getAllItems().some((element) => {
+			
+			const containsItemResponse = this.contains(element.itemData);
+			if (!containsItemResponse.isSuccessful()) return true;
+			if (containsItemResponse.payload) {
+				//store contains item, check quantity
+				const getItemResponse = this.getItem(element.itemData);
+				if (!getItemResponse.isSuccessful()) {
+					//should never occur, as we just checked contains
+					return true;
+				}
+				const currentItem = getItemResponse.payload;
+				return currentItem.getQuantity() < element.getQuantity();
+			} else {
+				//store does not contain item
+				return true;
+			}
+		});
+	}
+
+	/**
+	 * Adds items to the store if their quantity is lower than the quantity in the stockList.
+	 * If items are added, updates the restockTime.
 	 * If there is an error in the process, rolls back to original list.
 	 * @param stockList the list of items to restock. Defaults to the internal stocklist.
 	 * @returns InventoryTransactionResponse of true or an error message.
 	 */
 	restockStore(stockList: ItemList = this.stockList): InventoryTransactionResponse {
-		const currentItems = this.getAllItems();
 		const response = new InventoryTransactionResponse();
+		if (!this.needsRestock(stockList)) {
+			response.addErrorMessage(`Error: Nothing to restock!`);
+			return response;
+		}
+		let didAddItem = false;
+		const currentItems = this.getAllItems();
 
 		stockList.getAllItems().forEach((element, index) => {
 			
@@ -310,6 +369,8 @@ export class Store extends ItemStore {
 					const addItemResponse = this.addItem(currentItem, element.getQuantity() - currentItem.getQuantity());
 					if (!addItemResponse.isSuccessful()) {
 						response.addErrorMessage(addItemResponse.messages[0]);
+					} else {
+						didAddItem = true;
 					}
 				} else {
 					//already enough quantity, exit
@@ -320,6 +381,8 @@ export class Store extends ItemStore {
 				const addItemResponse = this.addItem(element, element.getQuantity());
 				if (!addItemResponse.isSuccessful()) {
 					response.addErrorMessage(addItemResponse.messages[0]);
+				} else {
+					didAddItem = true;
 				}
 			}
 		})
@@ -328,6 +391,11 @@ export class Store extends ItemStore {
 		} else {
 			//error, rollback
 			this.items = new ItemList(currentItems);
+		}
+		if (didAddItem) {
+			// this.restockTime = Date.now() + this.restockInterval;
+		} else {
+			response.addErrorMessage(`Error: Nothing to restock!`);
 		}
 		return response;
 	}

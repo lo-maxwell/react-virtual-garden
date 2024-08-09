@@ -97,31 +97,73 @@
   * Plants can only be harvested when enough time has passed
   * Added messages to garden to display when plants are placed/harvested
 
+## Day 11
+
 ### Built tooltip component
 
   * Plots now show tooltips on hover, displaying the value of the harvested item and how much grow time is remaining
+  * Added infrastructure for inventory/trade window tooltips, though the content is to be desired
+  * Added tooltips for inventory items
 
+### Reworked store restock function
+
+  * restockTime is now set to the time when restock is ready
+  * New restockInterval field to determine the new restockTime
+  * Loading a store (on refresh) will immediately restock if necessary
+  * If restocking does not add any items, restockInterval is not changed
+  * Store now restocks properly (interval seconds after items are purchased)
+
+### Refactored items
+
+  * Added item interfaces to prevent circular dependencies
+  * Reworked fromPlainObject to only serialize the id, name, and type, and grab all relevant data from the items.json file
+  * This causes items to update automatically when the user refreshes
+  * If this ever goes live service might want to force a refresh when a new patch comes out, or users will see the wrong display
+
+## Day 12
+
+### Refactored items
+
+  * Added item categories (mostly used for plant families) and descriptions
+  * Updated templates + interfaces to reflect this change
+  * Updated id formula to reflect this change
+  * Renamed harvested x to just x; sharing names is okay because we split between plants and harvested
+
+### UI Changes
+
+  * Added item categories to the tooltips
+  * Updated StoreProvider to more easily add new items to store
+  * Fixed issue with tooltips not properly updating when the page is scrolled
+
+## Day 13
+
+### UI Changes
+
+  * Moved selectedItem and owner to a provider/context, allowing easier access from internal components
+  * SelectedItem now sets to null if you click an already selected item
+  * Added tooltips for empty plots when a blueprint or seed is selected
+  * Added dropdowns for filtering inventories by subtype and category
+  * Refactored store and inventory for code reuse
+  * Fixed issue with inventory not updating when garden is interacted with
+    * Added inventoryForceRefreshKey as a hack to the inventoryProvider, used to refresh the item list manually
+  * Updated text on plot tooltips to display more useful information on remaining time/grow time
 
 
 TODO:
+Filter inventory - sort inventory by alphabet, price, category
 
-Make Items only take in their respective templates
 
-Refactor PlacedItems
+Add selected indicator and/or make plots show what is going to be planted/placed
 
-Write tests for refactored code
+To get stores to autoupdate, have to store store information in a json file and pull from it for the stocklist/itemlist without destroying the existing items
+
+Change grow time to say minutes/hours if more than 60s remaining
 
 Generate multiple store types/switch between stores/restock store
 Clean up ui, especially font/scaling using rem, to accommodate more screen width
 Trade Window Multiselect + Total
 
-Sort/Order Inventory by filters - itemid, alphabetical, type?
-
 Make Garden more interactive than plant all -> harvest 
-
-Add ToPlainObject method for all models
-
-Mouse over tooltips for items
 
 Add User class
 
@@ -131,9 +173,19 @@ Add way to delete in progress plants, some sort of select delete tool
 
 Add multiple harvests to some plants
 
-Add description to itemTemplate
+Add crop rotation - either assign plant families or just individual plants + soil health; low soil health -> cannot be fertilized for a duration + yield reduction, high soil health -> free stronger fertilizer
 
-Add fertilizer item - chance for double harvest, or reduce grow time
+Add fertilizer item - chance for double harvest, or reduce grow time. fertilizer lasts x seconds and affects any plants that start (finish?) growing during that time. or linearly diminishing effect based on time since fertilizer application
+
+Add toolkit - select (plant, harvest, pickup, place); delete (only in progress plants)
+
+Store sells seeds for base price, not 2x (?)
+
+Daily login bonus to prevent softlock - gives some money and a random assortment of seeds that add up to some value
+
+Change value of slow plants so they aren't super efficient, amke them high risk high reward by having high seed costs + add random events that can destroy them + fertilizer that makes them super efficient
+
+Tooltips should not go off the screen; make them below if normally on top, or on top if normally below
 
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time
@@ -141,3 +193,5 @@ This is a design flaw, not a coding one -- right now supports exponential growth
 Probably requires an entirely new ui though for the user to select their next plot location
 Or don't allow buying expansions/limit it per level
 Add random events/natural disasters that interact with decorations ie. scarecrows, fences
+Small, medium, large stores with different restock intervals and stock limits
+Item metadata migration tool

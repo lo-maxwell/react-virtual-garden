@@ -1,27 +1,24 @@
 'use client'
-import InventoryComponent from "@/components/inventory/inventory";
-import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
-import { loadGarden, saveGarden } from "@/utils/localStorage/garden";
-import { loadInventory, saveInventory } from "@/utils/localStorage/inventory";
-import { useEffect, useState } from "react";
+import { saveInventory } from "@/utils/localStorage/inventory";
+import { useState } from "react";
 import GardenComponent from "./garden";
 import User from "@/models/user/User";
 import UserProfileComponent from "@/components/garden/userProfile";
 import { useInventory } from "@/hooks/contexts/InventoryContext";
 import { useGarden } from "@/hooks/contexts/GardenContext";
-import PlaceholderItemTemplate from "@/models/items/templates/PlaceholderItemTemplate";
+import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
+import InventoryComponent from "@/components/inventory/inventory";
 
 
 const GardenPage = () => {
   const [user, setUser] = useState<User | null>(null);
   const { garden, resetGarden } = useGarden();
-  const { inventory, resetInventory } = useInventory();
-  //Hack to force refresh inventory when its contents change in another component
-  const [inventoryForceRefreshKey, setInventoryForceRefreshKey] = useState(0);
+  const { inventory, resetInventory, updateInventoryForceRefreshKey } = useInventory();
   //Hack to force refresh garden when its contents change in another component
   const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 
-  const [selected, setSelected] = useState<InventoryItem | null>(null);
+  const {selectedItem, toggleSelectedItem} = useSelectedItem();
 
   function printGarden() {
     if (!garden || !inventory) return;
@@ -31,10 +28,10 @@ const GardenPage = () => {
 
   function addAppleSeed() {
     if (!inventory) return;
-    const appleSeedTemplate = PlaceholderItemTemplate.getInventoryItemTemplateByName('apple seed');
+    const appleSeedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple seed');
     inventory.gainItem(appleSeedTemplate!, 10);
-    setSelected(inventory.getItem('apple seed').payload);
-    setInventoryForceRefreshKey(inventoryForceRefreshKey + 1);
+    toggleSelectedItem(inventory.getItem('apple seed').payload);
+    updateInventoryForceRefreshKey();
     saveInventory(inventory);
   }
 
@@ -45,12 +42,12 @@ const GardenPage = () => {
 
   function RenderGarden() {
     if (!garden || !inventory) return <div>Loading Garden...</div>;
-    return <GardenComponent key={gardenForceRefreshKey} selected={selected} setSelected={setSelected} inventoryForceRefresh={{value: inventoryForceRefreshKey, setter: setInventoryForceRefreshKey}}/>;
+    return <GardenComponent key={gardenForceRefreshKey}/>;
   }
 
   function RenderInventory() {
     if (!inventory) return <div>Loading Inventory...</div>;
-    return <InventoryComponent key={inventoryForceRefreshKey} onInventoryItemClickFunction={setSelected} costMultiplier={1}/>;
+    return <InventoryComponent onInventoryItemClickFunction={toggleSelectedItem} costMultiplier={1}/>;
   }
 
   function handleResetGarden() {

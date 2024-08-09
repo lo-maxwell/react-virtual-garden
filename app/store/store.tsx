@@ -1,4 +1,4 @@
-import InventoryItemComponent from "@/components/inventory/inventoryItem";
+import ItemStoreComponent from "@/components/itemStore/itemStore";
 import { useStore } from "@/hooks/contexts/StoreContext";
 import { useEffect, useState } from "react";
 
@@ -9,15 +9,15 @@ const StoreComponent = ({onInventoryItemClickFunction}: {onInventoryItemClickFun
 	const [timeRemaining, setTimeRemaining] = useState<number>(0);
 	const [canRestock, setCanRestock] = useState<boolean>(false);
 
-	const DEFAULT_RESTOCK_TIME = 60000;
-
 	useEffect(() => {
 		const updateTimer = () => {
 			const now = Date.now();
-			const calculatedTimeRemaining = Math.max(0, DEFAULT_RESTOCK_TIME + store.getRestockTime() - now);
+			const calculatedTimeRemaining = Math.max(0, store.getRestockTime() - now);
 			setTimeRemaining(calculatedTimeRemaining);
 			if (calculatedTimeRemaining == 0) {
 				setCanRestock(true);
+			} else {
+				setCanRestock(false);
 			}
 		};
 
@@ -26,25 +26,23 @@ const StoreComponent = ({onInventoryItemClickFunction}: {onInventoryItemClickFun
 		const intervalId = setInterval(updateTimer, 1000);
 
 		// Clear interval on component unmount
-		return () => clearInterval(intervalId);
+		return () => {
+			clearInterval(intervalId);
+		}
 	}, [store]);
 
-
 	const handleRestock = () => {
-		if (Date.now() - store.getRestockTime() >= DEFAULT_RESTOCK_TIME) {
-			console.log('store restocked');
-			store.setRestockTime(Date.now());
+		if (Date.now() > store.getRestockTime()) {
 			const response = restockStore();
-			if (!response) {
+			if (!response.isSuccessful()) {
 				console.log('there was an error');
 				return;
 			}
 			
 			setCanRestock(false);
 		} else {
-			console.log('restock not ready');
 			const now = Date.now();
-			const calculatedTimeRemaining = Math.max(0, DEFAULT_RESTOCK_TIME + store.getRestockTime() - now);
+			const calculatedTimeRemaining = Math.max(0, store.getRestockTime() - now);
 			setTimeRemaining(calculatedTimeRemaining);
 			if (calculatedTimeRemaining == 0) {
 				setCanRestock(true);
@@ -58,21 +56,10 @@ const StoreComponent = ({onInventoryItemClickFunction}: {onInventoryItemClickFun
 		<>
 		<div className="w-[80%]">
 			<div>{store.getStoreName()}</div>
-			{store.getAllItems().map((item, itemIndex) => (
-				<div key={itemIndex}>
-					<InventoryItemComponent item={item} onClickFunction={onInventoryItemClickFunction} costMultiplier={store.getBuyMultiplier()}></InventoryItemComponent>
-				</div>
-			))}
+			<ItemStoreComponent itemStore={store} onInventoryItemClickFunction={onInventoryItemClickFunction} costMultiplier={store.getBuyMultiplier()}/>
 			<div>
-				<button
-					onClick={handleRestock}
-					disabled={!canRestock}
-					className={`bg-gray-300 px-4 py-1 mt-2 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2 ${!canRestock ? 'opacity-50 cursor-not-allowed' : ''}`}
-				>
-					Restock Store
-				</button>
 				<div className="mt-2 text-sm text-gray-600">
-					{canRestock ? 'Restock available' : `Time remaining: ${Math.ceil(timeRemaining / 1000)}s`}
+					{canRestock ? 'Store is fully stocked' : `Restock in: ${Math.ceil(timeRemaining / 1000)}s`}
 				</div>
 			</div>
 			<div>

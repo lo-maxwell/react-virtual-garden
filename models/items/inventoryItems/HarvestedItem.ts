@@ -1,6 +1,5 @@
-import { HarvestedItemTemplate } from "../templates/HarvestedItemTemplate";
-import { InventoryItemTemplate } from "../templates/InventoryItemTemplate";
-import { ItemTemplate } from "../templates/ItemTemplate";
+
+import { HarvestedItemTemplate } from "../templates/models/HarvestedItemTemplate";
 import { InventoryItem } from "./InventoryItem";
 
 export class HarvestedItem extends InventoryItem {
