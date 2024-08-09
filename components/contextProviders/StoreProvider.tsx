@@ -22,7 +22,9 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 				generateNewPlaceholderInventoryItem('banana seed', 50),
 				generateNewPlaceholderInventoryItem('coconut seed', 25),
 				generateNewPlaceholderInventoryItem('yellow onion seed', 25),
-				generateNewPlaceholderInventoryItem('garlic bulb', 25),
+				generateNewPlaceholderInventoryItem('garlic seed', 25),
+				generateNewPlaceholderInventoryItem('cherry seed', 25),
+				generateNewPlaceholderInventoryItem('peach seed', 25),
 				generateNewPlaceholderInventoryItem('bench blueprint', 10),
 				generateNewPlaceholderInventoryItem('flamingo blueprint', 2),
 			]);	

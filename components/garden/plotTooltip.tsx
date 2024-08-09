@@ -132,7 +132,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 					{harvestedItem.value}
 				</span>
 			</div>
-			<div>Grow Time: {plantTemplate.growTime} seconds</div>
+			<div>{plantTemplate.getGrowTimeString()}</div>
 			<div>XP Gained: {plantTemplate.baseExp}</div>
 		</div>
 	</>
@@ -214,6 +214,14 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 				return colors.decoration.plotTooltipBackground;
 			case ItemSubtypes.PLANT.name:
 				return colors.plant.plotTooltipBackground;
+			case ItemSubtypes.GROUND.name:
+				if (selectedItem && selectedItem.itemData.subtype === ItemSubtypes.SEED.name) {
+					return colors.plant.plotTooltipBackground;
+				} else if (selectedItem && selectedItem.itemData.subtype === ItemSubtypes.BLUEPRINT.name) {
+					return colors.decoration.plotTooltipBackground;
+				} else {
+					return colors.ground.plotTooltipBackground;
+				}
 			default:
 				return colors.ground.plotTooltipBackground;
 		}

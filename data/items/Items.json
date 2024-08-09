@@ -15,6 +15,32 @@
 				"growTime": 0
 			},
 			{
+				"id": "0-02-01-02-00",
+				"name": "yellow onion",
+				"icon": "🧅",
+				"type": "PlacedItem",
+				"subtype": "Plant",
+				"category": "Allium",
+				"description": "Error",
+				"value": 30,
+				"transformId": "1-03-01-02-00",
+				"baseExp": 9, 
+				"growTime": 900
+			},
+			{
+				"id": "0-02-01-05-00",
+				"name": "garlic",
+				"icon": "🧄",
+				"type": "PlacedItem",
+				"subtype": "Plant",
+				"category": "Allium",
+				"description": "Error",
+				"value": 15,
+				"transformId": "1-03-01-05-00",
+				"baseExp": 18, 
+				"growTime": 900
+			},
+			{
 				"id": "0-02-09-01-00",
 				"name": "apple",
 				"icon": "🍎",
@@ -48,36 +74,36 @@
 				"subtype": "Plant",
 				"category": "Drupe",
 				"description": "Error",
-				"value": 2000,
+				"value": 200,
 				"transformId": "1-03-11-01-00",
-				"baseExp": 600, 
+				"baseExp": 60, 
 				"growTime": 21600
 			},
 			{
-				"id": "0-02-01-02-00",
-				"name": "yellow onion",
-				"icon": "🧅",
+				"id": "0-02-11-02-00",
+				"name": "cherry",
+				"icon": "🍒",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"category": "Allium",
+				"category": "Drupe",
 				"description": "Error",
-				"value": 30,
-				"transformId": "1-03-01-02-00",
-				"baseExp": 9, 
-				"growTime": 900
+				"value": 60,
+				"transformId": "1-03-11-02-00",
+				"baseExp": 20, 
+				"growTime": 3600
 			},
 			{
-				"id": "0-02-01-05-00",
-				"name": "garlic",
-				"icon": "🧄",
+				"id": "0-02-11-03-00",
+				"name": "peach",
+				"icon": "🍑",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"category": "Allium",
+				"category": "Drupe",
 				"description": "Error",
-				"value": 15,
-				"transformId": "1-03-01-05-00",
-				"baseExp": 18, 
-				"growTime": 900
+				"value": 80,
+				"transformId": "1-03-11-03-00",
+				"baseExp": 25, 
+				"growTime": 7200
 			}
 		],
 		"Decorations": [
@@ -154,6 +180,28 @@
 				"transformId": "0-02-99-99-99"
 			},
 			{
+				"id": "1-01-01-02-00",
+				"name": "yellow onion seed",
+				"icon": "🧅",
+				"type": "InventoryItem",
+				"subtype": "Seed",
+				"category": "Allium",
+				"description": "Error",
+				"value": 60,
+				"transformId": "0-02-01-02-00"
+			},
+			{
+				"id": "1-01-01-05-00",
+				"name": "garlic seed",
+				"icon": "🧄",
+				"type": "InventoryItem",
+				"subtype": "Seed",
+				"category": "Allium",
+				"description": "Error",
+				"value": 60,
+				"transformId": "0-02-01-05-00"
+			},
+			{
 				"id": "1-01-09-01-00",
 				"name": "apple seed",
 				"icon": "🍎",
@@ -183,30 +231,30 @@
 				"subtype": "Seed",
 				"category": "Drupe",
 				"description": "Error",
-				"value": 5000,
+				"value": 150,
 				"transformId": "0-02-11-01-00"
 			},
 			{
-				"id": "1-01-01-02-00",
-				"name": "yellow onion seed",
-				"icon": "🧅",
+				"id": "1-01-11-02-00",
+				"name": "cherry seed",
+				"icon": "🍒",
 				"type": "InventoryItem",
 				"subtype": "Seed",
-				"category": "Allium",
+				"category": "Drupe",
 				"description": "Error",
 				"value": 60,
-				"transformId": "0-02-01-02-00"
+				"transformId": "0-02-11-02-00"
 			},
 			{
-				"id": "1-01-01-05-00",
-				"name": "garlic seed",
-				"icon": "🧄",
+				"id": "1-01-11-03-00",
+				"name": "peach seed",
+				"icon": "🍑",
 				"type": "InventoryItem",
 				"subtype": "Seed",
-				"category": "Allium",
+				"category": "Drupe",
 				"description": "Error",
-				"value": 60,
-				"transformId": "0-02-01-05-00"
+				"value": 90,
+				"transformId": "0-02-11-03-00"
 			}
 		],
 		"HarvestedItems": [
@@ -219,6 +267,26 @@
 				"category": "Error",
 				"description": "Error",
 				"value": 0
+			},
+			{
+				"id": "1-03-01-02-00",
+				"name": "yellow onion",
+				"icon": "🧅",
+				"type": "InventoryItem",
+				"subtype": "HarvestedItem",
+				"category": "Allium",
+				"description": "Error",
+				"value": 150
+			},
+			{
+				"id": "1-03-01-05-00",
+				"name": "garlic",
+				"icon": "🧄",
+				"type": "InventoryItem",
+				"subtype": "HarvestedItem",
+				"category": "Allium",
+				"description": "Error",
+				"value": 135
 			},
 			{
 				"id": "1-03-09-01-00",
@@ -248,27 +316,27 @@
 				"subtype": "HarvestedItem",
 				"category": "Drupe",
 				"description": "Error",
-				"value": 12000
+				"value": 500
 			},
 			{
-				"id": "1-03-01-02-00",
-				"name": "yellow onion",
-				"icon": "🧅",
+				"id": "1-03-11-02-00",
+				"name": "cherry",
+				"icon": "🍒",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"category": "Allium",
+				"category": "Drupe",
 				"description": "Error",
-				"value": 150
+				"value": 180
 			},
 			{
-				"id": "1-03-01-05-00",
-				"name": "garlic",
-				"icon": "🧄",
+				"id": "1-03-11-03-00",
+				"name": "peach",
+				"icon": "🍑",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"category": "Allium",
+				"category": "Drupe",
 				"description": "Error",
-				"value": 135
+				"value": 260
 			}
 		],
 		"Blueprints": [

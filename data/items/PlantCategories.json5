@@ -55,13 +55,13 @@ Plant: {
 	},
 	Tropical: {
 		ID: '10'
-		Crops: Banana, Mango, Pineapple, Papaya
+		Crops: Banana, Mango, Papaya, Pineapple
 		Description: Tropical fruits are typically grown in warm climates and often have a sweet, juicy flesh.
 		Bonus: Growing multiple Tropicals together enhances resistance to heat or increases growth speed in warmer climates.
 	},
 	Drupe: {
 		ID: '11'
-		Crops: Coconut, Peach, Cherry, Plum
+		Crops: Coconut, Cherry, Peach, Plum
 		Description: Drupes are fruits with a single large seed or "stone" surrounded by fleshy fruit. They often have a hard outer shell or skin.
 		Bonus: Growing multiple Drupes together improves resistance to drought or increases the size of the fruit.
 	},
