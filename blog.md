@@ -162,6 +162,8 @@
 
   * Garden page now displays some basic user information
   * User page now allows modification of username and icon
+  * Can only select icons from the plants subtype
+  * Need to improve visual layout
 
 ### Other UI changes
 

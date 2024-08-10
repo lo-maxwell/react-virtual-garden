@@ -11,6 +11,10 @@ const UserPage = () => {
   function RenderUser() {
     const {user, username, handleChangeUsername, icon, handleChangeIcon} = useUser();
 
+    if (!user) {
+      return <></>;
+    }
+
     return <>
       <div>
         <UsernameDisplay username={username} onUsernameChange={handleChangeUsername}/>
