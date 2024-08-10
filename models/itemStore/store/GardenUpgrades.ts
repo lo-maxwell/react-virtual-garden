@@ -1,4 +1,5 @@
 import { Garden } from "@/models/garden/Garden";
+import User from "@/models/user/User";
 import { Inventory } from "../inventory/Inventory";
 import { InventoryTransactionResponse } from "../inventory/InventoryTransactionResponse";
 import { Store } from "./Store";
@@ -50,16 +51,16 @@ export class GardenUpgrades {
 	 * @param inventory the inventory that is paying gold
 	 * @returns InventoryTransactionResponse containing the final gold or an error message
 	 */
-	static expandRow(garden: Garden, store: Store, inventory: Inventory): InventoryTransactionResponse {
+	static expandRow(garden: Garden, store: Store, inventory: Inventory, user: User): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		if (!garden.canAddColumn()) {
+		if (!garden.canAddColumn(user)) {
 			const levelRequired = (garden.getCols() + 1 - 5) * 5;
-			response.addErrorMessage(`Need to be level ${levelRequired} to expand row, currently level ${garden.getLevel()}`);
+			response.addErrorMessage(`Need to be level ${levelRequired} to expand row, currently level ${user.getLevel()}`);
 			return response;
 		}
 		const buyResponse = store.buyCustomObjectFromStore(inventory, this.getRowExpansionCost(garden, store));
 		if (!buyResponse.isSuccessful()) return buyResponse;
-		garden.addRow();
+		garden.addRow(user);
 		response.payload = buyResponse.payload;
 		return response;
 	}
@@ -71,16 +72,16 @@ export class GardenUpgrades {
 	 * @param inventory the inventory that is paying gold
 	 * @returns InventoryTransactionResponse containing the final gold or an error message
 	 */
-	 static expandColumn(garden: Garden, store: Store, inventory: Inventory): InventoryTransactionResponse {
+	 static expandColumn(garden: Garden, store: Store, inventory: Inventory, user: User): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		if (!garden.canAddRow()) {
+		if (!garden.canAddRow(user)) {
 			const levelRequired = (garden.getRows() + 1 - 5) * 5;
-			response.addErrorMessage(`Need to be level ${levelRequired} to expand column, currently level ${garden.getLevel()}`);
+			response.addErrorMessage(`Need to be level ${levelRequired} to expand column, currently level ${user.getLevel()}`);
 			return response;
 		}
 		const buyResponse = store.buyCustomObjectFromStore(inventory, this.getColExpansionCost(garden, store));
 		if (!buyResponse.isSuccessful()) return buyResponse;
-		garden.addColumn();
+		garden.addColumn(user);
 		response.payload = buyResponse.payload;
 		return response;
 	}

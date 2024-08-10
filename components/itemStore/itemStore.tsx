@@ -19,9 +19,9 @@ const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultip
 		}
 	}
 
-	function RenderSubtypeFilter() {
+	const RenderSubtypeFilter = () => {
 		const subtypes = itemStore.getAllSubtypes();
-		function selectSubtypeFilter(value: string | null) {
+		const selectSubtypeFilter = (value: string | null) => {
 			if (value) {
 				if (value === ItemSubtypes.SEED.name) {
 					setSubtypeFilter("Seed");
@@ -38,7 +38,7 @@ const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultip
 			setCategoryFilter(null);
 		}
 
-		function renderOptionLabel(option: string | null) {
+		const renderOptionLabel = (option: string | null) => {
 			if (option === ItemSubtypes.SEED.name) {
 				return "Seed";
 			} else if (option === ItemSubtypes.HARVESTED.name) {
@@ -64,10 +64,10 @@ const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultip
 	}
 
 
-	function RenderCategoryFilter() {
+	const RenderCategoryFilter = () => {
 		if (!subtypeFilter) return <></>;
 		const categories = itemStore.getAllCategories(subtypeFilter);
-		function selectCategoryFilter(value: string | null) {
+		const selectCategoryFilter = (value: string | null) => {
 			setCategoryFilter(value);
 		}
 
