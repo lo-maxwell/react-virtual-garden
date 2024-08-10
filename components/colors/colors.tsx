@@ -43,6 +43,14 @@ const colors = {
 		inventoryTooltipBackground: "bg-reno-sand-100 border-2 border-coffee-600",
 		categoryTextColor: "text-coffee-700",
 	},
+
+	user: {
+		usernameTextColor: "text-coffee-800",
+		usernameBackgroundColor: "bg-reno-sand-400",
+		usernameBorder: "border border-2 border-coffee-800",
+		usernameEditButtonTextColor: "text-coffee-800",
+		usernameEditButtonBackgroundColor: "bg-reno-sand-400"
+	}
 	
 }
 

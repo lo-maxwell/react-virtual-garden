@@ -1,6 +1,4 @@
 'use client'
-
-import UserProfileComponent from "@/components/garden/userProfile";
 import LevelSystemComponent from "@/components/level/LevelSystem";
 import IconSelector from "@/components/user/IconSelector";
 import UsernameDisplay from "@/components/user/UsernameDisplay";
@@ -16,11 +14,9 @@ const UserPage = () => {
     }
 
     return <>
-      <div>
-        <UsernameDisplay username={username} onUsernameChange={handleChangeUsername}/>
-      </div>
-      <div>
+      <div className={`my-1 min-h-[8%] flex flex-row items-center justify-center `}>
         <IconSelector iconIndex={icon} onIconChange={handleChangeIcon}/>
+        <UsernameDisplay username={username} onUsernameChange={handleChangeUsername}/>
       </div>
       <div>
         <LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} />

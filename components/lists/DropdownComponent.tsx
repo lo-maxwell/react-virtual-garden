@@ -23,7 +23,7 @@ const DropdownComponent = <T,>({
 
     return (
         <div className="flex flex-row justify-between">
-            <label htmlFor="dropdown">{label}</label>
+            <label htmlFor="dropdown" className="mr-2">{label}</label>
             <select
                 id="dropdown"
                 value={selectedValue ? renderOptionLabel(selectedValue) : ''}
