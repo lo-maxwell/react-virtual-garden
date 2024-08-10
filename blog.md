@@ -149,9 +149,30 @@
   * Updated text on plot tooltips to display more useful information on remaining time/grow time
 
 
+## Day 14
+
+### Added User Class
+
+  * Only contains username, icon, levelsystem for now
+  * Levelsystem was moved from garden to user; things that gave the garden xp now give the user xp
+  * Added UserContextProvider with functions to modify username and icon
+  * Need to implement history/stats tracker
+
+### Added User page
+
+  * Garden page now displays some basic user information
+  * User page now allows modification of username and icon
+  * Can only select icons from the plants subtype
+  * Need to improve visual layout
+
+### Other UI changes
+
+  * Refactored ui to use const instead of functions for all permanent elements
+
 TODO:
 Filter inventory - sort inventory by alphabet, price, category
 
+Use redux for state management
 
 Add selected indicator and/or make plots show what is going to be planted/placed
 
@@ -177,13 +198,17 @@ Add crop rotation - either assign plant families or just individual plants + soi
 
 Add fertilizer item - chance for double harvest, or reduce grow time. fertilizer lasts x seconds and affects any plants that start (finish?) growing during that time. or linearly diminishing effect based on time since fertilizer application
 
+Change plant categories to better reflect common terms
+
+Make store not able to delete items, even if they drop to 0 quantity, and modify display to say out of stock
+
 Add toolkit - select (plant, harvest, pickup, place); delete (only in progress plants)
 
-Store sells seeds for base price, not 2x (?)
+Store sells seeds for base price, not 2x (?), or just make it more clear what the profit margin is
 
 Daily login bonus to prevent softlock - gives some money and a random assortment of seeds that add up to some value
 
-Change value of slow plants so they aren't super efficient, amke them high risk high reward by having high seed costs + add random events that can destroy them + fertilizer that makes them super efficient
+Change value of slow plants so they aren't super efficient, make them high risk high reward by having high seed costs + add random events that can destroy them + fertilizer that makes them super efficient
 
 Tooltips should not go off the screen; make them below if normally on top, or on top if normally below
 

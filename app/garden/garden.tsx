@@ -9,10 +9,12 @@ import LevelSystemComponent from "@/components/level/LevelSystem";
 import { saveGarden } from "@/utils/localStorage/garden";
 import { usePlotActions } from "@/hooks/garden/plotActions";
 import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
+import { useUser } from "@/hooks/contexts/UserContext";
 
 const GardenComponent = () => {
 	const { inventory } = useInventory();
 	const { garden, gardenMessage, setGardenMessage } = useGarden();
+	const { user } = useUser();
 	const {selectedItem, toggleSelectedItem} = useSelectedItem();
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 	const [instantGrow, setInstantGrow] = useState(false); //for debug purposes
@@ -29,7 +31,7 @@ const GardenComponent = () => {
 		return () => clearInterval(id); // Cleanup function to clear the interval on unmount
 	}, []);
 
-	function GetPlotAction(plot: Plot, selected: InventoryItem | null) {
+	const GetPlotAction = (plot: Plot, selected: InventoryItem | null) => {
 		const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
 		if (plot.getItemSubtype() == ItemSubtypes.GROUND.name && selected != null) {
 			if (selected.itemData.subtype == ItemSubtypes.SEED.name) {
@@ -47,7 +49,7 @@ const GardenComponent = () => {
 		return doNothing(plot);
 	}
 
-	function generatePlots(plots: Plot[][]) {
+	const generatePlots = (plots: Plot[][]) => {
 		return (
 			<>
 			<div className="flex flex-col flex-wrap max-w-[100%]">
@@ -79,7 +81,7 @@ const GardenComponent = () => {
 		);
 	}
 
-	function plantAll() {
+	const plantAll = ()  => {
 		if (selectedItem == null || selectedItem.itemData.subtype != ItemSubtypes.SEED.name) return;
 		const getItemResponse = inventory.getItem(selectedItem);
 		if (!getItemResponse.isSuccessful()) return;
@@ -100,7 +102,7 @@ const GardenComponent = () => {
 		setGardenMessage(`Planted ${numPlanted} ${getItemResponse.payload.itemData.name}.`);
 	}
 
-	function harvestAll() {
+	const harvestAll = () => {
 		let currentPlants = 0;
 		for (let i = 0; i < garden.getRows(); i++) {
 			for (let j = 0; j < garden.getCols(); j++) {
@@ -130,19 +132,19 @@ const GardenComponent = () => {
 
 
 	function expandRow() {
-		if (!garden) {
+		if (!garden || !user) {
 			return;
 		}
-		garden?.addColumn();
+		garden.addColumn(user);
 		saveGarden(garden);
 		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 	}
 
 	function expandCol() {
-		if (!garden) {
+		if (!garden || !user) {
 			return;
 		}
-		garden?.addRow();
+		garden.addRow(user);
 		saveGarden(garden);
 		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 	}
@@ -165,14 +167,14 @@ const GardenComponent = () => {
 		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 	}
 
-	function levelUp() {
-		if (!garden) {
-			return;
-		}
-		garden.addExp(garden.getExpToLevelUp());
-		saveGarden(garden);
-		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
-	}
+	// function levelUp() {
+	// 	if (!garden) {
+	// 		return;
+	// 	}
+	// 	garden.addExp(garden.getExpToLevelUp());
+	// 	saveGarden(garden);
+	// 	setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+	// }
 
 	function toggleInstantGrow() {
 		//Yes this is reversed, because instantGrow hasn't updated until the next render
@@ -188,9 +190,6 @@ const GardenComponent = () => {
 				{generatePlots(garden.getPlots())}
 			</div>
 		</div>
-		<div className="mx-4 my-4">
-			<LevelSystemComponent level={garden.getLevel()} currentExp={garden.getCurrentExp()} expToLevelUp={garden.getExpToLevelUp()}/>
-		</div>
 		<div>
 			<button onClick={plantAll} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>Plant All</button>
 			<button onClick={harvestAll} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>Harvest All</button>
@@ -198,7 +197,7 @@ const GardenComponent = () => {
 		<div>
 			<button onClick={expandRow} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>expand row</button>
 			<button onClick={expandCol} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>expand col</button>
-			<button onClick={levelUp} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>levelup (debug)</button>
+			{/* <button onClick={levelUp} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>levelup (debug)</button> */}
 		</div>
 		<div>
 			<button onClick={shrinkRow} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>shrink row</button>

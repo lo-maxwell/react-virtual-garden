@@ -11,7 +11,7 @@ import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
 import InventoryComponent from "@/components/inventory/inventory";
 
 const StorePage = () => {
-  function RenderStore() {
+  const RenderStore = () => {
     const {store} = useStore();
     const { inventory } = useInventory();
     const {selectedItem, toggleSelectedItem, owner, setOwner} = useSelectedItem();
@@ -73,7 +73,6 @@ const StorePage = () => {
 
   return (<>
     <div className="w-full px-4 py-4 bg-reno-sand-200 text-black"> 
-      <div>This is the Store Page! </div>
       {RenderStore()}
     </div>
     </>

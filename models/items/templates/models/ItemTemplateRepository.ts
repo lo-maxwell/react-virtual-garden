@@ -7,7 +7,6 @@ import { PlacedItemTemplate } from "./PlacedItemTemplate";
 import { PlantTemplate } from "./PlantTemplate";
 import { SeedTemplate } from "./SeedTemplate";
 import itemsData from '@/data/items/Items.json';
-import { BlueprintTemplateInterface } from "../interfaces/BlueprintTemplateInterface";
 
 export class ItemTemplateRepository {
 	PlacedItems: Record<string, PlacedItemTemplate[]> = {};

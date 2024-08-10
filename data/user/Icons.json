@@ -1,0 +1,54 @@
+{
+	"Icons": {
+		"Error": [
+			{
+				"name": "error",
+				"icon": "❌"
+			}
+		],
+		"Plants": [
+			{
+				"name": "yellow onion",
+				"icon": "🧅"
+			},
+			{
+				"name": "garlic",
+				"icon": "🧄"
+			},
+			{
+				"name": "apple",
+				"icon": "🍎"
+			},
+			{
+				"name": "banana",
+				"icon": "🍌"
+			},
+			{
+				"name": "coconut",
+				"icon": "🥥"
+			},
+			{
+				"name": "cherry",
+				"icon": "🍒"
+			},
+			{
+				"name": "peach",
+				"icon": "🍑"
+			}
+		],
+		"Decorations": [
+			{
+				"name": "bench",
+				"icon": "🪑"
+			},
+			{
+				"name": "flamingo",
+				"icon": "🦩"
+			},
+			{
+				"name": "blueprint",
+				"icon": "📜"
+			}
+		]
+	}
+}

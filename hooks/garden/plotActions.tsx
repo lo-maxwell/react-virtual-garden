@@ -5,12 +5,13 @@ import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { useGarden } from "../contexts/GardenContext";
 import { useInventory } from "../contexts/InventoryContext";
-import { useSelectedItem } from "../contexts/SelectedItemContext";
+import { useUser } from "../contexts/UserContext";
 
 //contains static onclick functions for plot components
 export const usePlotActions = () => {
 	const {garden, setGardenMessage } = useGarden();
 	const {inventory, updateInventoryForceRefreshKey} = useInventory();
+	const {user} = useUser();
 
 	/**
 	 * Can only be used in an empty plot. Converts an inventoryItem seed into a plant and places it in this plot.
@@ -85,7 +86,7 @@ export const usePlotActions = () => {
 			} 
 			updateInventoryForceRefreshKey();
 
-			garden.addExp(xp);
+			user.addExp(xp);
 			saveInventory(inventory);
 			saveGarden(garden);
 			setGardenMessage(`Harvested ${harvestItemResponse.payload.pickedItem.itemData.name}.`);

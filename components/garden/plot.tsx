@@ -22,6 +22,33 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 	PlotComponent.displayName = "Plot";
 	const { garden } = useGarden();
 	const [displayIcon, setDisplayIcon] = useState(plot.getItem().itemData.icon);
+
+	const getColor = () => {
+		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name) {
+			return `border ${colors.ground.plotBackgroundColor} ${colors.ground.defaultBorderColor}`;
+		} else if (plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
+			const plant = plot.getItem() as Plant;
+			const timeElapsed = Date.now() - plot.getPlantTime();
+			if (plant.itemData.growTime * 1000 <= timeElapsed) {
+				return `bg-green-500 border ${colors.plant.grownBorderColor}`;
+			} else if (plant.itemData.growTime * 3/4 * 1000 <= timeElapsed) {
+				return `bg-green-400 border ${colors.plant.defaultBorderColor}`;
+			} else if (plant.itemData.growTime/2 * 1000 <= timeElapsed) {
+				return `bg-green-300 border ${colors.plant.defaultBorderColor}`;
+			} else if (plant.itemData.growTime * 1/4 * 1000 <= timeElapsed) {
+				return `bg-green-200 border ${colors.plant.defaultBorderColor}`;
+			} else {
+				return `bg-green-100 border ${colors.plant.defaultBorderColor}`;
+			}
+
+		} else if (plot.getItemSubtype() === ItemSubtypes.DECORATION.name) {
+			return `border ${colors.decoration.plotBackgroundColor} ${colors.decoration.defaultBorderColor}`;
+		} else {
+			//should never occur
+			return `bg-gray-300 border ${colors.plant.defaultBorderColor}`;
+		}
+	}
+
 	const [color, setColor] = useState(() => getColor());
 
 	useImperativeHandle(ref, () => ({
@@ -56,31 +83,6 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 		}
 	}
 
-	function getColor() {
-		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name) {
-			return `border ${colors.ground.plotBackgroundColor} ${colors.ground.defaultBorderColor}`;
-		} else if (plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
-			const plant = plot.getItem() as Plant;
-			const timeElapsed = Date.now() - plot.getPlantTime();
-			if (plant.itemData.growTime * 1000 <= timeElapsed) {
-				return `bg-green-500 border ${colors.plant.grownBorderColor}`;
-			} else if (plant.itemData.growTime * 3/4 * 1000 <= timeElapsed) {
-				return `bg-green-400 border ${colors.plant.defaultBorderColor}`;
-			} else if (plant.itemData.growTime/2 * 1000 <= timeElapsed) {
-				return `bg-green-300 border ${colors.plant.defaultBorderColor}`;
-			} else if (plant.itemData.growTime * 1/4 * 1000 <= timeElapsed) {
-				return `bg-green-200 border ${colors.plant.defaultBorderColor}`;
-			} else {
-				return `bg-green-100 border ${colors.plant.defaultBorderColor}`;
-			}
-
-		} else if (plot.getItemSubtype() === ItemSubtypes.DECORATION.name) {
-			return `border ${colors.decoration.plotBackgroundColor} ${colors.decoration.defaultBorderColor}`;
-		} else {
-			//should never occur
-			return `bg-gray-300 border ${colors.plant.defaultBorderColor}`;
-		}
-	}
 
 	return (
 		<PlotTooltip plot={plot} currentTime={currentTime}>

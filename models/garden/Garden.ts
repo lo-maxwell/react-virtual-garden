@@ -3,7 +3,7 @@ import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { generateNewPlaceholderPlacedItem} from "../items/PlaceholderItems";
 import { PlacedItemTemplate } from "../items/templates/models/PlacedItemTemplate";
 import { placeholderItemTemplates } from "../items/templates/models/PlaceholderItemTemplate";
-import LevelSystem from "../level/LevelSystem";
+import User from "../user/User";
 import { GardenTransactionResponse } from "./GardenTransactionResponse";
 import { Plot } from "./Plot";
 
@@ -12,7 +12,6 @@ export class Garden {
 	private userId: string;
 	private plots: Plot[][];
 	private plotPositions: Map<Plot, [number, number]>;
-	private level: LevelSystem;
 	
 	static getStartingRows() {return 5;}
 	static getStartingCols() {return 5;}
@@ -23,7 +22,7 @@ export class Garden {
 		return template!;
 	}
 
-	constructor(userId: string = "Dummy User", rows: number = Garden.getStartingRows(), cols: number = Garden.getStartingCols(), plots: Plot[][] | null = null, level: LevelSystem | null = null) {
+	constructor(userId: string = "Dummy User", rows: number = Garden.getStartingRows(), cols: number = Garden.getStartingCols(), plots: Plot[][] | null = null) {
 		this.userId = userId;
 		this.plotPositions = new Map();
 		if (plots != null) {
@@ -33,38 +32,34 @@ export class Garden {
 		}
 		this.fillNullWithEmptyPlot(rows, cols);
 		this.updatePlotPositions();
-		this.level = level || new LevelSystem();
 	}
 
 	static fromPlainObject(plainObject: any): Garden {
 		if (!plainObject || typeof plainObject !== 'object') {
 			//we throw an error here which causes loadgarden to return [], causing it to reset everything.
 			throw new Error('Invalid input to fromPlainObject');
-		  }
-		const { userId, plots: plainPlots, level: plainLevel } = plainObject;
-
-		// Convert plainLevel to LevelSystem
-		const levelInstance = plainLevel ? LevelSystem.fromPlainObject(plainLevel) : new LevelSystem();
+		}
+		const { userId, plots: plainPlots } = plainObject;
 
 		if (!Array.isArray(plainPlots)) {
 			//if plots is not the right shape, throw away the entire thing
-			return new Garden(userId, Garden.getStartingRows(), Garden.getStartingCols(), null, levelInstance);
+			return new Garden(userId, Garden.getStartingRows(), Garden.getStartingCols(), null);
 		}	
 		// Convert plainPlots to Plot[][]
 		const plots = plainPlots.map((row: any[]) => row.map((plot: any) => Plot.fromPlainObject(plot)));
 		
-		const garden = new Garden(userId, plainPlots.length, plainPlots[0]?.length || 0, plots, levelInstance);
+		const garden = new Garden(userId, plainPlots.length, plainPlots[0]?.length || 0, plots);
 		garden.updatePlotPositions();
 
 		return garden;
+		
 	}
 
 	toPlainObject(): any {
 
 		return {
 			userId: this.userId,
-			plots: this.plots.map(row => row.map(plot => plot.toPlainObject())),
-			level: this.level.toPlainObject()
+			plots: this.plots.map(row => row.map(plot => plot.toPlainObject()))
 		};
 	} 
 
@@ -99,41 +94,6 @@ export class Garden {
 	}
 
 	/**
-	 * @returns the level of the garden
-	 */
-	getLevel(): number {
-		return this.level.getLevel();
-	}
-
-	/**
-	 * @returns the total xp needed to level up
-	 */
-	getExpToLevelUp(): number {
-		return this.level.getExpToLevelUp();
-	}
-
-	/**
-	 * @returns the garden's current xp
-	 */
-	getCurrentExp(): number {
-		return this.level.getCurrentExp();
-	}
-
-	/**
-	 * @returns the growth rate, higher = faster
-	 */
-	getGrowthRate(): number {
-		return this.level.getGrowthRate();
-	}
-
-	/**
-	 * @param exp the quantity of xp to add
-	 */
-	addExp(exp: number) {
-		return this.level.addExperience(exp);
-	}
-
-	/**
      * Creates a 2D array of Empty Plots.
      * @param rows - number of rows 
 	 * @param cols - number of columns
@@ -162,8 +122,8 @@ export class Garden {
 	 * Can only add a row if number of rows is less than 5 + (level / 5).
 	 * @returns true or false
 	 */
-	canAddRow() : boolean {
-		if (this.getRows() + 1 <= 5 + Math.floor(this.level.getLevel()/5)) return true;
+	canAddRow(user: User) : boolean {
+		if (this.getRows() + 1 <= 5 + Math.floor(user.getLevel()/5)) return true;
 		return false;
 	}
 
@@ -172,8 +132,8 @@ export class Garden {
 	 * Can only add a column if number of columns is less than 5 + (level / 5).
 	 * @returns true or false
 	 */
-	canAddColumn() : boolean {
-		if (this.getCols() + 1 <= 5 + Math.floor(this.level.getLevel()/5)) return true;
+	canAddColumn(user: User) : boolean {
+		if (this.getCols() + 1 <= 5 + Math.floor(user.getLevel()/5)) return true;
 		return false;
 	}
 
@@ -181,8 +141,8 @@ export class Garden {
  	 * Adds an additional row to the garden.
 	 * @returns success or failure
 	 */
-	addRow(): boolean {
-		if (!this.canAddRow()) return false;
+	addRow(user: User): boolean {
+		if (!this.canAddRow(user)) return false;
 		this.setGardenSize(this.getRows() + 1, this.getCols());
 		return true;
 	}
@@ -191,8 +151,8 @@ export class Garden {
  	 * Adds an additional column to the garden.
 	 * @returns success or failure
 	 */
-	addColumn(): boolean {
-		if (!this.canAddColumn()) return false;
+	addColumn(user: User): boolean {
+		if (!this.canAddColumn(user)) return false;
 		this.setGardenSize(this.getRows(), this.getCols() + 1);
 		return true;
 	}

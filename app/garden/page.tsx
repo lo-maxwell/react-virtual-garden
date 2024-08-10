@@ -2,17 +2,17 @@
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { useState } from "react";
 import GardenComponent from "./garden";
-import User from "@/models/user/User";
 import UserProfileComponent from "@/components/garden/userProfile";
 import { useInventory } from "@/hooks/contexts/InventoryContext";
 import { useGarden } from "@/hooks/contexts/GardenContext";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
 import InventoryComponent from "@/components/inventory/inventory";
+import { useUser } from "@/hooks/contexts/UserContext";
 
 
 const GardenPage = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useUser();
   const { garden, resetGarden } = useGarden();
   const { inventory, resetInventory, updateInventoryForceRefreshKey } = useInventory();
   //Hack to force refresh garden when its contents change in another component
@@ -35,17 +35,17 @@ const GardenPage = () => {
     saveInventory(inventory);
   }
 
-  function RenderUser() {
+  const RenderUser = () => {
     if (!user) return <div>Still in development...</div>;
     return <UserProfileComponent/>
   }
 
-  function RenderGarden() {
+  const RenderGarden = () => {
     if (!garden || !inventory) return <div>Loading Garden...</div>;
     return <GardenComponent key={gardenForceRefreshKey}/>;
   }
 
-  function RenderInventory() {
+  const RenderInventory = () => {
     if (!inventory) return <div>Loading Inventory...</div>;
     return <InventoryComponent onInventoryItemClickFunction={toggleSelectedItem} costMultiplier={1}/>;
   }
@@ -58,9 +58,6 @@ const GardenPage = () => {
 
   return (<>
     <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
-      <div> 
-        This is the Garden Page!
-      </div>
       <div className="flex">
         <div className="w-1/4">
           {RenderUser()}
