@@ -49,7 +49,7 @@ export const itemTemplateMap: { [key: string]: ItemTemplateConstructor<Inventory
 
 /**
  * Get the Class given an item. Can be used as a constructor.
- * @param item - InventoryItem, PlacedItem, or Template
+ * @item InventoryItem, PlacedItem, or Template
  * @returns the Item Class
  */
 export const getItemClassFromSubtype = (item: InventoryItem | PlacedItem | ItemTemplate): ItemConstructor<InventoryItem | PlacedItem> => {
@@ -71,7 +71,7 @@ export const getItemClassFromSubtype = (item: InventoryItem | PlacedItem | ItemT
 
 /**
  * Get the Template given an item. Can be used as a constructor.
- * @param item - InventoryItem, PlacedItem, or Template
+ * @item InventoryItem, PlacedItem, or Template
  * @returns the Item Template
  */
  export const getItemTemplateFromSubtype = (item: InventoryItemTemplate | PlacedItemTemplate): ItemTemplateConstructor<InventoryItemTemplate | PlacedItemTemplate> => {

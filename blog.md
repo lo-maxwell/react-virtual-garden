@@ -171,6 +171,13 @@
 
 ### Added mango item
 
+## Day 15
+
+### Working on history class
+
+  * Stores a record of how many times items/buttons were interacted with by a user
+  * Building history, historylist, tests
+
 TODO:
 Filter inventory - sort inventory by alphabet, price, category
 

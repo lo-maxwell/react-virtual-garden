@@ -52,7 +52,7 @@ export class PlantTemplate extends PlacedItemTemplate{
 					throw new Error('Cannot create error template');
 				}
 				if (template.subtype !== ItemSubtypes.PLANT.name) {
-					throw new Error('Found non decoration for Plant template');
+					throw new Error('Found non plant for Plant template');
 				}
 				const typedTemplate = template as PlantTemplate;
 				return new PlantTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId, typedTemplate.baseExp, typedTemplate.growTime);

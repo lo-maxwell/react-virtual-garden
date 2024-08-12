@@ -13,8 +13,8 @@ export class GardenUpgrades {
 	/**
 	 * Calculate the cost in gold to expand the garden by 1 row
 	 * Formula: each new plot costs (number of existing plots * 25 gold)
-	 * @param garden the garden to expand
-	 * @param store the store, which has an upgradeMultiplier
+	 * @garden the garden to expand
+	 * @store the store, which has an upgradeMultiplier
 	 * @returns the cost
 	 */
 	static getRowExpansionCost(garden: Garden, store: Store) {
@@ -30,8 +30,8 @@ export class GardenUpgrades {
 	/**
 	 * Calculate the cost in gold to expand the garden by 1 column
 	 * Formula: each new plot costs (number of existing plots * 25 gold)
-	 * @param garden the garden to expand
-	 * @param store the store, which has an upgradeMultiplier
+	 * @garden the garden to expand
+	 * @store the store, which has an upgradeMultiplier
 	 * @returns the cost
 	 */
 	static getColExpansionCost(garden: Garden, store: Store) {
@@ -46,9 +46,9 @@ export class GardenUpgrades {
 
 	/**
 	 * Inventory pays gold to expand the garden by 1 row. 
-	 * @param garden the garden to expand
-	 * @param store the store they are paying to
-	 * @param inventory the inventory that is paying gold
+	 * @garden the garden to expand
+	 * @store the store they are paying to
+	 * @inventory the inventory that is paying gold
 	 * @returns InventoryTransactionResponse containing the final gold or an error message
 	 */
 	static expandRow(garden: Garden, store: Store, inventory: Inventory, user: User): InventoryTransactionResponse {
@@ -67,9 +67,9 @@ export class GardenUpgrades {
 
 	/**
 	 * Inventory pays gold to expand the garden by 1 column. 
-	 * @param garden the garden to expand
-	 * @param store the store they are paying to
-	 * @param inventory the inventory that is paying gold
+	 * @garden the garden to expand
+	 * @store the store they are paying to
+	 * @inventory the inventory that is paying gold
 	 * @returns InventoryTransactionResponse containing the final gold or an error message
 	 */
 	 static expandColumn(garden: Garden, store: Store, inventory: Inventory, user: User): InventoryTransactionResponse {

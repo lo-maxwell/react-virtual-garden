@@ -5,6 +5,9 @@ import { InventoryTransactionResponse } from "./inventory/InventoryTransactionRe
 import { getItemClassFromSubtype, ItemConstructor } from "../items/utility/classMaps";
 import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplate";
 import { ItemTemplate } from "../items/templates/models/ItemTemplate";
+import { Item } from "../items/Item";
+import { PlacedItem } from "../items/placedItems/PlacedItem";
+import { BooleanResponse } from "../utility/BooleanResponse";
 
 
 export class ItemList {
@@ -67,7 +70,7 @@ export class ItemList {
 
 	/**
      * Check if item is an InventoryItem.
-	 * @param item - The item to check.
+	 * @item The item to check.
      * @returns True/False
      */
 	static isInventoryItem(item: any): item is InventoryItem {
@@ -76,7 +79,7 @@ export class ItemList {
 	
 	/**
      * Check if item is an ItemTemplate.
-	 * @param item - The item to check.
+	 * @item The item to check.
      * @returns True/False
      */
 	static isItemTemplate(item: any): item is ItemTemplate {
@@ -92,8 +95,8 @@ export class ItemList {
 
 	
 	/**
-	 * @param subtype the subtype string, ie. SEED, HARVESTED, BLUEPRINT
-	 * @param category (optional) the category string, ie. Allium, Normal
+	 * @subtype the subtype string, ie. SEED, HARVESTED, BLUEPRINT
+	 * @category (optional) the category string, ie. Allium, Normal
 	 * @returns a copy of the inventory items matching the given subtype
 	 */
 	getItemsBySubtype(subtype: ItemSubtype, category: string | null = null): InventoryItem[] {
@@ -131,7 +134,7 @@ export class ItemList {
 
 	//TODO: Needs unit tests
 	/**
-	 * @param subtype the subtype to search within
+	 * @subtype the subtype to search within
 	 * @returns a list of strings containing all the categories of items in this itemlist
 	 */
 	getAllCategories(subtype: ItemSubtype): string[] {
@@ -146,22 +149,18 @@ export class ItemList {
 	}
 
 	/**
-     * Converts an InventoryItem or ItemTemplate to its item name. Strings are unaffected.
-	 * @param item - The item to convert, identified by InventoryItem, ItemTemplate, or name.
+     * Converts an Item or ItemTemplate to its item name. Strings are unaffected. Can be used on Placed or InventoryItems.
+	 * @item The item to convert, identified by Item, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the name or an error message.
      */
-	getItemName(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
+	static getItemName(item: InventoryItem | PlacedItem | ItemTemplate | string): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
 		let itemName: string;
 		if (typeof item === 'string') {
 			itemName = item;
 		} else if (typeof item === 'object' && ItemList.isItemTemplate(item)) {
 			itemName = item.name;
-			if (item.type == ItemTypes.PLACED.name) {
-				response.addErrorMessage(`Cannot get a placeditem from inventory`);
-				return response;
-			}
-		} else if (typeof item === 'object' && ItemList.isInventoryItem(item)) {
+		} else if (typeof item === 'object' && (item instanceof InventoryItem || item instanceof PlacedItem)) {
 			itemName = item.itemData.name;
 		} else {
 			//Should never occur
@@ -173,13 +172,36 @@ export class ItemList {
 	}
 
 	/**
+     * Converts an Item or ItemTemplate to its item id. Can be used on Placed or InventoryItems.
+	 * @item The item to convert, identified by Item or ItemTemplate.
+     * @returns InventoryTransactionResponse containing the id string or an error message.
+     */
+	 static getItemId(item: string | InventoryItem | PlacedItem | ItemTemplate): InventoryTransactionResponse {
+		const response = new InventoryTransactionResponse();
+		let itemId: string;
+		if (typeof item === 'string') {
+			itemId = item;
+		} else if (typeof item === 'object' && ItemList.isItemTemplate(item)) {
+			itemId = item.id;
+		} else if (typeof item === 'object' && (item instanceof InventoryItem || item instanceof PlacedItem)) {
+			itemId = item.itemData.id;
+		} else {
+			//Should never occur
+			response.addErrorMessage(`Could not parse item: ${item}`);
+			return response;
+		}
+		response.payload = itemId;
+		return response;
+	}
+
+	/**
      * Get an item from the inventory.
-     * @param item - The item to get, identified by InventoryItem, ItemTemplate, or name.
+     * @item The item to get, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the found InventoryItem or error message.
      */
 	getItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		const itemNameResponse = this.getItemName(item);
+		const itemNameResponse = ItemList.getItemName(item);
 		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
 		const itemName = itemNameResponse.payload;
 
@@ -196,12 +218,12 @@ export class ItemList {
 
 	/**
      * Check if the inventory contains an item.
-     * @param item - The item to check for, identified by InventoryItem, ItemTemplate, or name.
-     * @returns InventoryTransactionResponse containing True/False or error message.
+     * @item The item to check for, identified by InventoryItem, ItemTemplate, or name.
+     * @returns BooleanResponse containing True/False or error message.
      */
-	contains(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
-		const itemNameResponse = this.getItemName(item);
+	contains(item: InventoryItem | ItemTemplate | string): BooleanResponse {
+		const response = new BooleanResponse();
+		const itemNameResponse = ItemList.getItemName(item);
 		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
 		const itemName = itemNameResponse.payload;
 		
@@ -218,18 +240,18 @@ export class ItemList {
 
 	/**
      * Check if the inventory contains at least quantity of an item.
-     * @param item - The item to check for, identified by InventoryItem, ItemTemplate, or name.
-	 * @param quantity - Amount to require
-     * @returns InventoryTransactionResponse containing True/False or error message.
+     * @item The item to check for, identified by InventoryItem, ItemTemplate, or name.
+	 * @quantity Amount to require
+     * @returns BooleanResponse containing True/False or error message.
      */
-	containsAmount(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	containsAmount(item: InventoryItem | ItemTemplate | string, quantity: number): BooleanResponse {
+		const response = new BooleanResponse();
 		if (quantity <= 0 || !Number.isInteger(quantity)) {
 			response.addErrorMessage(`Invalid quantity: ${quantity}`);
 			return response;
 		}
 
-		const itemNameResponse = this.getItemName(item);
+		const itemNameResponse = ItemList.getItemName(item);
 		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
 		const itemName = itemNameResponse.payload;
 		
@@ -250,8 +272,8 @@ export class ItemList {
 	 * Blueprint -> returns the Decoration ItemTemplate corresponding to the Blueprint
 	 * Seed -> returns the Plant ItemTemplate corresponding to the Seed
 	 * HarvestedItem -> error
-	 * @param item - The item to use, identified by InventoryItem, ItemTemplate, or name.
-	 * @param quantity - the quantity of item consumed
+	 * @item The item to use, identified by InventoryItem, ItemTemplate, or name.
+	 * @quantity the quantity of item consumed
 	 * @returns a response containing the following object, or an error message
 	 * {originalItem: InventoryItem
 	 *  newTemplate: ItemTemplate}
@@ -271,8 +293,8 @@ export class ItemList {
 
 	/**
      * Add an item to the inventory.
-     * @param item - The item to add.
-     * @param quantity - The quantity of the item to add.
+     * @item The item to add.
+     * @quantity The quantity of the item to add.
      * @returns InventoryTransactionResponse containing the added InventoryItem or error message
      */
 	addItem(item: InventoryItem | InventoryItemTemplate, quantity: number): InventoryTransactionResponse {
@@ -332,8 +354,8 @@ export class ItemList {
 
 	/**
      * Update the quantity of an item in the inventory.
-     * @param item - The item to update, identified by InventoryItem, ItemTemplate, or name.
-     * @param delta - The amount to change the quantity by. If negative and the final quantity ends up at or below 0, deletes the item from the list.
+     * @item The item to update, identified by InventoryItem, ItemTemplate, or name.
+     * @delta The amount to change the quantity by. If negative and the final quantity ends up at or below 0, deletes the item from the list.
      * @returns InventoryTransactionResponse containing the updated InventoryItem or error message.
      */
 	updateQuantity(item: InventoryItem | InventoryItemTemplate | string, delta: number): InventoryTransactionResponse {
@@ -357,7 +379,7 @@ export class ItemList {
 
 	/**
      * Delete an item from the inventory.
-     * @param item - The item to delete, identified by InventoryItem, ItemTemplate, or name.
+     * @item The item to delete, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the deleted InventoryItem with quantity set to 0 or error message.
      */
 	deleteItem(item: InventoryItem | InventoryItemTemplate | string): InventoryTransactionResponse {

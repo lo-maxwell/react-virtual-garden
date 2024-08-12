@@ -2,6 +2,7 @@ import { InventoryItem } from "../items/inventoryItems/InventoryItem";
 import { ItemSubtype } from "../items/ItemTypes";
 import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplate";
 import { ItemTemplate } from "../items/templates/models/ItemTemplate";
+import { BooleanResponse } from "../utility/BooleanResponse";
 import { InventoryTransactionResponse } from "./inventory/InventoryTransactionResponse";
 import { ItemList } from "./ItemList";
 
@@ -27,8 +28,8 @@ export class ItemStore {
 	}
 
 	/**
-	 * @param subtype the subtype string, ie. SEED, HARVESTED, BLUEPRINT
-	 * @param category (optional) the category string, ie. Allium, Normal
+	 * @subtype the subtype string, ie. SEED, HARVESTED, BLUEPRINT
+	 * @category (optional) the category string, ie. Allium, Normal
 	 * @returns a copy of the inventory items matching the given subtype
 	 */
 	getItemsBySubtype(subtype: ItemSubtype, category: string | null = null): InventoryItem[] {
@@ -45,7 +46,7 @@ export class ItemStore {
 
 	//TODO: Needs unit tests
 	/**
-	 * @param subtype the subtype to search within
+	 * @subtype the subtype to search within
 	 * @returns a list of strings containing all the categories of items in this itemlist
 	 */
 	getAllCategories(subtype: ItemSubtype): string[] {
@@ -54,8 +55,8 @@ export class ItemStore {
 
 	/**
      * Gains quantity of item to inventory at no cost.
-     * @param item - The item to add, identified by InventoryItem or ItemTemplate.
-	 * @param quantity - Positive integer amount of item being added.
+     * @item The item to add, identified by InventoryItem or ItemTemplate.
+	 * @quantity Positive integer amount of item being added.
      * @returns InventoryTransactionResponse containing the added item or an error message.
      */
 	 gainItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
@@ -65,8 +66,8 @@ export class ItemStore {
 
 	/**
      * Trashes quantity of item from inventory. If item quantity goes to 0, deletes it from inventory. Fails if item is not in inventory.
-     * @param item - The item to remove, identified by InventoryItem, ItemTemplate, or name
-	 * @param quantity - Positive integer amount of item being removed. If quantity is greater than the remaining amount, removes all existing ones.
+     * @item The item to remove, identified by InventoryItem, ItemTemplate, or name
+	 * @quantity Positive integer amount of item being removed. If quantity is greater than the remaining amount, removes all existing ones.
      * @returns InventoryTransactionResponse containing the item or an error message.
      */
 	trashItem(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
@@ -82,7 +83,7 @@ export class ItemStore {
 
 	/**
      * Find an item in the inventory.
-     * @param item - The item to get, identified by InventoryItem, ItemTemplate, or name.
+     * @item The item to get, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the found InventoryItem or error message.
      */
 	 getItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
@@ -92,18 +93,18 @@ export class ItemStore {
 
 	/**
      * Check if the inventory contains an item.
-     * @param item - The item to check for, identified by InventoryItem, ItemTemplate, or name.
-     * @returns InventoryTransactionResponse containing True/False or error message.
+     * @item - The item to check for, identified by InventoryItem, ItemTemplate, or name.
+     * @returns BooleanResponse containing True/False or error message.
      */
-	contains(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
+	contains(item: InventoryItem | ItemTemplate | string): BooleanResponse {
 		const response = this.items.contains(item);
 		return response;
 	}
 
 	/**
      * Add an item to the inventory. If the item is already in inventory, updates quantity instead.
-     * @param item - The item to add.
-     * @param quantity - The quantity of the item to add.
+     * @item The item to add.
+     * @quantity The quantity of the item to add.
      * @returns InventoryTransactionResponse containing the added InventoryItem or error message
      */
 	protected addItem(item: InventoryItem | InventoryItemTemplate, quantity: number): InventoryTransactionResponse {
@@ -113,8 +114,8 @@ export class ItemStore {
 
 	/**
      * Update the quantity of an item in the inventory.
-     * @param item - The item to update, identified by InventoryItem, ItemTemplate, or name.
-     * @param delta - The amount to change the quantity by.
+     * @item - The item to update, identified by InventoryItem, ItemTemplate, or name.
+     * @delta - The amount to change the quantity by.
      * @returns InventoryTransactionResponse containing the updated InventoryItem or error message.
      */
 	protected updateQuantity(item: InventoryItem | InventoryItemTemplate | string, delta: number): InventoryTransactionResponse {
@@ -124,7 +125,7 @@ export class ItemStore {
 
 	/**
      * Delete an item from the inventory.
-     * @param item - The item to delete, identified by InventoryItem, ItemTemplate, or name.
+     * @item The item to delete, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the deleted InventoryItem or error message.
      */
 	protected deleteItem(item: InventoryItem | InventoryItemTemplate | string): InventoryTransactionResponse {

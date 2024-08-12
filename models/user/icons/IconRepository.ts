@@ -30,7 +30,7 @@ class IconRepository {
 
 	/**
 	 * 
-	 * @param name the icon name
+	 * @name the icon name
 	 * @returns the found icon image (as a string) or null
 	 */
 	getIconByName(name: string): string | null {

@@ -58,7 +58,7 @@ export abstract class PlacedItem extends Item {
 	}
 
 	/** Replaces the existing status
-	 * @param status the new status
+	 * @status the new status
 	 */
 	setStatus(status: string): void {
 		this.status = status;

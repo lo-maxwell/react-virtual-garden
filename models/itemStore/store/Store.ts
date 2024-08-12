@@ -135,7 +135,7 @@ export class Store extends ItemStore {
 	}
 
 	/**
-	 * @param multiplier - the new multiplier
+	 * @multiplier the new multiplier
 	 */
 	setBuyMultiplier(multiplier: number): void {
 		this.buyMultiplier = multiplier;
@@ -149,7 +149,7 @@ export class Store extends ItemStore {
 	}
 
 	/**
-	 * @param multiplier - the new multiplier
+	 * @multiplier the new multiplier
 	 */
 	setSellMultiplier(multiplier: number): void {
 		this.sellMultiplier = multiplier;
@@ -163,7 +163,7 @@ export class Store extends ItemStore {
 	}
 
 	/**
-	 * @param multiplier - the new multiplier
+	 * @multiplier the new multiplier
 	 */
 	setUpgradeMultiplier(multiplier: number): void {
 		this.upgradeMultiplier = multiplier;
@@ -177,7 +177,7 @@ export class Store extends ItemStore {
 	}
 
 	/**
-	 * @param stockList the stock list of the store
+	 * @stockList the stock list of the store
 	 */
 	setStockList(stockList: ItemList): void {
 		this.stockList = stockList;
@@ -191,7 +191,7 @@ export class Store extends ItemStore {
 	}
 
 	/**
-	 * @param restockTime  the time the store was last restocked
+	 * @restockTime  the time the store was last restocked
 	 */
 	setRestockTime(restockTime: number): void {
 		this.restockTime = restockTime;
@@ -205,7 +205,7 @@ export class Store extends ItemStore {
 	}
 
 	/**
-	 * @param restockInterval the time in milliseconds between restocks
+	 * @restockInterval the time in milliseconds between restocks
 	 */
 	setRestockInterval(restockInterval: number): void {
 		this.restockInterval = restockInterval;
@@ -223,9 +223,9 @@ export class Store extends ItemStore {
 
 	/**
      * Spends gold to add items to inventory. Fails if there is not enough gold.
-	 * @param inventory - The inventory that is spending gold and gaining items
-     * @param item - The item to add, identified by InventoryItem or ItemTemplate.
-	 * @param quantity - Amount of item being purchased.
+	 * @inventory The inventory that is spending gold and gaining items
+     * @item The item to add, identified by InventoryItem or ItemTemplate.
+	 * @quantity Amount of item being purchased.
      * @returns InventoryTransactionResponse containing the following object or an error message.
 	 * {finalGold: number,
 	 *  storeItem: InventoryItem,
@@ -262,9 +262,9 @@ export class Store extends ItemStore {
 	
 	/**
      * Sells items for gold.
-	 * @param inventory - The inventory that is selling items and gaining gold
-     * @param item - The item to sell, identified by InventoryItem or ItemTemplate.
-	 * @param quantity - Amount of item being sold
+	 * @inventory The inventory that is selling items and gaining gold
+     * @item The item to sell, identified by InventoryItem or ItemTemplate.
+	 * @quantity Amount of item being sold
      * @returns InventoryTransactionResponse containing the following object or an error message.
 	 * {finalGold: number,
 	 *  storeItem: InventoryItem,
@@ -311,7 +311,7 @@ export class Store extends ItemStore {
 
 	/**
 	 * Checks if all of the items (and quantities) are contained within this store's inventory
-	 * @param stockList the ItemList of items to check for
+	 * @stockList the ItemList of items to check for
 	 * @returns true/false
 	 */
 	needsRestock(stockList: ItemList = this.stockList): boolean {
@@ -340,7 +340,7 @@ export class Store extends ItemStore {
 	 * Adds items to the store if their quantity is lower than the quantity in the stockList.
 	 * If items are added, updates the restockTime.
 	 * If there is an error in the process, rolls back to original list.
-	 * @param stockList the list of items to restock. Defaults to the internal stocklist.
+	 * @stockList the list of items to restock. Defaults to the internal stocklist.
 	 * @returns InventoryTransactionResponse of true or an error message.
 	 */
 	restockStore(stockList: ItemList = this.stockList): InventoryTransactionResponse {
@@ -402,8 +402,8 @@ export class Store extends ItemStore {
 
 	/**
      * Spends gold. Fails if there is not enough gold.
-	 * @param inventory - The inventory that is spending gold
-	 * @param cost - The amount of gold spent
+	 * @inventory The inventory that is spending gold
+	 * @cost The amount of gold spent
      * @returns InventoryTransactionResponse containing the final gold or an error message.
      */
 	buyCustomObjectFromStore(inventory: Inventory, cost: number): InventoryTransactionResponse {

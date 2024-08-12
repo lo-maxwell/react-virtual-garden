@@ -95,8 +95,8 @@ export class Garden {
 
 	/**
      * Creates a 2D array of Empty Plots.
-     * @param rows - number of rows 
-	 * @param cols - number of columns
+     * @rows number of rows 
+	 * @cols number of columns
      * @returns Plot[][] with rows rows and cols columns, each containing an instance of Plot
      */
 	static generateEmptyPlots(rows: number, cols: number): Plot[][] {
@@ -107,8 +107,8 @@ export class Garden {
 
 	/**
      * Creates a single empty plot (containing ground)
-     * @param rowIndex - column index
-	 * @param colIndex - row index
+     * @rowIndex - column index
+	 * @colIndex - row index
      * @returns new Plot()
      */
 	static generateEmptyPlot(rowIndex: number, colIndex: number): Plot {
@@ -181,8 +181,8 @@ export class Garden {
 
 	/**
  	 * Sets the garden size. Fills empty slots with Empty Plots, and deletes slots that are out of bounds.
-	 * @param rows - new number of rows
-	 * @param cols - new number of columns
+	 * @rows new number of rows
+	 * @cols new number of columns
 	 */
 	setGardenSize(rows: number, cols: number): void {
 		const newPlots = Array.from({ length: rows }, (_, rowIndex) =>
@@ -246,6 +246,9 @@ export class Garden {
 					this.plotPositions.set(plot2, [row1, col1]);
 				}
 				
+			} else {
+				console.error('Invalid Index while swapping plots');
+				return;
 			}
 		} else if (data1 instanceof Plot && data2 instanceof Plot) {
 
@@ -262,9 +265,13 @@ export class Garden {
 				// Update positions in the map
 				this.plotPositions.set(data1, [row2, col2]);
 				this.plotPositions.set(data2, [row1, col1]);
+			} else {
+				console.error('Cannot find plots in garden while swapping');
+				return;
 			}
 		} else {
 			//TODO: Console log failure or throw exception?
+			console.error('Cannot swapPlots: plots are different type or incorrect format');
 			return;
 		}
 	}
@@ -278,9 +285,9 @@ export class Garden {
 
 	/**
 	 * Changes the item in a plot in this garden
-	 * @param rowIndex - row index
-	 * @param colIndex - column index
-	 * @param item - the replacement PlacedItem
+	 * @rowIndex - row index
+	 * @colIndex - column index
+	 * @item - the replacement PlacedItem
 	 * @returns the plot changed
 	 */
 	setPlotItem(rowIndex: number, colIndex: number, item: PlacedItem): Plot {
@@ -301,8 +308,8 @@ export class Garden {
 
 	/**
 	 * Looks up a plot by its row and column.
-	 * @param row - row index
-	 * @param col - col index
+	 * @row row index
+	 * @col col index
 	 * @returns the found plot, or null.
 	 */
 	getPlotByRowAndColumn(row: number, col: number): Plot | null {
@@ -314,8 +321,8 @@ export class Garden {
 
 	/**
 	 * Helper function to call useItem and format the response.
-	 * @param plot - the plot in the garden.
-	 * @param replacementItem - item to replace with after modification
+	 * @plot the plot in the garden.
+	 * @replacementItem item to replace with after modification
 	 * @returns response containing:
 	 * {originalItem: PlacedItem, 
 	 *  updatedPlot: Plot, 
@@ -336,8 +343,8 @@ export class Garden {
 
 	/**
 	 * Verifies that the plot contains a Plant. Replaces the Plant with an item. Returns a response containing the harvested item.
-	 * @param plot - the plot in the garden, or an object containing the row, col indexes.
-	 * @param replacementItem (optional) - item to replace with after harvesting
+	 * @plot the plot in the garden, or an object containing the row, col indexes.
+	 * @replacementItem (optional) item to replace with after harvesting
 	 * @returns response containing:
 	 * {originalItem: PlacedItem, 
 	 *  updatedPlot: Plot, 
@@ -375,8 +382,8 @@ export class Garden {
 
 	/**
 	 * Verifies that the plot contains a Decoration. Replaces the Decoration with an item. Returns a response containing the blueprint.
-	 * @param plot - the plot in the garden, or an object containing the row, col indexes.
-	 * @param replacementItem (optional) - item to replace with after harvesting
+	 * @plot the plot in the garden, or an object containing the row, col indexes.
+	 * @replacementItem (optional) item to replace with after harvesting
 	 * @returns response containing:
 	 * {originalItem: PlacedItem, 
 	 *  updatedPlot: Plot, 

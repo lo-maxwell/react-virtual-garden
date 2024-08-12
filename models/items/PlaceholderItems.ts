@@ -24,8 +24,8 @@ export const generateRandomPlaceholderInventoryItem = () => {
 
 
 /**
- * @param itemName - the item name ie. apple
- * @param status - the status string
+ * @itemName the item name ie. apple
+ * @status the status string
  */
 export const generateNewPlaceholderPlacedItem = (itemName: string, status: string) => {
 	const itemData = placeholderItemTemplates.getPlacedItemTemplateByName(itemName);
@@ -49,8 +49,8 @@ export const generateNewPlaceholderPlacedItem = (itemName: string, status: strin
 }
 
 /**
- * @param itemName - the item name, ie. apple seed
- * @param quantity - the quantity
+ * @itemName the item name, ie. apple seed
+ * @quantity the quantity
  */
 export const generateNewPlaceholderInventoryItem = (itemName: string, quantity: number) => {
 	const itemData = placeholderItemTemplates.getInventoryItemTemplateByName(itemName);
