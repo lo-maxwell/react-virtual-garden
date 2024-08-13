@@ -136,7 +136,7 @@ const TradeWindowComponent = ({costMultiplier}: {costMultiplier: number}) => {
 	const renderQuantityButtons = () => {
 		if (selectedItem) {
 			return <>
-				<div className="flex flex-row justify-around my-1">
+				<div className="flex flex-row justify-between my-1 max-w-[90%]">
 					<ChangeQuantityButton onClick={onAllClick} currentQuantity={quantity} className={"bg-gray-300 rounded w-12 h-12 font-bold text-center text-purple-600 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"} contents={<div data-testid="select-all">All</div>}/>
 					<ChangeQuantityButton onClick={onPlusClick} currentQuantity={quantity} className={"bg-gray-300 rounded w-12 h-12 text-center text-green-500 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"} contents={<div data-testid="add-item"><PlusSquareFilled/></div>}/>
 					<ChangeQuantityButton onClick={onMinusClick} currentQuantity={quantity} className={"bg-gray-300 rounded w-12 h-12 text-center text-red-500 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"} contents={<div data-testid="minus-item"><MinusSquareFilled/></div>}/>
@@ -150,7 +150,7 @@ const TradeWindowComponent = ({costMultiplier}: {costMultiplier: number}) => {
 	
 	return (<>
 		<div>{tradeWindowMessage}</div>
-		<div className="w-[90%]">
+		<div className="w-full">
 		{renderInventoryItem()}
 		{renderQuantityButtons()}
 		</div>

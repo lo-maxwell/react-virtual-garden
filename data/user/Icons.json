@@ -34,6 +34,10 @@
 			{
 				"name": "peach",
 				"icon": "🍑"
+			},
+			{
+				"name": "mango",
+				"icon": "🥭"
 			}
 		],
 		"Decorations": [

@@ -178,6 +178,12 @@
   * Stores a record of how many times items/buttons were interacted with by a user
   * Building history, historylist, tests
 
+### UI Changes
+
+  * Store now highlights changed prices in orange and displays the markup fee
+  * Refactored tradeWindowItem for code reuse
+  * Added new text colors for inventory items
+
 TODO:
 Filter inventory - sort inventory by alphabet, price, category
 
