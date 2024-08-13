@@ -132,7 +132,7 @@ class ItemTemplateInterfaceRepository {
 
     /**
 	 * 
-	 * @param name the item name, ie apple. Note that there cannot be 2 placedItems with the same name, unless it is error
+	 * @name the item name, ie apple. Note that there cannot be 2 placedItems with the same name, unless it is error
 	 * @returns the found ItemTemplateInterface or null
 	 */
 	getPlacedItemTemplateInterfaceByName(name: string): PlacedItemTemplateInterface | null {
@@ -147,7 +147,7 @@ class ItemTemplateInterfaceRepository {
 	}
 
 	/**
-	 * @param name the item name, ie apple seed. Note that there cannot be 2 inventoryItems with the same name, unless it is error
+	 * @name the item name, ie apple seed. Note that there cannot be 2 inventoryItems with the same name, unless it is error
 	 * @returns the found ItemTemplateInterface or null
 	 */
 	getInventoryItemTemplateInterfaceByName(name: string): InventoryItemTemplateInterface | null {

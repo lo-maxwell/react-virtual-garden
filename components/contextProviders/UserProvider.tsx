@@ -14,25 +14,29 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 	const [username, setUsername] = useState<string | null>(null);
 	const [icon, setIcon] = useState<string | null>(null);
 
-	function setupUser(username: string): User {
+	function generateDefaultNewUser(): User {
+		return new User('Test User', 'apple');
+	}
+
+	function setupUser(): User {
 		let user = loadUser();
 		console.log(user);
 		if (!(user instanceof User)) {
 		  console.log('user not found, setting up');
-		  user = new User(username, "apple");
+		  user = generateDefaultNewUser();
 		  saveUser(user);
 		}
 		if (user.getIcon() === 'error') {
 			console.log('user data corrupted, resetting');
 			console.log(user);
-			user = new User(username, "apple");
+			user = generateDefaultNewUser();
 			saveUser(user);
 		}
 		return user;
 	  }
 
 	useEffect(() => {
-		const user = setupUser("Test User");
+		const user = setupUser();
 		setUser(user);
 		setUsername(user.getUsername());
 		setIcon(user.getIcon());
@@ -52,8 +56,15 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 		saveUser(user);
 	}
 
+	const resetUser = () => {
+		const newUser = generateDefaultNewUser();
+		setUser(newUser);
+		saveUser(newUser);
+		console.log(newUser.toPlainObject());
+	}
+
     return (
-        <UserContext.Provider value={{ user: user!, username: username!, handleChangeUsername, icon: icon!, handleChangeIcon }}>
+        <UserContext.Provider value={{ user: user!, username: username!, handleChangeUsername, icon: icon!, handleChangeIcon, resetUser }}>
             {children}
         </UserContext.Provider>
     );

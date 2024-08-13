@@ -20,7 +20,6 @@
   * UserId - String
   * PlotList - Array of Plots
   * PlotMap - Map of Plot to coordinates (not currently in use, but might be useful to have)
-  * Level - instance of LevelSystem
 
 ### Plot
   * A single square representing an area of land. Can contain a single plant, decoration, or nothing.
@@ -98,10 +97,16 @@
 
 ### User
   * Username - String
-  * Icon - Image (?) or int indexing into list of preselected avatars
+  * Icon - String indexing into list of preselected avatars
   * Tagline - String
+  * Level - LevelSystem
+  * History - Array of ItemHistory + ActionHistory
   * React Component - User Bubble
     * Displays Username, Icon, clickable link to user page
+
+### History
+  * ItemHistory - tracks number of times an item was purchased/used/sold
+  * ActionHistory - tracks number of actions a user takes, ie buying/selling/planting/harvesting
 
 
 ## Database

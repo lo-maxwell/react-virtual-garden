@@ -15,28 +15,28 @@
 				"growTime": 0
 			},
 			{
-				"id": "0-02-01-02-00",
+				"id": "0-02-01-06-00",
 				"name": "yellow onion",
 				"icon": "🧅",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"category": "Allium",
+				"category": "Onion",
 				"description": "Error",
 				"value": 30,
-				"transformId": "1-03-01-02-00",
+				"transformId": "1-03-01-06-00",
 				"baseExp": 9, 
 				"growTime": 900
 			},
 			{
-				"id": "0-02-01-05-00",
+				"id": "0-02-01-01-00",
 				"name": "garlic",
 				"icon": "🧄",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"category": "Allium",
+				"category": "Onion",
 				"description": "Error",
 				"value": 15,
-				"transformId": "1-03-01-05-00",
+				"transformId": "1-03-01-01-00",
 				"baseExp": 18, 
 				"growTime": 900
 			},
@@ -46,12 +46,38 @@
 				"icon": "🍎",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"category": "Pome",
+				"category": "Tree Fruit",
 				"description": "Error",
 				"value": 10,
 				"transformId": "1-03-09-01-00",
 				"baseExp": 2, 
 				"growTime": 30
+			},
+			{
+				"id": "0-02-09-02-00",
+				"name": "cherry",
+				"icon": "🍒",
+				"type": "PlacedItem",
+				"subtype": "Plant",
+				"category": "Tree Fruit",
+				"description": "Error",
+				"value": 60,
+				"transformId": "1-03-09-02-00",
+				"baseExp": 20, 
+				"growTime": 3600
+			},
+			{
+				"id": "0-02-09-03-00",
+				"name": "peach",
+				"icon": "🍑",
+				"type": "PlacedItem",
+				"subtype": "Plant",
+				"category": "Tree Fruit",
+				"description": "Error",
+				"value": 80,
+				"transformId": "1-03-09-03-00",
+				"baseExp": 25, 
+				"growTime": 7200
 			},
 			{
 				"id": "0-02-10-01-00",
@@ -67,43 +93,43 @@
 				"growTime": 180
 			},
 			{
-				"id": "0-02-11-01-00",
+				"id": "0-02-10-02-00",
 				"name": "coconut",
 				"icon": "🥥",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"category": "Drupe",
+				"category": "Tropical",
 				"description": "Error",
 				"value": 200,
-				"transformId": "1-03-11-01-00",
-				"baseExp": 60, 
+				"transformId": "1-03-10-02-00",
+				"baseExp": 50, 
 				"growTime": 21600
 			},
 			{
-				"id": "0-02-11-02-00",
-				"name": "cherry",
-				"icon": "🍒",
+				"id": "0-02-10-03-00",
+				"name": "mango",
+				"icon": "🥭",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"category": "Drupe",
+				"category": "Tropical",
 				"description": "Error",
-				"value": 60,
-				"transformId": "1-03-11-02-00",
-				"baseExp": 20, 
-				"growTime": 3600
+				"value": 120,
+				"transformId": "1-03-10-03-00",
+				"baseExp": 30, 
+				"growTime": 10800
 			},
 			{
-				"id": "0-02-11-03-00",
-				"name": "peach",
-				"icon": "🍑",
+				"id": "0-02-10-03-03",
+				"name": "magic mango",
+				"icon": "🥭",
 				"type": "PlacedItem",
 				"subtype": "Plant",
-				"category": "Drupe",
+				"category": "Tropical",
 				"description": "Error",
-				"value": 80,
-				"transformId": "1-03-11-03-00",
-				"baseExp": 25, 
-				"growTime": 7200
+				"value": 1200,
+				"transformId": "1-03-10-03-03",
+				"baseExp": 300, 
+				"growTime": 108000
 			}
 		],
 		"Decorations": [
@@ -180,26 +206,26 @@
 				"transformId": "0-02-99-99-99"
 			},
 			{
-				"id": "1-01-01-02-00",
+				"id": "1-01-01-06-00",
 				"name": "yellow onion seed",
 				"icon": "🧅",
 				"type": "InventoryItem",
 				"subtype": "Seed",
-				"category": "Allium",
+				"category": "Onion",
 				"description": "Error",
 				"value": 60,
-				"transformId": "0-02-01-02-00"
+				"transformId": "0-02-01-06-00"
 			},
 			{
-				"id": "1-01-01-05-00",
+				"id": "1-01-01-01-00",
 				"name": "garlic seed",
 				"icon": "🧄",
 				"type": "InventoryItem",
 				"subtype": "Seed",
-				"category": "Allium",
+				"category": "Onion",
 				"description": "Error",
 				"value": 60,
-				"transformId": "0-02-01-05-00"
+				"transformId": "0-02-01-01-00"
 			},
 			{
 				"id": "1-01-09-01-00",
@@ -207,10 +233,32 @@
 				"icon": "🍎",
 				"type": "InventoryItem",
 				"subtype": "Seed",
-				"category": "Pome",
+				"category": "Tree Fruit",
 				"description": "Error",
 				"value": 5,
 				"transformId": "0-02-09-01-00"
+			},
+			{
+				"id": "1-01-09-02-00",
+				"name": "cherry seed",
+				"icon": "🍒",
+				"type": "InventoryItem",
+				"subtype": "Seed",
+				"category": "Tree Fruit",
+				"description": "Error",
+				"value": 60,
+				"transformId": "0-02-09-02-00"
+			},
+			{
+				"id": "1-01-09-03-00",
+				"name": "peach seed",
+				"icon": "🍑",
+				"type": "InventoryItem",
+				"subtype": "Seed",
+				"category": "Tree Fruit",
+				"description": "Error",
+				"value": 90,
+				"transformId": "0-02-09-03-00"
 			},
 			{
 				"id": "1-01-10-01-00",
@@ -224,37 +272,37 @@
 				"transformId": "0-02-10-01-00"
 			},
 			{
-				"id": "1-01-11-01-00",
+				"id": "1-01-10-02-00",
 				"name": "coconut seed",
 				"icon": "🥥",
 				"type": "InventoryItem",
 				"subtype": "Seed",
-				"category": "Drupe",
+				"category": "Tropical",
 				"description": "Error",
 				"value": 150,
-				"transformId": "0-02-11-01-00"
+				"transformId": "0-02-10-02-00"
 			},
 			{
-				"id": "1-01-11-02-00",
-				"name": "cherry seed",
-				"icon": "🍒",
+				"id": "1-01-10-03-00",
+				"name": "mango seed",
+				"icon": "🥭",
 				"type": "InventoryItem",
 				"subtype": "Seed",
-				"category": "Drupe",
+				"category": "Tropical",
 				"description": "Error",
-				"value": 60,
-				"transformId": "0-02-11-02-00"
+				"value": 120,
+				"transformId": "0-02-10-03-00"
 			},
 			{
-				"id": "1-01-11-03-00",
-				"name": "peach seed",
-				"icon": "🍑",
+				"id": "1-01-10-03-03",
+				"name": "magic mango seed",
+				"icon": "🥭",
 				"type": "InventoryItem",
 				"subtype": "Seed",
-				"category": "Drupe",
+				"category": "Tropical",
 				"description": "Error",
-				"value": 90,
-				"transformId": "0-02-11-03-00"
+				"value": 1200,
+				"transformId": "0-02-10-03-03"
 			}
 		],
 		"HarvestedItems": [
@@ -269,22 +317,22 @@
 				"value": 0
 			},
 			{
-				"id": "1-03-01-02-00",
+				"id": "1-03-01-06-00",
 				"name": "yellow onion",
 				"icon": "🧅",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"category": "Allium",
+				"category": "Onion",
 				"description": "Error",
 				"value": 150
 			},
 			{
-				"id": "1-03-01-05-00",
+				"id": "1-03-01-01-00",
 				"name": "garlic",
 				"icon": "🧄",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"category": "Allium",
+				"category": "Onion",
 				"description": "Error",
 				"value": 135
 			},
@@ -294,9 +342,29 @@
 				"icon": "🍎",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"category": "Pome",
+				"category": "Tree Fruit",
 				"description": "Error",
 				"value": 20
+			},
+			{
+				"id": "1-03-09-02-00",
+				"name": "cherry",
+				"icon": "🍒",
+				"type": "InventoryItem",
+				"subtype": "HarvestedItem",
+				"category": "Tree Fruit",
+				"description": "Error",
+				"value": 180
+			},
+			{
+				"id": "1-03-09-03-00",
+				"name": "peach",
+				"icon": "🍑",
+				"type": "InventoryItem",
+				"subtype": "HarvestedItem",
+				"category": "Tree Fruit",
+				"description": "Error",
+				"value": 260
 			},
 			{
 				"id": "1-03-10-01-00",
@@ -309,34 +377,34 @@
 				"value": 45
 			},
 			{
-				"id": "1-03-11-01-00",
+				"id": "1-03-10-02-00",
 				"name": "coconut",
 				"icon": "🥥",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"category": "Drupe",
+				"category": "Tropical",
 				"description": "Error",
 				"value": 500
 			},
 			{
-				"id": "1-03-11-02-00",
-				"name": "cherry",
-				"icon": "🍒",
+				"id": "1-03-10-03-00",
+				"name": "mango",
+				"icon": "🥭",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"category": "Drupe",
+				"category": "Tropical",
 				"description": "Error",
-				"value": 180
+				"value": 360
 			},
 			{
-				"id": "1-03-11-03-00",
-				"name": "peach",
-				"icon": "🍑",
+				"id": "1-03-10-03-03",
+				"name": "magic mango",
+				"icon": "🥭",
 				"type": "InventoryItem",
 				"subtype": "HarvestedItem",
-				"category": "Drupe",
+				"category": "Tropical",
 				"description": "Error",
-				"value": 260
+				"value": 3600
 			}
 		],
 		"Blueprints": [

@@ -7,8 +7,8 @@ export class RewardGenerator {
 	
 	/**
 	 * An object with various functions for creating reward buckets within a certain value range
-	 * @param rewardItems the list of possible items that this generator can give out
-	 * @param maxQuantity the maximum quantity of a single item in a single reward
+	 * @rewardItems the list of possible items that this generator can give out
+	 * @maxQuantity the maximum quantity of a single item in a single reward
 	 */
 	constructor(rewardItems: ItemList, maxQuantity: number, maxItems: number) {
 		this.rewardItems = rewardItems;

@@ -9,7 +9,7 @@ const TradeWindowItemComponent  = ({item, quantity, costMultiplier}: {item: Inve
 	const renderItemComponent = ({icon, name, quantity, price}: {icon: string, name: string, quantity: number, price: number}) => {
 		return (
 			<>
-				<span className="flex justify-end min-w-[35px]">
+				<span className="flex justify-end min-w-[35px]" data-testid="item-qt">
 					{quantity}
 				</span>
 				<div className="mx-1 w-6">{icon}</div>
@@ -17,7 +17,7 @@ const TradeWindowItemComponent  = ({item, quantity, costMultiplier}: {item: Inve
 					{/* Might not display properly if screen size is small or name is too long */}
 					<span className="flex items-left truncate min-w-0 max-w-[100%]">{name}</span>
 				</div>
-				<span className="flex min-w-[30px] justify-start">
+				<span className="flex min-w-[30px] justify-start" data-testid="item-cost">
 					<span className="mr-1">💰</span> {/* Gold icon */}
 					{price}
 				</span>

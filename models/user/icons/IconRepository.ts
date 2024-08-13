@@ -22,12 +22,16 @@ class IconRepository {
 		);
 		console.log(this.Icons);
 	  }
+
+	getIconCategories() {
+		return Object.keys(this.Icons);
+	}
 	
 
 	/**
 	 * 
-	 * @param name the icon name
-	 * @returns the found icon string or null
+	 * @name the icon name
+	 * @returns the found icon image (as a string) or null
 	 */
 	getIconByName(name: string): string | null {
 		const icons = Object.values(this.Icons).flat().filter(icon => icon.getName() === name);

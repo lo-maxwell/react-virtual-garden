@@ -9,7 +9,7 @@ import { placeholderItemTemplates } from "@/models/items/templates/models/Placeh
 import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
 import React, { useEffect, useState } from "react";
 import colors from "../colors/colors";
-import Tooltip from "../textbox/tooltip";
+import Tooltip from "../window/tooltip";
 
 const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNode, plot: Plot, currentTime: number}) => {
 

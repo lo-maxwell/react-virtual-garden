@@ -8,6 +8,7 @@ interface UserContextType {
     handleChangeUsername: (newUsername: string) => void;
     icon: string;
     handleChangeIcon: (newIcon: string) => void;
+    resetUser: () => void;
     // Add any other actions or state you need
 }
 

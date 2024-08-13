@@ -163,11 +163,20 @@
   * Garden page now displays some basic user information
   * User page now allows modification of username and icon
   * Can only select icons from the plants subtype
-  * Need to improve visual layout
+  * Added popup for icon selection
 
 ### Other UI changes
 
   * Refactored ui to use const instead of functions for all permanent elements
+
+### Added mango item
+
+## Day 15
+
+### Working on history class
+
+  * Stores a record of how many times items/buttons were interacted with by a user
+  * Building history, historylist, tests
 
 TODO:
 Filter inventory - sort inventory by alphabet, price, category
@@ -211,6 +220,10 @@ Daily login bonus to prevent softlock - gives some money and a random assortment
 Change value of slow plants so they aren't super efficient, make them high risk high reward by having high seed costs + add random events that can destroy them + fertilizer that makes them super efficient
 
 Tooltips should not go off the screen; make them below if normally on top, or on top if normally below
+
+Grow zombies/other creatures - randomly move around and give bonuses (automatic harvest/planting, fertilizer, harvest bonus)
+
+User almanac - displays how many of each plant were grown, some extra details about them
 
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time

@@ -21,6 +21,8 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 				generateNewPlaceholderInventoryItem('apple seed', 100),
 				generateNewPlaceholderInventoryItem('banana seed', 50),
 				generateNewPlaceholderInventoryItem('coconut seed', 25),
+				generateNewPlaceholderInventoryItem('mango seed', 25),
+				generateNewPlaceholderInventoryItem('magic mango seed', 1),
 				generateNewPlaceholderInventoryItem('yellow onion seed', 25),
 				generateNewPlaceholderInventoryItem('garlic seed', 25),
 				generateNewPlaceholderInventoryItem('cherry seed', 25),

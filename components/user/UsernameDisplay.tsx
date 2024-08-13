@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import colors from '../colors/colors';
 
 const UsernameDisplay = ({ username, onUsernameChange }: { username: string, onUsernameChange: Function}) => {
     const [editing, setEditing] = useState(false);
@@ -18,19 +19,28 @@ const UsernameDisplay = ({ username, onUsernameChange }: { username: string, onU
     };
 
     return (
-        <div className="username-display">
+        <>
             {editing ? (
-                <>
-                    <input type="text" value={newUsername} onChange={handleChange} />
-                    <button onClick={handleSave}>Save</button>
-                </>
+                <span className="flex flex-row justify-center">
+                    <input type="text" 
+					maxLength={32}
+					value={newUsername} 
+					onChange={handleChange} 
+					className={`border-none text-3xl ml-2 px-2 py-1 w-[16ch] ${colors.user.usernameTextColor}`}/>
+                    <button onClick={handleSave}
+							className={`ml-2 my-4 px-2 text-xl rounded-lg ${colors.user.usernameEditButtonTextColor} ${colors.user.usernameEditButtonBackgroundColor}`}>
+						Save</button>
+                </span>
             ) : (
-                <>
-                    <span>{username}</span>
-                    <button onClick={handleEdit}>Edit</button>
-                </>
+                <span className="flex flex-row justify-center items-center">
+                    <span className={`px-2 py-1 text-3xl align-bottom ${colors.user.usernameTextColor}`}>{username}</span>
+                    <button onClick={handleEdit}
+							className={`ml-2 my-4 px-2 text-xl rounded-lg ${colors.user.usernameEditButtonTextColor} ${colors.user.usernameEditButtonBackgroundColor}`}>
+						Edit
+					</button>
+                </span>
             )}
-        </div>
+        </>
     );
 }
 

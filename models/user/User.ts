@@ -88,7 +88,7 @@ class User {
 	}
 
 	/**
-	 * @param exp the quantity of xp to add
+	 * @exp the quantity of xp to add
 	 */
 	addExp(exp: number) {
 		return this.level.addExperience(exp);

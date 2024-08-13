@@ -38,11 +38,11 @@ test('Should Get Items By Subtype', () => {
 
 test('Should Get Items By Subtype and Category', () => {
 	testItemList.addItem(generateNewPlaceholderInventoryItem('apple', 1), 1);
-	let items = testItemList.getItemsBySubtype(ItemSubtypes.SEED.name, "Pome");
+	let items = testItemList.getItemsBySubtype(ItemSubtypes.SEED.name, "Tree Fruit");
 	expect(items.length).toBe(1);
-	items = testItemList.getItemsBySubtype(ItemSubtypes.SEED.name, "Allium");
+	items = testItemList.getItemsBySubtype(ItemSubtypes.SEED.name, "Onion");
 	expect(items.length).toBe(0);
-	items = testItemList.getItemsBySubtype(ItemSubtypes.HARVESTED.name, "Pome");
+	items = testItemList.getItemsBySubtype(ItemSubtypes.HARVESTED.name, "Tree Fruit");
 	expect(items.length).toBe(1);
 	items = testItemList.getItemsBySubtype(ItemSubtypes.BLUEPRINT.name);
 	expect(items.length).toBe(0);

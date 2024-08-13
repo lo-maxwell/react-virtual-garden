@@ -7,7 +7,7 @@ import { HarvestedItemTemplate } from "@/models/items/templates/models/Harvested
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
 import colors from "../colors/colors";
-import Tooltip from "../textbox/tooltip";
+import Tooltip from "../window/tooltip";
 
 const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, item: InventoryItem}) => {
 

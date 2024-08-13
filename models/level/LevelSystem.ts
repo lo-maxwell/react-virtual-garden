@@ -6,9 +6,9 @@ class LevelSystem {
 	private growthRate: number;
 
 	/**
-	 * @param startingLevel - the initial level
-	 * @param currentExp - the initial xp
-	 * @param growthRate - divides the amount of xp needed per level. higher values = less xp.
+	 * @startingLevel the initial level
+	 * @currentExp the initial xp
+	 * @growthRate divides the amount of xp needed per level. higher values = less xp.
 	 */
 	constructor(startingLevel: number = 1, currentExp: number = 0, growthRate: number = 1) {
 		this.level = startingLevel;

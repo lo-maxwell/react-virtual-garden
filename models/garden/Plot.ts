@@ -77,8 +77,8 @@ export class Plot {
 
 	/** 
 	 * Replaces the existing item with a new one. Changes the plantTime.
-	 * @param item the item to replace with
-	 * @param plantTime the new plantTime, defaults to Date.now()
+	 * @item the item to replace with
+	 * @plantTime the new plantTime, defaults to Date.now()
 	 * @returns the changed item.
 	 */
 	setItem(item: PlacedItem, plantTime: number = Date.now()): PlacedItem {
@@ -95,7 +95,7 @@ export class Plot {
 	}
 
 	/** 
-	 * @param plantTime the new time planted (as milliseconds from epoch time), defaults to Date.now()
+	 * @plantTime the new time planted (as milliseconds from epoch time), defaults to Date.now()
 	 */
 	setPlantTime(plantTime: number = Date.now()): void {
 		this.plantTime = plantTime;
@@ -124,8 +124,8 @@ export class Plot {
 
 	/**
 	 * Returns the amount of time remaining for growing, as a readable string.
-	 * @param currentTime the current time
-	 * @param plantedTime the time the plant was planted
+	 * @currentTime the current time
+	 * @plantedTime the time the plant was planted
 	 * @returns a string containing the time
 	 */
 	getRemainingGrowTime(currentTime: number = Date.now(), plantedTime: number = this.plantTime) {
@@ -167,7 +167,7 @@ export class Plot {
 	 * Decoration -> returns the Blueprint ItemTemplate corresponding to the Decoration
 	 * Plant -> returns the HarvestedItem ItemTemplate corresponding to the Plant
 	 * EmptyItem -> error
-	 * @param item the item to replace with. Default: ground
+	 * @item the item to replace with. Default: ground
 	 * @returns a response containing the following object, or an error message
 	 * {originalItem: PlacedItem, 
 	 *  replacedItem: PlacedItem, 
@@ -207,8 +207,8 @@ export class Plot {
 	 * Blueprint -> returns a new Decoration corresponding to the blueprint
 	 * Seed -> returns a new Plant corresponding to the blueprint
 	 * HarvestedItem -> error
-	 * @param inventory the inventory to modify
-	 * @param item the inventoryItem to convert
+	 * @inventory the inventory to modify
+	 * @item the inventoryItem to convert
 	 * @returns a response containing the following object, or an error message
 	 *  {
 			newItem: PlacedItem
@@ -253,8 +253,8 @@ export class Plot {
 	 * Plant -> returns a new HarvestedItem
 	 * Decoration -> returns a new Blueprint
 	 * Ground -> Error
-	 * @param inventory the inventory to modify
-	 * @param updatedItem the item to replace with in this plot, defaults to ground.
+	 * @inventory the inventory to modify
+	 * @updatedItem the item to replace with in this plot, defaults to ground.
 	 * @returns a response containing the following object, or an error message
 	 *  {
 			pickedItem: PlacedItem
@@ -298,10 +298,10 @@ export class Plot {
 
 	/**
 	 * Checks if the plant in this plot is finished growing, then picks it up and adds a harvestedItem to inventory.
-	 * @param inventory the inventory to modify
-	 * @param instantHarvest if set to true, ignores grow times
-	 * @param updatedItem the item to replace with in this plot, defaults to ground.
-	 * @param currentTime the time in milliseconds since epoch time. Only used for testing.
+	 * @inventory the inventory to modify
+	 * @instantHarvest if set to true, ignores grow times
+	 * @updatedItem the item to replace with in this plot, defaults to ground.
+	 * @currentTime the time in milliseconds since epoch time. Only used for testing.
 	 * @returns a response containing the following object, or an error message
 	 *  {
 			pickedItem: PlacedItem

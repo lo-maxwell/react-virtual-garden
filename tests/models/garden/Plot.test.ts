@@ -2,6 +2,18 @@ import { Plot } from "@/models/garden/Plot";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { ItemList } from "@/models/itemStore/ItemList";
 import { generateNewPlaceholderInventoryItem, generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";
+import { ItemTemplateRepository } from "@/models/items/templates/models/ItemTemplateRepository";
+import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
+
+
+let testPlot: Plot;
+let testInventory: Inventory;
+
+beforeEach(() => {
+	testPlot = new Plot(generateNewPlaceholderPlacedItem('apple', ''));
+	testInventory = new Inventory("Test User");
+});
 
 test('Should Initialize Plot Object', () => {
 	const newPlot = new Plot(generateNewPlaceholderPlacedItem("apple", "newItem"), 1);
@@ -188,10 +200,23 @@ test('Should Create Plot Object From PlainObject', () => {
 test('Should Create Empty Plot Instead of Error Item On fromPlainObject', () => {
 	//Mute console error
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-	const testPlot = new Plot(generateNewPlaceholderPlacedItem('error', ''));
-	const serializedPlot = JSON.stringify(testPlot.toPlainObject());
+	const errorPlot = new Plot(generateNewPlaceholderPlacedItem('error', ''));
+	const serializedPlot = JSON.stringify(errorPlot.toPlainObject());
 	const plot = Plot.fromPlainObject(JSON.parse(serializedPlot));
 	expect(plot.getItem().itemData.name).toBe('ground');
 	// Restore console.error
 	consoleErrorSpy.mockRestore();
+})
+
+test('Should Get EXP Value', () => {
+	const appleTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate;
+	expect(testPlot.getExpValue()).toBe(appleTemplate.baseExp);
+})
+
+
+test('Should Not Get EXP Value', () => {
+	testPlot.pickupItem(testInventory);
+	testInventory.gainItem(generateNewPlaceholderInventoryItem('bench blueprint', 1), 1);
+	testPlot.placeItem(testInventory, testInventory.getItem('bench blueprint').payload);
+	expect(testPlot.getExpValue()).toBe(0);
 })

@@ -76,7 +76,7 @@ export class Inventory extends ItemStore{
 
 	/**
      * Gains quantity gold.
-	 * @param quantity - Positive integer amount of item being added.
+	 * @quantity Positive integer amount of item being added.
      * @returns InventoryTransactionResponse containing the ending gold amount or an error message.
      */
 	addGold(quantity: number): InventoryTransactionResponse {
@@ -92,7 +92,7 @@ export class Inventory extends ItemStore{
 
 	/**
      * Removes quantity gold from inventory. If reduced to below 0, sets gold to 0 instead.
-	 * @param quantity - Positive integer amount of gold being removed.
+	 * @quantity Positive integer amount of gold being removed.
      * @returns InventoryTransactionResponse containing the ending gold amount or an error message.
      */
 	removeGold(quantity: number): InventoryTransactionResponse {
@@ -112,9 +112,9 @@ export class Inventory extends ItemStore{
 
 	/**
      * Spends gold to add items to inventory. Fails if there is not enough gold.
-     * @param item - The item to add, identified by InventoryItem or ItemTemplate.
-	 * @param multiplier - Value that the base price is modified by.
-	 * @param quantity - Amount of item being purchased.
+     * @item The item to add, identified by InventoryItem or ItemTemplate.
+	 * @multiplier Value that the base price is modified by.
+	 * @quantity Amount of item being purchased.
      * @returns InventoryTransactionResponse containing the following object or an error message.
 	 * {finalGold: number,
 	 *  purchasedItem: InventoryItem}
@@ -162,9 +162,9 @@ export class Inventory extends ItemStore{
 
 	/**
      * Sells item from inventory. Fails if item is not in inventory.
-     * @param item - The item to sell, identified by InventoryItem, ItemTemplate, or name
-	 * @param multiplier - Value that the base price is modified by.
-	 * @param quantity - Positive integer amount of item being sold.
+     * @item The item to sell, identified by InventoryItem, ItemTemplate, or name
+	 * @multiplier Value that the base price is modified by.
+	 * @quantity Positive integer amount of item being sold.
      * @returns InventoryTransactionResponse containing the following object or an error message.
 	 * {finalGold: number,
 	 *  remainingItem: InventoryItem}
@@ -214,8 +214,8 @@ export class Inventory extends ItemStore{
 	 * Blueprint -> returns the Decoration ItemTemplate corresponding to the Blueprint
 	 * Seed -> returns the Plant ItemTemplate corresponding to the Seed
 	 * HarvestedItem -> error
-	 * @param item - The item to use, identified by InventoryItem, ItemTemplate, or name.
-	 * @param quantity - the quantity of item consumed
+	 * @item The item to use, identified by InventoryItem, ItemTemplate, or name.
+	 * @quantity the quantity of item consumed
 	 * @returns a response containing the following object, or an error message
 	 * {originalItem: InventoryItem
 	 *  newTemplate: ItemTemplate}

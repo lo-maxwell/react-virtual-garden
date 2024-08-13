@@ -15,8 +15,8 @@ export const usePlotActions = () => {
 
 	/**
 	 * Can only be used in an empty plot. Converts an inventoryItem seed into a plant and places it in this plot.
-	 * @param item - the inventoryItem to convert to a placedItem
-	 * @param plot - the plot to modify
+	 * @item the inventoryItem to convert to a placedItem
+	 * @plot the plot to modify
 	 * @returns the updated icon
 	 */
 	const plantSeed = (item: InventoryItem, plot: Plot) => {
@@ -42,8 +42,8 @@ export const usePlotActions = () => {
 
 	/**
 	 * Can only be used in an empty plot. Converts an inventoryItem blueprint into a decoration and places it in this plot.
-	 * @param item - the inventoryItem to convert to a placedItem
-	 * @param plot - the plot to modify
+	 * @item - the inventoryItem to convert to a placedItem
+	 * @plot - the plot to modify
 	 * @returns the updated icon
 	 */
 	const placeDecoration = (item: InventoryItem, plot: Plot) => {
@@ -68,8 +68,8 @@ export const usePlotActions = () => {
 
 	/**
 	 * Can only be used in a plot with a plant. Removes the plant and adds a harvestedItem to inventory.
-	 * @param plot - the plot to modify
-	 * @param instantGrow - if set to true, ignores grow timers and instantly harvests
+	 * @plot the plot to modify
+	 * @instantGrow if set to true, ignores grow timers and instantly harvests
 	 * @returns the updated icon
 	 */
 	const clickPlant = (plot: Plot, instantGrow: boolean = false) => {
@@ -97,7 +97,7 @@ export const usePlotActions = () => {
 
 	/**
 	 * Can only be used in a plot with a decoration. Removes the decoration and adds a blueprint to inventory.
-	 * @param plot - the plot to modify
+	 * @plot the plot to modify
 	 * @returns the updated icon
 	 */
 	const clickDecoration = (plot: Plot) => {

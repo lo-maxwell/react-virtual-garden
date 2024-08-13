@@ -5,10 +5,10 @@ const LevelSystemComponent = ({level, currentExp, expToLevelUp}: {level: number,
 	return (
 		<div className="bg-gray-300 p-4 rounded-lg shadow-md">
 			<div className="text-center mb-2">
-				<div className="text-xl font-bold text-purple-500">Level: {level}</div>
+				<div className="text-xl font-bold text-purple-500" data-testid="current-level">Level: {level}</div>
 			</div>
 			<div className="bg-white p-2 rounded-md">
-				<div className="text-lg font-medium text-gray-800">
+				<div className="text-lg font-medium text-gray-800" data-testid="level-xp">
 					XP: <span className="text-purple-500">{currentExp}</span>/{expToLevelUp}
 				</div>
 				<div className="mt-2 bg-gray-200 h-4 rounded-full overflow-hidden">

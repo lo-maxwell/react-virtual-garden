@@ -12,7 +12,7 @@ class PlaceholderItemTemplates {
 	}
 
 	/**
-	 * @param name the item name, ie apple. Note that there cannot be 2 placedItems with the same name, unless it is error
+	 * @name the item name, ie apple. Note that there cannot be 2 placedItems with the same name, unless it is error
 	 * @returns the found ItemTemplate or null
 	 */
 	getPlacedItemTemplateByName(name: string): PlacedItemTemplate | null {
@@ -27,7 +27,7 @@ class PlaceholderItemTemplates {
 	}
 
 	/**
-	 * @param name the item name, ie apple seed. Note that there cannot be 2 inventoryItems with the same name, unless it is error
+	 * @name the item name, ie apple seed. Note that there cannot be 2 inventoryItems with the same name, unless it is error
 	 * @returns the found ItemTemplate or null
 	 */
 	getInventoryItemTemplateByName(name: string): InventoryItemTemplate | null {
