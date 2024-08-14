@@ -1,5 +1,5 @@
-import { CustomResponse } from "../../utility/CustomResponse";
-import ItemHistory from "./itemHistory/ItemHistory";
+import { CustomResponse } from "../../../utility/CustomResponse";
+import ItemHistory from "./ItemHistory";
 
 export class ItemHistoryTransactionResponse extends CustomResponse {
 	// TODO: make payload only accept history items?

@@ -1,5 +1,5 @@
 import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
-import { ItemHistoryTransactionResponse } from "../ItemHistoryTransactionResponse";
+import { ItemHistoryTransactionResponse } from "./ItemHistoryTransactionResponse";
 abstract class ItemHistory {
 	protected itemData: ItemTemplate;
 	

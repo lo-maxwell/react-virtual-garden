@@ -1,6 +1,6 @@
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { DecorationTemplate } from "@/models/items/templates/models/DecorationTemplate";
-import { ItemHistoryTransactionResponse } from "../ItemHistoryTransactionResponse";
+import { ItemHistoryTransactionResponse } from "./ItemHistoryTransactionResponse";
 import ItemHistory from "./ItemHistory";
 import { PlantHistory } from "./PlantHistory";
 

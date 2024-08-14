@@ -1,6 +1,6 @@
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
-import { ItemHistoryTransactionResponse } from "../ItemHistoryTransactionResponse";
+import { ItemHistoryTransactionResponse } from "./ItemHistoryTransactionResponse";
 import ItemHistory from "./ItemHistory";
 
 export class PlantHistory extends ItemHistory{

@@ -177,6 +177,8 @@
 
   * Stores a record of how many times items/buttons were interacted with by a user
   * Building history, historylist, tests
+  * ItemHistory and ActionHistory
+  * ActionHistory still needs test cases
 
 ### UI Changes
 
@@ -185,6 +187,9 @@
   * Added new text colors for inventory items
 
 TODO:
+
+Change mouseover color for inventoryItems
+
 Filter inventory - sort inventory by alphabet, price, category
 
 Use redux for state management

@@ -3,7 +3,7 @@ import { ItemSubtype, ItemSubtypes, ItemTypes } from "@/models/items/ItemTypes";
 import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
 import { ItemList } from "@/models/itemStore/ItemList";
-import { ItemHistoryTransactionResponse } from "./ItemHistoryTransactionResponse";
+import { ItemHistoryTransactionResponse } from "./itemHistory/ItemHistoryTransactionResponse";
 import ItemHistory from "./itemHistory/ItemHistory";
 import { PlantHistory } from "./itemHistory/PlantHistory";
 import { CustomResponse } from "@/models/utility/CustomResponse";
@@ -16,13 +16,13 @@ export class ItemHistoryList {
 	constructor(history: ItemHistory[] = []) {
 		this.history = history;
 		this.history.sort((a, b) => {
-			const indexA = ItemList.fixedOrder.indexOf(a.getItemData().subtype);
-			const indexB = ItemList.fixedOrder.indexOf(b.getItemData().subtype);
+			const indexA = ItemHistoryList.fixedOrder.indexOf(a.getItemData().subtype);
+			const indexB = ItemHistoryList.fixedOrder.indexOf(b.getItemData().subtype);
 	
 			// If a subtype is not in the fixedOrder array, it gets a large index number.
 			// This keeps unknown subtypes at the end of the sorted array.
-			const orderA = indexA !== -1 ? indexA : ItemList.fixedOrder.length;
-			const orderB = indexB !== -1 ? indexB : ItemList.fixedOrder.length;
+			const orderA = indexA !== -1 ? indexA : ItemHistoryList.fixedOrder.length;
+			const orderB = indexB !== -1 ? indexB : ItemHistoryList.fixedOrder.length;
 			
 			if (orderA !== orderB) {
 				return orderA - orderB;
