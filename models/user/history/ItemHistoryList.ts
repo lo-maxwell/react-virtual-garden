@@ -230,7 +230,7 @@ export class ItemHistoryList {
 	/**
      * Delete a history from the list.
      * @history the history object to delete
-     * @returns ItemHistoryTransactionResponse containing the deleted InventoryItem with quantity set to 0 or error message.
+     * @returns ItemHistoryTransactionResponse containing the deleted ItemHistory or error message.
      */
 	deleteHistory(history: ItemHistory): ItemHistoryTransactionResponse {
 		const response = new ItemHistoryTransactionResponse();

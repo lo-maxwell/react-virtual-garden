@@ -178,7 +178,7 @@
   * Stores a record of how many times items/buttons were interacted with by a user
   * Building history, historylist, tests
   * ItemHistory and ActionHistory
-  * ActionHistory still needs test cases
+  * Finished test cases for ActionHistory and ActionHistoryList
 
 ### UI Changes
 

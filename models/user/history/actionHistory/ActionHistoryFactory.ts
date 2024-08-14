@@ -11,7 +11,7 @@ class ActionHistoryFactory {
 	/**
 	 * 
 	 * @name the history name
-	 * @returns the found actionHistory object or null
+	 * @returns the created actionHistory object or null
 	 */
 	 getActionHistoryByName(name: string): ActionHistory | null {
 		const histories = Object.values(this.repository.histories).flat().filter(history => history.name === name);
@@ -29,7 +29,7 @@ class ActionHistoryFactory {
 	 * @subtype plant, decoration, etc
 	 * @category tree fruit, onion, normal etc
 	 * @action harvest, place, etc
-	 * @returns the found actionHistory object or null
+	 * @returns the created actionHistory object or null
 	 */
 	getActionHistoryByIdentifiers(subtype: string, category: string, action: string): ActionHistory | null {
 		const identifierString = `${subtype.toLowerCase()}:${category.toLowerCase()}:${action.toLowerCase()}`;
@@ -45,7 +45,7 @@ class ActionHistoryFactory {
 	/**
 	 * 
 	 * @identifier the identifier
-	 * @returns the found actionHistory object or null
+	 * @returns the created actionHistory object or null
 	 */
 	 getActionHistoryByIdentifierString(identifier: string): ActionHistory | null {
 		const histories = Object.values(this.repository.histories).flat().filter(history => history.identifier === identifier);

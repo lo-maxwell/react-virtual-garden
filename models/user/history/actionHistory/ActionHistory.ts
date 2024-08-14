@@ -1,4 +1,4 @@
-import { actionHistoryFactory } from "./ActionHistoryFactory";
+import { actionHistoryRepository } from "./ActionHistoryRepository";
 import { ActionHistoryTransactionResponse } from "./ActionHistoryTransactionResponse";
 
 export default class ActionHistory {
@@ -61,20 +61,23 @@ export default class ActionHistory {
 			if (typeof description !== 'string') {
 				throw new Error('Invalid description in plainObject for ActionHistory');
 			}
+			if (typeof identifier !== 'string') {
+				throw new Error('Invalid identifier in plainObject for ActionHistory');
+			}
 			if (typeof quantity !== 'number') {
 				throw new Error('Invalid quantity in plainObject for ActionHistory');
 			}
 
 			//Fetch existing data based on identifier
-			let updatedActionHistory = actionHistoryFactory.getActionHistoryByIdentifierString(identifier);
+			let updatedActionHistory = actionHistoryRepository.getActionHistoryInterfaceByIdentifierString(identifier);
 			if (updatedActionHistory != null) {
-				return new ActionHistory(updatedActionHistory.getName(), updatedActionHistory.getDescription(), updatedActionHistory.getIdentifier(), quantity);
+				return new ActionHistory(updatedActionHistory.name, updatedActionHistory.description, updatedActionHistory.identifier, quantity);
 			}
 
 			//Fetch existing data based on name
-			updatedActionHistory = actionHistoryFactory.getActionHistoryByName(name);
+			updatedActionHistory = actionHistoryRepository.getActionHistoryInterfaceByName(name);
 			if (updatedActionHistory != null) {
-				return new ActionHistory(updatedActionHistory.getName(), updatedActionHistory.getDescription(), updatedActionHistory.getIdentifier(), quantity);
+				return new ActionHistory(updatedActionHistory.name, updatedActionHistory.description, updatedActionHistory.identifier, quantity);
 			}
 			
 			//Create new object -- danger -- should be unnecessary unless large data migration was made
@@ -96,14 +99,19 @@ export default class ActionHistory {
 		};
 	}
 
+	/**
+	 * Combines the quantity from the given history into this one.
+	 * @history the history to combine with
+	 * @returns ActionHistoryTransactionResponse containing the updated ActionHistory or an error message
+	 */
 	combineHistory(history: ActionHistory): ActionHistoryTransactionResponse {
 		const response = new ActionHistoryTransactionResponse();
 		if (history.quantity < 0) {
 			response.addErrorMessage('Error combining ActionHistory: invalid quantity');
 			return response;
 		}
-		if (history.getName() !== this.name || history.getDescription() !== this.description) {
-			response.addErrorMessage('Error combining ActionHistory: not identical name or description');
+		if (history.getName() !== this.name || history.getDescription() !== this.description || history.getIdentifier() !== this.identifier) {
+			response.addErrorMessage('Error combining ActionHistory: not identical name, description, or identifier');
 			return response;
 		}
 		this.updateQuantity(history.getQuantity());

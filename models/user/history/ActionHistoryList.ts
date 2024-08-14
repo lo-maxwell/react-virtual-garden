@@ -1,19 +1,19 @@
 import { BooleanResponse } from "@/models/utility/BooleanResponse";
+import { CustomResponse } from "@/models/utility/CustomResponse";
 import ActionHistory from "./actionHistory/ActionHistory";
-import { actionHistoryFactory } from "./actionHistory/ActionHistoryFactory";
 import { ActionHistoryTransactionResponse } from "./actionHistory/ActionHistoryTransactionResponse";
 
 export class ActionHistoryList {
-	private history: ActionHistory[];
-	constructor(history: ActionHistory[] = []) {
-		this.history = history;
+	private histories: ActionHistory[];
+	constructor(histories: ActionHistory[] = []) {
+		this.histories = histories;
 	}
 
 	static fromPlainObject(plainObject: any): ActionHistoryList {
 		try {
             // Validate plainObject structure
             if (!plainObject || typeof plainObject !== 'object') {
-                throw new Error('Invalid plainObject structure for PlantHistory');
+                throw new Error('Invalid plainObject structure for ActionHistoryList');
             }
 			const { actionHistories } = plainObject;
 			const histories = actionHistories.map((actionHistory: any) => {
@@ -30,7 +30,7 @@ export class ActionHistoryList {
 
 	toPlainObject(): any {
 		const toReturn = {
-			actionHistories: this.history.map(ActionHistory => {
+			actionHistories: this.histories.map(ActionHistory => {
 				return ActionHistory.toPlainObject();
 			}) // Convert each InventoryItem to a plain object
 		};
@@ -41,38 +41,61 @@ export class ActionHistoryList {
 	 * @returns a copy of the inventory items within the list.
 	 */
 	getAllHistories(): ActionHistory[] {
-		return this.history.slice();
+		return this.histories.slice();
 	}
 
 	/**
-     * Get a history object from the list, based on name
-     * @name the history name to search for
-     * @returns ActionHistoryTransactionResponse containing the found ActionHistory or error message.
+     * Check if the history list contains a history
+     * @subtype plant, decoration, etc
+	 * @category tree fruit, onion, normal etc
+	 * @action harvested, placed, etc
+     * @returns BooleanResponse containing True/False or error message.
      */
-	getHistory(name: string): ActionHistoryTransactionResponse {
+	 getHistoryByIdentifier(subtype: string, category: string, action: string): ActionHistoryTransactionResponse {
+		const identifierString = `${subtype.toLowerCase()}:${category.toLowerCase()}:${action.toLowerCase()}`;
+		return this.getHistoryByIdentifierString(identifierString);
+	}
+
+	/**
+     * Check if the history list contains a history
+     * @identifier the identifier
+     * @returns BooleanResponse containing True/False or error message.
+     */
+	getHistoryByIdentifierString(identifier: string): ActionHistoryTransactionResponse {
 		const response = new ActionHistoryTransactionResponse();
 
-		this.history.forEach((element, index) => {
-			if (element.getName() == name) {
+		this.histories.forEach((element, index) => {
+			if (element.getIdentifier() == identifier) {
 				response.payload = element;
 				return response;
 			}
 		})
 		if (response.payload != null) return response;
-		response.addErrorMessage(`ActionHistory for ${name} not found`);
+		response.addErrorMessage(`ActionHistory for ${identifier} not found`);
 		return response;
 	}
 
 	/**
      * Check if the history list contains a history
-     * @name the history name to search for
+     * @subtype plant, decoration, etc
+	 * @category tree fruit, onion, normal etc
+	 * @action harvested, placed, etc
      * @returns BooleanResponse containing True/False or error message.
      */
-	contains(name: string): BooleanResponse {
+	containsIdentifier(subtype: string, category: string, action: string): BooleanResponse {
+		const identifierString = `${subtype.toLowerCase()}:${category.toLowerCase()}:${action.toLowerCase()}`;
+		return this.containsIdentifierString(identifierString);
+	}
+
+	/**
+     * Check if the history list contains a history
+     * @identifier the identifier
+     * @returns BooleanResponse containing True/False or error message.
+     */
+	 containsIdentifierString(identifier: string): BooleanResponse {
 		const response = new BooleanResponse();
-		
-		this.history.forEach((element, index) => {
-			if (element.getName() == name) {
+		this.histories.forEach((element, index) => {
+			if (element.getIdentifier() == identifier) {
 				response.payload = true;
 				return response;
 			}
@@ -88,7 +111,7 @@ export class ActionHistoryList {
 	addActionHistory(newHistory: ActionHistory): ActionHistoryTransactionResponse {
 		const response = new ActionHistoryTransactionResponse();
 		//Check if history already contains this type
-		if (this.contains(newHistory.getName()).payload) {
+		if (this.containsIdentifierString(newHistory.getIdentifier()).payload) {
 			//Update existing history
 			const updateHistoryResponse = this.updateActionHistory(newHistory);
 			if (!updateHistoryResponse.isSuccessful()) {
@@ -97,7 +120,7 @@ export class ActionHistoryList {
 			response.payload = updateHistoryResponse.payload;
 		} else {
 			//Add new history
-			this.history.push(newHistory);
+			this.histories.push(newHistory);
 			response.payload = newHistory;
 		}
 		return response;
@@ -110,14 +133,14 @@ export class ActionHistoryList {
      */
 	updateActionHistory(newHistory: ActionHistory): ActionHistoryTransactionResponse {
 		const response = new ActionHistoryTransactionResponse();
-		if (this.contains(newHistory.getName()).payload) {
-			const getHistoryResponse = this.getHistory(newHistory.getName());
+		if (this.containsIdentifierString(newHistory.getIdentifier()).payload) {
+			const getHistoryResponse = this.getHistoryByIdentifierString(newHistory.getIdentifier());
 			const originalHistory = getHistoryResponse.payload;
 			if (!getHistoryResponse.isSuccessful() || !originalHistory) {
 				//Should never occur, since we just checked contains
 				return getHistoryResponse;
 			}
-			if (originalHistory.getName() !== newHistory.getName()) {
+			if (originalHistory.getName() !== newHistory.getName() || originalHistory.getDescription() !== newHistory.getDescription() || originalHistory.getIdentifier() !== newHistory.getIdentifier()) {
 				response.addErrorMessage(`Error: cannot merge non matching action histories: ${originalHistory.getName()} and ${newHistory.getName()}`)
 				return response;
 			}
@@ -131,5 +154,56 @@ export class ActionHistoryList {
 			return response;
 		}
 		return response;
+	}
+
+	/**
+     * Delete a history from the list.
+     * @subtype plant, decoration, etc
+	 * @category tree fruit, onion, normal etc
+	 * @action harvested, placed, etc
+     * @returns ActionHistoryTransactionResponse containing the deleted ActionHistory or error message.
+     */
+	deleteHistoryByIdentifier(subtype: string, category: string, action: string): ActionHistoryTransactionResponse {
+		const identifierString = `${subtype.toLowerCase()}:${category.toLowerCase()}:${action.toLowerCase()}`;
+		return this.deleteHistoryByIdentifierString(identifierString);
+	}
+
+	/**
+     * Delete a history from the list.
+     * @identifier the identifier of the history to delete
+     * @returns ActionHistoryTransactionResponse containing the deleted ActionHistory or error message.
+     */
+	 deleteHistoryByIdentifierString(identifier: string): ActionHistoryTransactionResponse {
+		const response = new ActionHistoryTransactionResponse();
+		if (this.containsIdentifierString(identifier).payload) {
+			const getHistoryResponse = this.getHistoryByIdentifierString(identifier);
+			const originalHistory = getHistoryResponse.payload;
+			if (!getHistoryResponse.isSuccessful() || !originalHistory) {
+				//Should never occur, since we just checked contains
+				return getHistoryResponse;
+			}
+			const toDeleteIndex = this.histories.indexOf(originalHistory);
+			this.histories.splice(toDeleteIndex, 1);
+			response.payload = originalHistory;
+		} else {
+			response.addErrorMessage(`Error: Could not find history matching that identifier in HistoryList`);
+			return response;
+		}
+		return response;
+	}
+
+	/**
+	 * Deletes all items from the inventory.
+	 * @returns CustomResponse containing the deleted ItemHistoryList or error message.
+	 */
+	deleteAll(): CustomResponse {
+		const response = new CustomResponse();
+		response.payload = this.getAllHistories();
+		this.histories = [];
+		return response;
+	}
+
+	size(): number {
+		return this.histories.length;
 	}
 }

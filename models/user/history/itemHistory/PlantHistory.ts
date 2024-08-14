@@ -73,7 +73,7 @@ export class PlantHistory extends ItemHistory{
 	/**
 	 * Combines all fields from the given history into this one.
 	 * @history the history to combine with
-	 * @returns the updated PlantHistory or an error message
+	 * @returns ItemHistoryTransactionResponse containing the updated PlantHistory or an error message
 	 */
 	combineHistory(history: PlantHistory): ItemHistoryTransactionResponse {
 		const response = new ItemHistoryTransactionResponse();
