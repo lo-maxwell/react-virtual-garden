@@ -1,4 +1,12 @@
-const ItemComponent = ({icon, name, quantity, price, priceColor}: {icon: string, name: string, quantity: number, price: number, priceColor: string}) => {
+const ItemComponent = ({icon, name, quantity, price, priceColor, width}: {icon: string, name: string, quantity: number, price: number, priceColor: string, width: number | null}) => {
+	const getWidthString = () => {
+		if (width) {
+			return `min-w-[${width}px] max-w-[${width}px]`;
+		} else {
+			return "";
+		}
+	}
+	
 	return (
 		<>	
 			<span className="flex items-center min-w-[35px] text-center" data-testid="item-qt">
@@ -9,7 +17,7 @@ const ItemComponent = ({icon, name, quantity, price, priceColor}: {icon: string,
 				{/* Might not display properly if screen size is small or name is too long */}
 				<span className="flex items-left ml-2 truncate min-w-0 max-w-[80%]">{name}</span>
 			</div>
-			<span className="flex min-w-[55px] max-w-[55px]" data-testid="item-cost">
+			<span className={`flex ${getWidthString()}`} data-testid="item-cost">
 				<span className="mr-1">💰</span> {/* Gold icon */}
 				<span className={`${priceColor}`}>{price}</span>
 			</span>

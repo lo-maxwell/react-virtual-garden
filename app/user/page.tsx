@@ -14,15 +14,23 @@ const UserPage = () => {
     }
 
     return <>
-      <div className={`my-1 min-h-[8%] flex flex-row items-center justify-center `}>
-        <IconSelector iconIndex={icon} onIconChange={handleChangeIcon}/>
-        <UsernameDisplay username={username} onUsernameChange={handleChangeUsername}/>
-      </div>
-      <div>
-        <LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} />
-      </div>
-      <div>
-        <UserStats />
+      <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
+        <div className="flex">
+          <div className={`w-1/3`}>
+            <div className={`my-1 min-h-[8%] flex flex-row items-center justify-center `}>
+              <IconSelector iconIndex={icon} onIconChange={handleChangeIcon}/>
+              <UsernameDisplay username={username} onUsernameChange={handleChangeUsername}/>
+            </div>
+            <div className="mx-4 my-4">
+              <LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} />
+            </div>
+            <div>Friends list goes here!</div>
+          </div>
+
+          <div className={`w-2/3`}>
+            <UserStats />
+          </div>
+        </div>
       </div>
     </>
   }

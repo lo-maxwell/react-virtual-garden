@@ -42,7 +42,7 @@ const TradeWindowItemComponent  = ({item, quantity, costMultiplier}: {item: Inve
 		<>
 		<InventoryItemTooltip item={item}>
 			<button className="flex justify-between bg-reno-sand-400 px-2 py-1 my-0.5 w-[100%] text-sm text-coffee-800 font-semibold border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2">
-				<ItemComponent icon={item.itemData.icon} name={item.itemData.name} quantity={quantity} price={getPrice()} priceColor={getPriceColor()}/>
+				<ItemComponent icon={item.itemData.icon} name={item.itemData.name} quantity={quantity} price={getPrice()} priceColor={getPriceColor()} width={null}/>
 			</button>
 		</InventoryItemTooltip>
 		</>
