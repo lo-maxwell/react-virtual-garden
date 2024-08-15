@@ -165,6 +165,17 @@
 				"description": "Error",
 				"value": 5000,
 				"transformId": "1-05-01-02-00"
+			},
+			{
+				"id": "0-04-03-01-00",
+				"name": "construction sign",
+				"icon": "🚧",
+				"type": "PlacedItem",
+				"subtype": "Decoration",
+				"category": "Normal",
+				"description": "Error",
+				"value": 25,
+				"transformId": "1-05-02-01-00"
 			}
 		],
 		"Ground": [
@@ -440,6 +451,17 @@
 				"description": "Error",
 				"value": 5000,
 				"transformId": "0-04-01-02-00"
+			},
+			{
+				"id": "1-05-02-01-00",
+				"name": "construction sign blueprint",
+				"icon": "📜",
+				"type": "InventoryItem",
+				"subtype": "Blueprint",
+				"category": "Normal",
+				"description": "Error",
+				"value": 25,
+				"transformId": "0-04-03-01-00"
 			}
 		]
 	}

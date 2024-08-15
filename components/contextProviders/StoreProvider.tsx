@@ -29,6 +29,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 				generateNewPlaceholderInventoryItem('peach seed', 25),
 				generateNewPlaceholderInventoryItem('bench blueprint', 10),
 				generateNewPlaceholderInventoryItem('flamingo blueprint', 2),
+				generateNewPlaceholderInventoryItem('construction sign blueprint', 2)
 			]);	
 		}
 		const storeId = 0;
