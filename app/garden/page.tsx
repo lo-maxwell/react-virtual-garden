@@ -65,7 +65,7 @@ const GardenPage = () => {
         <div className="w-1/2 flex-col">
           {RenderGarden()}
         </div>
-        <div className="w-1/4">
+        <div className="w-1/4" data-testid="user-inventory">
           {RenderInventory()}
         </div>
       </div>

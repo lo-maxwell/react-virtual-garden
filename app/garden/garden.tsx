@@ -52,7 +52,7 @@ const GardenComponent = () => {
 	const generatePlots = (plots: Plot[][]) => {
 		return (
 			<>
-			<div className="flex flex-col flex-wrap max-w-[100%]">
+			<div className="flex flex-col flex-wrap max-w-[100%]" data-testid="garden-plots">
 			{plots.map((row, rowIndex) => (
 				<div className="flex flex-nowrap" key={rowIndex}>
 					{row.map((plot, colIndex) => {

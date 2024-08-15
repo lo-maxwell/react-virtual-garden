@@ -10,7 +10,7 @@ const InventoryComponent = ({onInventoryItemClickFunction, costMultiplier}: {onI
 		<>
 		<div className="text-black">
 			<div>{user.getUsername()}{"'s Inventory"}</div>
-			<div>Gold: {inventory.getGold()}</div>
+			<div data-testid="current-gold">Gold: {inventory.getGold()}</div>
 			<ItemStoreComponent itemStore={inventory} onInventoryItemClickFunction={onInventoryItemClickFunction} costMultiplier={costMultiplier}/>
 		</div>
 		</>
