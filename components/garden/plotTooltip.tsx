@@ -41,7 +41,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 		}
 
 		return (<>
-			<div className="flex flex-col items-left min-w-0 flex-grow">
+			<div className="flex flex-col items-left min-w-0 flex-grow" data-testid="tool-tip">
 				<div className="flex flex-row justify-between flex-grow min-w-max">
 					<div className="flex flex-row min-w-0">
 						<span className="w-6">{currentItem.itemData.icon}</span>
