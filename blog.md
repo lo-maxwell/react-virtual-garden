@@ -177,8 +177,19 @@
 
   * Stores a record of how many times items/buttons were interacted with by a user
   * Building history, historylist, tests
+  * ItemHistory and ActionHistory
+  * Finished test cases for ActionHistory and ActionHistoryList
+
+### UI Changes
+
+  * Store now highlights changed prices in orange and displays the markup fee
+  * Refactored tradeWindowItem for code reuse
+  * Added new text colors for inventory items
 
 TODO:
+
+Change mouseover color for inventoryItems
+
 Filter inventory - sort inventory by alphabet, price, category
 
 Use redux for state management

@@ -43,7 +43,11 @@ const StorePage = () => {
 
     const findInventoryComponent = () => {
       if (!inventory || !store) return <div>Loading Inventory...</div>;
-      return <InventoryComponent onInventoryItemClickFunction={inventorySetSelected} costMultiplier={store.getSellMultiplier()}/>;
+      return <>
+        <div className="w-[80%]">
+          <InventoryComponent onInventoryItemClickFunction={inventorySetSelected} costMultiplier={store.getSellMultiplier()}/>
+        </div>
+      </>
     }
 
     const getCostMultiplier = () => {

@@ -77,7 +77,7 @@ Plant: {
 		Description: Vine fruits grow on climbing or sprawling plants. They often require support structures and produce fruits that hang from the plant.
 		Bonus: Growing multiple Vine fruits together enhances vine growth or improves fruit setting.
 	},
-	Sea Vegetables: {
+	Sea Vegetable: {
 		ID: '14'
 		Crops: Dulse, Kelp, Nori, Wakame
 	},

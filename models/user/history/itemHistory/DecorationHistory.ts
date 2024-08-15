@@ -1,6 +1,6 @@
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { DecorationTemplate } from "@/models/items/templates/models/DecorationTemplate";
-import { ItemHistoryTransactionResponse } from "../ItemHistoryTransactionResponse";
+import { ItemHistoryTransactionResponse } from "./ItemHistoryTransactionResponse";
 import ItemHistory from "./ItemHistory";
 import { PlantHistory } from "./PlantHistory";
 
@@ -74,7 +74,7 @@ export class DecorationHistory extends ItemHistory{
 	/**
 	 * Combines all fields from the given history into this one.
 	 * @history the history to combine with
-	 * @returns the updated PlantHistory or an error message
+	 * @returns ItemHistoryTransactionResponse containing the updated DecorationHistory or an error message
 	 */
 	combineHistory(history: DecorationHistory): ItemHistoryTransactionResponse {
 		const response = new ItemHistoryTransactionResponse();

@@ -50,7 +50,21 @@ const colors = {
 		usernameBorder: "border border-2 border-coffee-800",
 		usernameEditButtonTextColor: "text-coffee-800",
 		usernameEditButtonBackgroundColor: "bg-reno-sand-400"
-	}
+	},
+
+	store: {
+		storeDefaultItemTextColor: "text-coffee-800",
+		storeHighPrice: "text-red-700",
+		storeRegularPrice: "text-orange-700",
+		storeLowPrice: "text-green-300"
+	},
+
+	inventory: {
+		inventoryDefaultItemTextColor: "text-coffee-800",
+		inventoryHighPrice: "text-green-300",
+		inventoryRegularPrice: "text-coffee-800",
+		inventoryLowPrice: "text-green-300"
+	},
 	
 }
 

@@ -1,6 +1,6 @@
-const ItemComponent = ({icon, name, quantity, price}: {icon: string, name: string, quantity: number, price: number}) => {
+const ItemComponent = ({icon, name, quantity, price, priceColor}: {icon: string, name: string, quantity: number, price: number, priceColor: string}) => {
 	return (
-		<>
+		<>	
 			<span className="flex items-center min-w-[35px] text-center" data-testid="item-qt">
 				{quantity}
 			</span>
@@ -11,7 +11,7 @@ const ItemComponent = ({icon, name, quantity, price}: {icon: string, name: strin
 			</div>
 			<span className="flex min-w-[55px] max-w-[55px]" data-testid="item-cost">
 				<span className="mr-1">💰</span> {/* Gold icon */}
-				{price}
+				<span className={`${priceColor}`}>{price}</span>
 			</span>
 		</>
 	);

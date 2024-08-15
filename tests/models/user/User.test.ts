@@ -1,5 +1,14 @@
+import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
 import LevelSystem from "@/models/level/LevelSystem";
+import ActionHistory from "@/models/user/history/actionHistory/ActionHistory";
+import { actionHistoryFactory } from "@/models/user/history/actionHistory/ActionHistoryFactory";
+import { ActionHistoryList } from "@/models/user/history/ActionHistoryList";
+import ItemHistory from "@/models/user/history/itemHistory/ItemHistory";
+import { PlantHistory } from "@/models/user/history/itemHistory/PlantHistory";
+import { ItemHistoryList } from "@/models/user/history/ItemHistoryList";
 import User from "@/models/user/User";
+import { parse } from "path";
 
 test('Should Initialize User Object', () => {
 	const user = new User('test', '', new LevelSystem(100));
@@ -19,12 +28,17 @@ test('Should Initialize User Object', () => {
 
 
 test('Should Create User Object From PlainObject', () => {
-	const user = new User('test', '', new LevelSystem(100));
+	const testActionHistory = actionHistoryFactory.getActionHistoryByName("Total Plants Harvested");
+	const user = new User('test', '', new LevelSystem(100), new ItemHistoryList([new PlantHistory(placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate, 1)]), new ActionHistoryList([testActionHistory!]));
 	const serializedUser = JSON.stringify(user.toPlainObject());
 	const parsedUser = User.fromPlainObject(JSON.parse(serializedUser));
 	expect(parsedUser).toBeTruthy();
 	expect(parsedUser.getLevel()).toBe(100);
 	expect(parsedUser.getUsername()).toBe('test');
+	expect(parsedUser.getItemHistory().contains(placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate).payload).toBe(true);
+	expect(parsedUser.getActionHistory().containsIdentifierString("plant:all:harvested").payload).toBe(true);
+	parsedUser.getActionHistory().getHistoryByIdentifierString("plant:all:harvested").payload?.updateQuantity(100);
+	expect(parsedUser.getActionHistory().getHistoryByIdentifierString("plant:all:harvested").payload?.getQuantity()).toBe(100);
 })
 
 test('Should Not Create Invalid User Object From PlainObject', () => {	

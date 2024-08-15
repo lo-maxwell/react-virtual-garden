@@ -1,15 +1,22 @@
 import LevelSystem from "../level/LevelSystem";
+import { ActionHistoryList } from "./history/ActionHistoryList";
+import ItemHistory from "./history/itemHistory/ItemHistory";
+import { ItemHistoryList } from "./history/ItemHistoryList";
 
 class User {
 
 	private username: string;
 	private icon: string; //indexes into a list of icons by name
 	private level: LevelSystem;
+	private itemHistory: ItemHistoryList;
+	private actionHistory: ActionHistoryList;
 
-	constructor(username: string, icon: string, level: LevelSystem = new LevelSystem()) {
+	constructor(username: string, icon: string, level: LevelSystem = new LevelSystem(), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList()) {
 		this.username = username;
 		this.icon = icon;
 		this.level = level;
+		this.itemHistory = itemHistory;
+		this.actionHistory = actionHistory;
 	}
 
 	static fromPlainObject(plainObject: any) {
@@ -18,7 +25,7 @@ class User {
             if (!plainObject || typeof plainObject !== 'object') {
                 throw new Error('Invalid plainObject structure for User');
             }
-			const { username, icon, level } = plainObject;
+			const { username, icon, level, itemHistory, actionHistory } = plainObject;
 			// Perform additional type checks if necessary
 			if (typeof username !== 'string') {
 				throw new Error('Invalid username property in plainObject for User');
@@ -27,7 +34,9 @@ class User {
 				throw new Error('Invalid icon property in plainObject for User');
 			}
 			const hydratedLevel = LevelSystem.fromPlainObject(level);
-			return new User(username, icon, hydratedLevel);
+			const hydratedItemHistory = ItemHistoryList.fromPlainObject(itemHistory);
+			const hydratedActionHistory = ActionHistoryList.fromPlainObject(actionHistory);
+			return new User(username, icon, hydratedLevel, hydratedItemHistory, hydratedActionHistory);
 			
 		} catch (err) {
 			console.error('Error creating User from plainObject:', err);
@@ -39,7 +48,9 @@ class User {
 		return {
 			username: this.username,
 			icon: this.icon,
-			level: this.level.toPlainObject()
+			level: this.level.toPlainObject(),
+			itemHistory: this.itemHistory.toPlainObject(),
+			actionHistory: this.actionHistory.toPlainObject(),
 		};
 	}
 
@@ -57,6 +68,14 @@ class User {
 
 	setIcon(newIcon: string): void {
 		this.icon = newIcon;
+	}
+
+	getItemHistory() {
+		return this.itemHistory;
+	}
+
+	getActionHistory() {
+		return this.actionHistory;
 	}
 
 	/**
@@ -93,6 +112,8 @@ class User {
 	addExp(exp: number) {
 		return this.level.addExperience(exp);
 	}
+
+
 
 }
 export default User;

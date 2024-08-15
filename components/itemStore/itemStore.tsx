@@ -89,7 +89,7 @@ const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultip
 		<div>{RenderCategoryFilter()}</div>
 		{getItemList().map((item, itemIndex) => (
 			<div key={itemIndex}>
-				<InventoryItemComponent item={item} onClickFunction={onInventoryItemClickFunction} costMultiplier={costMultiplier}></InventoryItemComponent>
+				<InventoryItemComponent itemStore={itemStore} item={item} onClickFunction={onInventoryItemClickFunction} costMultiplier={costMultiplier}></InventoryItemComponent>
 			</div>
 		))}
 		</>

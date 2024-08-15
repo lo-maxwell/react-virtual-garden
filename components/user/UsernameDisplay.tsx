@@ -23,7 +23,7 @@ const UsernameDisplay = ({ username, onUsernameChange }: { username: string, onU
             {editing ? (
                 <span className="flex flex-row justify-center">
                     <input type="text" 
-					maxLength={32}
+					maxLength={24}
 					value={newUsername} 
 					onChange={handleChange} 
 					className={`border-none text-3xl ml-2 px-2 py-1 w-[16ch] ${colors.user.usernameTextColor}`}/>
