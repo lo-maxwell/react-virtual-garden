@@ -7,8 +7,8 @@ let onionHistory: ActionHistory;
 let list: ActionHistoryList;
 
 beforeEach(() => {
-	allHistory = actionHistoryFactory.getActionHistoryByName("Total Plants Harvested")!;
-	onionHistory = actionHistoryFactory.getActionHistoryByName("Onions Harvested")!;
+	allHistory = actionHistoryFactory.createActionHistoryByName("Total Plants Harvested", 1)!;
+	onionHistory = actionHistoryFactory.createActionHistoryByName("Onions Harvested", 1)!;
 	allHistory.setQuantity(10);
 	onionHistory.setQuantity(10);
 	list = new ActionHistoryList();

@@ -17,10 +17,10 @@ class IconRepository {
 		this.Icons['Decorations'] = iconData.Icons.Decorations.map((iconObject: any) =>
 		  {return new Icon(iconObject.name, iconObject.icon);}
 		);
-		this.Icons['Error'] = iconData.Icons.Error.map((iconObject: any) =>
-		  {return new Icon(iconObject.name, iconObject.icon);}
-		);
-		console.log(this.Icons);
+		// this.Icons['Error'] = iconData.Icons.Error.map((iconObject: any) =>
+		//   {return new Icon(iconObject.name, iconObject.icon);}
+		// );
+		// console.log(this.Icons);
 	  }
 
 	getIconCategories() {

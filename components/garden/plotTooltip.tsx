@@ -79,10 +79,10 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 					{/* Might not display properly if screen size is small or name is too long */}
 					<span>{currentItem.itemData.name}</span>
 				</div>
-				<span className="ml-2 flex ">
-						<span className="">💰</span> {/* Gold icon */}
+				{/* <span className="ml-2 flex ">
+						<span className="">💰</span>
 						{blueprint.value}
-					</span>
+					</span> */}
 			</div>
 			<div className={`${colors.decoration.categoryTextColor} text-left`}>Decoration</div>
 		</div>

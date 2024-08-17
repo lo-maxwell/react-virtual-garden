@@ -54,7 +54,7 @@
 		{
 			"name": "Tropical Fruit Harvested",
 			"description": "The number of tropical fruit harvested by this user",
-			"identifier": "plant:tropical fruit:harvested"
+			"identifier": "plant:tropical:harvested"
 		},
 		{
 			"name": "Berries Harvested",

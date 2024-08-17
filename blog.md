@@ -186,6 +186,13 @@
   * Refactored tradeWindowItem for code reuse
   * Added new text colors for inventory items
 
+## Day 16
+
+### Adding History to User Page
+
+  * Actionhistory, Itemhistory
+  * IconSelector only displays icons for items that you have harvested before
+
 TODO:
 
 Change mouseover color for inventoryItems

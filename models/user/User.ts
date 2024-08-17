@@ -1,6 +1,14 @@
+import ItemStoreComponent from "@/components/itemStore/itemStore";
+import { ItemSubtypes } from "../items/ItemTypes";
+import { PlacedItem } from "../items/placedItems/PlacedItem";
+import { PlantTemplate } from "../items/templates/models/PlantTemplate";
 import LevelSystem from "../level/LevelSystem";
+import { BooleanResponse } from "../utility/BooleanResponse";
+import { actionHistoryFactory } from "./history/actionHistory/ActionHistoryFactory";
+import { actionHistoryRepository } from "./history/actionHistory/ActionHistoryRepository";
 import { ActionHistoryList } from "./history/ActionHistoryList";
 import ItemHistory from "./history/itemHistory/ItemHistory";
+import { PlantHistory } from "./history/itemHistory/PlantHistory";
 import { ItemHistoryList } from "./history/ItemHistoryList";
 
 class User {
@@ -113,6 +121,38 @@ class User {
 		return this.level.addExperience(exp);
 	}
 
+	/**
+	 * Updates this user's itemHistory and actionHistory following the harvest of an item.
+	 * @item the item that was harvested
+	 * @returns Response containing true or an error message on failure
+	 */
+	updateHarvestHistory(item: PlacedItem): BooleanResponse {
+		const response = new BooleanResponse();
+		if (item.itemData.subtype !== ItemSubtypes.PLANT.name) {
+			response.addErrorMessage(`Error updating history: attempting to harvest item of type ${item.itemData.subtype}`);
+			return response;
+		}
+		const itemHistory = new PlantHistory(item.itemData as PlantTemplate, 1);
+		this.itemHistory.addItemHistory(itemHistory);
+		const harvestAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(item.itemData.subtype, 'all', 'harvested', 1);
+		const harvestCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(item.itemData.subtype, item.itemData.category, 'harvested', 1);
+		if (harvestAllHistory) {
+			this.actionHistory.addActionHistory(harvestAllHistory);
+			response.payload = true;
+		} else {
+			//probably impossible to reach, would only occur if allHistory doesn't exist, which requires modification of histories.json
+			response.addErrorMessage(`Error updating history: could not find all action history`);
+		}
+
+		if (harvestCategoryHistory) {
+			this.actionHistory.addActionHistory(harvestCategoryHistory);
+			response.payload = true;
+		} else {
+			response.addErrorMessage(`Error updating history: could not find action history for item ${item.itemData.name}`);
+		}
+		
+		return response;
+	}
 
 
 }

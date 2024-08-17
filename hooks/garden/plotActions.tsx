@@ -1,8 +1,13 @@
 import { Plot } from "@/models/garden/Plot";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
+import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
+import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
+import ItemHistory from "@/models/user/history/itemHistory/ItemHistory";
+import { PlantHistory } from "@/models/user/history/itemHistory/PlantHistory";
 import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
+import { saveUser } from "@/utils/localStorage/user";
 import { useGarden } from "../contexts/GardenContext";
 import { useInventory } from "../contexts/InventoryContext";
 import { useUser } from "../contexts/UserContext";
@@ -86,9 +91,12 @@ export const usePlotActions = () => {
 			} 
 			updateInventoryForceRefreshKey();
 
+			const pickedItem = harvestItemResponse.payload.pickedItem as PlacedItem;
+			user.updateHarvestHistory(pickedItem);
 			user.addExp(xp);
 			saveInventory(inventory);
 			saveGarden(garden);
+			saveUser(user);
 			setGardenMessage(`Harvested ${harvestItemResponse.payload.pickedItem.itemData.name}.`);
 			return plot.getItem().itemData.icon;
 		}

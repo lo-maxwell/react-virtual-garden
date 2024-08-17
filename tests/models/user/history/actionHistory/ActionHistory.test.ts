@@ -57,7 +57,7 @@ test('Should Not Combine ActionHistory With Invalid Quantity', () => {
 
 
 test('Should Create ActionHistory Object From PlainObject', () => {
-	const newActionHistory1 = actionHistoryFactory.getActionHistoryByName("Total Plants Harvested");
+	const newActionHistory1 = actionHistoryFactory.createActionHistoryByName("Total Plants Harvested", 1);
 	newActionHistory1?.setQuantity(10);
 	const serializedHistory = JSON.stringify(newActionHistory1!.toPlainObject());
 	const history = ActionHistory.fromPlainObject(JSON.parse(serializedHistory));

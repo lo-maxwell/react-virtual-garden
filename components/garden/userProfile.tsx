@@ -3,6 +3,7 @@ import { iconRepository } from "@/models/user/icons/IconRepository";
 import { useRef, useState, useEffect } from "react";
 import colors from "../colors/colors";
 import LevelSystemComponent from "../level/LevelSystem";
+import IconDisplay from "../user/icon/IconDisplay";
 
 const UserProfileComponent = () => {
 	const { user } = useUser();
@@ -22,7 +23,7 @@ const UserProfileComponent = () => {
 
 	return <>
 	<div className="flex flex-row items-center justify-center">
-		<span className="px-1 py-1 border border-2 border-coffee-700 align-text-bottom text-center bg-gray-300 min-w-12 min-h-12 text-3xl text-purple-600 font-semibold rounded-lg">{iconRepository.getIconByName(user.getIcon())}</span>
+		<IconDisplay icon={user.getIcon()} size={"text-4xl"}/>
 		<span className={`ml-4 ${getUsernameFontSize()} ${colors.user.usernameTextColor}`}>{user.getUsername()}</span>
 	</div>
 	<div className="mx-4 my-4"><LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} /></div>

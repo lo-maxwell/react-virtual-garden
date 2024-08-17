@@ -11,11 +11,12 @@ class ActionHistoryFactory {
 	/**
 	 * 
 	 * @name the history name
+	 * @quantity
 	 * @returns the created actionHistory object or null
 	 */
-	 getActionHistoryByName(name: string): ActionHistory | null {
+	createActionHistoryByName(name: string, quantity: number): ActionHistory | null {
 		const histories = Object.values(this.repository.histories).flat().filter(history => history.name === name);
-		if (histories.length === 1) return new ActionHistory(histories[0].name, histories[0].description, histories[0].identifier, histories[0].quantity);
+		if (histories.length === 1) return new ActionHistory(histories[0].name, histories[0].description, histories[0].identifier, quantity);
 		else if (histories.length === 0) return null;
 		else {
 			console.error('Error: found multiple histories with the same name!');
@@ -31,10 +32,11 @@ class ActionHistoryFactory {
 	 * @action harvest, place, etc
 	 * @returns the created actionHistory object or null
 	 */
-	getActionHistoryByIdentifiers(subtype: string, category: string, action: string): ActionHistory | null {
+	createActionHistoryByIdentifiers(subtype: string, category: string, action: string, quantity: number): ActionHistory | null {
 		const identifierString = `${subtype.toLowerCase()}:${category.toLowerCase()}:${action.toLowerCase()}`;
 		const histories = Object.values(this.repository.histories).flat().filter(history => history.identifier === identifierString);
-		if (histories.length === 1) return new ActionHistory(histories[0].name, histories[0].description, histories[0].identifier, histories[0].quantity);		else if (histories.length === 0) return null;
+		if (histories.length === 1) return new ActionHistory(histories[0].name, histories[0].description, histories[0].identifier, quantity);		
+		else if (histories.length === 0) return null;
 		else {
 			console.error('Error: found multiple histories with the same name!');
 			console.error(histories);
@@ -45,6 +47,7 @@ class ActionHistoryFactory {
 	/**
 	 * 
 	 * @identifier the identifier
+	 * @quantity
 	 * @returns the created actionHistory object or null
 	 */
 	 getActionHistoryByIdentifierString(identifier: string): ActionHistory | null {

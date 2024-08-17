@@ -1,6 +1,6 @@
 'use client'
 import LevelSystemComponent from "@/components/level/LevelSystem";
-import IconSelector from "@/components/user/IconSelector";
+import IconSelector from "@/components/user/icon/IconSelector";
 import UsernameDisplay from "@/components/user/UsernameDisplay";
 import UserStats from "@/components/user/UserStats";
 import { useUser } from "@/hooks/contexts/UserContext";
