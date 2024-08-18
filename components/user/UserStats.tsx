@@ -1,4 +1,4 @@
-import HistoryComponent from "./history/history";
+import HistoryComponent from "./history/History";
 
 const UserStats = () => {
 
