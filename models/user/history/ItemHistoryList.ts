@@ -188,6 +188,7 @@ export class ItemHistoryList {
 			//Update existing history
 			const updateHistoryResponse = this.updateItemHistory(newHistory);
 			if (!updateHistoryResponse.isSuccessful()) {
+				console.log(updateHistoryResponse);
 				return updateHistoryResponse;
 			}
 			response.payload = updateHistoryResponse.payload;
