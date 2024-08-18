@@ -181,6 +181,8 @@ export class ItemHistoryList {
      */
 	addItemHistory(newHistory: ItemHistory): ItemHistoryTransactionResponse {
 		const response = new ItemHistoryTransactionResponse();
+		console.log('additemhistory: ');
+		console.log(newHistory);
 		//Check if history already contains this type
 		if (this.contains(newHistory.getItemData()).payload) {
 			//Update existing history
