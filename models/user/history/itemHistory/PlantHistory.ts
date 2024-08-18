@@ -82,9 +82,6 @@ export class PlantHistory extends ItemHistory{
 			return response;
 		}
 		if (JSON.stringify(history.getItemData()) != JSON.stringify(this.itemData)) {
-			console.log('comparing:');
-			console.log(history.getItemData());
-			console.log(this.itemData);
 			response.addErrorMessage('Error combining PlantHistory: not identical templates');
 			return response;
 		}
