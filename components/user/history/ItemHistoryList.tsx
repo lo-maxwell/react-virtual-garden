@@ -14,14 +14,14 @@ const ItemHistoryListComponent = ({}) => {
 				if (history.getItemData().subtype === ItemSubtypes.PLANT.name) {
 					const plantHistory = history as PlantHistory;
 					return (
-						<div>
+						<div key={plantHistory.getItemData().name}>
 							{plantHistory.getItemData().name} {plantHistory.getItemData().icon}: {plantHistory.getHarvestedQuantity()}
 						</div>
 					);
 				} else if (history.getItemData().subtype === ItemSubtypes.DECORATION.name) {
 					const decorationHistory = history as DecorationHistory;
 					return (
-						<div>
+						<div key={decorationHistory.getItemData().name}>
 							{decorationHistory.getItemData().name}: {decorationHistory.getPlacedQuantity()}
 						</div>
 					);

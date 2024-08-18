@@ -8,7 +8,7 @@ const ActionHistoryListComponent = ({}) => {
 			<div>
 			{histories.map((history, index) => {
 				return (
-					<div>
+					<div key={history.getName()}>
 						{history.getName()}: {history.getQuantity()}
 					</div>
 				);
