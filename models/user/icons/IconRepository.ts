@@ -9,7 +9,7 @@ class IconRepository {
 	}
 
 	loadItems() {
-		console.log(iconData);
+		// console.log(iconData);
 		// Example to load PlacedItems > Plants
 		this.Icons['Plants'] = iconData.Icons.Plants.map((iconObject: any) =>
 		  {return new Icon(iconObject.name, iconObject.icon);}

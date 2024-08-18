@@ -59,6 +59,9 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 		currentTime
 	}));
 
+	const currentItem = plot.getItem();
+	const currentPlantTime = plot.getPlantTime();
+
 	useEffect(() => {
 		let interval: NodeJS.Timeout | null = null;
 		setColor(getColor());
@@ -74,7 +77,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 			clearInterval(interval);
 		  }
 		};
-	  }, [plot.getItem(), plot.getPlantTime(), getColor(), plot]);
+	  }, [currentItem, currentPlantTime, plot]);
 
 	const handleClick = () => {
 		const updatedIcon = onPlotClick();

@@ -2,6 +2,7 @@ import LongPressButton from "@/components/buttons/longPressButton";
 import { useCallback, useState } from "react";
 
 const ChangeQuantityButton = ({onClick, currentQuantity, className, contents}: {onClick: (arg: number) => void, currentQuantity: number, className: string, contents: JSX.Element}) => {
+	//Bugs can probably be fixed by marking date.now as initial time and recalculating handleLongPress dynamically
 	const [timeElapsed, setTimeElapsed] = useState(0);
 
 	const handleClick = useCallback(() => {
@@ -14,7 +15,7 @@ const ChangeQuantityButton = ({onClick, currentQuantity, className, contents}: {
 		// Handle quantity update based on the currentQuantity
 		onClick(Math.max(2, Math.floor(1.1 ** timeElapsed)));
 		setTimeElapsed((timeElapsed) => timeElapsed + 1);
-	  }, [onClick, currentQuantity, timeElapsed]);
+	  }, [onClick, timeElapsed]);
 
 	return <LongPressButton 
 		onClick={handleClick} 

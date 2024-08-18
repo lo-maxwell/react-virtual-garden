@@ -11,10 +11,10 @@ const InventoryItemComponent = ({itemStore, item, onClickFunction, costMultiplie
 	const [displayQuantity, setDisplayQuantity] = useState(itemQuantity);
 
 	useEffect(() => {
-		if (displayQuantity !== item.getQuantity()) {
-		  setDisplayQuantity(item.getQuantity());
+		if (displayQuantity !== itemQuantity) {
+		  setDisplayQuantity(itemQuantity);
 		}
-	  }, [item, displayQuantity, item.getQuantity()]);
+	  }, [item, displayQuantity, itemQuantity]);
 	
 	const handleClick = () => {
 		onClickFunction(item);

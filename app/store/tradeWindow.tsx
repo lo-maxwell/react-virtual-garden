@@ -54,22 +54,37 @@ const TradeWindowComponent = ({costMultiplier}: {costMultiplier: number}) => {
 		}
 	}
 
-	//Resets quantity when selected changes
-	useEffect(() => {
-		setQuantity(1);
-		if (selectedItem != null) setTradeWindowMessage(defaultTradeWindowMessage);
-	}, [selectedItem]);
+	// //Resets quantity when selected changes
+	// useEffect(() => {
+	// 	setQuantity(1);
+	// 	if (selectedItem != null) setTradeWindowMessage(defaultTradeWindowMessage);
+	// }, [selectedItem]);
 	
-	//Ensures quantity is never above/below bounds
+	// //Ensures quantity is never above/below bounds
+	// useEffect(() => {
+	// 	if (!selectedItem) return;
+	// 	if (quantity > selectedItem.getQuantity()) {
+	// 	  setQuantity(selectedItem.getQuantity());
+	// 	}
+	// 	if (quantity <= 0) {
+	// 		setQuantity(1);
+	// 	}
+	//   }, [quantity, selectedItem]);
+
 	useEffect(() => {
 		if (!selectedItem) return;
-		if (selectedItem && quantity > selectedItem.getQuantity()) {
+		if (quantity > selectedItem.getQuantity()) {
 		  setQuantity(selectedItem.getQuantity());
 		}
-		if (selectedItem && quantity <= 0) {
+		if (quantity <= 0) {
 			setQuantity(1);
 		}
-	  }, [quantity]);
+	  }, [quantity, selectedItem]);
+
+
+	useEffect(() => {
+		setQuantity(1);
+	  }, [selectedItem]);
 
 
 	const onPlusClick = useCallback((delta: number) => {

@@ -5,7 +5,7 @@ import { InventoryTransactionResponse } from '@/models/itemStore/inventory/Inven
 import { ItemList } from '@/models/itemStore/ItemList';
 import { Store } from '@/models/itemStore/store/Store';
 import { loadStore, saveStore } from '@/utils/localStorage/store';
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 // Define props for the provider
 interface StoreProviderProps {
@@ -76,7 +76,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
     };
 
 	const restockTimeout = useRef<number | null>(null);
-	const updateRestockTimer = () => {
+	const updateRestockTimer = useCallback(() => {
 		if (!store) return;
 		const currentTime = Date.now();
 		if (currentTime > store.getRestockTime() && store.needsRestock()) {
@@ -99,8 +99,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 				}
 			}, remainingTime);
 		}
-
-	}
+	}, [store]);
 
 	useEffect(() => {
 		// Start the timer when the component mounts
