@@ -139,10 +139,10 @@ export class Plot {
 		}
 		const remainingTime = Math.min(item.itemData.growTime, Math.max(1, Math.round((plantedTime + item.itemData.growTime * 1000 - currentTime) / 1000)));
 		// Calculate days, hours, minutes, and seconds
-		const remainingDays = Math.round(remainingTime / (24 * 3600));
-		const remainingHours = Math.round((remainingTime % (24 * 3600)) / 3600);
-		const remainingMinutes = Math.round((remainingTime % 3600) / 60);
-		const remainingSeconds = Math.round(remainingTime % 60);
+		const remainingDays = Math.floor(remainingTime / (24 * 3600));
+		const remainingHours = Math.floor((remainingTime % (24 * 3600)) / 3600);
+		const remainingMinutes = Math.floor((remainingTime % 3600) / 60);
+		const remainingSeconds = Math.floor(remainingTime % 60);
 
 		// Format components with leading zeros
 		const formattedDays = remainingDays.toString();
