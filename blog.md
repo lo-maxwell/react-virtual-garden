@@ -199,28 +199,23 @@
   * Plot tooltips now only display numbers between 1 and growtime, causing lag at the start but finishing at 1s
   * Inventory cuts off at 60% of viewport height, and allows scrolling
   * Added more colors for tailwind
+  * Removed debug options from main screen, now only accesible by clicking profile image 30 times
+  * Moved garden expansion options into hidden folder, and gave them tooltips
+  * Garden expansion options are disabled if too large/small
 
 TODO:
 
 Change mouseover color for inventoryItems
 
-Filter inventory - sort inventory by alphabet, price, category
-
 Use redux for state management
 
-Add selected indicator and/or make plots show what is going to be planted/placed
-
 To get stores to autoupdate, have to store store information in a json file and pull from it for the stocklist/itemlist without destroying the existing items
-
-Change grow time to say minutes/hours if more than 60s remaining
 
 Generate multiple store types/switch between stores/restock store
 Clean up ui, especially font/scaling using rem, to accommodate more screen width
 Trade Window Multiselect + Total
 
 Make Garden more interactive than plant all -> harvest 
-
-Add User class
 
 Add level requirement to plants/seeds
 
@@ -237,8 +232,6 @@ Change plant categories to better reflect common terms
 Make store not able to delete items, even if they drop to 0 quantity, and modify display to say out of stock
 
 Add toolkit - select (plant, harvest, pickup, place); delete (only in progress plants)
-
-Store sells seeds for base price, not 2x (?), or just make it more clear what the profit margin is
 
 Daily login bonus to prevent softlock - gives some money and a random assortment of seeds that add up to some value
 
