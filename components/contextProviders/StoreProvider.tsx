@@ -3,6 +3,7 @@ import { StoreContext } from '@/hooks/contexts/StoreContext';
 import { generateNewPlaceholderInventoryItem } from '@/models/items/PlaceholderItems';
 import { InventoryTransactionResponse } from '@/models/itemStore/inventory/InventoryTransactionResponse';
 import { ItemList } from '@/models/itemStore/ItemList';
+import { stocklistRepository } from '@/models/itemStore/store/StocklistRepository';
 import { Store } from '@/models/itemStore/store/Store';
 import { loadStore, saveStore } from '@/utils/localStorage/store';
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
@@ -17,23 +18,10 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 
 	function generateInitialStore() {
 		function generateItems() { 
-			return new ItemList([
-				generateNewPlaceholderInventoryItem('apple seed', 100),
-				generateNewPlaceholderInventoryItem('banana seed', 50),
-				generateNewPlaceholderInventoryItem('coconut seed', 25),
-				generateNewPlaceholderInventoryItem('mango seed', 25),
-				generateNewPlaceholderInventoryItem('magic mango seed', 1),
-				generateNewPlaceholderInventoryItem('yellow onion seed', 25),
-				generateNewPlaceholderInventoryItem('garlic seed', 25),
-				generateNewPlaceholderInventoryItem('cherry seed', 25),
-				generateNewPlaceholderInventoryItem('peach seed', 25),
-				generateNewPlaceholderInventoryItem('bench blueprint', 10),
-				generateNewPlaceholderInventoryItem('flamingo blueprint', 2),
-				generateNewPlaceholderInventoryItem('construction sign blueprint', 2)
-			]);	
+			return stocklistRepository.getStocklistInterfaceById("0")?.items;
 		}
 		const storeId = 0;
-		const storeName = "Test Store";
+		const storeName = "Default Store";
 		const buyMultiplier = 2;
 		const sellMultiplier = 1;
 		const upgradeMultiplier = 1;

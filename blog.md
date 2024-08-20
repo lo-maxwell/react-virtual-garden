@@ -203,6 +203,15 @@
   * Moved garden expansion options into hidden folder, and gave them tooltips
   * Garden expansion options are disabled if too large/small
 
+## Day 17
+
+### Store update
+
+  * New store.json and stocklist.json data files
+  * Stores now grab stocklist from data files, so they will update instantly
+  * Allows for future expansions of additional store types
+  * TODO: Store data file needs to include store fields such as buy/sell price
+
 TODO:
 
 Change mouseover color for inventoryItems
