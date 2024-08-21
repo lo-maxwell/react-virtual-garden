@@ -63,8 +63,12 @@ export const usePlotActions = () => {
 				return plot.getItem().itemData.icon; 
 			}
 			updateInventoryForceRefreshKey();
+
+			const placedItem = placeItemResponse.payload.newItem as PlacedItem;
+			user.updateDecorationHistory(placedItem);
 			saveInventory(inventory);
 			saveGarden(garden);
+			saveUser(user);
 			setGardenMessage(`Placed ${placeItemResponse.payload.newItem.itemData.name}.`);
 			return plot.getItem().itemData.icon;
 		}

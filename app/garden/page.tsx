@@ -15,7 +15,7 @@ const GardenPage = () => {
   const {selectedItem, toggleSelectedItem} = useSelectedItem();
 
   const RenderUser = () => {
-    if (!user) return <div>Still in development...</div>;
+    if (!user) return <div>Loading User...</div>;
     return <UserProfileComponent/>
   }
 

@@ -210,6 +210,9 @@
   * New store.json and stocklist.json data files
   * Stores now grab stocklist from data files, so they will update instantly
   * Allows for future expansions of additional store types
+  * Changed some text colors
+
+### User Icon Selection now depends on plants/decorations harvested/placed
 
 TODO:
 

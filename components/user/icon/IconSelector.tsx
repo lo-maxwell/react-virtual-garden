@@ -42,23 +42,18 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
 
     const RenderIconChoices = () => {
         const iconSet: Icon[] = [];
+
         if (!categoryFilter || categoryFilter === '') {
             iconRepository.getIconCategories().map((categoryName) => {
                 availableIcons[categoryName].map((iconOption) => {
-                    const template = placeholderItemTemplates.getPlacedItemTemplateByName(iconOption.getName());
-                    if (!template) return;
-                    const itemAvailable = user.getItemHistory().contains(template);
-                    if (itemAvailable.payload) {
+                    if(user.isValidIconItem(iconOption)) {
                         iconSet.push(iconOption);
                     }
                 })
             });
         } else {
             availableIcons[categoryFilter].map((iconOption) => {
-                const template = placeholderItemTemplates.getPlacedItemTemplateByName(iconOption.getName());
-                if (!template) return;
-                const itemAvailable = user.getItemHistory().contains(template);
-                if (itemAvailable.payload) {
+                if(user.isValidIconItem(iconOption)) {
                     iconSet.push(iconOption);
                 }
             });
@@ -68,6 +63,12 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
         // Chunk the icons into arrays of 5
         for (let i = 0; i < iconSet.length; i += 5) {
             chunkedIcons.push(iconSet.slice(i, i + 5));
+        }
+
+        if (chunkedIcons.length === 0) {
+            return <div className="max-h-[60vh] overflow-y-auto">
+                No icons found. Try another category!
+            </div>;
         }
 
         return <div className="max-h-[60vh] overflow-y-auto">
@@ -89,7 +90,8 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
             <PopupWindow showWindow={showAllIcons} setShowWindow={setShowAllIcons}>
                 <div className="w-max bg-reno-sand-200 text-black p-8 rounded-lg shadow-md justify-between items-center">
                     <div className="text-2xl text-semibold"> Select a new icon: </div>
-                    <div className="text-xl mb-4">{RenderCategoryFilter()}</div>
+                    <div className="text-xl mb-2">{RenderCategoryFilter()}</div>
+                    <div className="text-sm mb-4">Plant crops or place decorations to unlock new icons.</div>
                     {RenderIconChoices()}
                     </div>
             </PopupWindow>
