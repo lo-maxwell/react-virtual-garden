@@ -210,15 +210,12 @@
   * New store.json and stocklist.json data files
   * Stores now grab stocklist from data files, so they will update instantly
   * Allows for future expansions of additional store types
-  * TODO: Store data file needs to include store fields such as buy/sell price
 
 TODO:
 
 Change mouseover color for inventoryItems
 
 Use redux for state management
-
-To get stores to autoupdate, have to store store information in a json file and pull from it for the stocklist/itemlist without destroying the existing items
 
 Generate multiple store types/switch between stores/restock store
 Clean up ui, especially font/scaling using rem, to accommodate more screen width

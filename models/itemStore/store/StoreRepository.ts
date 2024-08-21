@@ -22,6 +22,10 @@ class StoreRepository {
 			name: store.name,
 			stocklistId: store.stocklistId,
 			stocklistName: store.stocklistName,
+			buyMultiplier: store.buyMultiplier,
+			sellMultiplier: store.sellMultiplier,
+			upgradeMultiplier: store.upgradeMultiplier,
+			restockInterval: store.restockInterval,
 		}
 	}
 
