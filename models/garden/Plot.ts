@@ -211,14 +211,18 @@ export class Plot {
 		const formattedMinutes = remainingMinutes.toString().padStart(2, '0');
 		const formattedSeconds = remainingSeconds.toString().padStart(2, '0');
 		
+		const isFirstGrowth = this.getUsesRemaining() === (this.item.itemData as PlantTemplate).numHarvests;
+
+		const fullyGrownText = isFirstGrowth ? `Fully Grown in: ` : `Next Harvest in: `
+
 		if (remainingTime < 60) {
-			return `Fully Grown in: ${remainingTime} seconds`;
+			return `${fullyGrownText} ${remainingTime} seconds`;
 		} else if (remainingTime < 3600) {
-			return `Fully Grown in: ${remainingMinutes}:${formattedSeconds}`;
+			return `${fullyGrownText} ${remainingMinutes}:${formattedSeconds}`;
 		} else if (remainingTime < 3600 * 24) {
-			return `Fully Grown in: ${remainingHours}:${formattedMinutes}:${formattedSeconds}`;
+			return `${fullyGrownText} ${remainingHours}:${formattedMinutes}:${formattedSeconds}`;
 		} else {
-			return `Fully Grown in: ${formattedDays}d ${formattedHours}:${formattedMinutes}`;
+			return `${fullyGrownText} ${formattedDays}d ${formattedHours}:${formattedMinutes}`;
 		}
 	}
 
