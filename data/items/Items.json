@@ -50,11 +50,11 @@
 				"subtype": "Plant",
 				"category": "Tree Fruit",
 				"description": "Error",
-				"value": 10,
+				"value": 5,
 				"transformId": "1-03-09-01-00",
 				"baseExp": 2, 
 				"growTime": 10,
-				"numHarvests": 3
+				"numHarvests": 1
 			},
 			{
 				"id": "0-02-09-02-00",
@@ -96,7 +96,7 @@
 				"transformId": "1-03-10-01-00",
 				"baseExp": 4, 
 				"growTime": 180,
-				"numHarvests": 1
+				"numHarvests": 3
 			},
 			{
 				"id": "0-02-10-02-00",
@@ -364,7 +364,7 @@
 				"subtype": "HarvestedItem",
 				"category": "Tree Fruit",
 				"description": "Error",
-				"value": 20
+				"value": 15
 			},
 			{
 				"id": "1-03-09-02-00",
@@ -394,7 +394,7 @@
 				"subtype": "HarvestedItem",
 				"category": "Tropical",
 				"description": "Error",
-				"value": 45
+				"value": 20
 			},
 			{
 				"id": "1-03-10-02-00",
