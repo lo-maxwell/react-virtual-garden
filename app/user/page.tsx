@@ -24,7 +24,7 @@ const UserPage = () => {
             <div className="mx-4 my-4">
               <LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} />
             </div>
-            <div>Friends list goes here!</div>
+            <div>Friends list not implemented yet...</div>
           </div>
 
           <div className={`w-2/3`}>

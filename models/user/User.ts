@@ -192,7 +192,7 @@ class User {
 		return response;
 	}
 
-	isValidIconItem(iconOption: Icon) {
+	isIconUnlocked(iconOption: Icon) {
 		if (iconOption.getName() === 'apple' || iconOption.getName() === 'blueprint') return true;
 		const template = placeholderItemTemplates.getPlacedItemTemplateByName(iconOption.getName());
 		if (!template) return false;

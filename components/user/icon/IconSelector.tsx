@@ -46,14 +46,14 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
         if (!categoryFilter || categoryFilter === '') {
             iconRepository.getIconCategories().map((categoryName) => {
                 availableIcons[categoryName].map((iconOption) => {
-                    if(user.isValidIconItem(iconOption)) {
+                    if(user.isIconUnlocked(iconOption)) {
                         iconSet.push(iconOption);
                     }
                 })
             });
         } else {
             availableIcons[categoryFilter].map((iconOption) => {
-                if(user.isValidIconItem(iconOption)) {
+                if(user.isIconUnlocked(iconOption)) {
                     iconSet.push(iconOption);
                 }
             });

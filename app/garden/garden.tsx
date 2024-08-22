@@ -104,13 +104,12 @@ const GardenComponent = () => {
 
 	const harvestAll = () => {
 		let currentPlants = 0;
-		for (let i = 0; i < garden.getRows(); i++) {
-			for (let j = 0; j < garden.getCols(); j++) {
-				if (garden.getPlotByRowAndColumn(i, j)?.getItemSubtype() === ItemSubtypes.PLANT.name) {
-					currentPlants++;
-				}
+		inventory.getAllItems().forEach((item) => {
+			if (item.itemData.subtype === ItemSubtypes.HARVESTED.name) {
+				currentPlants += item.getQuantity();
 			}
-		}
+		})
+
 		plotRefs.current.forEach(row => {
 			row.forEach(plotRef => {
 			  if (plotRef && plotRef.plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
@@ -120,14 +119,12 @@ const GardenComponent = () => {
 		  });
 
 		let newCurrentPlants = 0;
-		for (let i = 0; i < garden.getRows(); i++) {
-			for (let j = 0; j < garden.getCols(); j++) {
-				if (garden.getPlotByRowAndColumn(i, j)?.getItemSubtype() === ItemSubtypes.PLANT.name) {
-					newCurrentPlants++;
-				}
+		inventory.getAllItems().forEach((item) => {
+			if (item.itemData.subtype === ItemSubtypes.HARVESTED.name) {
+				newCurrentPlants += item.getQuantity();
 			}
-		}
-		setGardenMessage(`Harvested ${currentPlants - newCurrentPlants} plants.`);
+		})
+		setGardenMessage(`Harvested ${newCurrentPlants - currentPlants} plants.`);
 	}
 
 

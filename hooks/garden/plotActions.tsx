@@ -88,7 +88,7 @@ export const usePlotActions = () => {
 				return plot.getItem().itemData.icon;
 			}
 			const xp = plot.getExpValue();
-			const harvestItemResponse = plot.harvestItem(inventory, instantGrow);
+			const harvestItemResponse = plot.harvestItem(inventory, instantGrow, 1);
 			if (!harvestItemResponse.isSuccessful()) {
 				setGardenMessage(` `);
 				return plot.getItem().itemData.icon;

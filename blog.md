@@ -214,6 +214,12 @@
 
 ### User Icon Selection now depends on plants/decorations harvested/placed
 
+### Added multiple harvests to certain plants
+
+  * Right now initial harvest takes growTime, then subsequent harvests take growTime/2
+  * Eventually will change to have specific timers
+  * Need to work out a way to better display this information
+
 TODO:
 
 Change mouseover color for inventoryItems

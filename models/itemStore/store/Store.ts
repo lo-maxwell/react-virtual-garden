@@ -55,8 +55,6 @@ export class Store extends ItemStore {
 			storeName = plainObject.storeName;
 		}
 	
-
-		console.log(plainObject.items);
 		// Validate and assign items
 		if (plainObject && plainObject.items !== undefined) {
 			if (typeof plainObject.items === 'object' && plainObject.items !== null) {
