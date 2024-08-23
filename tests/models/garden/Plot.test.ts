@@ -25,7 +25,7 @@ test('Should Initialize Plot Object', () => {
 	expect(newPlot.getItem().itemData.name).toBe("banana");
 	expect(newPlot.getItemStatus()).toBe("old item");
 	expect(newPlot.getPlantTime()).toBe(1);
-	expect(newPlot.getUsesRemaining()).toBe(1);
+	expect(newPlot.getUsesRemaining()).toBe((placeholderItemTemplates.getPlacedItemTemplateByName('banana')! as PlantTemplate).numHarvests);
 	newPlot.setUsesRemaining(100);
 	newPlot.setPlantTime(100);
 	expect(newPlot.getPlantTime()).toBe(100);

@@ -31,6 +31,7 @@ export class ItemTemplateRepository {
         item.transformId,
         item.baseExp,
 		    item.growTime,
+        item.repeatedGrowTime,
         item.numHarvests
       )
     );

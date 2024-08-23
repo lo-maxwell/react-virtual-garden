@@ -12,8 +12,6 @@ import { placeholderItemTemplates } from "../items/templates/models/PlaceholderI
 import { PlantTemplate } from "../items/templates/models/PlantTemplate";
 
 export class Plot {
-	
-	
 	private item: PlacedItem;
 	private plantTime: number;
 	private usesRemaining: number;
@@ -23,9 +21,9 @@ export class Plot {
 		this.plantTime = plantTime;
 		if (usesRemaining && usesRemaining >= 0) {
 			this.usesRemaining = usesRemaining;
-		} else if (this.item.itemData.subtype === ItemSubtypes.PLANT.name) {
+		} else if (item.itemData.subtype === ItemSubtypes.PLANT.name) {
 			//is a plant
-			const plantTemplate = this.item.itemData as PlantTemplate;
+			const plantTemplate = item.itemData as PlantTemplate;
 			this.usesRemaining = plantTemplate.numHarvests;
 		} else {
 			//is non plant
@@ -91,18 +89,17 @@ export class Plot {
 	 * Replaces the existing item with a new one. Changes the plantTime.
 	 * @item the item to replace with
 	 * @plantTime the new plantTime, defaults to Date.now()
-	 * @harvestsRemaining the number of harvests, defaults to 0 for non plants, and numHarvests for plants. Should not be negative.
+	 * @usesRemaining the number of uses, defaults to 0 for non plants, and numHarvests for plants. Should not be negative.
 	 * @returns the changed item.
 	 */
-	setItem(item: PlacedItem, plantTime: number = Date.now(), harvestsRemaining: number | null = null): PlacedItem {
+	setItem(item: PlacedItem, plantTime: number = Date.now(), usesRemaining: number | null = null): PlacedItem {
 		this.item = item;
 		this.plantTime = plantTime;
-		//We use null as a flag to show harvestsRemaining was not set
-		if (harvestsRemaining && harvestsRemaining >= 0) {
-			this.usesRemaining = harvestsRemaining;
-		} else if (this.item.itemData.subtype === ItemSubtypes.PLANT.name) {
+		if (usesRemaining && usesRemaining >= 0) {
+			this.usesRemaining = usesRemaining;
+		} else if (item.itemData.subtype === ItemSubtypes.PLANT.name) {
 			//is a plant
-			const plantTemplate = this.item.itemData as PlantTemplate;
+			const plantTemplate = item.itemData as PlantTemplate;
 			this.usesRemaining = plantTemplate.numHarvests;
 		} else {
 			//is non plant
@@ -128,7 +125,7 @@ export class Plot {
 	/**
 	 * @returns the number of uses remaining
 	 */
-	 getUsesRemaining(): number {
+	getUsesRemaining(): number {
 		return this.usesRemaining;
 	}
 
