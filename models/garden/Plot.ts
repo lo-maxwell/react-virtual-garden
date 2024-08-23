@@ -166,17 +166,20 @@ export class Plot {
 		this.item.setStatus(status);
 	}
 
+	/**
+	 * If fertilizer/a way to increase usesRemaining for plants is created, this will break
+	 * @returns the total number of seconds for the plant to finish growing and be ready for harvest
+	 */
 	getTotalGrowTime() {
 		if (this.item.itemData.subtype !== ItemSubtypes.PLANT.name) {
 			console.error('Error: attempting to get grow time of a non plant');
 			return 0;
 		}
 		const plantTemplate = this.item.itemData as PlantTemplate;
-		if (plantTemplate.numHarvests === this.getUsesRemaining()) {
+		if (plantTemplate.numHarvests <= this.getUsesRemaining()) {
 			return plantTemplate.growTime;
 		} else {
-			//replace with specific multiharvest grow time
-			return plantTemplate.growTime / 2;
+			return plantTemplate.repeatedGrowTime;
 		}
 	}
 
