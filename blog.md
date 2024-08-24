@@ -220,6 +220,14 @@
   * Eventually will change to have specific timers
   * Need to work out a way to better display this information
 
+## Day 18
+
+### Looking into how to host external database and poll user data from there
+
+  * Added some test files for querying from local postgres db
+  * Not pushing .env, some things will break if forked
+
+
 TODO:
 
 Change mouseover color for inventoryItems
@@ -266,3 +274,4 @@ Or don't allow buying expansions/limit it per level
 Add random events/natural disasters that interact with decorations ie. scarecrows, fences
 Small, medium, large stores with different restock intervals and stock limits
 Item metadata migration tool
+Dev/Prod external dbs, and dev/prod branches
