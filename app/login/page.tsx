@@ -6,7 +6,7 @@ const LoginPage = () => {
   return (<>
       <div> Still in development...
       </div>
-      <IconList/>
+      {/* <IconList/> */}
     </>
   );
 }
