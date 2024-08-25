@@ -86,15 +86,25 @@ const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultip
 		);
 	}
 
+	const RenderItemList = () => {
+		if (getItemList().length === 0) {
+			if (itemStore instanceof Store) {
+				return <div>{`${(itemStore as Store).getStoreName()} is out of stock. Come back later!`}</div>
+			}
+			return <div>{`This seems to be empty...`}</div>
+		}
+		return getItemList().map((item, itemIndex) => (
+			<div key={itemIndex}>
+				<InventoryItemComponent itemStore={itemStore} item={item} onClickFunction={onInventoryItemClickFunction} costMultiplier={costMultiplier} focus={item == selectedItem}></InventoryItemComponent>
+			</div>
+		))
+	}
+
 	return (<>
 		<div>{RenderSubtypeFilter()}</div>
 		<div>{RenderCategoryFilter()}</div>
 		<div className={`max-h-[${maxHeightPercentage}vh] overflow-y-auto`}>
-		{getItemList().map((item, itemIndex) => (
-			<div key={itemIndex}>
-				<InventoryItemComponent itemStore={itemStore} item={item} onClickFunction={onInventoryItemClickFunction} costMultiplier={costMultiplier} focus={item == selectedItem}></InventoryItemComponent>
-			</div>
-		))}
+		{RenderItemList()}
 		</div>
 		</>
 	);
