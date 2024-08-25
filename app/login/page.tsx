@@ -24,7 +24,7 @@ const LoginPage = () => {
   }, []);
   
   return (<>
-      <div> Still in development...
+      <div> {`This is the login page, but it's still in development...`}
       </div>
       <div>{loading ? `loading...` : testString}</div>
       {/* <IconList/> */}
