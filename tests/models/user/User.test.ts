@@ -91,7 +91,7 @@ test('Should Not Update Invalid harvest History', () => {
 	const response = user.updateHarvestHistory(invalidItem);
 	expect(response.isSuccessful()).toBe(false);
 
-	const invalidTemplate = new PlantTemplate("invalid id", "invalid name", "", ItemTypes.PLACED.name, ItemSubtypes.PLANT.name, "", "", 100, "", 0, 0);
+	const invalidTemplate = new PlantTemplate("invalid id", "invalid name", "", ItemTypes.PLACED.name, ItemSubtypes.PLANT.name, "", "", 100, "", 0, 0, 0, 0);
 	const invalidItem2 = new Plant(invalidTemplate, "");
 	const response2 = user.updateHarvestHistory(invalidItem2);
 	expect(response2.isSuccessful()).toBe(false);

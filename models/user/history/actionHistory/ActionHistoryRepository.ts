@@ -50,14 +50,7 @@ export class ActionHistoryRepository {
 	 */
 	getActionHistoryInterfaceByIdentifiers(subtype: string, category: string, action: string): ActionHistoryInterface | null {
 		const identifierString = `${subtype.toLowerCase()}:${category.toLowerCase()}:${action.toLowerCase()}`;
-		const histories = Object.values(this.histories).flat().filter(history => history.identifier === identifierString);
-		if (histories.length === 1) return histories[0];
-		else if (histories.length === 0) return null;
-		else {
-			console.error('Error: found multiple histories with the same name!');
-			console.error(histories);
-			return null;
-		}
+		return this.getActionHistoryInterfaceByIdentifierString(identifierString);
 	}
 
 	/**
