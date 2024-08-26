@@ -78,6 +78,11 @@ export class PlantTemplate extends PlacedItemTemplate{
 
 	getGrowTimeString(): string {
 		const growTime = this.growTime;
+
+		if (growTime === 0) {
+			return 'Grow Time: Instant';
+		}
+
 		// Calculate days, hours, minutes, and seconds
 		const growDays = Math.floor(growTime / (24 * 3600));
 		const growHours = Math.floor((growTime % (24 * 3600)) / 3600);

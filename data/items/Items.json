@@ -10,6 +10,7 @@
 				"category": "Error",
 				"description": "Error",
 				"value": 0,
+				"level": 0,
 				"transformId": "1-03-99-99-99",
 				"baseExp": 0, 
 				"growTime": 0
@@ -23,6 +24,7 @@
 				"category": "Onion",
 				"description": "Error",
 				"value": 30,
+				"level": 0,
 				"transformId": "1-03-01-06-00",
 				"baseExp": 9, 
 				"growTime": 900,
@@ -38,6 +40,7 @@
 				"category": "Onion",
 				"description": "Error",
 				"value": 15,
+				"level": 0,
 				"transformId": "1-03-01-01-00",
 				"baseExp": 18, 
 				"growTime": 900,
@@ -53,6 +56,7 @@
 				"category": "Tree Fruit",
 				"description": "Error",
 				"value": 5,
+				"level": 0,
 				"transformId": "1-03-09-01-00",
 				"baseExp": 2, 
 				"growTime": 10,
@@ -68,6 +72,7 @@
 				"category": "Tree Fruit",
 				"description": "Error",
 				"value": 60,
+				"level": 0,
 				"transformId": "1-03-09-02-00",
 				"baseExp": 20, 
 				"growTime": 3600,
@@ -83,6 +88,7 @@
 				"category": "Tree Fruit",
 				"description": "Error",
 				"value": 80,
+				"level": 0,
 				"transformId": "1-03-09-03-00",
 				"baseExp": 25, 
 				"growTime": 7200,
@@ -113,6 +119,7 @@
 				"category": "Tropical",
 				"description": "Error",
 				"value": 200,
+				"level": 0,
 				"transformId": "1-03-10-02-00",
 				"baseExp": 50, 
 				"growTime": 21600,
@@ -128,6 +135,7 @@
 				"category": "Tropical",
 				"description": "Error",
 				"value": 120,
+				"level": 0,
 				"transformId": "1-03-10-03-00",
 				"baseExp": 30, 
 				"growTime": 10800,
@@ -143,6 +151,7 @@
 				"category": "Tropical",
 				"description": "Error",
 				"value": 1200,
+				"level": 0,
 				"transformId": "1-03-10-03-03",
 				"baseExp": 300, 
 				"growTime": 108000,
@@ -160,6 +169,7 @@
 				"category": "Error",
 				"description": "Error",
 				"value": 0,
+				"level": 0,
 				"transformId": "1-05-99-99-99"
 			},
 			{
@@ -171,6 +181,7 @@
 				"category": "Normal",
 				"description": "Error",
 				"value": 100,
+				"level": 0,
 				"transformId": "1-05-01-01-00"
 			},
 			{
@@ -182,6 +193,7 @@
 				"category": "Normal",
 				"description": "Error",
 				"value": 5000,
+				"level": 0,
 				"transformId": "1-05-01-02-00"
 			},
 			{
@@ -193,6 +205,7 @@
 				"category": "Normal",
 				"description": "Error",
 				"value": 25,
+				"level": 0,
 				"transformId": "1-05-01-03-00"
 			}
 		],
@@ -206,6 +219,7 @@
 				"category": "Error",
 				"description": "Error",
 				"value": 0,
+				"level": 0,
 				"transformId": "0-00-99-99-99"
 			},
 			{
@@ -217,6 +231,7 @@
 				"category": "Ground",
 				"description": "Error",
 				"value": 0,
+				"level": 0,
 				"transformId": "0-00-00-00-00"
 			}
 		]
@@ -232,6 +247,7 @@
 				"category": "Error",
 				"description": "Error",
 				"value": 0,
+				"level": 0,
 				"transformId": "0-02-99-99-99"
 			},
 			{
@@ -243,6 +259,7 @@
 				"category": "Onion",
 				"description": "Error",
 				"value": 60,
+				"level": 0,
 				"transformId": "0-02-01-06-00"
 			},
 			{
@@ -254,6 +271,7 @@
 				"category": "Onion",
 				"description": "Error",
 				"value": 60,
+				"level": 0,
 				"transformId": "0-02-01-01-00"
 			},
 			{
@@ -265,6 +283,7 @@
 				"category": "Tree Fruit",
 				"description": "Error",
 				"value": 5,
+				"level": 0,
 				"transformId": "0-02-09-01-00"
 			},
 			{
@@ -276,6 +295,7 @@
 				"category": "Tree Fruit",
 				"description": "Error",
 				"value": 60,
+				"level": 0,
 				"transformId": "0-02-09-02-00"
 			},
 			{
@@ -287,6 +307,7 @@
 				"category": "Tree Fruit",
 				"description": "Error",
 				"value": 90,
+				"level": 0,
 				"transformId": "0-02-09-03-00"
 			},
 			{
@@ -298,6 +319,7 @@
 				"category": "Tropical",
 				"description": "Error",
 				"value": 15,
+				"level": 0,
 				"transformId": "0-02-10-01-00"
 			},
 			{
@@ -309,6 +331,7 @@
 				"category": "Tropical",
 				"description": "Error",
 				"value": 150,
+				"level": 0,
 				"transformId": "0-02-10-02-00"
 			},
 			{
@@ -320,6 +343,7 @@
 				"category": "Tropical",
 				"description": "Error",
 				"value": 120,
+				"level": 0,
 				"transformId": "0-02-10-03-00"
 			},
 			{
@@ -331,6 +355,7 @@
 				"category": "Tropical",
 				"description": "Error",
 				"value": 1200,
+				"level": 0,
 				"transformId": "0-02-10-03-03"
 			}
 		],
@@ -343,7 +368,8 @@
 				"subtype": "HarvestedItem",
 				"category": "Error",
 				"description": "Error",
-				"value": 0
+				"value": 0,
+				"level": 0
 			},
 			{
 				"id": "1-03-01-06-00",
@@ -353,7 +379,8 @@
 				"subtype": "HarvestedItem",
 				"category": "Onion",
 				"description": "Error",
-				"value": 150
+				"value": 150,
+				"level": 0
 			},
 			{
 				"id": "1-03-01-01-00",
@@ -363,7 +390,8 @@
 				"subtype": "HarvestedItem",
 				"category": "Onion",
 				"description": "Error",
-				"value": 135
+				"value": 135,
+				"level": 0
 			},
 			{
 				"id": "1-03-09-01-00",
@@ -383,7 +411,8 @@
 				"subtype": "HarvestedItem",
 				"category": "Tree Fruit",
 				"description": "Error",
-				"value": 180
+				"value": 180,
+				"level": 0
 			},
 			{
 				"id": "1-03-09-03-00",
@@ -393,7 +422,8 @@
 				"subtype": "HarvestedItem",
 				"category": "Tree Fruit",
 				"description": "Error",
-				"value": 260
+				"value": 260,
+				"level": 0
 			},
 			{
 				"id": "1-03-10-01-00",
@@ -403,7 +433,8 @@
 				"subtype": "HarvestedItem",
 				"category": "Tropical",
 				"description": "Error",
-				"value": 20
+				"value": 20,
+				"level": 0
 			},
 			{
 				"id": "1-03-10-02-00",
@@ -413,7 +444,8 @@
 				"subtype": "HarvestedItem",
 				"category": "Tropical",
 				"description": "Error",
-				"value": 500
+				"value": 500,
+				"level": 0
 			},
 			{
 				"id": "1-03-10-03-00",
@@ -423,7 +455,8 @@
 				"subtype": "HarvestedItem",
 				"category": "Tropical",
 				"description": "Error",
-				"value": 360
+				"value": 360,
+				"level": 0
 			},
 			{
 				"id": "1-03-10-03-03",
@@ -433,7 +466,8 @@
 				"subtype": "HarvestedItem",
 				"category": "Tropical",
 				"description": "Error",
-				"value": 3600
+				"value": 3600,
+				"level": 0
 			}
 		],
 		"Blueprints": [
@@ -446,6 +480,7 @@
 				"category": "Error",
 				"description": "Error",
 				"value": 0,
+				"level": 0,
 				"transformId": "0-04-99-99-99"
 			},
 			{
@@ -457,6 +492,7 @@
 				"category": "Normal",
 				"description": "Error",
 				"value": 100,
+				"level": 0,
 				"transformId": "0-04-01-01-00"
 			},
 			{
@@ -468,6 +504,7 @@
 				"category": "Normal",
 				"description": "Error",
 				"value": 5000,
+				"level": 0,
 				"transformId": "0-04-01-02-00"
 			},
 			{
@@ -479,6 +516,7 @@
 				"category": "Normal",
 				"description": "Error",
 				"value": 25,
+				"level": 0,
 				"transformId": "0-04-01-03-00"
 			}
 		]

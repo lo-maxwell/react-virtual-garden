@@ -109,6 +109,20 @@ test('Should Return Correct Grow Time String', () => {
 	expect((coconut as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 6 hours");
 	expect((peach as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 2 hours");
 	expect((magic as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 1 day 6 hours");
+	const testTemplate = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, "", 0, 0, 0, 0);
+	expect((testTemplate as PlantTemplate).getGrowTimeString()).toBe("Grow Time: Instant");
+	const testTemplate2 = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, "", 0, 1, 0, 0);
+	expect((testTemplate2 as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 1 s");
+	const testTemplate3 = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, "", 0, 10, 0, 0);
+	expect((testTemplate3 as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 10 s");
+	const testTemplate4 = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, "", 0, 100, 0, 0);
+	expect((testTemplate4 as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 1 min 40 s");
+	const testTemplate5 = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, "", 0, 1000, 0, 0);
+	expect((testTemplate5 as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 16 min 40 s");
+	const testTemplate6 = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, "", 0, 10000, 0, 0);
+	expect((testTemplate6 as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 2 hours 46 min");
+	const testTemplate7 = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, "", 0, 100000, 0, 0);
+	expect((testTemplate7 as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 1 day 3 hours");
 
-	//add custom plant templates and test
+	
 })
