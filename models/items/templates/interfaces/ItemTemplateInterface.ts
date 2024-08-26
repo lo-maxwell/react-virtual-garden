@@ -9,4 +9,5 @@ export interface ItemTemplateInterface {
 	category: string;
 	description: string;
 	value: number;
+	level: number;
   }

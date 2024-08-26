@@ -28,6 +28,7 @@ export class ItemTemplateRepository {
         item.category,
         item.description,
         item.value,
+        item.level,
         item.transformId,
         item.baseExp,
 		    item.growTime,
@@ -45,6 +46,7 @@ export class ItemTemplateRepository {
         item.category,
         item.description,
         item.value,
+        item.level,
         item.transformId,
       )
     );
@@ -58,6 +60,7 @@ export class ItemTemplateRepository {
         item.category,
         item.description,
         item.value,
+        item.level,
         item.transformId
       )
     );
@@ -71,6 +74,7 @@ export class ItemTemplateRepository {
         item.category,
         item.description,
         item.value,
+        item.level,
         item.transformId
       )
     );
@@ -83,7 +87,8 @@ export class ItemTemplateRepository {
         item.subtype,
         item.category,
         item.description,
-        item.value
+        item.value,
+        item.level
       )
     );
 	this.InventoryItems['Blueprints'] = itemsData.InventoryItems.Blueprints.map((item: any) =>
@@ -96,6 +101,7 @@ export class ItemTemplateRepository {
         item.category,
         item.description,
         item.value,
+        item.level,
         item.transformId
       )
     );
