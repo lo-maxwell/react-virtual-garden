@@ -194,6 +194,17 @@
 				"description": "Error",
 				"value": 25,
 				"transformId": "1-05-01-03-00"
+			},
+			{
+				"id": "0-04-01-04-00",
+				"name": "potted plant",
+				"icon": "🪴",
+				"type": "PlacedItem",
+				"subtype": "Decoration",
+				"category": "Normal",
+				"description": "Error",
+				"value": 100,
+				"transformId": "1-05-01-04-00"
 			}
 		],
 		"Ground": [
@@ -480,6 +491,17 @@
 				"description": "Error",
 				"value": 25,
 				"transformId": "0-04-01-03-00"
+			},
+			{
+				"id": "1-05-01-04-00",
+				"name": "potted plant blueprint",
+				"icon": "📜",
+				"type": "InventoryItem",
+				"subtype": "Blueprint",
+				"category": "Normal",
+				"description": "Error",
+				"value": 100,
+				"transformId": "0-04-01-04-00"
 			}
 		]
 	}
