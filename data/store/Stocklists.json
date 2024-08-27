@@ -51,6 +51,10 @@
 					{
 						"name": "construction sign blueprint",
 						"quantity": 5
+					},
+					{
+						"name": "potted plant blueprint",
+						"quantity": 5
 					}
 				]
 			}
