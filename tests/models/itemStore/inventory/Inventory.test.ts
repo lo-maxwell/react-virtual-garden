@@ -3,6 +3,7 @@ import { ItemList } from "@/models/itemStore/ItemList";
 import { generateNewPlaceholderInventoryItem} from "@/models/items/PlaceholderItems";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
+import { v4 as uuidv4 } from 'uuid';
 
 
 let testInventory: Inventory;
@@ -12,15 +13,15 @@ beforeEach(() => {
 	const item2 = generateNewPlaceholderInventoryItem("banana seed", 2);
 	const item3 = generateNewPlaceholderInventoryItem("coconut seed", 3);
 	const testItemList = new ItemList([item1, item2, item3]);
-	testInventory = new Inventory("Test", 100, testItemList);
+	testInventory = new Inventory(uuidv4(), "Test User", 100, testItemList);
 });
 
 test('Should Initialize Default Inventory Object', () => {
-	const inv = new Inventory("Dummy User", 100, new ItemList());
+	const inv = new Inventory(uuidv4(), "Dummy User", 100, new ItemList());
 	expect(inv).not.toBeUndefined();
 	expect(inv).not.toBeNull();
 	expect(inv.getGold()).toBe(100);
-	expect(inv.getUserId()).toBe("Dummy User");
+	expect(inv.getOwnerName()).toBe("Dummy User");
 	expect(inv.size()).toBe(0);
 });
 
@@ -242,9 +243,9 @@ test('Should Not Use Item Lacking Quantity', () => {
 })
 
 test('Should Create Inventory Object From PlainObject', () => {
-	const serializedInventory = JSON.stringify((new Inventory("Dummy User", 100, new ItemList([generateNewPlaceholderInventoryItem('apple seed', 10)]))).toPlainObject());
+	const serializedInventory = JSON.stringify((new Inventory(uuidv4(), "Dummy User", 100, new ItemList([generateNewPlaceholderInventoryItem('apple seed', 10)]))).toPlainObject());
 	const inv = Inventory.fromPlainObject(JSON.parse(serializedInventory));
-	expect(inv.getUserId()).toBe("Dummy User");
+	expect(inv.getOwnerName()).toBe("Dummy User");
 	expect(inv.size()).toBe(1);
 	expect(inv.contains('apple seed').payload).toBe(true);
 })

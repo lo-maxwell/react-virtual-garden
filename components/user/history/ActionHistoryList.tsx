@@ -1,4 +1,4 @@
-import { useUser } from "@/hooks/contexts/UserContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
 
 const ActionHistoryListComponent = ({}) => {
 	const { user } = useUser();

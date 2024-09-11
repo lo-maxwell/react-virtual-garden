@@ -1,11 +1,12 @@
 import ItemStoreComponent from "@/components/itemStore/itemStore";
 import { triggerAsyncId } from "async_hooks";
+import Toolbox from "../garden/tools/Toolbox";
 import { ItemSubtypes } from "../items/ItemTypes";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { DecorationTemplate } from "../items/templates/models/DecorationTemplate";
 import { placeholderItemTemplates } from "../items/templates/models/PlaceholderItemTemplate";
 import { PlantTemplate } from "../items/templates/models/PlantTemplate";
-import LevelSystem from "../level/LevelSystem";
+import LevelSystem, { LevelSystemEntity } from "../level/LevelSystem";
 import { BooleanResponse } from "../utility/BooleanResponse";
 import { actionHistoryFactory } from "./history/actionHistory/ActionHistoryFactory";
 import { actionHistoryRepository } from "./history/actionHistory/ActionHistoryRepository";
@@ -15,21 +16,32 @@ import ItemHistory from "./history/itemHistory/ItemHistory";
 import { PlantHistory } from "./history/itemHistory/PlantHistory";
 import { ItemHistoryList } from "./history/ItemHistoryList";
 import Icon from "./icons/Icon";
+import { v4 as uuidv4 } from 'uuid';
+
+export interface UserEntity {
+	id: string;
+	username: string;
+	icon: string;
+}
 
 class User {
-
+	private userId: string;
 	private username: string;
 	private icon: string; //indexes into a list of icons by name
 	private level: LevelSystem;
 	private itemHistory: ItemHistoryList;
 	private actionHistory: ActionHistoryList;
+	private toolbox: Toolbox;
 
-	constructor(username: string, icon: string, level: LevelSystem = new LevelSystem(), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList()) {
+	//TODO: New Users should get a random UUID as their userId
+	constructor(userId: string, username: string, icon: string, level: LevelSystem = new LevelSystem(uuidv4()), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList(), toolbox: Toolbox = new Toolbox()) {
+		this.userId = userId;
 		this.username = username;
 		this.icon = icon;
 		this.level = level;
 		this.itemHistory = itemHistory;
 		this.actionHistory = actionHistory;
+		this.toolbox = toolbox;
 	}
 
 	static fromPlainObject(plainObject: any) {
@@ -38,8 +50,11 @@ class User {
             if (!plainObject || typeof plainObject !== 'object') {
                 throw new Error('Invalid plainObject structure for User');
             }
-			const { username, icon, level, itemHistory, actionHistory } = plainObject;
+			const { userId, username, icon, level, itemHistory, actionHistory, toolbox } = plainObject;
 			// Perform additional type checks if necessary
+			if (typeof userId !== 'string') {
+				throw new Error('Invalid userId property in plainObject for User');
+			}
 			if (typeof username !== 'string') {
 				throw new Error('Invalid username property in plainObject for User');
 			}
@@ -49,22 +64,29 @@ class User {
 			const hydratedLevel = LevelSystem.fromPlainObject(level);
 			const hydratedItemHistory = ItemHistoryList.fromPlainObject(itemHistory);
 			const hydratedActionHistory = ActionHistoryList.fromPlainObject(actionHistory);
-			return new User(username, icon, hydratedLevel, hydratedItemHistory, hydratedActionHistory);
+			const hydratedToolbox = Toolbox.fromPlainObject(toolbox);
+			return new User(userId, username, icon, hydratedLevel, hydratedItemHistory, hydratedActionHistory, hydratedToolbox);
 			
 		} catch (err) {
 			console.error('Error creating User from plainObject:', err);
-            return new User("Error User", "error");
+            return new User("99999999-9999-9999-9999-999999999999", "Error User", "error");
 		}
 	}
 
 	toPlainObject(): any {
 		return {
+			userId: this.userId,
 			username: this.username,
 			icon: this.icon,
 			level: this.level.toPlainObject(),
 			itemHistory: this.itemHistory.toPlainObject(),
 			actionHistory: this.actionHistory.toPlainObject(),
+			toolbox: this.toolbox.toPlainObject(),
 		};
+	}
+
+	getUserId(): string {
+		return this.userId;
 	}
 
 	getUsername(): string {
@@ -117,6 +139,10 @@ class User {
 	 */
 	getGrowthRate(): number {
 		return this.level.getGrowthRate();
+	}
+
+	getLevelSystem(): LevelSystem {
+		return this.level;
 	}
 
 	/**

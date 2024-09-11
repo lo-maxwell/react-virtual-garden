@@ -1,8 +1,9 @@
 'use client'
-import { GardenContext } from '@/hooks/contexts/GardenContext';
+import { GardenContext } from '@/app/hooks/contexts/GardenContext';
 import { Garden } from '@/models/garden/Garden';
 import { loadGarden, saveGarden } from '@/utils/localStorage/garden';
 import React, { ReactNode, useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 // Define props for the provider
 interface GardenProviderProps {
@@ -15,25 +16,30 @@ export const GardenProvider = ({ children }: GardenProviderProps) => {
 	const [instantGrow, setInstantGrow] = useState(false);
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 
-	function setupGarden(userId: string): Garden {
+	function generateDefaultNewGarden(): Garden {
+		const randomUuid = uuidv4();
+		return new Garden(randomUuid, "Test User");
+	}
+
+	function setupGarden(): Garden {
 		let garden = loadGarden();
 		console.log(garden);
 		if (!(garden instanceof Garden)) {
 		  console.log('garden not found, setting up');
-		  garden = new Garden(userId);
+		  garden = generateDefaultNewGarden();
 		  saveGarden(garden);
 		}
 		return garden;
 	  }
 
 	useEffect(() => {
-		const garden = setupGarden("Test User");
+		const garden = setupGarden();
 		setGarden(garden);
 	}, []);
 	
 
 	function resetGarden() {
-		const garden = new Garden("Test User");
+		const garden = generateDefaultNewGarden();
 		setGarden(garden);
 		saveGarden(garden);
 		console.log('finished reset');

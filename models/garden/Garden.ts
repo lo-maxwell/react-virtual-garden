@@ -6,10 +6,25 @@ import { placeholderItemTemplates } from "../items/templates/models/PlaceholderI
 import User from "../user/User";
 import { GardenTransactionResponse } from "./GardenTransactionResponse";
 import { Plot } from "./Plot";
+import { v4 as uuidv4 } from 'uuid';
+
+export interface GardenDimensionEntity {
+	rows: number,
+	columns: number
+}
+
+export interface GardenEntity extends GardenDimensionEntity {
+	id: string,
+	owner: string
+}
+
+export interface ExtendedGardenEntity extends GardenEntity {
+	owner_name: string;
+}
 
 export class Garden {
-	
-	private userId: string;
+	private gardenId: string;
+	private ownerName: string;
 	private plots: Plot[][];
 	private plotPositions: Map<Plot, [number, number]>;
 	
@@ -22,8 +37,9 @@ export class Garden {
 		return template!;
 	}
 
-	constructor(userId: string = "Dummy User", rows: number = Garden.getStartingRows(), cols: number = Garden.getStartingCols(), plots: Plot[][] | null = null) {
-		this.userId = userId;
+	constructor(gardenId: string, ownerName: string = "Dummy User", rows: number = Garden.getStartingRows(), cols: number = Garden.getStartingCols(), plots: Plot[][] | null = null) {
+		this.gardenId = gardenId;
+		this.ownerName = ownerName;
 		this.plotPositions = new Map();
 		if (plots != null) {
 			this.plots = plots;
@@ -39,16 +55,16 @@ export class Garden {
 			//we throw an error here which causes loadgarden to return [], causing it to reset everything.
 			throw new Error('Invalid input to fromPlainObject');
 		}
-		const { userId, plots: plainPlots } = plainObject;
+		const { gardenId, ownerName, plots: plainPlots } = plainObject;
 
 		if (!Array.isArray(plainPlots)) {
 			//if plots is not the right shape, throw away the entire thing
-			return new Garden(userId, Garden.getStartingRows(), Garden.getStartingCols(), null);
+			return new Garden(gardenId, ownerName, Garden.getStartingRows(), Garden.getStartingCols(), null);
 		}	
 		// Convert plainPlots to Plot[][]
 		const plots = plainPlots.map((row: any[]) => row.map((plot: any) => Plot.fromPlainObject(plot)));
 		
-		const garden = new Garden(userId, plainPlots.length, plainPlots[0]?.length || 0, plots);
+		const garden = new Garden(gardenId, ownerName, plainPlots.length, plainPlots[0]?.length || 0, plots);
 		garden.updatePlotPositions();
 
 		return garden;
@@ -58,16 +74,24 @@ export class Garden {
 	toPlainObject(): any {
 
 		return {
-			userId: this.userId,
+			gardenId: this.gardenId,
+			ownerName: this.ownerName,
 			plots: this.plots.map(row => row.map(plot => plot.toPlainObject()))
 		};
 	} 
 
 	/**
-	 * @returns the userId of the owner of the garden.
+	 * @returns the gardenId
 	 */
-	 getUserId(): string {
-		return this.userId;
+	 getGardenId(): string {
+		return this.gardenId;
+	}
+
+	/**
+	 * @returns the ownerName of the owner of the garden.
+	 */
+	 getOwnerName(): string {
+		return this.ownerName;
 	}
 
 	/**
@@ -112,8 +136,8 @@ export class Garden {
      * @returns new Plot()
      */
 	static generateEmptyPlot(rowIndex: number, colIndex: number): Plot {
-		const ground = generateNewPlaceholderPlacedItem("ground", "empty");
-		const newPlot = new Plot(ground, Date.now(), 0);
+		const ground = generateNewPlaceholderPlacedItem("ground", "");
+		const newPlot = new Plot(uuidv4(), ground, Date.now(), 0);
 		return newPlot;
 	}
 
@@ -350,7 +374,7 @@ export class Garden {
 	 *  updatedPlot: Plot, 
 	 *  harvestedItemTemplate: ItemTemplate}
 	 */
-	harvestPlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(Garden.getGroundTemplate(), '')): GardenTransactionResponse {
+	harvestPlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(uuidv4(), Garden.getGroundTemplate(), '')): GardenTransactionResponse {
 		const response = new GardenTransactionResponse();
 		let data: Plot | {row: number, col: number} | null = plot;
 		if (!(plot instanceof Plot)) {
@@ -389,7 +413,7 @@ export class Garden {
 	 *  updatedPlot: Plot, 
 	 *  blueprintItemTemplate: ItemTemplate}
 	 */
-	repackagePlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(Garden.getGroundTemplate(), '')): GardenTransactionResponse {
+	repackagePlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(uuidv4(), Garden.getGroundTemplate(), '')): GardenTransactionResponse {
 		const response = new GardenTransactionResponse();
 		let data: Plot | {row: number, col: number} | null = plot;
 		if (!(plot instanceof Plot)) {

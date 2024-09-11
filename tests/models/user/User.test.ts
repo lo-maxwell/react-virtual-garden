@@ -1,23 +1,19 @@
+import Toolbox from "@/models/garden/tools/Toolbox";
 import { ItemSubtypes, ItemTypes } from "@/models/items/ItemTypes";
-import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { Plant } from "@/models/items/placedItems/Plant";
 import { generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";
-import { PlacedItemTemplate } from "@/models/items/templates/models/PlacedItemTemplate";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
 import LevelSystem from "@/models/level/LevelSystem";
-import ActionHistory from "@/models/user/history/actionHistory/ActionHistory";
 import { actionHistoryFactory } from "@/models/user/history/actionHistory/ActionHistoryFactory";
 import { ActionHistoryList } from "@/models/user/history/ActionHistoryList";
-import ItemHistory from "@/models/user/history/itemHistory/ItemHistory";
 import { PlantHistory } from "@/models/user/history/itemHistory/PlantHistory";
 import { ItemHistoryList } from "@/models/user/history/ItemHistoryList";
 import User from "@/models/user/User";
-import { userAgent } from "@/node_modules/next/server";
-import { parse } from "path";
+import { v4 as uuidv4 } from 'uuid';
 
 test('Should Initialize User Object', () => {
-	const user = new User('test', '', new LevelSystem(100));
+	const user = new User("00000000-0000-0000-0000-000000000000", 'test', '', new LevelSystem(uuidv4(), 100), new ItemHistoryList(), new ActionHistoryList(), new Toolbox());
 	expect(user.getUsername()).toBe('test');
 	expect(user.getIcon()).toBe('');
 	expect(user.getLevel()).toBe(100);
@@ -35,7 +31,7 @@ test('Should Initialize User Object', () => {
 
 test('Should Create User Object From PlainObject', () => {
 	const testActionHistory = actionHistoryFactory.createActionHistoryByName("Total Plants Harvested", 1);
-	const user = new User('test', '', new LevelSystem(100), new ItemHistoryList([new PlantHistory(placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate, 1)]), new ActionHistoryList([testActionHistory!]));
+	const user = new User('00000000-0000-0000-0000-000000000000', 'test', '', new LevelSystem(uuidv4(), 100), new ItemHistoryList([new PlantHistory(placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate, 1)]), new ActionHistoryList([testActionHistory!]), new Toolbox());
 	const serializedUser = JSON.stringify(user.toPlainObject());
 	const parsedUser = User.fromPlainObject(JSON.parse(serializedUser));
 	expect(parsedUser).toBeTruthy();
@@ -61,7 +57,7 @@ test('Should Not Create Invalid User Object From PlainObject', () => {
 
 test('Should Update Harvest History', () => {
 
-	const user = new User('test', '', new LevelSystem(100));
+	const user = new User('00000000-0000-0000-0000-000000000000', 'test', '', new LevelSystem(uuidv4(), 100), new ItemHistoryList(), new ActionHistoryList(), new Toolbox());
 	const plantItem = generateNewPlaceholderPlacedItem("apple", "");
 	const response = user.updateHarvestHistory(plantItem);
 	expect(response.isSuccessful()).toBe(true);
@@ -86,13 +82,13 @@ test('Should Update Harvest History', () => {
 })
 
 test('Should Not Update Invalid harvest History', () => {
-	const user = new User('test', '', new LevelSystem(100));
+	const user = new User('00000000-0000-0000-0000-000000000000', 'test', '', new LevelSystem(uuidv4(), 100), new ItemHistoryList(), new ActionHistoryList(), new Toolbox());
 	const invalidItem = generateNewPlaceholderPlacedItem("bench", "");
 	const response = user.updateHarvestHistory(invalidItem);
 	expect(response.isSuccessful()).toBe(false);
 
-	const invalidTemplate = new PlantTemplate("invalid id", "invalid name", "", ItemTypes.PLACED.name, ItemSubtypes.PLANT.name, "", "", 100, "", 0, 0, 0, 0);
-	const invalidItem2 = new Plant(invalidTemplate, "");
+	const invalidTemplate = new PlantTemplate("invalid id", "invalid name", "", ItemTypes.PLACED.name, ItemSubtypes.PLANT.name, "", "", 100, 0, "", 0, 0, 0, 0);
+	const invalidItem2 = new Plant(uuidv4(), invalidTemplate, "");
 	const response2 = user.updateHarvestHistory(invalidItem2);
 	expect(response2.isSuccessful()).toBe(false);
 

@@ -1,4 +1,4 @@
-import { useUser } from "@/hooks/contexts/UserContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { DecorationHistory } from "@/models/user/history/itemHistory/DecorationHistory";
 import { PlantHistory } from "@/models/user/history/itemHistory/PlantHistory";

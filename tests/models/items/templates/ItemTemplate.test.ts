@@ -1,11 +1,12 @@
 import { InventoryItemTemplate } from "@/models/items/templates/models/InventoryItemTemplate";
 import { PlacedItemTemplate } from "@/models/items/templates/models/PlacedItemTemplate";
 import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
+import { v4 as uuidv4 } from 'uuid';
 
 
 //TODO: Add tests for different template types
 test('Initialize itemTemplate', () => {
-	const testSeedTemplate = new SeedTemplate("0", 'test', '', "InventoryItem", "Seed", "", "", 0, "0");
+	const testSeedTemplate = new SeedTemplate("0", 'test', '', "InventoryItem", "Seed", "", "", 0, 0, "0");
 	expect(testSeedTemplate).toBeTruthy();
 });
 

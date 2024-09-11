@@ -1,6 +1,6 @@
 import colors from "@/components/colors/colors";
 import ItemStoreComponent from "@/components/itemStore/itemStore";
-import { useStore } from "@/hooks/contexts/StoreContext";
+import { useStore } from "@/app/hooks/contexts/StoreContext";
 import { useEffect, useState } from "react";
 
 const StoreComponent = ({onInventoryItemClickFunction}: {onInventoryItemClickFunction: (arg: any) => void}) => {

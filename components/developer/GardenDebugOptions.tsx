@@ -1,6 +1,6 @@
-import { useGarden } from "@/hooks/contexts/GardenContext";
-import { useInventory } from "@/hooks/contexts/InventoryContext";
-import { useUser } from "@/hooks/contexts/UserContext";
+import { useGarden } from "@/app/hooks/contexts/GardenContext";
+import { useInventory } from "@/app/hooks/contexts/InventoryContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { saveUser } from "@/utils/localStorage/user";

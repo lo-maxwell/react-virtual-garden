@@ -1,7 +1,7 @@
 import storeData from '@/data/store/Stores.json';
 import { StoreInterface } from "./StoreInterface";
 
-class StoreRepository {
+class StoreFactory {
 	stores: StoreInterface[];
 
 	constructor() {
@@ -52,4 +52,4 @@ class StoreRepository {
 	}
 }
 
-export const storeRepository = new StoreRepository();
+export const storeFactory = new StoreFactory();

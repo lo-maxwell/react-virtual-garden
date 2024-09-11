@@ -5,9 +5,10 @@ import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
 import ItemHistory from "@/models/user/history/itemHistory/ItemHistory";
 import { PlantHistory } from "@/models/user/history/itemHistory/PlantHistory";
+import User from "@/models/user/User";
 import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
-import { saveUser } from "@/utils/localStorage/user";
+import { loadUser, saveUser } from "@/utils/localStorage/user";
 import { useGarden } from "../contexts/GardenContext";
 import { useInventory } from "../contexts/InventoryContext";
 import { useSelectedItem } from "../contexts/SelectedItemContext";
@@ -90,7 +91,7 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const clickPlant = (plot: Plot, instantGrow: boolean = false) => {
-		const helper = () => {
+		const helper = async () => {
 			if (plot.getItem().itemData.subtype != ItemSubtypes.PLANT.name) {
 				setGardenMessage(` `);
 				return plot.getItem().itemData.icon;
@@ -105,7 +106,38 @@ export const usePlotActions = () => {
 
 			const pickedItem = harvestItemResponse.payload.pickedItem as PlacedItem;
 			user.updateHarvestHistory(pickedItem);
-			user.addExp(xp);
+			try {
+				user.addExp(xp);
+				//TODO: api call for harvestPlant
+				// const data = {
+				//   ownerType: 'user',
+				//   xpAmount: xp
+				// }
+				// // Making the PATCH request to your API endpoint
+				// const response = await fetch(`/api/user/${user.getUserId()}/level/gainExp`, {
+				//   method: 'PATCH',
+				//   headers: {
+				// 	'Content-Type': 'application/json',
+				//   },
+				//   body: JSON.stringify(data), // Send the new xp data in the request body
+				// });
+		  
+				// // Check if the response is successful
+				// if (!response.ok) {
+				//   throw new Error('Failed to update levelsystem for user');
+				// }
+		  
+				// // Parsing the response data
+				// const result = await response.json();
+				// console.log('Successfully updated:', result);
+			  } catch (error) {
+				console.error(error);
+				//TODO: reload user to fix display issue with xp
+				// const reloadedUser = loadUser() as User;
+				// saveUser(reloadedUser);
+			  } finally {
+			  }
+			// user.addExp(xp);
 			saveInventory(inventory);
 			saveGarden(garden);
 			saveUser(user);

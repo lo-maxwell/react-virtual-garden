@@ -1,6 +1,6 @@
 import Tooltip from "@/components/window/tooltip";
-import { useGarden } from "@/hooks/contexts/GardenContext";
-import { useUser } from "@/hooks/contexts/UserContext";
+import { useGarden } from "@/app/hooks/contexts/GardenContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
 
 const GardenExpansionTooltip = ({ children, row, expand }: { children: React.ReactNode, row: boolean, expand: boolean}) => {
 

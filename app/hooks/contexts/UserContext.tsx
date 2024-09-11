@@ -1,3 +1,4 @@
+import Icon from '@/models/user/icons/Icon';
 import User from '@/models/user/User';
 import React, { createContext, useContext } from 'react';
 
@@ -7,7 +8,7 @@ interface UserContextType {
     username: string;
     handleChangeUsername: (newUsername: string) => void;
     icon: string;
-    handleChangeIcon: (newIcon: string) => void;
+    handleChangeIcon: (newIcon: Icon) => void;
     resetUser: () => void;
     // Add any other actions or state you need
 }

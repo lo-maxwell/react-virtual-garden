@@ -16,6 +16,7 @@ import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
 import { DecorationHistory } from "@/models/user/history/itemHistory/DecorationHistory";
 import { PlantHistory } from "@/models/user/history/itemHistory/PlantHistory";
 import { ItemHistoryList } from "@/models/user/history/ItemHistoryList";
+import { v4 as uuidv4 } from 'uuid';
 
 let seedItem: Seed;
 let blueprintItem: Blueprint;
@@ -35,17 +36,17 @@ let testItemHistoryList: ItemHistoryList;
 
 beforeEach(() => {
 	seedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple seed') as SeedTemplate;
-	seedItem = new Seed(seedTemplate, 1);
+	seedItem = new Seed(uuidv4(), seedTemplate, 1);
 	blueprintTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
-	blueprintItem = new Blueprint(blueprintTemplate, 1);
+	blueprintItem = new Blueprint(uuidv4(), blueprintTemplate, 1);
 	harvestedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple') as HarvestedItemTemplate;
-	harvestedItem = new HarvestedItem(harvestedTemplate, 1);
+	harvestedItem = new HarvestedItem(uuidv4(), harvestedTemplate, 1);
 	plantTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate;
-	plantItem = new Plant(plantTemplate, '');
+	plantItem = new Plant(uuidv4(), plantTemplate, '');
 	decorationTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('bench') as DecorationTemplate;
-	decorationItem = new Decoration(decorationTemplate, '');
+	decorationItem = new Decoration(uuidv4(), decorationTemplate, '');
 	emptyTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('ground') as EmptyItemTemplate;
-	emptyItem = new EmptyItem(emptyTemplate, 'ground');
+	emptyItem = new EmptyItem(uuidv4(), emptyTemplate, 'ground');
 	plantHistory = new PlantHistory(plantTemplate, 1);
 	decorationHistory = new DecorationHistory(decorationTemplate, 1);
 	testItemHistoryList = new ItemHistoryList();
@@ -190,7 +191,7 @@ test('Should Add Existing History to ItemHistoryList', () => {
 
 test('Should Not Add Invalid History', () => {
 	testItemHistoryList.addItemHistory(plantHistory);
-	const corruptedTemplate = new PlantTemplate(plantTemplate.id, '', '', 'PlacedItem', 'Decoration', '', '', 1, '', 1, 1);
+	const corruptedTemplate = new PlantTemplate(plantTemplate.id, '', '', 'PlacedItem', 'Decoration', '', '', 1, 1, '', 1, 1, 1, 1);
 	const corruptedHistory = new PlantHistory(corruptedTemplate, 1);
 	const addResponse = testItemHistoryList.addItemHistory(corruptedHistory);
 	expect(addResponse.isSuccessful()).toBe(false);
@@ -212,7 +213,7 @@ test('Should Directly Update History to ItemHistoryList', () => {
 
 test('Should Not Update Invalid History', () => {
 	testItemHistoryList.addItemHistory(plantHistory);
-	const corruptedTemplate = new PlantTemplate(plantTemplate.id, '', '', 'PlacedItem', 'Decoration', '', '', 1, '', 1, 1);
+	const corruptedTemplate = new PlantTemplate(plantTemplate.id, '', '', 'PlacedItem', 'Decoration', '', '', 1, 1, '', 1, 1, 1, 1);
 	const corruptedHistory = new PlantHistory(corruptedTemplate, 1);
 	const updateResponse = testItemHistoryList.updateItemHistory(corruptedHistory);
 	expect(updateResponse.isSuccessful()).toBe(false);

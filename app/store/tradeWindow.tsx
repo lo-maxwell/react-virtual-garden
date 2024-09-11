@@ -10,9 +10,9 @@ import { saveStore } from "@/utils/localStorage/store";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import TrashCanFilled from "@/components/icons/buttons/trash-can-filled";
 import ChangeQuantityButton from "./changeQuantityButton";
-import { useStore } from "@/hooks/contexts/StoreContext";
-import { useInventory } from "@/hooks/contexts/InventoryContext";
-import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
+import { useStore } from "@/app/hooks/contexts/StoreContext";
+import { useInventory } from "@/app/hooks/contexts/InventoryContext";
+import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 
 
 const TradeWindowComponent = ({costMultiplier}: {costMultiplier: number}) => {
@@ -143,6 +143,7 @@ const TradeWindowComponent = ({costMultiplier}: {costMultiplier: number}) => {
 			//owner == null, should never occur
 			return;
 		}
+		
 		saveStore(store);
 		saveInventory(inventory);
 		toggleSelectedItem(null);

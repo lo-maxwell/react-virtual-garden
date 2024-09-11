@@ -4,11 +4,12 @@ import { generateNewPlaceholderPlacedItem} from "@/models/items/PlaceholderItems
 import LevelSystem from "@/models/level/LevelSystem";
 import User from "@/models/user/User";
 import { loadGarden } from "@/utils/localStorage/garden";
+import { v4 as uuidv4 } from 'uuid';
 
 let testUser: User;
 
 beforeEach(() => {
-	testUser = new User("test user", "test", new LevelSystem());
+	testUser = new User('00000000-0000-0000-0000-000000000000', "test user", "test", new LevelSystem(uuidv4()));
 });
 
 test('getEmptyPlots generates new set of plots', () => {
@@ -18,17 +19,17 @@ test('getEmptyPlots generates new set of plots', () => {
 	expect(plots1[0].length).toBe(3);
 	plots1[0][0].setItemStatus('changed status');
 	expect(plots1[0][0].getItem().getStatus()).toBe('changed status');
-	expect(plots1[0][1].getItem().getStatus()).toBe('empty');
-	expect(plots1[1][0].getItem().getStatus()).toBe('empty');
+	expect(plots1[0][1].getItem().getStatus()).toBe('');
+	expect(plots1[1][0].getItem().getStatus()).toBe('');
 	
 	const plots2 = Garden.generateEmptyPlots(5, 5);
 	expect(plots2).toBeTruthy();
 	expect(plots2.length).toBe(5);
 	expect(plots2[0].length).toBe(5);
 	plots2[1][1].setItemStatus('changed status');
-	expect(plots2[0][0].getItem().getStatus()).toBe('empty');
-	expect(plots2[0][1].getItem().getStatus()).toBe('empty');
-	expect(plots2[1][0].getItem().getStatus()).toBe('empty');
+	expect(plots2[0][0].getItem().getStatus()).toBe('');
+	expect(plots2[0][1].getItem().getStatus()).toBe('');
+	expect(plots2[1][0].getItem().getStatus()).toBe('');
 	expect(plots2[1][1].getItem().getStatus()).toBe('changed status');
 
 	expect(plots1).not.toEqual(plots2);
@@ -36,11 +37,11 @@ test('getEmptyPlots generates new set of plots', () => {
 });
 
 test('Should Initialize Default Garden Object', () => {
-	const newGarden = new Garden();
+	const newGarden = new Garden(uuidv4());
 	expect(newGarden).toBeTruthy();
 	expect(newGarden.getRows()).toBe(Garden.getStartingRows());
 	expect(newGarden.getCols()).toBe(Garden.getStartingCols());
-	expect(newGarden.getUserId()).toBe("Dummy User");
+	expect(newGarden.getOwnerName()).toBe("Dummy User");
 	expect(newGarden.getPlots().length).toBe(Garden.getStartingRows());
 	expect(newGarden.getPlots()[0].length).toBe(Garden.getStartingCols());
 	expect(newGarden.getPlots()[0][0].getItem().itemData.name).toBe("ground");
@@ -50,11 +51,11 @@ test('Should Initialize Default Garden Object', () => {
 });
 
 test('Should Initialize Specified Garden Object', () => {
-	const newGarden = new Garden("Test User", 15, 15, Garden.generateEmptyPlots(15, 15));
+	const newGarden = new Garden(uuidv4(), "Test User", 15, 15, Garden.generateEmptyPlots(15, 15));
 	expect(newGarden).toBeTruthy();
 	expect(newGarden.getRows()).toBe(15);
 	expect(newGarden.getCols()).toBe(15);
-	expect(newGarden.getUserId()).toBe("Test User");
+	expect(newGarden.getOwnerName()).toBe("Test User");
 	expect(newGarden.getPlots().length).toBe(15);
 	expect(newGarden.getPlots()[0].length).toBe(15);
 	expect(newGarden.getPlots()[0][0].getItem().itemData.name).toBe("ground");
@@ -69,7 +70,7 @@ test('Garden Generates Empty Plot', () => {
   });
 
 test('Should Extend Garden Size', () => {
-	const newGarden = new Garden();
+	const newGarden = new Garden(uuidv4());
 	testUser.addExp(100000000);
 	expect(newGarden.getRows()).toBe(Garden.getStartingRows());
 	expect(newGarden.getCols()).toBe(Garden.getStartingCols());
@@ -85,7 +86,7 @@ test('Should Extend Garden Size', () => {
 })
 
 test('Should Not Extend Garden Size If Low Level', () => {
-	const newGarden = new Garden();
+	const newGarden = new Garden(uuidv4());
 	expect(newGarden.getRows()).toBe(Garden.getStartingRows());
 	expect(newGarden.getCols()).toBe(Garden.getStartingCols());
 	newGarden.addRow(testUser);
@@ -98,7 +99,7 @@ test('Should Not Extend Garden Size If Low Level', () => {
 })
 
 test('Should Shrink Garden Size', () => {
-	const newGarden = new Garden("Dummy User", Garden.getStartingRows() + 5, Garden.getStartingCols() + 5);
+	const newGarden = new Garden(uuidv4(), "Dummy User", Garden.getStartingRows() + 5, Garden.getStartingCols() + 5);
 	expect(newGarden.getRows()).toBe(Garden.getStartingRows() + 5);
 	expect(newGarden.getCols()).toBe(Garden.getStartingCols() + 5);
 	newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("apple", "newItem"));
@@ -125,19 +126,19 @@ test('Should Shrink Garden Size', () => {
 })
 
 test('Should Get Plot Position', () => {
-	const newGarden = new Garden();
+	const newGarden = new Garden(uuidv4());
 	const plot = newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("apple", "newItem"));
 	expect(newGarden.getPlotPosition(plot)).toStrictEqual([1,1])
 })
 
 test('Should Not Get Invalid Plot Position', () => {
-	const newGarden = new Garden();
-	const plot = new Plot(generateNewPlaceholderPlacedItem('apple', ''));
+	const newGarden = new Garden(uuidv4());
+	const plot = new Plot(uuidv4(), generateNewPlaceholderPlacedItem('apple', ''));
 	expect(newGarden.getPlotPosition(plot)).toBe(null);
 })
 
 test('Should Swap Plot Positions', () => {
-	const newGarden = new Garden();
+	const newGarden = new Garden(uuidv4());
 	const plot = newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("apple", "newItem"));
 	const plot2 = newGarden.setPlotItem(2,2,generateNewPlaceholderPlacedItem("banana", "newItem"));
 	expect(newGarden.getPlotPosition(plot)).toStrictEqual([1,1]);
@@ -153,10 +154,10 @@ test('Should Swap Plot Positions', () => {
 
 test('Should Swap Plot Positions', () => {
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-	const newGarden = new Garden();
+	const newGarden = new Garden(uuidv4());
 	const plot = newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("apple", "newItem"));
 	const plot2 = newGarden.setPlotItem(2,2,generateNewPlaceholderPlacedItem("banana", "newItem"));
-	const plot3 = new Plot(generateNewPlaceholderPlacedItem('apple', ''));
+	const plot3 = new Plot(uuidv4(), generateNewPlaceholderPlacedItem('apple', ''));
 	expect(newGarden.getPlotPosition(plot)).toStrictEqual([1,1]);
 	expect(newGarden.getPlotPosition(plot2)).toStrictEqual([2,2]);
 	newGarden.swapPlots([1,1], plot2);
@@ -173,7 +174,7 @@ test('Should Swap Plot Positions', () => {
 })
 
 test('Should Harvest Plant In Plot', () => {
-	const newGarden = new Garden();
+	const newGarden = new Garden(uuidv4());
 	const plot = newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("apple", "newItem"));
 	const plot2 = newGarden.setPlotItem(2,2,generateNewPlaceholderPlacedItem("banana", "newItem"));
 	const plot1HarvestResponse = newGarden.harvestPlot({row: 1, col: 1});
@@ -194,7 +195,7 @@ test('Should Harvest Plant In Plot', () => {
 });
 
 test('Should Not Harvest Non Plant', () => {
-	const newGarden = new Garden();
+	const newGarden = new Garden(uuidv4());
 	const plot = newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("bench", "newItem"));
 	const plot2 = newGarden.setPlotItem(2,2,generateNewPlaceholderPlacedItem("banana", "newItem"));
 	const plot1HarvestResponse = newGarden.harvestPlot({row: 1, col: 1});
@@ -204,14 +205,14 @@ test('Should Not Harvest Non Plant', () => {
 })
 
 test('Should Not Harvest Invalid Plot', () => {
-	const newGarden = new Garden();
+	const newGarden = new Garden(uuidv4());
 	const plot = newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("apple", "newItem"));
 	const plot2 = newGarden.setPlotItem(2,2,generateNewPlaceholderPlacedItem("banana", "newItem"));
 	const plot1HarvestResponse = newGarden.harvestPlot({row: 3, col: 3});
 	expect(plot1HarvestResponse.isSuccessful()).toBe(false);
 	expect(newGarden.getPlotByRowAndColumn(1, 1)?.getItem().itemData.name).toBe('apple');
 	expect(newGarden.getPlotByRowAndColumn(2, 2)?.getItem().itemData.name).toBe('banana');
-	const plot3 = new Plot(generateNewPlaceholderPlacedItem("banana", "newItem"), Date.now());
+	const plot3 = new Plot(uuidv4(), generateNewPlaceholderPlacedItem("banana", "newItem"), Date.now());
 	const plot3HarvestResponse = newGarden.harvestPlot(plot3);
 	expect(plot3HarvestResponse.isSuccessful()).toBe(false);
 	const plot4HarvestResponse = newGarden.harvestPlot({row: 100, col: 100});
@@ -219,7 +220,7 @@ test('Should Not Harvest Invalid Plot', () => {
 })
 
 test('Should Repackage Decoration In Plot', () => {
-	const newGarden = new Garden();
+	const newGarden = new Garden(uuidv4());
 	const plot = newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("bench", "newItem"));
 	const plot2 = newGarden.setPlotItem(2,2,generateNewPlaceholderPlacedItem("banana", "newItem"));
 	const plot1RepackageResponse = newGarden.repackagePlot({row: 1, col: 1});
@@ -233,7 +234,7 @@ test('Should Repackage Decoration In Plot', () => {
 });
 
 test('Should Not Repackage Non Decoration', () => {
-	const newGarden = new Garden();
+	const newGarden = new Garden(uuidv4());
 	const plot = newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("apple", "newItem"));
 	const plot2 = newGarden.setPlotItem(2,2,generateNewPlaceholderPlacedItem("banana", "newItem"));
 	const plot1HarvestResponse = newGarden.repackagePlot({row: 1, col: 1});
@@ -243,14 +244,14 @@ test('Should Not Repackage Non Decoration', () => {
 })
 
 test('Should Not Repackage Invalid Plot', () => {
-	const newGarden = new Garden();
+	const newGarden = new Garden(uuidv4());
 	const plot = newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("bench", "newItem"));
 	const plot2 = newGarden.setPlotItem(2,2,generateNewPlaceholderPlacedItem("banana", "newItem"));
 	const plot1HarvestResponse = newGarden.repackagePlot({row: 3, col: 3});
 	expect(plot1HarvestResponse.isSuccessful()).toBe(false);
 	expect(newGarden.getPlotByRowAndColumn(1, 1)?.getItem().itemData.name).toBe('bench');
 	expect(newGarden.getPlotByRowAndColumn(2, 2)?.getItem().itemData.name).toBe('banana');
-	const plot3 = new Plot(generateNewPlaceholderPlacedItem("bench", "newItem"), Date.now());
+	const plot3 = new Plot(uuidv4(), generateNewPlaceholderPlacedItem("bench", "newItem"), Date.now());
 	const plot3HarvestResponse = newGarden.repackagePlot(plot3);
 	expect(plot3HarvestResponse.isSuccessful()).toBe(false);
 	const plot4HarvestResponse = newGarden.repackagePlot({row: 100, col: 100});
@@ -258,7 +259,7 @@ test('Should Not Repackage Invalid Plot', () => {
 })
 
 test('Should Fill Null With Empty Plot', () => {
-	const newGarden = new Garden("Dummy User", 10, 10, [[new Plot(generateNewPlaceholderPlacedItem('apple', ''), Date.now())], [], []]);
+	const newGarden = new Garden(uuidv4(), "Dummy User", 10, 10, [[new Plot(uuidv4(), generateNewPlaceholderPlacedItem('apple', ''), Date.now())], [], []]);
 	
 	expect(newGarden.getRows()).toBe(10);
 	expect(newGarden.getCols()).toBe(10);
@@ -271,9 +272,9 @@ test('Should Fill Null With Empty Plot', () => {
 
 test('Should Create Garden Object From PlainObject', () => {
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-	const serializedGarden = JSON.stringify((new Garden("Test", 10, 10, null)).toPlainObject());
+	const serializedGarden = JSON.stringify((new Garden(uuidv4(), "Test", 10, 10, null)).toPlainObject());
 	const garden = Garden.fromPlainObject(JSON.parse(serializedGarden));
-	expect(garden.getUserId()).toBe("Test");
+	expect(garden.getOwnerName()).toBe("Test");
 	expect(garden.getRows()).toBe(10);
 	expect(garden.getCols()).toBe(10);
 	expect(garden.size()).toBe(100);
@@ -289,7 +290,7 @@ test('Should Throw Error on Invalid Input to FromPlainObject', () => {
 test('Should Only Reset Corrupted Plot On Load', () => {
 	//Mute console error
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-	const testGarden = new Garden('test', 10, 10, null);
+	const testGarden = new Garden(uuidv4(), 'test', 10, 10, null);
 	testGarden.setPlotItem(0, 0, generateNewPlaceholderPlacedItem('error', ''));
 	const serializedGarden = JSON.stringify(testGarden.toPlainObject());
 	const garden = Garden.fromPlainObject(JSON.parse(serializedGarden));
@@ -304,7 +305,7 @@ test('Should Only Reset Corrupted Plot On Load', () => {
 test('Should Reset All Plots On Invalid Format Load', () => {
 	//Mute console error
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-	const testGarden = new Garden('test', 10, 10, null);
+	const testGarden = new Garden(uuidv4(), 'test', 10, 10, null);
 	testGarden.setPlotItem(0, 0, generateNewPlaceholderPlacedItem('error', ''));
 	testGarden.setPlotItem(1, 1, generateNewPlaceholderPlacedItem('apple', ''));
 	const serializedGarden = JSON.stringify(testGarden.toPlainObject());

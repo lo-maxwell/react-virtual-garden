@@ -227,6 +227,76 @@
   * Added some test files for querying from local postgres db
   * Not pushing .env, some things will break if forked
 
+## Day 19
+
+### Added infrastructure for toolbox class
+
+  * Users will have a toolbox, which appears on the garden screen for special actions
+  * ie. a shovel to remove plants and move decorations
+  * TODO: tools are upgradeable and can give special bonuses, so we store each user's individual set of tools
+  * TODO: tools can be purchased in the store (on a separate page, not as part of the inventory), which removes the existing tool of that type if there is one (only 1 shovel at a time)
+  * TODO: tools actually impact the garden
+
+## Day 20
+
+### Wasted money on AWS aurora instance even though the database was empty
+
+### Added postgres local database
+
+  * Accessible with pool/query
+  * Writing services and apis to interact with db
+  * Harvest all is broken for xp because it calculates the new xp before updating the database, so all writes will update the db with the same values. Need to stagger read times or calculate the expected xp increase.
+  * Plots need ids (or just row/column/owner) so we can track them in database
+  * Maybe plots are always in existence (once user is leveled), expanding/shrinking just shows/hides them and makes them uninteractable
+
+## Day 21-25
+
+### Working on database schemas, services, api routing, integrating database queries with updating backend models
+
+### User
+  * service, routing
+  * createUser for generating a new row in database
+  * makeUserObject to return a user object (requires a valid levelSystem in database)
+  * change icon and username
+
+### LevelSystem
+  * service, routing
+  * createLevelSystem (needs owner and levelsystem object)
+  * makeLevelSystemObject
+  * change level details (level, currentxp, growth rate)
+  * add xp by cloning the database level, gaining xp on it, and reuploading
+
+### Inventory
+  * service, routing
+  * createInventory (needs owner and inventory object, doesn't create inventory items)
+  * makeInventoryObject (requires inventoryItems in database)
+  * change gold amount (set and update)
+
+### Store
+  * service, routing
+  * createStore (needs owner and store object, doesn't create store items)
+  * makeStoreObject (requires storeItems in database)
+  * set identifier (maps to hardcoded store values), restock time
+
+### Garden
+  * service, routing
+  * createGarden (needs owner and garden object, doesn't create plots)
+  * makeGardenObject (requires plots in database)
+  * change size (set/update rows/columns)
+
+### Plots
+  * service, routing
+  * createPlot (needs owner (garden) and plot object, doesn't create placedItem)
+  * makePlotObject (requires placedItem in database)
+  * change plantTime and usesRemaining
+
+### InventoryItems
+
+### PlacedItems
+
+### StoreItems
+
+### Create X Service functions should take in the model and use it to produce the entire object in database
 
 TODO:
 
@@ -266,6 +336,27 @@ Grow zombies/other creatures - randomly move around and give bonuses (automatic 
 
 User almanac - displays how many of each plant were grown, some extra details about them
 
+User sends harvest plant request alongside their user auth token -> backend checks the token matches the user (or fetches the user that matches that token), attempts to perform the harvest plant request, sends back success/failure state -> frontend updates display based on result
+
+If the user hacks the api and sends multiple harvest/plant requests, the backend needs to verify that it is disallowed and fail
+
+Can use begin/commit/rollback in database, along with SELECT * FOR UPDATE for row level locking
+
+auth0 provides a user id, which we need to stick into the sql database
+
+New user -> backend sets up user, garden, inventory, store, etc. (choose uuids here) -> backend pushes to database, forcing uuids of certain type
+
+Old user -> backend checks for current id -> grab data from database based on current id -> push to backend model
+
+TODO: Refactor all services to use new ids
+TODO: Refactor routes to be useful given new ids
+TODO: Test to make sure ids are working
+
+User should be sending a harvest plant request/create account request, not add xp or add item requests
+
+Creation uses owners, updating uses direct ids
+
+
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time
 This is a design flaw, not a coding one -- right now supports exponential growth when it should be linear, also easier to make iterative progress
@@ -275,3 +366,4 @@ Add random events/natural disasters that interact with decorations ie. scarecrow
 Small, medium, large stores with different restock intervals and stock limits
 Item metadata migration tool
 Dev/Prod external dbs, and dev/prod branches
+Garden Stock Market - buying/selling pressure, variable costs, options and futures

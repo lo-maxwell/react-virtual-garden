@@ -1,8 +1,10 @@
 'use client'
-import { UserContext } from '@/hooks/contexts/UserContext';
+import { UserContext } from '@/app/hooks/contexts/UserContext';
+import Icon from '@/models/user/icons/Icon';
 import User from '@/models/user/User';
 import { loadUser, saveUser } from '@/utils/localStorage/user';
 import React, { ReactNode, useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 // Define props for the provider
 interface UserProviderProps {
@@ -15,7 +17,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 	const [icon, setIcon] = useState<string | null>(null);
 
 	function generateDefaultNewUser(): User {
-		return new User('Test User', 'apple');
+		const randomUuid = uuidv4();
+		return new User(randomUuid, 'Test User', 'apple');
 	}
 
 	function setupUser(): User {
@@ -50,10 +53,10 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 		saveUser(user);
 	}
 
-	function handleChangeIcon(newIcon: string) {
+	function handleChangeIcon(newIcon: Icon) {
 		if (!user) return;
-		user.setIcon(newIcon);
-		setIcon(newIcon);
+		user.setIcon(newIcon.getName());
+		setIcon(newIcon.getName());
 		saveUser(user);
 	}
 

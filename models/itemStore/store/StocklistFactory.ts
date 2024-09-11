@@ -3,7 +3,7 @@ import stocklistData from '@/data/store/Stocklists.json';
 import { ItemList } from "../ItemList";
 import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
 
-class StocklistRepository {
+class StocklistFactory {
 	stocklists: StocklistInterface[];
 
 	constructor() {
@@ -56,4 +56,4 @@ class StocklistRepository {
 	}
 }
 
-export const stocklistRepository = new StocklistRepository();
+export const stocklistFactory = new StocklistFactory();

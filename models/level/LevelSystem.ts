@@ -1,5 +1,15 @@
+import { v4 as uuidv4 } from 'uuid';
+
+export interface LevelSystemEntity {
+	id: string;
+	level: number;
+	current_xp: number;
+	growth_rate: number;
+}
+
 class LevelSystem {
 	//No maximum level for now
+	private levelSystemId: string;
 	private level: number;
 	private currentExp: number;
 	private expToLevelUp: number;
@@ -10,7 +20,8 @@ class LevelSystem {
 	 * @currentExp the initial xp
 	 * @growthRate divides the amount of xp needed per level. higher values = less xp.
 	 */
-	constructor(startingLevel: number = 1, currentExp: number = 0, growthRate: number = 1) {
+	constructor(levelSystemId: string, startingLevel: number = 1, currentExp: number = 0, growthRate: number = 1) {
+		this.levelSystemId = levelSystemId;
 		this.level = startingLevel;
 		this.currentExp = currentExp;
 		this.expToLevelUp = LevelSystem.calculateExpToLevelUp(startingLevel, growthRate);
@@ -18,14 +29,20 @@ class LevelSystem {
 	}
 
 	static fromPlainObject(plainObject: any): LevelSystem {
+		let levelSystemId = uuidv4();
 		if (!plainObject || typeof plainObject !== 'object') {
 			console.error('Error creating LevelSystem from plainObject: Invalid plainObject structure for LevelSystem')
-			return new LevelSystem();
+			return new LevelSystem(levelSystemId);
 		}
 		// Initialize default values
 		let level = 1;
 		let currentExp = 0;
 		let growthRate = 1;
+
+		// Validate and assign level
+		if (plainObject && typeof plainObject.levelSystemId === 'string') {
+			levelSystemId = plainObject.levelSystemId;
+		}
 
 		// Validate and assign level
 		if (plainObject && typeof plainObject.level === 'number') {
@@ -43,16 +60,30 @@ class LevelSystem {
 		}
 
 		// Create a new LevelSystem instance with the validated values
-		return new LevelSystem(level, currentExp, growthRate);
+		return new LevelSystem(levelSystemId, level, currentExp, growthRate);
 	}
 
 	toPlainObject(): any {
 		return {
+			levelSystemId: this.levelSystemId,
 			level: this.level,
 			currentExp: this.currentExp,
 			growthRate: this.growthRate,
 		  };
-	} 
+	}
+	
+	clone(): LevelSystem {
+		return new LevelSystem(this.levelSystemId, this.level, this.currentExp, this.growthRate);
+	}
+
+	toLevelSystemEntity(): LevelSystemEntity {
+		return {
+			id: this.getLevelSystemId(),
+			level: this.getLevel(),
+			current_xp: this.getCurrentExp(),
+			growth_rate: this.getGrowthRate()
+		}
+	}
 
 	addExperience(exp: number) {
 		this.currentExp += exp;
@@ -63,30 +94,37 @@ class LevelSystem {
 	}
 
 	/** 
+	 * @returns the level system id for database access
+	 */
+	 getLevelSystemId(): string {
+		return this.levelSystemId;
+	}
+
+	/** 
 	 * @returns the current level
 	 */
-	getLevel() {
+	getLevel(): number {
 		return this.level;
 	}
 
 	/**
 	 * @returns the current xp
 	 */
-	getCurrentExp() {
+	getCurrentExp(): number {
 		return this.currentExp;
 	}
 
 	/**
 	 * @returns the amount of xp needed to level up (total, not considering how much current xp)
 	 */
-	getExpToLevelUp() {
+	getExpToLevelUp(): number {
 		return this.expToLevelUp;
 	}
 
 	/**
 	 * @returns the growth rate. 2 = half xp needed, 0.5 = double xp needed per level.
 	 */
-	getGrowthRate() {
+	getGrowthRate(): number {
 		return this.growthRate;
 	}
 

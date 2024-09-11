@@ -1,5 +1,5 @@
 'use client'
-import { SelectedItemContext } from '@/hooks/contexts/SelectedItemContext';
+import { SelectedItemContext } from '@/app/hooks/contexts/SelectedItemContext';
 import { InventoryItem } from '@/models/items/inventoryItems/InventoryItem';
 import { ItemStore } from '@/models/itemStore/ItemStore';
 import { usePathname } from '@/node_modules/next/navigation';

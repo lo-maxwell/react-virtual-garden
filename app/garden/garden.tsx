@@ -3,12 +3,12 @@ import { Plot } from "@/models/garden/Plot";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import React, { useEffect, useRef, useState } from "react";
-import { useInventory } from "@/hooks/contexts/InventoryContext";
-import { useGarden } from "@/hooks/contexts/GardenContext";
+import { useInventory } from "@/app/hooks/contexts/InventoryContext";
+import { useGarden } from "@/app/hooks/contexts/GardenContext";
 import { saveGarden } from "@/utils/localStorage/garden";
-import { usePlotActions } from "@/hooks/garden/plotActions";
-import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
-import { useUser } from "@/hooks/contexts/UserContext";
+import { usePlotActions } from "@/app/hooks/garden/plotActions";
+import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
 import GardenExpansionTooltip from "./gardenExpansionTooltip";
 
 const GardenComponent = () => {
@@ -82,6 +82,8 @@ const GardenComponent = () => {
 	}
 
 	const plantAll = ()  => {
+
+		//TODO: change this to not use click()
 		if (selectedItem == null || selectedItem.itemData.subtype != ItemSubtypes.SEED.name) return;
 		const getItemResponse = inventory.getItem(selectedItem);
 		if (!getItemResponse.isSuccessful()) return;
@@ -103,6 +105,7 @@ const GardenComponent = () => {
 	}
 
 	const harvestAll = () => {
+		//TODO: change this to not use click()
 		let currentPlants = 0;
 		inventory.getAllItems().forEach((item) => {
 			if (item.itemData.subtype === ItemSubtypes.HARVESTED.name) {

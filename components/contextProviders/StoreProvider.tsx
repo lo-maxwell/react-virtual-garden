@@ -1,13 +1,14 @@
 'use client'
-import { StoreContext } from '@/hooks/contexts/StoreContext';
+import { StoreContext } from '@/app/hooks/contexts/StoreContext';
 import { generateNewPlaceholderInventoryItem } from '@/models/items/PlaceholderItems';
 import { InventoryTransactionResponse } from '@/models/itemStore/inventory/InventoryTransactionResponse';
 import { ItemList } from '@/models/itemStore/ItemList';
-import { stocklistRepository } from '@/models/itemStore/store/StocklistRepository';
+import { stocklistFactory } from '@/models/itemStore/store/StocklistFactory';
 import { Store } from '@/models/itemStore/store/Store';
-import { storeRepository } from '@/models/itemStore/store/StoreRepository';
+import { storeFactory } from '@/models/itemStore/store/StoreFactory';
 import { loadStore, saveStore } from '@/utils/localStorage/store';
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 // Define props for the provider
 interface StoreProviderProps {
@@ -18,12 +19,13 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
     const [store, setStore] = useState<Store | null>(null);
 
 	function generateInitialStore() {
+		const randomUuid = uuidv4();
 		function generateItems() { 
-			return stocklistRepository.getStocklistInterfaceById("0")?.items;
+			return stocklistFactory.getStocklistInterfaceById("0")?.items;
 		}
 		const storeId = 0;
 		const storeName = "Default Store";
-		const storeInterface = storeRepository.getStoreInterfaceById(0);
+		const storeInterface = storeFactory.getStoreInterfaceById(0);
 		let buyMultiplier = 2;
 		let sellMultiplier = 1;
 		let upgradeMultiplier = 1;
@@ -35,7 +37,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 			upgradeMultiplier = storeInterface.upgradeMultiplier;
 			restockInterval = storeInterface.restockInterval;
 		}
-		const initialStore = new Store(storeId, storeName, buyMultiplier, sellMultiplier, upgradeMultiplier, new ItemList(), generateItems(), restockTime, restockInterval);
+		const initialStore = new Store(randomUuid, storeId, storeName, buyMultiplier, sellMultiplier, upgradeMultiplier, new ItemList(), generateItems(), restockTime, restockInterval);
 		initialStore.restockStore();
 		return initialStore;
 	}

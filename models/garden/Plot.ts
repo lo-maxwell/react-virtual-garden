@@ -10,15 +10,40 @@ import { Plant } from "../items/placedItems/Plant";
 import { PlacedItemTemplate } from "../items/templates/models/PlacedItemTemplate";
 import { placeholderItemTemplates } from "../items/templates/models/PlaceholderItemTemplate";
 import { PlantTemplate } from "../items/templates/models/PlantTemplate";
+import { v4 as uuidv4 } from 'uuid';
 
+export interface PlotEntity {
+	row_index: number,
+	col_index: number,
+	plant_time: string,
+	uses_remaining: number
+}
+
+export interface ExtendedPlotEntity extends PlotEntity {
+	id: string
+}
+
+
+//Add row/column to plot class?
 export class Plot {
+	private plotId: string;
 	private item: PlacedItem;
 	private plantTime: number;
 	private usesRemaining: number;
 
-	constructor(item: PlacedItem, plantTime: number = Date.now(), usesRemaining: number | null = null) {
+	constructor(plotId: string, item: PlacedItem, plantTime: number | string = Date.now(), usesRemaining: number | null = null) {
+		this.plotId = plotId;
 		this.item = item;
-		this.plantTime = plantTime;
+		if (typeof plantTime === 'number') {
+			this.plantTime = plantTime;
+		} else {
+			let convertedRestockTime = BigInt(plantTime);
+			const MAX_SAFE_INTEGER = BigInt(Number.MAX_SAFE_INTEGER);
+			const lastRestockTimeMsNumber = convertedRestockTime > MAX_SAFE_INTEGER 
+				? Number.MAX_SAFE_INTEGER 
+				: Number(convertedRestockTime);
+			this.plantTime = lastRestockTimeMsNumber;
+		}
 		if (usesRemaining && usesRemaining >= 0) {
 			this.usesRemaining = usesRemaining;
 		} else if (item.itemData.subtype === ItemSubtypes.PLANT.name) {
@@ -43,7 +68,7 @@ export class Plot {
             if (!plainObject || typeof plainObject !== 'object' || !plainObject.item) {
                 throw new Error('Invalid plainObject structure for Plot');
             }
-			const { item, plantTime, harvestsRemaining } = plainObject;
+			const { plotId, item, plantTime, harvestsRemaining } = plainObject;
 
             // Convert item if valid
 			const itemType = getItemClassFromSubtype(item) as ItemConstructor<PlacedItem>;
@@ -51,17 +76,18 @@ export class Plot {
 			if (hydratedItem.itemData.name == 'error') {
 				throw new Error('Invalid item in Plot');
 			}
-            return new Plot(hydratedItem, plantTime, harvestsRemaining);
+            return new Plot(plotId, hydratedItem, plantTime, harvestsRemaining);
         } catch (error) {
             console.error('Error creating Plot from plainObject:', error);
             // Return a default or empty Plot instance in case of error
-			const ground = generateNewPlaceholderPlacedItem("ground", "empty");
-            return new Plot(ground, Date.now(), 0);
+			const ground = generateNewPlaceholderPlacedItem("ground", "");
+            return new Plot(uuidv4(), ground, Date.now(), 0);
         }
 	}
 
 	toPlainObject(): any {
 		return {
+			plotId: this.plotId,
 			item: this.item.toPlainObject(),
 			plantTime: this.plantTime,
 			harvestsRemaining: this.usesRemaining,
@@ -72,7 +98,11 @@ export class Plot {
 	 * @returns a copy of this plot.
 	 */
 	clone() {
-		return new Plot(this.item, this.plantTime, this.usesRemaining);
+		return new Plot(this.plotId, this.item, this.plantTime, this.usesRemaining);
+	}
+
+	static generateEmptyItem(): PlacedItem {
+		return new EmptyItem(uuidv4(), Plot.getGroundTemplate(), '');
 	}
 
 	/**
@@ -81,7 +111,7 @@ export class Plot {
 	getItem(): PlacedItem {
 		//TODO: Investigate type correction
 		const itemClass = getItemClassFromSubtype(this.item);
-		const newItem = new itemClass(this.item.itemData, this.item.getStatus()) as PlacedItem;
+		const newItem = new itemClass(uuidv4(), this.item.itemData, this.item.getStatus()) as PlacedItem;
 		return newItem;
 	}
 
@@ -106,6 +136,13 @@ export class Plot {
 			this.usesRemaining = 0;
 		}
 		return this.item;
+	}
+
+	/**
+	 * @returns the plot id
+	 */
+	 getPlotId(): string {
+		return this.plotId;
 	}
 
 	/**
@@ -241,7 +278,7 @@ export class Plot {
 	 *  replacedItem: PlacedItem, 
 	 *  newTemplate: ItemTemplate}
 	 */
-	useItem(item: PlacedItem = new EmptyItem(Plot.getGroundTemplate(), ''), numUses: number = 1): GardenTransactionResponse {
+	useItem(item: PlacedItem = Plot.generateEmptyItem(), numUses: number = 1): GardenTransactionResponse {
 		const response = new GardenTransactionResponse();
 		const originalItem = this.item;
 		let useItemResponse: GardenTransactionResponse;
@@ -308,7 +345,7 @@ export class Plot {
 				//TODO: Investigate type correction
 				const newItemType = getItemClassFromSubtype(useItemResponse.payload.newTemplate);
 				
-				const newPlacedItem = new newItemType(useItemResponse.payload.newTemplate, "") as PlacedItem;
+				const newPlacedItem = new newItemType(uuidv4(), useItemResponse.payload.newTemplate, "") as PlacedItem;
 				this.setItem(newPlacedItem);
 				break;
 			default:
@@ -336,7 +373,7 @@ export class Plot {
 			newItem: InventoryItem
 		}
 	 */
-	pickupItem(inventory: Inventory, updatedItem: PlacedItem = generateNewPlaceholderPlacedItem("ground", "")) {
+	pickupItem(inventory: Inventory, updatedItem: PlacedItem = Plot.generateEmptyItem()) {
 		const response = new GardenTransactionResponse();
 		if (updatedItem.itemData.type != ItemTypes.PLACED.name) {
 			response.addErrorMessage(`item to replace with is of type ${updatedItem.itemData.type} but should be placedItem, cannot replace`);
@@ -385,7 +422,7 @@ export class Plot {
 			newItem: InventoryItem
 		}
 	 */
-	harvestItem(inventory: Inventory, instantHarvest: boolean = false, numHarvests: number = 1, updatedItem: PlacedItem = generateNewPlaceholderPlacedItem("ground", ""), currentTime: number = Date.now()) {
+	harvestItem(inventory: Inventory, instantHarvest: boolean = false, numHarvests: number = 1, updatedItem: PlacedItem = Plot.generateEmptyItem(), currentTime: number = Date.now()) {
 		const response = new GardenTransactionResponse();
 		//verify this plot contains a plant
 		if (this.item.itemData.subtype !== ItemSubtypes.PLANT.name) {

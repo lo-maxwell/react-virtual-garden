@@ -1,7 +1,7 @@
 import colors from "@/components/colors/colors";
 import InventoryItemTooltip from "@/components/inventory/inventoryItemTooltip";
 import ItemComponent from "@/components/inventory/item";
-import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
+import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { Store } from "@/models/itemStore/store/Store";

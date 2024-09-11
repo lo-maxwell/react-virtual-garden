@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import StoreComponent from "./store";
 import { Store } from "@/models/itemStore/store/Store";
 import TradeWindowComponent from "./tradeWindow";
-import { useStore } from "@/hooks/contexts/StoreContext";
-import { useInventory } from "@/hooks/contexts/InventoryContext";
-import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
+import { useStore } from "@/app/hooks/contexts/StoreContext";
+import { useInventory } from "@/app/hooks/contexts/InventoryContext";
+import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import InventoryComponent from "@/components/inventory/inventory";
 
 const StorePage = () => {

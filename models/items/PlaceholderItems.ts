@@ -11,6 +11,7 @@ import { HarvestedItemTemplate } from "./templates/models/HarvestedItemTemplate"
 import { placeholderItemTemplates } from "./templates/models/PlaceholderItemTemplate";
 import { PlantTemplate } from "./templates/models/PlantTemplate";
 import { SeedTemplate } from "./templates/models/SeedTemplate";
+import { v4 as uuidv4 } from 'uuid';
 
 export const generateRandomPlaceholderPlacedItem = () => {
 	const placedItems = Object.values(placeholderItemTemplates.repository.PlacedItems).flat().filter(item => item.name != "error");
@@ -29,22 +30,22 @@ export const generateRandomPlaceholderInventoryItem = () => {
  */
 export const generateNewPlaceholderPlacedItem = (itemName: string, status: string) => {
 	const itemData = placeholderItemTemplates.getPlacedItemTemplateByName(itemName);
-	if (!itemData) return new EmptyItem(EmptyItemTemplate.getErrorTemplate(), '');
+	if (!itemData) return new EmptyItem(uuidv4(), EmptyItemTemplate.getErrorTemplate(), '');
 	switch (itemData.subtype) {
 		case "Plant":
 			//TODO: Replace type assertion with type guard
 			//But this is placeholder stuff so dont worry about it too much
 			const plantItemData = itemData as PlantTemplate;
-			return new Plant(plantItemData, status);
+			return new Plant(uuidv4(), plantItemData, status);
 		case "Decoration":
 			const decorationItemData = itemData as DecorationTemplate;
-			return new Decoration(decorationItemData, status);
+			return new Decoration(uuidv4(), decorationItemData, status);
 		case "Ground":
 			const emptyItemData = itemData as EmptyItemTemplate;
-			return new EmptyItem(emptyItemData, status);
+			return new EmptyItem(uuidv4(), emptyItemData, status);
 		default:
 			console.log('Could not find item, generating error item.');
-			return new EmptyItem(EmptyItemTemplate.getErrorTemplate(), '');
+			return new EmptyItem(uuidv4(), EmptyItemTemplate.getErrorTemplate(), '');
 	}
 }
 
@@ -54,21 +55,21 @@ export const generateNewPlaceholderPlacedItem = (itemName: string, status: strin
  */
 export const generateNewPlaceholderInventoryItem = (itemName: string, quantity: number) => {
 	const itemData = placeholderItemTemplates.getInventoryItemTemplateByName(itemName);
-	if (!itemData) return new Seed(SeedTemplate.getErrorTemplate(), 1);
+	if (!itemData) return new Seed(uuidv4(), SeedTemplate.getErrorTemplate(), 1);
 	switch (itemData.subtype) {
 		case "Seed":
 			//TODO: Replace type assertion with type guard
 			//But this is placeholder stuff so dont worry about it too much
 			const seedItemData = itemData as SeedTemplate;
-			return new Seed(seedItemData, quantity);
+			return new Seed(uuidv4(), seedItemData, quantity);
 		case "Blueprint":
 			const blueprintItemData = itemData as BlueprintTemplate;
-			return new Blueprint(blueprintItemData, quantity);
+			return new Blueprint(uuidv4(), blueprintItemData, quantity);
 		case "HarvestedItem":
 			const harvestedItemData = itemData as HarvestedItemTemplate;
-			return new HarvestedItem(harvestedItemData, quantity);
+			return new HarvestedItem(uuidv4(), harvestedItemData, quantity);
 		default:
 			console.log('Could not find item, generating error item.');
-			return new Seed(SeedTemplate.getErrorTemplate(), 1);
+			return new Seed(uuidv4(), SeedTemplate.getErrorTemplate(), 1);
 	}
 }

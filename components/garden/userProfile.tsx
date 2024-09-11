@@ -1,4 +1,4 @@
-import { useUser } from "@/hooks/contexts/UserContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
 import { useState } from "react";
 import colors from "../colors/colors";
 import GardenDebugOptions from "../developer/GardenDebugOptions";
@@ -35,7 +35,7 @@ const UserProfileComponent = () => {
 		<span className={`ml-4 ${getUsernameFontSize()} ${colors.user.usernameTextColor}`}>{user.getUsername()}</span>
 	</div>
 	<div className="mx-4 my-4"><LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} /></div>
-	<div className={`${showDebugOptions >= 30 ? `` : `hidden`}`}>
+	<div className={`${showDebugOptions >= 1 ? `` : `hidden`}`}>
 		<GardenDebugOptions/>
 	</div>
 	</>

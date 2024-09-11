@@ -6,12 +6,28 @@ import { InventoryItemTemplate } from "../templates/models/InventoryItemTemplate
 import { placeholderItemTemplates } from "../templates/models/PlaceholderItemTemplate";
 import { SeedTemplate } from "../templates/models/SeedTemplate";
 
+export interface InventoryItemEntity {
+	id: string,
+	owner: string, //maps to inventory
+	identifier: string, //itemData.id
+	quantity: number
+}
+
+export interface StoreItemEntity {
+	id: string,
+	owner: string, //maps to store
+	identifier: string, //itemData.id
+	quantity: number
+}
+
 export abstract class InventoryItem extends Item {
+	protected inventoryItemId: string;
 	itemData: InventoryItemTemplate;
 	protected quantity: number;
 	
-	constructor(itemData: InventoryItemTemplate, quantity: number) {
+	constructor(inventoryItemId: string, itemData: InventoryItemTemplate, quantity: number) {
 		super();
+		this.inventoryItemId = inventoryItemId;
 		this.itemData = itemData;
 		this.quantity = quantity;
 	}
@@ -50,6 +66,13 @@ export abstract class InventoryItem extends Item {
 	// 		itemData: this.itemData.toPlainObject()
 	// 	}
 	// } 
+
+	/**
+	 * @returns the inventoryItemId for database access
+	 */
+	getInventoryItemId(): string {
+		return this.inventoryItemId;
+	}
 	
 	/**
 	 * @returns the quantity

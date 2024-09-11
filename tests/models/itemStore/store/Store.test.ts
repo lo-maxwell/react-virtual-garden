@@ -4,6 +4,7 @@ import { placeholderItemTemplates } from "@/models/items/templates/models/Placeh
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { ItemList } from "@/models/itemStore/ItemList";
 import { Store } from "@/models/itemStore/store/Store";
+import { v4 as uuidv4 } from 'uuid';
 
 let testStore: Store;
 let testInventory: Inventory;
@@ -13,17 +14,17 @@ beforeEach(() => {
 	const item2 = generateNewPlaceholderInventoryItem("banana seed", 20);
 	const item3 = generateNewPlaceholderInventoryItem("coconut seed", 30);
 	const testItemList = new ItemList([item1, item2, item3]);
-	testStore = new Store(1, "Test Store", 2.0, 1.0, 1, testItemList, new ItemList(), 0, 60000);
+	testStore = new Store(uuidv4(), 1, "Test Store", 2.0, 1.0, 1, testItemList, new ItemList(), 0, 60000);
 	const item4 = generateNewPlaceholderInventoryItem("apple seed", 1);
 	const testItemList2 = new ItemList([item4]);
-	testInventory = new Inventory("Test User", 100, testItemList2);
+	testInventory = new Inventory(uuidv4(), "Test User", 100, testItemList2);
 });
 
 test('Should Initialize Default Store Object', () => {
-	const inv = new Store(1, "Dummy Store", 2.0, 1.0, 1, new ItemList(), new ItemList(), 0, 60000);
+	const inv = new Store(uuidv4(), 1, "Dummy Store", 2.0, 1.0, 1, new ItemList(), new ItemList(), 0, 60000);
 	expect(inv).not.toBeUndefined();
 	expect(inv).not.toBeNull();
-	expect(inv.getStoreId()).toBe(1);
+	expect(inv.getStoreIdentifier()).toBe(1);
 	expect(inv.getStoreName()).toBe("Dummy Store");
 	expect(inv.size()).toBe(0);
 	expect(inv.getBuyMultiplier()).toBe(2);
@@ -276,9 +277,9 @@ test('Should Rollback on Failing Restock', () => {
 })
 
 test('Should Create Store Object From PlainObject', () => {
-	const serializedStore = JSON.stringify((new Store(0, "Test Store", 1, 1, 1, new ItemList([generateNewPlaceholderInventoryItem('apple seed', 5)]), new ItemList([]), Date.now() + 1000000, 60000)).toPlainObject());
+	const serializedStore = JSON.stringify((new Store(uuidv4(), 0, "Test Store", 1, 1, 1, new ItemList([generateNewPlaceholderInventoryItem('apple seed', 5)]), new ItemList([]), Date.now() + 1000000, 60000)).toPlainObject());
 	const store = Store.fromPlainObject(JSON.parse(serializedStore));
-	expect(store.getStoreId()).toBe(0);
+	expect(store.getStoreIdentifier()).toBe(0);
 	expect(store.size()).toBe(1);
 	expect(store.getItem('apple seed').payload.quantity).toBe(5);
 })

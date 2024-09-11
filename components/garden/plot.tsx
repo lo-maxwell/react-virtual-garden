@@ -1,14 +1,14 @@
 import { Plot } from "@/models/garden/Plot";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
-import { useGarden } from "@/hooks/contexts/GardenContext";
+import { useGarden } from "@/app/hooks/contexts/GardenContext";
 import { Plant } from "@/models/items/placedItems/Plant";
 import PlotTooltip from "./plotTooltip";
 import colors from "../colors/colors";
 
 type PlotComponentProps = {
 	plot: Plot;
-	onPlotClick: () => string;
+	onPlotClick: (() => Promise<string>) | (() => string);
 	currentTime: number;
   };
 
@@ -81,8 +81,9 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 		};
 	  }, [currentItem, currentPlantTime, plot]);
 
-	const handleClick = () => {
-		const updatedIcon = onPlotClick();
+	const handleClick = async () => {
+		//onPlotClick comes from plotActions which may/may not be async
+		const updatedIcon = await onPlotClick();
 		if (displayIcon != updatedIcon) {
 			setDisplayIcon(updatedIcon);
 		}

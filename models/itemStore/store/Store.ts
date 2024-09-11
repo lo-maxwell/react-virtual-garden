@@ -4,28 +4,48 @@ import { ItemStore } from "../ItemStore";
 import { Inventory } from "../inventory/Inventory";
 import { InventoryTransactionResponse } from "../inventory/InventoryTransactionResponse";
 import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
-import { storeRepository } from "./StoreRepository";
-import { stocklistRepository } from "./StocklistRepository";
+import { storeFactory } from "./StoreFactory";
+import { v4 as uuidv4 } from 'uuid';
+import { stocklistFactory } from "./StocklistFactory";
+
+export interface StoreEntity {
+	id: string,
+	owner: string,
+	identifier: number, 
+	last_restock_time_ms: string //BigInt, but we can't convert a bigInt to a number later
+}
 
 export class Store extends ItemStore {
-	private id: number;
+	private storeId: string;
+	private identifier: number;
 	private storeName: string;
 	private buyMultiplier: number;
 	private sellMultiplier: number;
 	private upgradeMultiplier: number;
 	private stockList: ItemList;
-	private restockTime: number;
+	private restockTime: number; //TODO: Convert to BigInt
 	private restockInterval: number;
 
-	constructor(id: number, name: string, buyMultiplier: number = 2, sellMultiplier: number = 1, upgradeMultiplier: number = 1, items: ItemList = new ItemList(), stockList: ItemList = new ItemList(), restockTime: number = Date.now(), restockInterval: number = 300000) {
+	//TODO: Make this pull from storeRepository
+	constructor(storeId: string, identifier: number, name: string, buyMultiplier: number = 2, sellMultiplier: number = 1, upgradeMultiplier: number = 1, items: ItemList = new ItemList(), stockList: ItemList = new ItemList(), restockTime: number | string = Date.now(), restockInterval: number = 300000) {
 		super(items);
-		this.id = id;
+		this.storeId = storeId;
+		this.identifier = identifier;
 		this.storeName = name;
 		this.buyMultiplier = buyMultiplier;
 		this.sellMultiplier = sellMultiplier;
 		this.upgradeMultiplier = upgradeMultiplier;
 		this.stockList = stockList;
-		this.restockTime = restockTime;
+		if (typeof restockTime === 'number') {
+			this.restockTime = restockTime;
+		} else {
+			let convertedRestockTime = BigInt(restockTime);
+			const MAX_SAFE_INTEGER = BigInt(Number.MAX_SAFE_INTEGER);
+			const lastRestockTimeMsNumber = convertedRestockTime > MAX_SAFE_INTEGER 
+				? Number.MAX_SAFE_INTEGER 
+				: Number(convertedRestockTime);
+			this.restockTime = lastRestockTimeMsNumber;
+		}
 		this.restockInterval = restockInterval;
 		if (this.restockTime < Date.now()) {
 			this.restockStore();
@@ -39,15 +59,20 @@ export class Store extends ItemStore {
 			throw new Error('Invalid plainObject structure for Store');
 		}
 		// Initialize default values
-		let id = 0;
+		let storeId = uuidv4();
+		let identifier = 0;
 		let storeName = 'Default Store';
 		let items = new ItemList();
 		// let stockList = new ItemList();
 		let restockTime = Date.now();
+		// Validate and assign id
+		if (plainObject && typeof plainObject.storeId === 'string') {
+			storeId = plainObject.storeId;
+		}
 	
 		// Validate and assign id
-		if (plainObject && typeof plainObject.id === 'number') {
-			id = plainObject.id;
+		if (plainObject && typeof plainObject.identifier === 'number') {
+			identifier = plainObject.identifier;
 		}
 	
 		// Validate and assign storeName
@@ -65,23 +90,23 @@ export class Store extends ItemStore {
 		//get stocklist from database
 
 		//first, get store data
-		let storeInterface = storeRepository.getStoreInterfaceById(id);
+		let storeInterface = storeFactory.getStoreInterfaceById(identifier);
 		if (!storeInterface) {
-			storeInterface = storeRepository.getStoreInterfaceByName(storeName);
+			storeInterface = storeFactory.getStoreInterfaceByName(storeName);
 			if (!storeInterface) {
-				storeInterface = storeRepository.getStoreInterfaceById(0);
+				storeInterface = storeFactory.getStoreInterfaceById(0);
 				if (!storeInterface) {
 					//hardcoded initial values if store with id 0 doesn't show up
-					storeInterface = {id: id, name: storeName, stocklistId: "0", stocklistName: "Default Stocklist", buyMultiplier: 2, sellMultiplier: 1, upgradeMultiplier: 1, restockInterval: 300000};
+					storeInterface = {id: identifier, name: storeName, stocklistId: "0", stocklistName: "Default Stocklist", buyMultiplier: 2, sellMultiplier: 1, upgradeMultiplier: 1, restockInterval: 300000};
 				}
 			}
 		}
 
 		//then get stocklist data
-		let stocklistInterface = stocklistRepository.getStocklistInterfaceById(storeInterface.stocklistId);
+		let stocklistInterface = stocklistFactory.getStocklistInterfaceById(storeInterface.stocklistId);
 		let stocklistItems = new ItemList();
 		if (!stocklistInterface) {
-			stocklistInterface = stocklistRepository.getStocklistInterfaceByName(storeInterface.stocklistName);
+			stocklistInterface = stocklistFactory.getStocklistInterfaceByName(storeInterface.stocklistName);
 		}
 		if (stocklistInterface) {
 			stocklistItems = stocklistInterface.items;
@@ -92,12 +117,12 @@ export class Store extends ItemStore {
 			restockTime = plainObject.restockTime;
 		}
 	
-		return new Store(id, storeName, storeInterface.buyMultiplier, storeInterface.sellMultiplier, storeInterface.upgradeMultiplier, items, stocklistItems, restockTime, storeInterface.restockInterval);
+		return new Store(storeId, identifier, storeName, storeInterface.buyMultiplier, storeInterface.sellMultiplier, storeInterface.upgradeMultiplier, items, stocklistItems, restockTime, storeInterface.restockInterval);
 	}
 
 	toPlainObject(): any {
 		return {
-			id: this.id,
+			identifier: this.identifier,
 			storeName: this.storeName,
 			// stockList: this.stockList.toPlainObject(), // We do not save stocklist, it is grabbed from database
 			items: this.items.toPlainObject(), // Convert items to plain object
@@ -106,10 +131,17 @@ export class Store extends ItemStore {
 	} 
 
 	/**
-	 * @returns the storeId of the store.
+	 * @returns the store id for database access
 	 */
-	getStoreId(): number {
-		return this.id;
+	 getStoreId(): string {
+		return this.storeId;
+	}
+
+	/**
+	 * @returns the store identifier of the store, a number that represents the store template
+	 */
+	getStoreIdentifier(): number {
+		return this.identifier;
 	}
 
 	/**

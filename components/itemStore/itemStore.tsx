@@ -1,4 +1,4 @@
-import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
+import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import { ItemSubtype, ItemSubtypes } from "@/models/items/ItemTypes";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { Store } from "@/models/itemStore/store/Store";

@@ -8,6 +8,7 @@ import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 import { Item } from "../items/Item";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { BooleanResponse } from "../utility/BooleanResponse";
+import { v4 as uuidv4 } from 'uuid';
 
 
 export class ItemList {
@@ -325,10 +326,10 @@ export class ItemList {
 			//TODO: Investigate type assertion
 			if (ItemList.isInventoryItem(item)) {
 				const itemClass = getItemClassFromSubtype(item) as ItemConstructor<InventoryItem>;
-				newItem = new itemClass(item.itemData, quantity);
+				newItem = new itemClass(uuidv4(), item.itemData, quantity);
 			} else if (ItemList.isItemTemplate(item) && item instanceof InventoryItemTemplate) {
 				const itemClass = getItemClassFromSubtype(item)  as ItemConstructor<InventoryItem>;
-				newItem = new itemClass(item, quantity);
+				newItem = new itemClass(uuidv4(), item, quantity);
 				if (item.type === ItemTypes.PLACED.name) {
 					response.addErrorMessage(`Cannot add a placeditem to inventory`);
 					return response;

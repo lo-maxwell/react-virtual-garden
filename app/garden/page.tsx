@@ -1,11 +1,11 @@
 'use client'
 import GardenComponent from "./garden";
 import UserProfileComponent from "@/components/garden/userProfile";
-import { useInventory } from "@/hooks/contexts/InventoryContext";
-import { useGarden } from "@/hooks/contexts/GardenContext";
-import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
+import { useInventory } from "@/app/hooks/contexts/InventoryContext";
+import { useGarden } from "@/app/hooks/contexts/GardenContext";
+import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import InventoryComponent from "@/components/inventory/inventory";
-import { useUser } from "@/hooks/contexts/UserContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
 
 const GardenPage = () => {
   const { user } = useUser();

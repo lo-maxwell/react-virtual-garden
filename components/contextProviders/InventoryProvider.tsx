@@ -1,10 +1,11 @@
 'use client'
-import { InventoryContext } from '@/hooks/contexts/InventoryContext';
+import { InventoryContext } from '@/app/hooks/contexts/InventoryContext';
 import { generateNewPlaceholderInventoryItem } from '@/models/items/PlaceholderItems';
 import { Inventory } from '@/models/itemStore/inventory/Inventory';
 import { ItemList } from '@/models/itemStore/ItemList';
 import { loadInventory, saveInventory } from '@/utils/localStorage/inventory';
 import React, { ReactNode, useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 // Define props for the provider
 interface InventoryProviderProps {
@@ -15,8 +16,10 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     const [inventory, setInventory] = useState<Inventory | null>(null);
 	const [inventoryForceRefreshKey, setInventoryForceRefreshKey] = useState(0);
 
+
 	function generateDefaultNewInventory(): Inventory {
-		return new Inventory("Test User", 100, new ItemList([
+		const randomUuid = uuidv4();
+		return new Inventory(randomUuid, "Test User", 100, new ItemList([
 			generateNewPlaceholderInventoryItem('apple seed', 100)]));
 	}
 

@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 
-const pool = new Pool({
+export const pool = new Pool({
 	host: process.env.DATABASE_HOST || 'localhost',
 	port: parseInt(process.env.DATABASE_PORT || '5432', 10),
 	user: process.env.DATABASE_USER,
@@ -8,4 +8,4 @@ const pool = new Pool({
 	database: process.env.DATABASE_NAME,
   });
 
-export default pool;
+export const query = <T>(text: string, params: any[]): Promise<{ rows: T[] }> => pool.query(text, params);
