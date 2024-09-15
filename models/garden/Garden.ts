@@ -27,6 +27,8 @@ export class Garden {
 	private ownerName: string;
 	private plots: Plot[][];
 	private plotPositions: Map<Plot, [number, number]>;
+	private rows: number;
+	private columns: number;
 	
 	static getStartingRows() {return 5;}
 	static getStartingCols() {return 5;}
@@ -40,6 +42,8 @@ export class Garden {
 	constructor(gardenId: string, ownerName: string = "Dummy User", rows: number = Garden.getStartingRows(), cols: number = Garden.getStartingCols(), plots: Plot[][] | null = null) {
 		this.gardenId = gardenId;
 		this.ownerName = ownerName;
+		this.rows = rows;
+		this.columns = cols;
 		this.plotPositions = new Map();
 		if (plots != null) {
 			this.plots = plots;
@@ -55,7 +59,7 @@ export class Garden {
 			//we throw an error here which causes loadgarden to return [], causing it to reset everything.
 			throw new Error('Invalid input to fromPlainObject');
 		}
-		const { gardenId, ownerName, plots: plainPlots } = plainObject;
+		const { gardenId, ownerName, plots: plainPlots, rows, columns } = plainObject;
 
 		if (!Array.isArray(plainPlots)) {
 			//if plots is not the right shape, throw away the entire thing
@@ -64,7 +68,7 @@ export class Garden {
 		// Convert plainPlots to Plot[][]
 		const plots = plainPlots.map((row: any[]) => row.map((plot: any) => Plot.fromPlainObject(plot)));
 		
-		const garden = new Garden(gardenId, ownerName, plainPlots.length, plainPlots[0]?.length || 0, plots);
+		const garden = new Garden(gardenId, ownerName, rows, columns, plots);
 		garden.updatePlotPositions();
 
 		return garden;
@@ -76,7 +80,9 @@ export class Garden {
 		return {
 			gardenId: this.gardenId,
 			ownerName: this.ownerName,
-			plots: this.plots.map(row => row.map(plot => plot.toPlainObject()))
+			plots: this.plots.map(row => row.map(plot => plot.toPlainObject())),
+			rows: this.rows,
+			columns: this.columns
 		};
 	} 
 
@@ -98,23 +104,25 @@ export class Garden {
 	 * @returns the number of rows.
 	 */
 	 getRows(): number {
-		return this.plots.length;
+		return this.rows;
 	}
 
 	/**
 	 * @returns the number of columns.
 	 */
 	 getCols(): number {
-		return this.plots[0].length;
+		return this.columns;
 	}
 
 	/**
-	 * @returns the plots in the garden. (modifiable)
+	 * @returns a deep copy of the visible plots in the garden, based on the current rows and columns
 	 */
 	getPlots(): Plot[][] {
-		return this.plots;
-		// deep copy instead (?)
-		// return this.plots.map(innerArray => innerArray.map(plot => plot.clone()));
+		// return this.plots;
+		return this.plots.slice(0, this.rows).map(innerArray => innerArray.slice(0, this.columns));
+		// return this.plots.slice(0, this.rows).map(innerArray =>
+		// 	innerArray.slice(0, this.columns).map(plot => plot.clone())
+		// );
 	}
 
 	/**
@@ -204,19 +212,41 @@ export class Garden {
 	}
 
 	/**
- 	 * Sets the garden size. Fills empty slots with Empty Plots, and deletes slots that are out of bounds.
+ 	 * Sets the visible garden size. Fills empty slots with Empty Plots.
 	 * @rows new number of rows
 	 * @cols new number of columns
 	 */
 	setGardenSize(rows: number, cols: number): void {
-		const newPlots = Array.from({ length: rows }, (_, rowIndex) =>
-			Array.from({ length: cols }, (_, colIndex) =>
-				this.plots[rowIndex]?.[colIndex] || Garden.generateEmptyPlot(rowIndex, colIndex)
-			)
-		);
-		this.plots = newPlots;
-		this.fillNullWithEmptyPlot(rows, cols);
+		// Loop through the rows up to the new row count
+		for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+			// If the row does not exist, create it as an empty array
+			if (!this.plots[rowIndex]) {
+				this.plots[rowIndex] = [];
+			}
+			// Loop through the columns up to the new column count
+			for (let colIndex = 0; colIndex < cols; colIndex++) {
+				// If the column does not exist, generate an empty plot and fill it
+				if (!this.plots[rowIndex][colIndex]) {
+					this.plots[rowIndex][colIndex] = Garden.generateEmptyPlot(rowIndex, colIndex);
+				}
+			}
+		}
+	
+		// Update garden dimensions
+		this.rows = rows;
+		this.columns = cols;
 	}
+	// setGardenSize(rows: number, cols: number): void {
+	// 	const newPlots = Array.from({ length: rows }, (_, rowIndex) =>
+	// 		Array.from({ length: cols }, (_, colIndex) =>
+	// 			this.plots[rowIndex]?.[colIndex] || Garden.generateEmptyPlot(rowIndex, colIndex)
+	// 		)
+	// 	);
+	// 	this.rows = rows;
+	// 	this.columns = cols;
+	// 	this.plots = newPlots;
+	// 	this.fillNullWithEmptyPlot(rows, cols);
+	// }
 
 	/**
 	 * Replaces all undefined slots in plots with Empty Plots.
@@ -301,10 +331,12 @@ export class Garden {
 	}
 
 	/**
-	 * Checks if the given row and column indexes are valid.
+	 * Checks if the given row and column indexes are valid, ie. within the visible garden area
+	 * @row the row index to check
+	 * @col the column index to check
 	 */
 	private isValidIndex(row: number, col: number): boolean {
-		return row >= 0 && row < this.plots.length && col >= 0 && col < this.plots[row].length;
+		return row >= 0 && row < this.getRows() && col >= 0 && col < this.getCols();
 	}
 
 	/**
