@@ -65,7 +65,7 @@ export class ItemStore {
 	}
 
 	/**
-     * Trashes quantity of item from inventory. If item quantity goes to 0, deletes it from inventory. Fails if item is not in inventory.
+     * Trashes quantity of item from inventory. Fails if item is not in inventory.
      * @item The item to remove, identified by InventoryItem, ItemTemplate, or name
 	 * @quantity Positive integer amount of item being removed. If quantity is greater than the remaining amount, removes all existing ones.
      * @returns InventoryTransactionResponse containing the item or an error message.

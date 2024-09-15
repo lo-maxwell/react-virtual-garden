@@ -7,7 +7,6 @@ import plotRepository from "./plot/plotRepository";
 class GardenRepository {
 	/**
 	 * Turns a gardenEntity into a Garden object.
-	 * TODO: Make this take in a client as a parameter?
 	 */
 	async makeGardenObject(extendedGardenEntity: ExtendedGardenEntity): Promise<Garden> {
 		if (!extendedGardenEntity || (typeof extendedGardenEntity.owner_name !== 'string') || (typeof extendedGardenEntity.owner !== 'string') || (typeof extendedGardenEntity.rows !== 'number') || (typeof extendedGardenEntity.columns !== 'number')) {
@@ -68,7 +67,7 @@ class GardenRepository {
 	 */
 	async getAllGardens(): Promise<ExtendedGardenEntity[]> {
 		const result = await query<ExtendedGardenEntity>(
-			'SELECT users.username AS owner_name, gardens.id, gardens.rows, gardens.columns FROM gardens LEFT JOIN users ON users.id = gardens.owner',
+			'SELECT users.username AS owner_name, gardens.id, gardens.owner, gardens.rows, gardens.columns FROM gardens LEFT JOIN users ON users.id = gardens.owner',
 			[]);
 		if (!result || result.rows.length === 0) return [];
 		return result.rows;
@@ -81,7 +80,7 @@ class GardenRepository {
 	 * @id the id of the garden in the database
 	 */
 	async getGardenById(id: string): Promise<ExtendedGardenEntity | null> {
-		const result = await query<ExtendedGardenEntity>('SELECT users.username AS owner_name, gardens.id, gardens.rows, gardens.columns FROM gardens LEFT JOIN users ON users.id = gardens.owner WHERE gardens.id = $1', [id]);
+		const result = await query<ExtendedGardenEntity>('SELECT users.username AS owner_name, gardens.id, gardens.owner, gardens.rows, gardens.columns FROM gardens LEFT JOIN users ON users.id = gardens.owner WHERE gardens.id = $1', [id]);
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
@@ -95,7 +94,7 @@ class GardenRepository {
 	 * @userId the id of the user
 	 */
 	async getGardenByOwnerId(userId: string): Promise<ExtendedGardenEntity | null> {
-		const result = await query<ExtendedGardenEntity>('SELECT users.username AS owner_name, gardens.id, gardens.rows, gardens.columns FROM gardens LEFT JOIN users ON users.id = gardens.owner WHERE gardens.owner = $1', [userId]);
+		const result = await query<ExtendedGardenEntity>('SELECT users.username AS owner_name, gardens.id, gardens.owner, gardens.rows, gardens.columns FROM gardens LEFT JOIN users ON users.id = gardens.owner WHERE gardens.owner = $1', [userId]);
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
@@ -105,14 +104,14 @@ class GardenRepository {
 	}
 
 	/**
-	 * Begins a transaction if there is not already one. Creates a new garden row. Does not create plots.
+	 * Begins a transaction if there is not already one. Creates a new garden row and plot rows.
 	 * On error, rolls back.
 	 * @userId the id of the owner (user) of this garden. If the owner cannot be found, fails.
 	 * @garden the garden to pull data from
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns an ExtendedGardenEntity with the corresponding data if success, null if failure (or throws error)
 	 */
-	async createGarden(userId: string, garden: Garden, client?: PoolClient): Promise<ExtendedGardenEntity | null> {
+	async createGarden(userId: string, garden: Garden, client?: PoolClient): Promise<ExtendedGardenEntity> {
 		//TODO: Call createPlots here
 		const shouldReleaseClient = !client;
 		if (!client) {
@@ -122,6 +121,7 @@ class GardenRepository {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
 			}
+
 			// Check if the garden already exists
 			const existingGardenResult = await client.query<{id: string}>(
 				'SELECT id FROM gardens WHERE id = $1',
@@ -149,9 +149,13 @@ class GardenRepository {
 					columns: garden.getCols()
 				}
 				console.warn(`Garden already exists for user ${username} with this ID: ${existingGardenResult.rows[0].id}`);
+				if (shouldReleaseClient) {
+					await client.query('ROLLBACK'); // Rollback the transaction on error
+				}
 				return extendedGardenEntity;
 				// return makeGardenObject(extendedGardenEntity); 
 			}
+
 			
 			const result = await query<{id: string}>(
 				'INSERT INTO gardens (id, owner, rows, columns) VALUES ($1, $2, $3, $4) RETURNING id',
@@ -178,43 +182,144 @@ class GardenRepository {
 				[newGardenId]
 			);
 
-			//Create plots
-			const plotPromises: Promise<void>[] = []; // Array to store promises
-
-			for (let i = 0; i < garden.getRows(); i++) {
-				for (let j = 0; j < garden.getCols(); j++) {
-					const plot = garden.getPlotByRowAndColumn(i, j);
-					if (!plot) {
-						throw new Error(`Could not find plot at row ${i}, col ${j}`);
-					}
-
-					// Create a promise for each plot creation and store it in the array
-					const plotPromise = plotRepository.createPlot(newGardenId, i, j, plot, client)
-						.then((plotResult) => {
-							if (!plotResult) {
-								throw new Error(`Error creating plot at row ${i}, col ${j}`);
-							}
-						});
-					plotPromises.push(plotPromise);
-				}
-			}
-
-			// Wait for all plot creation promises to resolve
-			await Promise.allSettled(plotPromises);
-
 			if (shouldReleaseClient) {
 				await client.query('COMMIT'); // Rollback the transaction on error
 			}
 
-			// Return the created Garden as an instance
 			return extendedResult.rows[0];
-			// const instance = makeGardenObject(extendedResult.rows[0]);
-			// return instance;
 		} catch (error) {
 			if (shouldReleaseClient) {
 				await client.query('ROLLBACK'); // Rollback the transaction on error
 			}
 			console.error('Error creating garden:', error);
+			throw error; // Rethrow the error for higher-level handling
+		} finally {
+			if (shouldReleaseClient) {
+				client.release(); // Release the client back to the pool
+			}
+		}
+	}
+
+	/**
+	 * If the garden does not exist, creates it for the user. Otherwise, modifies its row/column size.
+	 * @userId the id of the user the garden belongs to
+	 * @garden the garden
+	 * @client the pool client that this is nested within, or null if it should create its own transaction.
+	 * @returns a new GardenEntity with the corresponding data if success, null if failure (or throws error)
+	*/
+	async createOrUpdateGarden(userId: string, garden: Garden, client?: PoolClient): Promise<ExtendedGardenEntity> {
+		const shouldReleaseClient = !client;
+		if (!client) {
+			client = await pool.connect();
+		}
+		try {
+			if (shouldReleaseClient) {
+				await client.query('BEGIN'); // Start the transaction
+			}
+			// Check if the garden already exists
+			const existingGardenResult = await client.query<{id: string}>(
+				'SELECT id FROM gardens WHERE id = $1',
+				[garden.getGardenId()]
+			);
+
+			let result;
+
+			if (existingGardenResult.rows.length > 0) {
+				// Garden already exists
+				result = await this.updateEntireGarden(garden, client);
+				if (!result) {
+					throw new Error(`Error updating garden with id ${garden.getGardenId()}`);
+				} 
+			} else {
+				result = await this.createGarden(userId, garden, client);
+				if (!result) {
+					throw new Error(`Error creating garden with id ${garden.getGardenId()}`);
+				} 
+			}
+
+			if (shouldReleaseClient) {
+				await client.query('COMMIT'); // Rollback the transaction on error
+			}
+
+			return result;
+		} catch (error) {
+			if (shouldReleaseClient) {
+				await client.query('ROLLBACK'); // Rollback the transaction on error
+			}
+			console.error('Error creating plot:', error);
+			throw error; // Rethrow the error for higher-level handling
+		} finally {
+			if (shouldReleaseClient) {
+				client.release(); // Release the client back to the pool
+			}
+		}
+	}
+
+	/**
+	 * Begins a transaction if there is not already one. 
+	 * Updates the garden in the database.
+	 * Cannot modify the owner, only row/column size
+	 * On error, rolls back.
+	 * @userId the id of the owner (user) of this garden. If the owner cannot be found, fails.
+	 * @garden the garden to pull data from
+	 * @client the pool client that this is nested within, or null if it should create its own transaction.
+	 * @returns a GardenEntity with the corresponding data if success, null if failure (or throws error)
+	 */
+	 async updateEntireGarden(garden: Garden, client?: PoolClient): Promise<ExtendedGardenEntity> {
+		const shouldReleaseClient = !client;
+		if (!client) {
+			client = await pool.connect();
+		}
+		try {
+			if (shouldReleaseClient) {
+				await client.query('BEGIN'); // Start the transaction
+			}
+			// Check if the garden already exists
+			const existingGardenResult = await client.query<{id: string}>(
+				'SELECT id FROM gardens WHERE id = $1',
+				[garden.getGardenId()]
+			);
+
+			if (existingGardenResult.rows.length === 0) {
+				//Garden does not exist
+				throw new Error(`Could not find garden for id ${garden.getGardenId()}`);
+			}
+			
+			const result = await query<GardenEntity>(
+				'UPDATE gardens SET rows = $1, columns = $2 WHERE id = $3 RETURNING id, owner, rows, columns',
+				[garden.getRows(), garden.getCols(), garden.getGardenId()]
+				);
+
+			// Check if result is valid
+			if (!result || result.rows.length === 0) {
+				throw new Error('There was an error updating the garden');
+			}
+
+			const newGardenId = result.rows[0].id;
+
+			const extendedResult = await query<ExtendedGardenEntity>(
+				`SELECT 
+					gardens.id, 
+					gardens.owner, 
+					gardens.rows, 
+					gardens.columns, 
+					users.username AS owner_name
+				FROM gardens
+				INNER JOIN users ON gardens.owner = users.id
+				WHERE gardens.id = $1`,
+				[newGardenId]
+			);
+
+			if (shouldReleaseClient) {
+				await client.query('COMMIT'); // Rollback the transaction on error
+			}
+
+			return extendedResult.rows[0];
+		} catch (error) {
+			if (shouldReleaseClient) {
+				await client.query('ROLLBACK'); // Rollback the transaction on error
+			}
+			console.error('Error updating garden:', error);
 			throw error; // Rethrow the error for higher-level handling
 		} finally {
 			if (shouldReleaseClient) {
@@ -231,7 +336,7 @@ class GardenRepository {
 	 * @columnCount the new number of columns
 	 * @returns a GardenEntity with the new data on success (or throws error)
 	 */
-	async setGardenSize(id: string, rowCount: number, columnCount: number, client?: PoolClient): Promise<GardenEntity | null> {
+	async setGardenSize(id: string, rowCount: number, columnCount: number, client?: PoolClient): Promise<GardenEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -239,16 +344,6 @@ class GardenRepository {
 		try {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
-			}
-
-			//Lock the row for update
-			const lockResult = await client.query<{id: string}>(
-				'SELECT id FROM gardens WHERE id = $1 FOR UPDATE',
-				[id]
-			);
-
-			if (lockResult.rows.length === 0) {
-				throw new Error(`Garden not found for id: ${id}`);
 			}
 		
 			const gardenResult = await client.query<GardenEntity>(
@@ -287,7 +382,7 @@ class GardenRepository {
 	 * @columnDelta the number of columns to change by
 	 * @returns a GardenEntity with the new data on success (or throws error)
 	 */
-	async updateGardenSize(id: string, rowDelta: number, columnDelta: number, client?: PoolClient): Promise<GardenEntity | null> {
+	async updateGardenSize(id: string, rowDelta: number, columnDelta: number, client?: PoolClient): Promise<GardenEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();

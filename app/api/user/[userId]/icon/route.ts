@@ -1,4 +1,4 @@
-import { updateUserIcon } from "@/backend/repositories/user/userRepository";
+import { updateUserIcon } from "@/backend/services/user/userService";
 import { NextResponse } from "@/node_modules/next/server";
 
 export async function PATCH(request: Request, { params }: { params: { userId: string } }) {

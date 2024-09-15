@@ -111,11 +111,12 @@ test('Should Trash Item From Store', () => {
 	const response = testStore.trashItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!, 1);
 	expect(response.isSuccessful()).toBe(true);
 	expect(response.payload.quantity).toBe(0);
-	expect(testStore.size()).toBe(2);
+	//Does not delete item
+	expect(testStore.size()).toBe(3);
 	const response2 = testStore.trashItem(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, 1);
 	expect(response2.isSuccessful()).toBe(true);
 	expect(response2.payload.quantity).toBe(19);
-	expect(testStore.size()).toBe(2);
+	expect(testStore.size()).toBe(3);
 	expect(testStore.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!).payload.quantity).toBe(19);
 })
 

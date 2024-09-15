@@ -6,7 +6,7 @@ import inventoryItemRepository from "../../items/inventoryItem/inventoryItemRepo
 
 class InventoryRepository {
 
-	async getInventoryItems(id: string): Promise<ItemList | null> {
+	private async getInventoryItems(id: string): Promise<ItemList> {
 		const itemResults = await inventoryItemRepository.getAllInventoryItemsByOwnerId(id);
 		const items = new ItemList();
 		for (const itemResult of itemResults) {
@@ -30,7 +30,7 @@ class InventoryRepository {
 			throw new Error(`Invalid types while creating Inventory`);
 		}
 		//TODO: Fetches all relevant data from database and uses it to construct user
-		let itemList: ItemList | null = await this.getInventoryItems(inventoryEntity.id);
+		let itemList: ItemList = await this.getInventoryItems(inventoryEntity.id);
 		if (!itemList) itemList = new ItemList();
 		return new Inventory(inventoryEntity.id, '', inventoryEntity.gold, itemList);
 	}
@@ -87,7 +87,7 @@ class InventoryRepository {
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns a new Inventory with the corresponding data if success, null if failure (or throws error)
 	 */
-	async createInventory(userId: string, inventory: Inventory, client?: PoolClient): Promise<InventoryEntity | null> {
+	async createInventory(userId: string, inventory: Inventory, client?: PoolClient): Promise<InventoryEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -119,23 +119,6 @@ class InventoryRepository {
 				throw new Error('Failed to insert inventory');
 			}
 
-			//Create inventory items
-			const inventoryItemPromises: Promise<void>[] = []; // Array to store promises
-			const inventoryItems = inventory.getAllItems();
-			inventoryItems.forEach((item) => {
-				// Create a promise for each inventoryItem creation and store it in the array
-				const inventoryItemPromise = inventoryItemRepository.createInventoryItem(result.rows[0].id, item, client)
-					.then((inventoryItemResult) => {
-						if (!inventoryItemResult) {
-							throw new Error(`Error creating inventory item for item ${item.itemData.id}`);
-						}
-					});
-				inventoryItemPromises.push(inventoryItemPromise);
-			});
-
-			// Wait for all inventoryItem creation promises to resolve
-			await Promise.allSettled(inventoryItemPromises);
-
 			if (shouldReleaseClient) {
 				await client.query('COMMIT'); // Rollback the transaction on error
 			}
@@ -158,15 +141,14 @@ class InventoryRepository {
 		}
 	}
 
-
 	/**
-	 * Sets the gold of the inventory. Uses row level locking.
-	 * @id the id of the inventory
-	 * @newGold the new gold amount of the inventory
-	 * @client optional client for nested transactions
-	 * @returns a InventoryEntity with the new data on success (or throws error)
-	 */
-	async setInventoryGold(id: string, newGold: number, client?: PoolClient): Promise<InventoryEntity | null> {
+	 * If the inventory does not exist, creates it for the user. Otherwise, modifies its gold.
+	 * @userId the id of the user the inventory belongs to
+	 * @inventory the inventory
+	 * @client the pool client that this is nested within, or null if it should create its own transaction.
+	 * @returns a new InventoryEntity with the corresponding data if success, null if failure (or throws error)
+	*/
+	async createOrUpdateInventory(userId: string, inventory: Inventory, client: PoolClient): Promise<InventoryEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -175,15 +157,61 @@ class InventoryRepository {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
 			}
-
-			//Lock the row for update
-			const inventoryLockResult = await client.query<{id: string}>(
-				'SELECT id FROM inventories WHERE id = $1 FOR UPDATE',
-				[id]
+			// Check if the inventory already exists
+			const existingInventoryResult = await client.query<{id: string}>(
+				'SELECT id FROM inventories WHERE id = $1',
+				[inventory.getInventoryId()]
 			);
 
-			if (inventoryLockResult.rows.length === 0) {
-				throw new Error('Inventory not found');
+			let result;
+
+			if (existingInventoryResult.rows.length > 0) {
+				// Inventory already exists
+				result = await this.updateInventoryGold(inventory.getInventoryId(), inventory.getGold(), client);
+				if (!result) {
+					throw new Error(`Error updating inventory with id ${inventory.getInventoryId()}`);
+				} 
+			} else {
+				result = await this.createInventory(userId, inventory, client);
+				if (!result) {
+					throw new Error(`Error creating inventory with id ${inventory.getInventoryId()}`);
+				} 
+			}
+
+			if (shouldReleaseClient) {
+				await client.query('COMMIT'); // Rollback the transaction on error
+			}
+
+			return result;
+		} catch (error) {
+			if (shouldReleaseClient) {
+				await client.query('ROLLBACK'); // Rollback the transaction on error
+			}
+			console.error('Error creating inventory:', error);
+			throw error; // Rethrow the error for higher-level handling
+		} finally {
+			if (shouldReleaseClient) {
+				client.release(); // Release the client back to the pool
+			}
+		}
+	}
+
+
+	/**
+	 * Sets the gold of the inventory. Uses row level locking.
+	 * @id the id of the inventory
+	 * @newGold the new gold amount of the inventory
+	 * @client optional client for nested transactions
+	 * @returns a InventoryEntity with the new data on success (or throws error)
+	 */
+	async setInventoryGold(id: string, newGold: number, client?: PoolClient): Promise<InventoryEntity> {
+		const shouldReleaseClient = !client;
+		if (!client) {
+			client = await pool.connect();
+		}
+		try {
+			if (shouldReleaseClient) {
+				await client.query('BEGIN'); // Start the transaction
 			}
 		
 			const InventoryResult = await client.query<InventoryEntity>(
@@ -222,7 +250,7 @@ class InventoryRepository {
 	 * @client optional client for nested transactions
 	 * @returns a InventoryEntity with the new data on success (or throws error)
 	 */
-	async updateInventoryGold(id: string, goldDelta: number, client?: PoolClient): Promise<InventoryEntity | null> {
+	async updateInventoryGold(id: string, goldDelta: number, client?: PoolClient): Promise<InventoryEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();

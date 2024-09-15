@@ -224,6 +224,7 @@ export class ItemList {
 
 	/**
      * Check if the inventory contains an item.
+	 * Only returns true if the item matches the given name and has a quantity above 0.
      * @item The item to check for, identified by InventoryItem, ItemTemplate, or name.
      * @returns BooleanResponse containing True/False or error message.
      */
@@ -234,7 +235,7 @@ export class ItemList {
 		const itemName = itemNameResponse.payload;
 		
 		this.items.forEach((element, index) => {
-			if (element.itemData.name == itemName) {
+			if (element.itemData.name == itemName && element.getQuantity() > 0) {
 				response.payload = true;
 				return response;
 			}
@@ -362,7 +363,7 @@ export class ItemList {
 	/**
      * Update the quantity of an item in the inventory.
      * @item The item to update, identified by InventoryItem, ItemTemplate, or name.
-     * @delta The amount to change the quantity by. If negative and the final quantity ends up at or below 0, deletes the item from the list.
+     * @delta The amount to change the quantity by.
      * @returns InventoryTransactionResponse containing the updated InventoryItem or error message.
      */
 	updateQuantity(item: InventoryItem | InventoryItemTemplate | string, delta: number): InventoryTransactionResponse {
@@ -370,9 +371,10 @@ export class ItemList {
 		let toUpdate = this.getItem(item);
 		if (toUpdate.isSuccessful()) {
 			//Item already in inventory, update quantity
-			if (delta < 0 && toUpdate.payload.quantity + delta <= 0) {
-				return this.deleteItem(item);
-			}
+			//Does not delete upon hitting 0 quantity
+			// if (delta < 0 && toUpdate.payload.quantity + delta <= 0) {
+			// 	return this.deleteItem(item);
+			// }
 
 			toUpdate.payload.quantity = toUpdate.payload.quantity + delta;
 			response.payload = toUpdate.payload;

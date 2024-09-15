@@ -75,8 +75,7 @@ const TradeWindowComponent = ({costMultiplier}: {costMultiplier: number}) => {
 		if (!selectedItem) return;
 		if (quantity > selectedItem.getQuantity()) {
 		  setQuantity(selectedItem.getQuantity());
-		}
-		if (quantity <= 0) {
+		} else if (quantity <= 0 && selectedItem.getQuantity() > 0) {
 			setQuantity(1);
 		}
 	  }, [quantity, selectedItem]);

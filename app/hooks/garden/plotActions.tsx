@@ -2,13 +2,9 @@ import { Plot } from "@/models/garden/Plot";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
-import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
-import ItemHistory from "@/models/user/history/itemHistory/ItemHistory";
-import { PlantHistory } from "@/models/user/history/itemHistory/PlantHistory";
-import User from "@/models/user/User";
 import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
-import { loadUser, saveUser } from "@/utils/localStorage/user";
+import { saveUser } from "@/utils/localStorage/user";
 import { useGarden } from "../contexts/GardenContext";
 import { useInventory } from "../contexts/InventoryContext";
 import { useSelectedItem } from "../contexts/SelectedItemContext";
@@ -97,6 +93,39 @@ export const usePlotActions = () => {
 				return plot.getItem().itemData.icon;
 			}
 			const xp = plot.getExpValue();
+			try {
+				
+				//TODO: api call for harvestPlant
+				const data = {
+					inventoryId: inventory.getInventoryId(), 
+					levelSystemId: user.getLevelSystem().getLevelSystemId(), 
+					numHarvests: 1, //Usually only 1 harvest
+					replacementItem: null //Replace with ground as default
+				}
+				// Making the PATCH request to your API endpoint
+				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/harvest`, {
+				  method: 'PATCH',
+				  headers: {
+					'Content-Type': 'application/json',
+				  },
+				  body: JSON.stringify(data), // Send the new xp data in the request body
+				});
+		  
+				// Check if the response is successful
+				if (!response.ok) {
+				  throw new Error('Failed to harvest plant');
+				}
+		  
+				// Parsing the response data
+				const result = await response.json();
+				console.log('Successfully harvested:', result);
+			  } catch (error) {
+				console.error(error);
+				//TODO: reload user to fix display issue with xp
+				// const reloadedUser = loadUser() as User;
+				// saveUser(reloadedUser);
+			  } finally {
+			  }
 			const harvestItemResponse = plot.harvestItem(inventory, instantGrow, 1);
 			if (!harvestItemResponse.isSuccessful()) {
 				setGardenMessage(` `);
@@ -106,38 +135,7 @@ export const usePlotActions = () => {
 
 			const pickedItem = harvestItemResponse.payload.pickedItem as PlacedItem;
 			user.updateHarvestHistory(pickedItem);
-			try {
-				user.addExp(xp);
-				//TODO: api call for harvestPlant
-				// const data = {
-				//   ownerType: 'user',
-				//   xpAmount: xp
-				// }
-				// // Making the PATCH request to your API endpoint
-				// const response = await fetch(`/api/user/${user.getUserId()}/level/gainExp`, {
-				//   method: 'PATCH',
-				//   headers: {
-				// 	'Content-Type': 'application/json',
-				//   },
-				//   body: JSON.stringify(data), // Send the new xp data in the request body
-				// });
-		  
-				// // Check if the response is successful
-				// if (!response.ok) {
-				//   throw new Error('Failed to update levelsystem for user');
-				// }
-		  
-				// // Parsing the response data
-				// const result = await response.json();
-				// console.log('Successfully updated:', result);
-			  } catch (error) {
-				console.error(error);
-				//TODO: reload user to fix display issue with xp
-				// const reloadedUser = loadUser() as User;
-				// saveUser(reloadedUser);
-			  } finally {
-			  }
-			// user.addExp(xp);
+			user.addExp(xp);
 			saveInventory(inventory);
 			saveGarden(garden);
 			saveUser(user);

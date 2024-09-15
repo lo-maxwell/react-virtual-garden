@@ -15,7 +15,7 @@ export class HarvestedItem extends InventoryItem {
 	static fromPlainObject(plainObject: any): HarvestedItem {
 		try {
             // Validate plainObject structure
-            if (!plainObject || typeof plainObject !== 'object' || !plainObject.itemData || !plainObject.quantity) {
+            if (!plainObject || typeof plainObject !== 'object' || !plainObject.itemData || (plainObject.quantity == null)) {
                 throw new Error('Invalid plainObject structure for HarvestedItem');
             }
 			// Validate required properties

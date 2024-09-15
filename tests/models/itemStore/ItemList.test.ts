@@ -206,16 +206,16 @@ test('Should Update Quantity of Existing Item', () => {
 	expect(response3.payload.quantity).toBe(2);
 });
 
-test('Should Delete When Updating Quantity to Zero', () => {
-	const response = testItemList.updateQuantity('apple seed', -1);
-	expect(response.isSuccessful()).toBe(true);
-	expect(response.payload.quantity).toBe(0);
-	expect(testItemList.size()).toBe(2);
-	const response2 = testItemList.updateQuantity(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, -3);
-	expect(response2.isSuccessful()).toBe(true);
-	expect(response2.payload.quantity).toBe(0);
-	expect(testItemList.size()).toBe(1);
-});
+// test('Should Delete When Updating Quantity to Zero', () => {
+// 	const response = testItemList.updateQuantity('apple seed', -1);
+// 	expect(response.isSuccessful()).toBe(true);
+// 	expect(response.payload.quantity).toBe(0);
+// 	expect(testItemList.size()).toBe(2);
+// 	const response2 = testItemList.updateQuantity(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!, -3);
+// 	expect(response2.isSuccessful()).toBe(true);
+// 	expect(response2.payload.quantity).toBe(0);
+// 	expect(testItemList.size()).toBe(1);
+// });
 
 test('Should Not Update Nonexistent Item', () => {
 	expect(testItemList.contains('invalid item').payload).toBe(false);

@@ -13,7 +13,7 @@ export class Blueprint extends InventoryItem {
 	static fromPlainObject(plainObject: any): Blueprint {
 		try {
             // Validate plainObject structure
-            if (!plainObject || typeof plainObject !== 'object' || !plainObject.itemData || !plainObject.quantity) {
+            if (!plainObject || typeof plainObject !== 'object' || !plainObject.itemData || (plainObject.quantity == null)) {
                 throw new Error('Invalid plainObject structure for BlueprintItem');
             }
 			// Validate required properties

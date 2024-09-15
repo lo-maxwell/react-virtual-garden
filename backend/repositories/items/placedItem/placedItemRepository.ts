@@ -71,7 +71,7 @@ class PlacedItemRepository {
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns a PlacedItemEntity with the corresponding data if success, null if failure (or throws error)
 	 */
-	async createPlacedItem(plotId: string, placedItem: PlacedItem, client?: PoolClient): Promise<PlacedItemEntity | null> {
+	async createPlacedItem(plotId: string, placedItem: PlacedItem, client?: PoolClient): Promise<PlacedItemEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -82,8 +82,8 @@ class PlacedItemRepository {
 			}
 			// Check if the placedItem already exists
 			const existingPlacedItemResult = await client.query<PlacedItemEntity>(
-				'SELECT id, owner, identifier, status FROM placed_items WHERE owner = $1 AND identifier = $2',
-				[plotId, placedItem.itemData.id]
+				'SELECT id, owner, identifier, status FROM placed_items WHERE owner = $1',
+				[plotId]
 			);
 
 			if (existingPlacedItemResult.rows.length > 0) {
@@ -126,13 +126,75 @@ class PlacedItemRepository {
 	}
 
 	/**
+	 * If the placedItem does not exist, creates it for the user. Otherwise, modifies its identifier or status.
+	 * @plotId the id of the plot the placedItem belongs to
+	 * @item the placedItem
+	 * @client the pool client that this is nested within, or null if it should create its own transaction.
+	 * @returns a new PlacedItemEntity with the corresponding data if success, null if failure (or throws error)
+	*/
+	async createOrUpdatePlacedItem(plotId: string, item: PlacedItem, client?: PoolClient): Promise<PlacedItemEntity> {
+		const shouldReleaseClient = !client;
+		if (!client) {
+			client = await pool.connect();
+		}
+		try {
+			if (shouldReleaseClient) {
+				await client.query('BEGIN'); // Start the transaction
+			}
+			//TODO: Fix this
+			// owner check is so that we don't have 2 placedItems mapped to the same plot
+			// but we should really delete the old one instead of modifying it
+			// id check is to make sure this plot doesn't already exist,
+			// this is fine but it is technically possible to fetch 2 items at once 
+			// with this query, which will result in unexpected outputs
+			// Check if the placedItem already exists
+			const existingPlacedItemResult = await client.query<{id: string}>(
+				'SELECT id FROM placed_items WHERE id = $1 OR owner = $2',
+				[item.getPlacedItemId(), plotId]
+			);
+
+			let result;
+
+			if (existingPlacedItemResult.rows.length > 0) {
+				// Item already exists
+				result = await this.replacePlacedItemById(existingPlacedItemResult.rows[0].id, item.itemData.id, item.getStatus(), client);
+				if (!result) {
+					throw new Error(`Error updating placedItem with id ${item.getPlacedItemId()}`);
+				} 
+			} else {
+				console.error(`creating placedItem for plot id ${plotId}`);
+				result = await this.createPlacedItem(plotId, item, client);
+				if (!result) {
+					throw new Error(`Error creating placedItem with id ${item.getPlacedItemId()}`);
+				} 
+			}
+
+			if (shouldReleaseClient) {
+				await client.query('COMMIT'); // Rollback the transaction on error
+			}
+
+			return result;
+		} catch (error) {
+			if (shouldReleaseClient) {
+				await client.query('ROLLBACK'); // Rollback the transaction on error
+			}
+			console.error('Error creating plot:', error);
+			throw error; // Rethrow the error for higher-level handling
+		} finally {
+			if (shouldReleaseClient) {
+				client.release(); // Release the client back to the pool
+			}
+		}
+	}
+
+	/**
 	 * Sets the identifier of the placedItem, effectively changing the item. Uses row level locking.
 	 * @id the id of the placedItem
 	 * @newIdentifier the item template id
 	 * @newStatus the new status, defaults to empty string
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
-	async replacePlacedItemById(id: string, newIdentifier: string, newStatus?: string, client?: PoolClient): Promise<PlacedItemEntity | null> {
+	async replacePlacedItemById(id: string, newIdentifier: string, newStatus?: string, client?: PoolClient): Promise<PlacedItemEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -142,29 +204,31 @@ class PlacedItemRepository {
 				await client.query('BEGIN'); // Start the transaction
 			}
 
-			//Lock the row for update
-			const lockResult = await client.query<{id: string}>(
-				'SELECT id FROM placed_items WHERE id = $1 FOR UPDATE',
-				[id, newIdentifier]
-			);
-
-			if (lockResult.rows.length === 0) {
-				throw new Error(`PlacedItem not found for plotId: ${id}`);
-			}
-
 			if (!newStatus) {
 				newStatus = '';
 			}
 		
 			const placedItemResult = await client.query<PlacedItemEntity>(
-				'UPDATE placed_items SET identifier = $1, status = $2 WHERE id = $3 RETURNING id, owner, identifier, status',
+				`WITH updated AS (
+				   UPDATE placed_items 
+				   SET identifier = $1, status = $2 
+				   WHERE id = $3 
+				   AND (identifier != $1 OR status IS DISTINCT FROM $2)
+				 )
+				 SELECT id, owner, identifier, status
+				 FROM placed_items
+				 WHERE id = $3;`,
 				[newIdentifier, newStatus, id]
-				);
+			  );
 
 
 			// Check if result is valid
-			if (!placedItemResult || placedItemResult.rows.length === 0) {
+			if (!placedItemResult) {
 				throw new Error('There was an error updating the placedItem');
+			}
+
+			if (placedItemResult.rows.length === 0) {
+				console.warn(`No changes made for placedItem with id ${id}`);
 			}
 
 			if (shouldReleaseClient) {
@@ -192,7 +256,7 @@ class PlacedItemRepository {
 	 * @newStatus the new status, defaults to empty string
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
-	async replacePlacedItemByPlotId(plotId: string, newIdentifier: string, newStatus?: string, client?: PoolClient): Promise<PlacedItemEntity | null> {
+	async replacePlacedItemByPlotId(plotId: string, newIdentifier: string, newStatus?: string, client?: PoolClient): Promise<PlacedItemEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -200,16 +264,6 @@ class PlacedItemRepository {
 		try {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
-			}
-
-			//Lock the row for update
-			const lockResult = await client.query<{id: string}>(
-				'SELECT id FROM placed_items WHERE owner = $1 FOR UPDATE',
-				[plotId, newIdentifier]
-			);
-
-			if (lockResult.rows.length === 0) {
-				throw new Error(`PlacedItem not found for plotId: ${plotId}`);
 			}
 
 			if (!newStatus) {
@@ -252,7 +306,7 @@ class PlacedItemRepository {
 	 * @newStatus the new status
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
-	async setPlacedItemStatusById(id: string, newStatus: string, client?: PoolClient): Promise<PlacedItemEntity | null> {
+	async setPlacedItemStatusById(id: string, newStatus: string, client?: PoolClient): Promise<PlacedItemEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -260,16 +314,6 @@ class PlacedItemRepository {
 		try {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
-			}
-
-			//Lock the row for update
-			const lockResult = await client.query<{id: string}>(
-				'SELECT id FROM placed_items WHERE id = $1 FOR UPDATE',
-				[id]
-			);
-
-			if (lockResult.rows.length === 0) {
-				throw new Error(`PlacedItem not found for id: ${id}`);
 			}
 		
 			const placedItemResult = await client.query<PlacedItemEntity>(
@@ -307,7 +351,7 @@ class PlacedItemRepository {
 	 * @newStatus the new status
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
-	async setPlacedItemStatusByPlotId(plotId: string, newStatus: string, client?: PoolClient): Promise<PlacedItemEntity | null> {
+	async setPlacedItemStatusByPlotId(plotId: string, newStatus: string, client?: PoolClient): Promise<PlacedItemEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -315,16 +359,6 @@ class PlacedItemRepository {
 		try {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
-			}
-
-			//Lock the row for update
-			const lockResult = await client.query<{id: string}>(
-				'SELECT id FROM placed_items WHERE owner = $1 FOR UPDATE',
-				[plotId]
-			);
-
-			if (lockResult.rows.length === 0) {
-				throw new Error(`PlacedItem not found for plotId: ${plotId}`);
 			}
 		
 			const placedItemResult = await client.query<PlacedItemEntity>(
@@ -361,7 +395,7 @@ class PlacedItemRepository {
 	 * @id the id of the placedItem
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
-	async deletePlacedItemById(id: string, client?: PoolClient): Promise<PlacedItemEntity | null> {
+	async deletePlacedItemById(id: string, client?: PoolClient): Promise<PlacedItemEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -371,15 +405,6 @@ class PlacedItemRepository {
 				await client.query('BEGIN'); // Start the transaction
 			}
 
-			//Lock the row for update
-			const lockResult = await client.query<{id: string, current_status: number}>(
-				'SELECT id, status AS current_status FROM placed_items WHERE id = $1 FOR UPDATE',
-				[id]
-			);
-
-			if (lockResult.rows.length === 0) {
-				throw new Error(`PlacedItem not found for id: ${id}`);
-			}
 			const deleteResult = await client.query<PlacedItemEntity>(
 				'DELETE FROM placed_items WHERE id = $1 RETURNING id, owner, identifier, status',
 				[id]
@@ -409,7 +434,7 @@ class PlacedItemRepository {
 	 * @plotId the id of the owner (plot)
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
-	async deletePlacedItemByPlotId(plotId: string, client?: PoolClient): Promise<PlacedItemEntity | null> {
+	async deletePlacedItemByPlotId(plotId: string, client?: PoolClient): Promise<PlacedItemEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -419,15 +444,6 @@ class PlacedItemRepository {
 				await client.query('BEGIN'); // Start the transaction
 			}
 
-			//Lock the row for update
-			const lockResult = await client.query<{id: string, current_status: number}>(
-				'SELECT id, status AS current_status FROM placed_items WHERE owner = $1 FOR UPDATE',
-				[plotId]
-			);
-
-			if (lockResult.rows.length === 0) {
-				throw new Error(`PlacedItem not found for plotId: ${plotId}`);
-			}
 			const deleteResult = await client.query<PlacedItemEntity>(
 				'DELETE FROM placed_items WHERE owner = $1 RETURNING id, owner, identifier, status',
 				[plotId]
@@ -458,7 +474,7 @@ class PlacedItemRepository {
 	 * @columnIndex the column this plot is in
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
-	async deletePlacedItemFromGarden(gardenId: string, rowIndex: number, columnIndex: number, client?: PoolClient): Promise<PlacedItemEntity | null> {
+	async deletePlacedItemFromGarden(gardenId: string, rowIndex: number, columnIndex: number, client?: PoolClient): Promise<PlacedItemEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -476,17 +492,6 @@ class PlacedItemRepository {
 			if (!existingPlotResult || existingPlotResult.rows.length === 0) {
 				throw new Error(`Could not find plot for garden id: ${gardenId} at row ${rowIndex}, col ${columnIndex}`);
 			}
-
-			//Lock the row for update
-			const lockResult = await client.query<{id: string, current_status: number}>(
-				'SELECT id, status AS current_status FROM placed_items WHERE owner = $1 FOR UPDATE',
-				[existingPlotResult.rows[0].plot_id]
-			);
-
-			if (lockResult.rows.length === 0) {
-				throw new Error(`PlacedItem not found for plotId: ${existingPlotResult.rows[0].plot_id}`);
-			}
-
 
 			const deleteResult = await client.query<PlacedItemEntity>(
 				'DELETE FROM placed_items WHERE owner = $1 RETURNING id, owner, identifier, status',

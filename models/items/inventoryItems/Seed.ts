@@ -14,8 +14,8 @@ export class Seed extends InventoryItem {
 	static fromPlainObject(plainObject: any): Seed {
 		try {
             // Validate plainObject structure
-            if (!plainObject || typeof plainObject !== 'object' || !plainObject.itemData || !plainObject.quantity) {
-                throw new Error('Invalid plainObject structure for SeedItem');
+            if (!plainObject || typeof plainObject !== 'object' || !plainObject.itemData || (plainObject.quantity == null)) {
+				throw new Error('Invalid plainObject structure for SeedItem');
             }
 			// Validate required properties
 			const { inventoryItemId, itemData, quantity } = plainObject;

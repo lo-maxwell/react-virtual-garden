@@ -19,6 +19,7 @@ const GardenComponent = () => {
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
 	const [showExpansionOptions, setShowExpansionOptions] = useState(false);
+	const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
 
 	const [currentTime, setCurrentTime] = useState(Date.now());
 	// const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
@@ -32,7 +33,7 @@ const GardenComponent = () => {
 	}, []);
 
 	const GetPlotAction = (plot: Plot, selected: InventoryItem | null) => {
-		const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
+		
 		if (plot.getItemSubtype() == ItemSubtypes.GROUND.name && selected != null) {
 			if (selected.itemData.subtype == ItemSubtypes.SEED.name) {
 				return plantSeed(selected, plot);

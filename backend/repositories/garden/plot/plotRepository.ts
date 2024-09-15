@@ -86,7 +86,7 @@ class PlotRepository {
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns an ExtendedPlotEntity with the corresponding data if success, null if failure (or throws error)
 	 */
-	async createPlot(ownerId: string, rowIndex: number, columnIndex: number, plot?: Plot, client?: PoolClient): Promise<ExtendedPlotEntity | null> {
+	async createPlot(ownerId: string, rowIndex: number, columnIndex: number, plot?: Plot, client?: PoolClient): Promise<ExtendedPlotEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -129,12 +129,6 @@ class PlotRepository {
 				throw new Error(`There was an error creating the plot with id ${result.rows[0].id}`);
 			}
 
-			//Create placedItem for this plot
-			const createPlacedItemResult = placedItemRepository.createPlacedItem(result.rows[0].id, plot.getItem(), client);
-			if (!createPlacedItemResult) {
-				throw new Error(`There was an error creating the placedItem for plot with id ${result.rows[0].id}`);
-			}
-
 			if (shouldReleaseClient) {
 				await client.query('COMMIT'); // Rollback the transaction on error
 			}
@@ -156,6 +150,108 @@ class PlotRepository {
 		}
 	}
 
+	/**
+	 * If the plot does not exist, creates it for the garden. Otherwise, modifies its plant time and uses remaining.
+	 * @gardenId the id of the garden the plot belongs to
+	 * @rowIndex the row index
+	 * @columnIndex the column index
+	 * @plot the plot
+	 * @client the pool client that this is nested within, or null if it should create its own transaction.
+	 * @returns a new GardenEntity with the corresponding data if success, null if failure (or throws error)
+	*/
+	async createOrUpdatePlot(gardenId: string, rowIndex: number, columnIndex: number, plot: Plot, client?: PoolClient): Promise<ExtendedPlotEntity> {
+		const shouldReleaseClient = !client;
+		if (!client) {
+			client = await pool.connect();
+		}
+		try {
+			if (shouldReleaseClient) {
+				await client.query('BEGIN'); // Start the transaction
+			}
+			//TODO: Delete plots if they are found here
+			// Check if the plot already exists
+
+			const existingPlotResult = await client.query<{id: string}>(
+				'SELECT id FROM plots WHERE id = $1 OR (owner = $2 AND row_index = $3 AND col_index = $4)',
+				[plot.getPlotId(), gardenId, rowIndex, columnIndex]
+			);
+
+			let result;
+
+			if (existingPlotResult.rows.length > 0) {
+				// Plot already exists
+				result = await this.updateEntirePlot(plot, client);
+				if (!result) {
+					throw new Error(`Error updating plot with id ${plot.getPlotId()}`);
+				} 
+			} else {
+				result = await this.createPlot(gardenId, rowIndex, columnIndex, plot, client);
+				if (!result) {
+					throw new Error(`Error creating plot with id ${plot.getPlotId()}`);
+				} 
+			}
+
+			if (shouldReleaseClient) {
+				await client.query('COMMIT'); // Rollback the transaction on error
+			}
+
+			return result;
+		} catch (error) {
+			if (shouldReleaseClient) {
+				await client.query('ROLLBACK'); // Rollback the transaction on error
+			}
+			console.error('Error creating plot:', error);
+			throw error; // Rethrow the error for higher-level handling
+		} finally {
+			if (shouldReleaseClient) {
+				client.release(); // Release the client back to the pool
+			}
+		}
+	}
+
+	/**
+	 * Updates a plot (plant time, uses remaining)
+	 * @plot the plot to update
+	 * @returns a PlotEntity with the new data on success (or throws error)
+	 */
+	 async updateEntirePlot(plot: Plot, client?: PoolClient): Promise<ExtendedPlotEntity> {
+		const shouldReleaseClient = !client;
+		if (!client) {
+			client = await pool.connect();
+		}
+		try {
+			if (shouldReleaseClient) {
+				await client.query('BEGIN'); // Start the transaction
+			}
+		
+			const plotResult = await client.query<ExtendedPlotEntity>(
+				'UPDATE plots SET plant_time = $1, uses_remaining = $2 WHERE id = $3 RETURNING *',
+				[plot.getPlantTime(), plot.getUsesRemaining(), plot.getPlotId()]
+				);
+
+			// Check if result is valid
+			if (!plotResult || plotResult.rows.length === 0) {
+				throw new Error('There was an error updating the plot');
+			}
+
+			if (shouldReleaseClient) {
+				await client.query('COMMIT'); // Rollback the transaction on error
+			}
+			const updatedRow = plotResult.rows[0];
+			return updatedRow;
+		} catch (error) {
+			if (shouldReleaseClient) {
+				await client.query('ROLLBACK'); // Rollback the transaction on error
+			}
+			console.error('Error updating plot:', error);
+			throw error; // Rethrow the error for higher-level handling
+		} finally {
+			if (shouldReleaseClient) {
+				client.release(); // Release the client back to the pool
+			}
+		}
+	}
+
 
 	/**
 	 * Sets the coordinates of the plot. Uses row level locking.
@@ -165,7 +261,7 @@ class PlotRepository {
 	 * @newColumnIndex the new column index
 	 * @returns a PlotEntity with the new data on success (or throws error)
 	 */
-	async setPlotCoords(id: string, newRowIndex: number, newColumnIndex: number, client?: PoolClient): Promise<PlotEntity | null> {
+	async setPlotCoords(id: string, newRowIndex: number, newColumnIndex: number, client?: PoolClient): Promise<PlotEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -173,16 +269,6 @@ class PlotRepository {
 		try {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
-			}
-
-			//Lock the row for update
-			const lockResult = await client.query<{id: string}>(
-				'SELECT id FROM plots WHERE id = $1 FOR UPDATE',
-				[id]
-			);
-
-			if (lockResult.rows.length === 0) {
-				throw new Error(`Plot not found for id: ${id}`);
 			}
 		
 			const plotResult = await client.query<PlotEntity>(
@@ -220,7 +306,7 @@ class PlotRepository {
 	 * @newPlantTime the new plant time
 	 * @returns a PlotEntity with the new data on success (or throws error)
 	 */
-	async setPlotPlantTime(id: string, newPlantTime: number, client?: PoolClient): Promise<PlotEntity | null> {
+	async setPlotPlantTime(id: string, newPlantTime: number, client?: PoolClient): Promise<PlotEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -228,16 +314,6 @@ class PlotRepository {
 		try {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
-			}
-
-			//Lock the row for update
-			const lockResult = await client.query<{id: string}>(
-				'SELECT id FROM plots WHERE id = $1 FOR UPDATE',
-				[id]
-			);
-
-			if (lockResult.rows.length === 0) {
-				throw new Error(`Plot not found for id: ${id}`);
 			}
 		
 			const plotResult = await client.query<PlotEntity>(
@@ -276,7 +352,7 @@ class PlotRepository {
 	 * @newUsesRemaining the new number of uses remaining
 	 * @returns a PlotEntity with the new data on success (or throws error)
 	 */
-	async setPlotUsesRemaining(id: string, newUsesRemaining: number, client?: PoolClient): Promise<PlotEntity | null> {
+	async setPlotUsesRemaining(id: string, newUsesRemaining: number, client?: PoolClient): Promise<PlotEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -284,16 +360,6 @@ class PlotRepository {
 		try {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
-			}
-
-			//Lock the row for update
-			const lockResult = await client.query<{id: string}>(
-				'SELECT id FROM plots WHERE id = $1 FOR UPDATE',
-				[id]
-			);
-
-			if (lockResult.rows.length === 0) {
-				throw new Error(`Plot not found for id: ${id}`);
 			}
 		
 			const plotResult = await client.query<PlotEntity>(
@@ -332,7 +398,7 @@ class PlotRepository {
 	 * @usesDelta the number of uses to change by (use -1 for decreasing by 1)
 	 * @returns a PlotEntity with the new data on success (or throws error)
 	 */
-	async updatePlotUsesRemaining(id: string, usesDelta: number, client?: PoolClient): Promise<PlotEntity | null> {
+	async updatePlotUsesRemaining(id: string, usesDelta: number, client?: PoolClient): Promise<PlotEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();

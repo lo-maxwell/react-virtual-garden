@@ -20,7 +20,6 @@ export interface PlotComponentRef {
 
 const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, onPlotClick, currentTime}, ref) => {
 	PlotComponent.displayName = "Plot";
-	const { garden } = useGarden();
 	const [displayIcon, setDisplayIcon] = useState(plot.getItem().itemData.icon);
 
 	const getColor = () => {

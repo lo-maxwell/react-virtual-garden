@@ -249,52 +249,21 @@
   * Plots need ids (or just row/column/owner) so we can track them in database
   * Maybe plots are always in existence (once user is leveled), expanding/shrinking just shows/hides them and makes them uninteractable
 
-## Day 21-25
+## Day 21-30
 
 ### Working on database schemas, services, api routing, integrating database queries with updating backend models
 
-### User
-  * service, routing
-  * createUser for generating a new row in database
-  * makeUserObject to return a user object (requires a valid levelSystem in database)
-  * change icon and username
-
-### LevelSystem
-  * service, routing
-  * createLevelSystem (needs owner and levelsystem object)
-  * makeLevelSystemObject
-  * change level details (level, currentxp, growth rate)
-  * add xp by cloning the database level, gaining xp on it, and reuploading
-
-### Inventory
-  * service, routing
-  * createInventory (needs owner and inventory object, doesn't create inventory items)
-  * makeInventoryObject (requires inventoryItems in database)
-  * change gold amount (set and update)
-
-### Store
-  * service, routing
-  * createStore (needs owner and store object, doesn't create store items)
-  * makeStoreObject (requires storeItems in database)
-  * set identifier (maps to hardcoded store values), restock time
-
-### Garden
-  * service, routing
-  * createGarden (needs owner and garden object, doesn't create plots)
-  * makeGardenObject (requires plots in database)
-  * change size (set/update rows/columns)
-
-### Plots
-  * service, routing
-  * createPlot (needs owner (garden) and plot object, doesn't create placedItem)
-  * makePlotObject (requires placedItem in database)
-  * change plantTime and usesRemaining
-
-### InventoryItems
-
-### PlacedItems
-
-### StoreItems
+### Added repository, service, routing for the following:
+  * User
+  * LevelSystem
+  * Garden
+  * Plot
+  * PlacedItem
+  * Inventory
+  * InventoryItem
+  * Store
+  * StoreItem
+  * Contains various functions to interact with database and send/receive data from api routes
 
 ### Create X Service functions should take in the model and use it to produce the entire object in database
 
@@ -355,6 +324,15 @@ TODO: Test to make sure ids are working
 User should be sending a harvest plant request/create account request, not add xp or add item requests
 
 Creation uses owners, updating uses direct ids
+
+TODO: Items are no longer deleted when quantity is 0, we just don't display them on the frontend
+TODO: Items are no longer deleted from database when quantity is 0 (though they can be garbage collected after inactivity)
+
+Saving a plot to the database, then removing it (by shrinking row/col), then re adding it, will result in save errors because we have created a new plot isntance with the same owner and coordinates, but a different id
+
+This can be fixed by not deleting plots on the model side, or by saving to the correct location, or by deleting the plots on the database side
+
+Replanting and reharvesting will currently error if you don't save in between, because the database doesn't recognize that the plot is harvestable. this should be fixed naturally when plantItem is added.
 
 
 Stretch Goals

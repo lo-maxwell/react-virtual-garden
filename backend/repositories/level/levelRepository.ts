@@ -66,7 +66,7 @@ class LevelRepository {
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns a new LevelSystem with the corresponding data if success, null if failure (or throws error)
 	 */
-	async createLevelSystem(owner: string, ownerType: string, levelSystem: LevelSystem, client?: PoolClient): Promise<LevelSystemEntity | null> {
+	async createLevelSystem(owner: string, ownerType: string, levelSystem: LevelSystem, client?: PoolClient): Promise<LevelSystemEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -123,14 +123,14 @@ class LevelRepository {
 
 
 	/**
-	 * Sets the levelsystem data. Uses row level locking.
-	 * @id the level system id
-	 * @level the current level
-	 * @currentExp the current xp
-	 * @growthRate the growth rate, as a float
-	 * @returns a LevelSystemEntity with the new data on success (or throws error)
-	 */
-	async setLevelSystem(id: string, level: number, currentExp: number, growthRate: number, client?: PoolClient): Promise<LevelSystemEntity | null> {
+	 * If the levelSystem does not exist, creates it for the user. Otherwise, modifies its data.
+	 * @userId the id of the user the levelSystem belongs to
+	 * @ownerType 'user' etc
+	 * @levelSystem the levelSystem
+	 * @client the pool client that this is nested within, or null if it should create its own transaction.
+	 * @returns a new LevelSystemEntity with the corresponding data if success, null if failure (or throws error)
+	*/
+	async createOrUpdateLevelSystem(userId: string, ownerType: string, levelSystem: LevelSystem, client: PoolClient): Promise<LevelSystemEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -139,15 +139,81 @@ class LevelRepository {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
 			}
-
-			//Lock the row for update
-			const lockResult = await client.query<LevelSystemEntity>(
-				'SELECT * FROM levels WHERE id = $1 FOR UPDATE',
-				[id]
+			// Check if the inventory already exists
+			const existingLevelSystemResult = await client.query<{id: string}>(
+				'SELECT id FROM levels WHERE id = $1',
+				[levelSystem.getLevelSystemId()]
 			);
 
-			if (lockResult.rows.length === 0) {
-				throw new Error('Level system not found');
+			let result;
+
+			if (existingLevelSystemResult.rows.length > 0) {
+				// Inventory already exists
+				result = await this.updateEntireLevelSystem(levelSystem);
+				if (!result) {
+					throw new Error(`Error updating levelSystem with id ${levelSystem.getLevelSystemId()}`);
+				} 
+			} else {
+				result = await this.createLevelSystem(userId, ownerType, levelSystem, client);
+				if (!result) {
+					throw new Error(`Error creating levelSystem with id ${levelSystem.getLevelSystemId()}`);
+				} 
+			}
+
+			if (shouldReleaseClient) {
+				await client.query('COMMIT'); // Rollback the transaction on error
+			}
+
+			return result;
+		} catch (error) {
+			if (shouldReleaseClient) {
+				await client.query('ROLLBACK'); // Rollback the transaction on error
+			}
+			console.error('Error creating inventory:', error);
+			throw error; // Rethrow the error for higher-level handling
+		} finally {
+			if (shouldReleaseClient) {
+				client.release(); // Release the client back to the pool
+			}
+		}
+	}
+
+	/**
+	 * Changes all data fields for a specified levelSystem (level, currentxp, growth rate)
+	 * @levelSystem the levelSystem to update
+	 * @returns a LevelSystemEntity with the new data on success (or throws error)
+	 */
+	 async updateEntireLevelSystem(levelSystem: LevelSystem): Promise<LevelSystemEntity> {
+		const levelSystemResult = await query<LevelSystemEntity>(
+			'UPDATE levels SET level = $1, current_xp = $2, growth_rate = $3 WHERE id = $4 RETURNING id, level, current_xp, growth_rate',
+			[levelSystem.getLevel(), levelSystem.getCurrentExp(), levelSystem.getGrowthRate(), levelSystem.getLevelSystemId()]
+			);
+
+		// Check if result is valid
+		if (!levelSystemResult || levelSystemResult.rows.length === 0) {
+			throw new Error(`Could not find levelSystem for id ${levelSystem.getLevelSystemId()}`);
+		}
+
+		const updatedRow = levelSystemResult.rows[0];
+		return updatedRow;
+	}
+
+	/**
+	 * Sets the levelsystem data. Uses row level locking.
+	 * @id the level system id
+	 * @level the current level
+	 * @currentExp the current xp
+	 * @growthRate the growth rate, as a float
+	 * @returns a LevelSystemEntity with the new data on success (or throws error)
+	 */
+	async setLevelSystem(id: string, level: number, currentExp: number, growthRate: number, client?: PoolClient): Promise<LevelSystemEntity> {
+		const shouldReleaseClient = !client;
+		if (!client) {
+			client = await pool.connect();
+		}
+		try {
+			if (shouldReleaseClient) {
+				await client.query('BEGIN'); // Start the transaction
 			}
 		
 			const levelSystemResult = await client.query<LevelSystemEntity>(
@@ -186,7 +252,7 @@ class LevelRepository {
 	 * @xpAmount the amount of xp gained, must be positive
 	 * @returns a LevelSystemEntity with the new data on success (or throws error)
 	 */
-	async gainExp(id: string, xpAmount: number, client?: PoolClient): Promise<LevelSystemEntity | null> {
+	async gainExp(id: string, xpAmount: number, client?: PoolClient): Promise<LevelSystemEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();

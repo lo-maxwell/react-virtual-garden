@@ -122,6 +122,7 @@ export class Store extends ItemStore {
 
 	toPlainObject(): any {
 		return {
+			storeId: this.storeId,
 			identifier: this.identifier,
 			storeName: this.storeName,
 			// stockList: this.stockList.toPlainObject(), // We do not save stocklist, it is grabbed from database

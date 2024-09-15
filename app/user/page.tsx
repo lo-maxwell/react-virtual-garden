@@ -8,6 +8,14 @@ import Icon, { IconEntity } from "@/models/user/icons/Icon";
 import { useInventory } from "../hooks/contexts/InventoryContext";
 import { useGarden } from "../hooks/contexts/GardenContext";
 import { useStore } from "../hooks/contexts/StoreContext";
+import { saveUser } from "@/utils/localStorage/user";
+import User from "@/models/user/User";
+import { Garden } from "@/models/garden/Garden";
+import { Inventory } from "@/models/itemStore/inventory/Inventory";
+import { Store } from "@/models/itemStore/store/Store";
+import { saveGarden } from "@/utils/localStorage/garden";
+import { saveInventory } from "@/utils/localStorage/inventory";
+import { saveStore } from "@/utils/localStorage/store";
 
 const UserPage = () => {
   
@@ -21,14 +29,8 @@ const UserPage = () => {
       return <></>;
     }
 
-    const handleCreateUserButton = async () => {
+    const handleCreateAccountButton = async () => {
       try {
-        // const requestParameters = {
-        //   plainUserObject: user.toPlainObject(),
-        //   plainInventoryObject: inventory.toPlainObject(),
-        //   plainStoreObject: store.toPlainObject(),
-        //   plainGardenObject: garden.toPlainObject()
-        // }
         // Making the POST request to your API endpoint
         const response = await fetch('/api/account', {
           method: 'POST',
@@ -45,12 +47,75 @@ const UserPage = () => {
   
         // Check if the response is successful
         if (!response.ok) {
-          throw new Error('Failed to post new user');
+          throw new Error('Failed to post new account');
         }
   
         // Parsing the response data
         const result = await response.json();
         console.log('Successfully posted:', result);
+      } catch (error) {
+        console.error(error);
+      } finally {
+      }
+    }
+
+    const handleSaveAccountButton = async () => {
+      try {
+        // Making the POST request to your API endpoint
+        const response = await fetch('/api/account', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            plainUserObject: user.toPlainObject(),
+            plainInventoryObject: inventory.toPlainObject(),
+            plainStoreObject: store.toPlainObject(),
+            plainGardenObject: garden.toPlainObject()
+          }), // Send the new user data in the request body
+        });
+  
+        // Check if the response is successful
+        if (!response.ok) {
+          throw new Error('Failed to update account');
+        }
+  
+        // Parsing the response data
+        const result = await response.json();
+        console.log('Successfully updated:', result);
+      } catch (error) {
+        console.error(error);
+      } finally {
+      }
+    }
+
+    const handleFetchAccountButton = async () => {
+      try {
+        const userId = user.getUserId();
+        // Making the GET request to your API endpoint
+        const response = await fetch(`/api/account/${userId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        // Check if the response is successful
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+  
+        // Parsing the response data
+        const result = await response.json();
+        console.log('Successfully fetched:', result);
+        console.log(User.fromPlainObject(result.plainUserObject));
+        console.log(Garden.fromPlainObject(result.plainGardenObject));
+        console.log(Inventory.fromPlainObject(result.plainInventoryObject));
+        console.log(Store.fromPlainObject(result.plainStoreObject));
+        saveUser(User.fromPlainObject(result.plainUserObject));
+        saveGarden(Garden.fromPlainObject(result.plainGardenObject));
+        saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
+        saveStore(Store.fromPlainObject(result.plainStoreObject));
       } catch (error) {
         console.error(error);
       } finally {
@@ -131,7 +196,9 @@ const UserPage = () => {
               <LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} />
             </div>
             <div>Friends List goes here!</div>
-            <div><button onClick={handleCreateUserButton}> Save user to Database </button></div>
+            <div><button onClick={handleCreateAccountButton}> Create user in Database </button></div>
+            <div><button onClick={handleSaveAccountButton}> Save user to Database </button></div>
+            <div><button onClick={handleFetchAccountButton}> Fetch user from Database </button></div>
           </div>
 
           <div className={`w-2/3`}>

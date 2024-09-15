@@ -1,4 +1,4 @@
-import { updateUserUsername } from "@/backend/repositories/user/userRepository";
+import { updateUserUsername } from "@/backend/services/user/userService";
 import { NextResponse } from "@/node_modules/next/server";
 
 export async function PATCH(request: Request, { params }: { params: { userId: string } }) {

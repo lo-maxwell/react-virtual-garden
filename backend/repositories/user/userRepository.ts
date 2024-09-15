@@ -56,7 +56,7 @@ class UserRepository {
 		return instance;
 	}
 
-	async getUsersByName(searchName: string): Promise<User[] | null> {
+	async getUsersByName(searchName: string): Promise<User[]> {
 		const result = await query<UserEntity>('SELECT * FROM users WHERE username = $1', [searchName]);
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return [];
@@ -72,8 +72,6 @@ class UserRepository {
 		return result.rows[0];
 	}
 
-
-	//TODO: Make this only create the user row, and add a separate to initialize all
 	/**
 	 * Begins a transaction if there is not already one. Creates a new row in the users, levels, itemstores, inventoryItems (if there are existing items), garden, plots tables.
 	 * On error, rolls back.
@@ -81,7 +79,7 @@ class UserRepository {
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns the UserEntity if success, null if failure (or throws error)
 	 */
-	async createUser(user: User, client?: PoolClient): Promise<UserEntity | null> {
+	async createUser(user: User, client?: PoolClient): Promise<UserEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -134,13 +132,82 @@ class UserRepository {
 		}
 	}
 
+	async createOrUpdateUser(user: User, client: PoolClient): Promise<UserEntity> {
+		const shouldReleaseClient = !client;
+		if (!client) {
+			client = await pool.connect();
+		}
+		try {
+			if (shouldReleaseClient) {
+				await client.query('BEGIN'); // Start the transaction
+			}
+
+			// Check if the user already exists
+			const existingUserResult = await client.query<{id: string}>(
+				'SELECT id FROM users WHERE id = $1',
+				[user.getUserId()]
+			);
+
+			let result;
+
+			if (existingUserResult.rows.length > 0) {
+				// User already exists
+				result = await this.updateEntireUser(user);
+				if (!result) {
+					throw new Error(`Error updating user with id ${user.getUserId()}`);
+				} 
+			} else {
+				result = await this.createUser(user, client);
+				if (!result) {
+					throw new Error(`Error creating user with id ${user.getUserId()}`);
+				} 
+			}
+
+			if (shouldReleaseClient) {
+				await client.query('COMMIT'); // Rollback the transaction on error
+			}
+
+			return result;
+		} catch (error) {
+			if (shouldReleaseClient) {
+				await client.query('ROLLBACK'); // Rollback the transaction on error
+			}
+			console.error('Error creating user:', error);
+			throw error; // Rethrow the error for higher-level handling
+		} finally {
+			if (shouldReleaseClient) {
+				client.release(); // Release the client back to the pool
+			}
+		}
+	}
+
+	/**
+	 * Changes all data fields for a specified user (username, icon)
+	 * @user the user to update
+	 * @returns a UserEntity with the new data on success (or throws error)
+	 */
+	async updateEntireUser(user: User): Promise<UserEntity> {
+		const userResult = await query<UserEntity>(
+			'UPDATE users SET username = $1, icon = $2 WHERE id = $3 RETURNING id, username, icon',
+			[user.getUsername(), user.getIcon(), user.getUserId()]
+			);
+
+		// Check if result is valid
+		if (!userResult || userResult.rows.length === 0) {
+			throw new Error(`Could not find user for id ${user.getUserId()}`);
+		}
+
+		const updatedRow = userResult.rows[0];
+		return updatedRow;
+	}
+
 	/**
 	 * Changes the username for the given user id
 	 * @userId the id of the user to modify
 	 * @newUsername the new username of the user (maximum 255 characters)
 	 * @returns a UserEntity with the new username on success (or throws error)
 	 */
-	async updateUserUsername(userId: string, newUsername: string): Promise<UserEntity | null> {
+	async updateUserUsername(userId: string, newUsername: string): Promise<UserEntity> {
 		const userResult = await query<UserEntity>(
 			'UPDATE users SET username = $1 WHERE id = $2 RETURNING id, username, icon',
 			[newUsername, userId]
@@ -148,7 +215,7 @@ class UserRepository {
 
 		// Check if result is valid
 		if (!userResult || userResult.rows.length === 0) {
-			throw new Error('There was an error updating the username');
+			throw new Error(`Could not find user for id ${userId}`);
 		}
 
 		const updatedRow = userResult.rows[0];
@@ -162,7 +229,7 @@ class UserRepository {
 	 * @newIcon the new icon of the user (maximum 50 characters)
 	 * @returns a UserEntity with the new icon on success (or throws error)
 	 */
-	async updateUserIcon(userId: string, newIcon: string): Promise<UserEntity | null> {
+	async updateUserIcon(userId: string, newIcon: string): Promise<UserEntity> {
 		const userResult = await query<UserEntity>(
 			'UPDATE users SET icon = $1 WHERE id = $2 RETURNING id, username, icon',
 			[newIcon, userId]
@@ -170,7 +237,7 @@ class UserRepository {
 
 		// Check if result is valid
 		if (!userResult || userResult.rows.length === 0) {
-			throw new Error('There was an error updating the icon');
+			throw new Error(`Could not find user for id ${userId}`);
 		}
 
 		const updatedRow = userResult.rows[0];

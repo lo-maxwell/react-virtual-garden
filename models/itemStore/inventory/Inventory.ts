@@ -229,7 +229,6 @@ export class Inventory extends ItemStore{
 
 	/**
 	 * Consumes x quantity from the specified item. Fails if there is not enough quantity of item.
-	 * If the quantity hits 0, deletes the item from the inventory.
 	 * Performs a specific action depending on the item type:
 	 * Blueprint -> returns the Decoration ItemTemplate corresponding to the Blueprint
 	 * Seed -> returns the Plant ItemTemplate corresponding to the Seed
@@ -242,16 +241,17 @@ export class Inventory extends ItemStore{
 	 */
 	 useItem(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
 		const response = this.items.useItem(item, quantity);
-		if (response.isSuccessful()) {
-			if (response.payload.originalItem.quantity <= 0) {
-				const deleteResponse = this.deleteItem(response.payload.originalItem);
-				if (!deleteResponse.isSuccessful()) {
-					response.addErrorMessage(`Error deleting item after using down to 0 quantity`);
-					return response;
-				}
-				//we throw away the response from delete if it succeeds
-			}
-		}
+		//Does not delete upon hitting 0 quantity
+		// if (response.isSuccessful()) {
+		// 	if (response.payload.originalItem.quantity <= 0) {
+		// 		const deleteResponse = this.deleteItem(response.payload.originalItem);
+		// 		if (!deleteResponse.isSuccessful()) {
+		// 			response.addErrorMessage(`Error deleting item after using down to 0 quantity`);
+		// 			return response;
+		// 		}
+		// 		//we throw away the response from delete if it succeeds
+		// 	}
+		// }
 		return response;
 	}
 

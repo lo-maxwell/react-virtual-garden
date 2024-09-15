@@ -11,6 +11,7 @@ import { PlacedItemTemplate } from "../items/templates/models/PlacedItemTemplate
 import { placeholderItemTemplates } from "../items/templates/models/PlaceholderItemTemplate";
 import { PlantTemplate } from "../items/templates/models/PlantTemplate";
 import { v4 as uuidv4 } from 'uuid';
+import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 
 export interface PlotEntity {
 	row_index: number,
@@ -406,6 +407,31 @@ export class Plot {
 			newItem: findItemResponse.payload
 		}
 		return response;
+	}
+
+	/**
+	 * Checks whether an item is harvestable or not
+	 * @itemData the item to check
+	 * @plantTime the time the plant was planted
+	 * @currentTime the number of ms since epoch time, defaults to Date.now()
+	 */
+	static canHarvest(itemData: ItemTemplate, plantTime: number, usesRemaining: number, currentTime = Date.now()): boolean {
+		if (itemData.subtype !== ItemSubtypes.PLANT.name) {
+			return false;
+		}
+		// check if enough time passed
+		const timeElapsed = currentTime - plantTime;
+		const plantTemplate = itemData as PlantTemplate;
+		let totalGrowTime;
+		if (plantTemplate.numHarvests <= usesRemaining) {
+			totalGrowTime = plantTemplate.growTime;
+		} else {
+			totalGrowTime = plantTemplate.repeatedGrowTime;
+		}
+		if (timeElapsed < totalGrowTime * 1000) {
+			return false;
+		}
+		return true;
 	}
 
 	/**

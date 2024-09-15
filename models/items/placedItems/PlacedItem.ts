@@ -4,11 +4,14 @@ import { ItemSubtypes } from "../ItemTypes";
 import { PlacedItemTemplate } from "../templates/models/PlacedItemTemplate";
 import { placeholderItemTemplates } from "../templates/models/PlaceholderItemTemplate";
 
-export interface PlacedItemEntity {
-	id: string,
-	owner: string, //maps to a plot
+export interface PlacedItemDetailsEntity {
 	identifier: string, //itemData.id
 	status: string
+}
+
+export interface PlacedItemEntity extends PlacedItemDetailsEntity {
+	id: string,
+	owner: string, //maps to a plot
 }
 
 export abstract class PlacedItem extends Item { 

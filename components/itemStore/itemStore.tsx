@@ -93,11 +93,17 @@ const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultip
 			}
 			return <div>{`This seems to be empty...`}</div>
 		}
-		return getItemList().map((item, itemIndex) => (
-			<div key={itemIndex}>
-				<InventoryItemComponent itemStore={itemStore} item={item} onClickFunction={onInventoryItemClickFunction} costMultiplier={costMultiplier} focus={item == selectedItem}></InventoryItemComponent>
-			</div>
-		))
+		return getItemList().map((item, itemIndex) => {
+			//Do not display items with 0 quantity
+			if (item.getQuantity() <= 0) {
+				return <div key={itemIndex}></div>;
+			}
+			return (
+				<div key={itemIndex}>
+					<InventoryItemComponent itemStore={itemStore} item={item} onClickFunction={onInventoryItemClickFunction} costMultiplier={costMultiplier} focus={item == selectedItem}></InventoryItemComponent>
+				</div>
+			)
+	})
 	}
 
 	return (<>

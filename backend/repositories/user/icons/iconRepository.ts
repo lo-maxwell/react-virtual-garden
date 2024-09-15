@@ -40,7 +40,7 @@ class IconRepository {
 		return instance;
 	}
 
-	async createIcon(inputName: string, inputIcon: string): Promise<Icon | null> {
+	async createIcon(inputName: string, inputIcon: string): Promise<Icon> {
 		const result = await query<IconEntity>(
 			'INSERT INTO icons (name, icon) VALUES ($1, $2) RETURNING *',
 			[inputName, inputIcon]

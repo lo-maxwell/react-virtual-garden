@@ -1,4 +1,3 @@
-import { createIcon, getAllIcons } from "@/backend/services/user/icons/iconService";
 import { NextResponse } from "@/node_modules/next/server";
 
 
@@ -21,3 +20,12 @@ export async function GET() {
 	  return NextResponse.json({ error: (error as Error).message }, { status: 500 });
 	}
   }
+
+function getAllIcons() {
+	throw new Error("Function not implemented.");
+}
+
+
+function createIcon(name: any, icon: any) {
+	throw new Error("Function not implemented.");
+}

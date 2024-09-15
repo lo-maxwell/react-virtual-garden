@@ -8,7 +8,7 @@ import storeItemRepository from "../../items/inventoryItem/storeItemRepository";
 
 class StoreRepository {
 
-	async getStoreItems(id: string): Promise<ItemList | null> {
+	async getStoreItems(id: string): Promise<ItemList> {
 		const itemResults = await storeItemRepository.getAllStoreItemsByOwnerId(id);
 		const items = new ItemList();
 		for (const itemResult of itemResults) {
@@ -32,7 +32,7 @@ class StoreRepository {
 			throw new Error(`Invalid types while creating Store`);
 		}
 		//TODO: Fetches all relevant data from database and uses it to construct user
-		let itemList: ItemList | null = await this.getStoreItems(storeEntity.id);
+		let itemList: ItemList = await this.getStoreItems(storeEntity.id);
 		if (!itemList) itemList = new ItemList();
 		const storeData = storeFactory.getStoreInterfaceById(storeEntity.identifier);
 		if (!storeData) {
@@ -98,7 +98,7 @@ class StoreRepository {
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns a new Store with the corresponding data if success, null if failure (or throws error)
 	 */
-	async createStore(ownerId: string, store: Store, client?: PoolClient): Promise<StoreEntity | null> {
+	async createStore(ownerId: string, store: Store, client?: PoolClient): Promise<StoreEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -130,23 +130,6 @@ class StoreRepository {
 				throw new Error('Failed to insert store');
 			}
 
-			//Create store items
-			const storeItemPromises: Promise<void>[] = []; // Array to store promises
-			const storeItems = store.getAllItems();
-			storeItems.forEach((item) => {
-				// Create a promise for each inventoryItem creation and store it in the array
-				const storeItemPromise = storeItemRepository.createStoreItem(result.rows[0].id, item, client)
-					.then((storeItemResult) => {
-						if (!storeItemResult) {
-							throw new Error(`Error creating store item for item ${item.itemData.id}`);
-						}
-					});
-				storeItemPromises.push(storeItemPromise);
-			});
-
-			// Wait for all storeItem creation promises to resolve
-			await Promise.allSettled(storeItemPromises);
-
 			if (shouldReleaseClient) {
 				await client.query('COMMIT'); // Rollback the transaction on error
 			}
@@ -170,12 +153,13 @@ class StoreRepository {
 	}
 
 	/**
-	 * Sets the identifier of the store. Uses row level locking.
-	 * @id the id of the store
-	 * @newIdentifier the new identifier
-	 * @returns a StoreEntity with the new data on success (or throws error)
-	 */
-	async setStoreIdentifier(id: string, newIdentifier: number, client?: PoolClient): Promise<StoreEntity | null> {
+	 * If the store does not exist, creates it for the user. Otherwise, modifies its gold.
+	 * @userId the id of the user the store belongs to
+	 * @store the store
+	 * @client the pool client that this is nested within, or null if it should create its own transaction.
+	 * @returns a new StoreEntity with the corresponding data if success, null if failure (or throws error)
+	*/
+	async createOrUpdateStore(userId: string, store: Store, client: PoolClient): Promise<StoreEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -184,22 +168,65 @@ class StoreRepository {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
 			}
-
-			//Lock the row for update
-			const lockResult = await client.query<StoreEntity>(
-				'SELECT owner, identifier, last_restock_time_ms FROM stores WHERE id = $1 FOR UPDATE',
-				[id]
+			// Check if the inventory already exists
+			const existingStoreResult = await client.query<{id: string}>(
+				'SELECT id FROM stores WHERE id = $1',
+				[store.getStoreId()]
 			);
 
-			if (lockResult.rows.length === 0) {
-				throw new Error(`Store with id ${id} not found in database`);
+			let result;
+
+			if (existingStoreResult.rows.length > 0) {
+				// Store already exists
+				result = await this.setStoreIdentifier(existingStoreResult.rows[0].id, store.getStoreIdentifier(), client);
+				if (!result) {
+					throw new Error(`Error updating store with id ${store.getStoreId()}`);
+				} 
+			} else {
+				result = await this.createStore(userId, store, client);
+				if (!result) {
+					throw new Error(`Error creating store with id ${store.getStoreId()}`);
+				} 
+			}
+
+			if (shouldReleaseClient) {
+				await client.query('COMMIT'); // Rollback the transaction on error
+			}
+
+			return result;
+		} catch (error) {
+			if (shouldReleaseClient) {
+				await client.query('ROLLBACK'); // Rollback the transaction on error
+			}
+			console.error('Error creating inventory:', error);
+			throw error; // Rethrow the error for higher-level handling
+		} finally {
+			if (shouldReleaseClient) {
+				client.release(); // Release the client back to the pool
+			}
+		}
+	}
+
+	/**
+	 * Sets the identifier of the store. Uses row level locking.
+	 * @id the id of the store
+	 * @newIdentifier the new identifier
+	 * @returns a StoreEntity with the new data on success (or throws error)
+	 */
+	async setStoreIdentifier(id: string, newIdentifier: number, client?: PoolClient): Promise<StoreEntity> {
+		const shouldReleaseClient = !client;
+		if (!client) {
+			client = await pool.connect();
+		}
+		try {
+			if (shouldReleaseClient) {
+				await client.query('BEGIN'); // Start the transaction
 			}
 		
 			const storeResult = await client.query<StoreEntity>(
 				'UPDATE stores SET identifier = $1 WHERE id = $2 RETURNING owner, identifier, last_restock_time_ms',
 				[newIdentifier, id]
 				);
-
 
 			// Check if result is valid
 			if (!storeResult || storeResult.rows.length === 0) {
@@ -231,7 +258,7 @@ class StoreRepository {
 	 * @newRestockTime the new restock time, should usually use Date.now()
 	 * @returns a StoreEntity with the new data on success (or throws error)
 	 */
-	async setStoreLastRestockTime(id: string, newRestockTime: number, client?: PoolClient): Promise<StoreEntity | null> {
+	async setStoreLastRestockTime(id: string, newRestockTime: number, client?: PoolClient): Promise<StoreEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -239,16 +266,6 @@ class StoreRepository {
 		try {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
-			}
-
-			//Lock the row for update
-			const lockResult = await client.query<StoreEntity>(
-				'SELECT owner, identifier, last_restock_time_ms FROM stores WHERE id = $1 FOR UPDATE',
-				[id]
-			);
-
-			if (lockResult.rows.length === 0) {
-				throw new Error(`Store for owner ${id} not found in database`);
 			}
 		
 			const storeResult = await client.query<StoreEntity>(
