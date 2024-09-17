@@ -467,6 +467,11 @@ export class Plot {
 			response.addErrorMessage(`item to replace with is of type ${updatedItem.itemData.type} but should be placedItem, cannot replace`);
 			return response;
 		}
+		//Ensure consistency with service harvest
+		if (!instantHarvest && !Plot.canHarvest(this.getItem().itemData, this.getPlantTime(), this.getUsesRemaining(), currentTime)) {
+			response.addErrorMessage(`Ran into an error while attempting to harvest.`);
+			return response;
+		}
 		const originalItem = this.item;
 		let useItemResponse: GardenTransactionResponse;
 		useItemResponse = originalItem.use();

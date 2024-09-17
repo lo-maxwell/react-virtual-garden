@@ -301,6 +301,52 @@ class PlotRepository {
 	}
 
 	/**
+	 * Sets the plant time and usesRemaining of the plot. Uses row level locking.
+	 * @id the id of the plot
+	 * @newPlantTime the new plant time
+	 * @newUsesRemaining the new uses remaining
+	 * @returns a PlotEntity with the new data on success (or throws error)
+	 */
+	 async setPlotDetails(id: string, newPlantTime: number, newUsesRemaining: number, client?: PoolClient): Promise<PlotEntity> {
+		const shouldReleaseClient = !client;
+		if (!client) {
+			client = await pool.connect();
+		}
+		try {
+			if (shouldReleaseClient) {
+				await client.query('BEGIN'); // Start the transaction
+			}
+		
+			const plotResult = await client.query<PlotEntity>(
+				'UPDATE plots SET plant_time = $1, uses_remaining = $2 WHERE id = $3 RETURNING *',
+				[newPlantTime, newUsesRemaining, id]
+				);
+
+
+			// Check if result is valid
+			if (!plotResult || plotResult.rows.length === 0) {
+				throw new Error('There was an error updating the plot');
+			}
+
+			if (shouldReleaseClient) {
+				await client.query('COMMIT'); // Rollback the transaction on error
+			}
+			const updatedRow = plotResult.rows[0];
+			return updatedRow;
+		} catch (error) {
+			if (shouldReleaseClient) {
+				await client.query('ROLLBACK'); // Rollback the transaction on error
+			}
+			console.error('Error updating plot:', error);
+			throw error; // Rethrow the error for higher-level handling
+		} finally {
+			if (shouldReleaseClient) {
+				client.release(); // Release the client back to the pool
+			}
+		}
+	}
+
+	/**
 	 * Sets the plant time of the plot. Uses row level locking.
 	 * @id the id of the plot
 	 * @newPlantTime the new plant time

@@ -267,6 +267,16 @@
 
 ### Create X Service functions should take in the model and use it to produce the entire object in database
 
+### Plots are no longer deleted by resizing garden, only hidden
+
+### Added service functions for the following:
+
+  * Create/Save/Fetch Account
+  * PlantSeed
+  * PlaceDecoration
+  * HarvestPlant
+  * PickupDecoration
+
 TODO:
 
 Change mouseover color for inventoryItems
@@ -316,23 +326,6 @@ auth0 provides a user id, which we need to stick into the sql database
 New user -> backend sets up user, garden, inventory, store, etc. (choose uuids here) -> backend pushes to database, forcing uuids of certain type
 
 Old user -> backend checks for current id -> grab data from database based on current id -> push to backend model
-
-TODO: Refactor all services to use new ids
-TODO: Refactor routes to be useful given new ids
-TODO: Test to make sure ids are working
-
-User should be sending a harvest plant request/create account request, not add xp or add item requests
-
-Creation uses owners, updating uses direct ids
-
-TODO: Items are no longer deleted when quantity is 0, we just don't display them on the frontend
-TODO: Items are no longer deleted from database when quantity is 0 (though they can be garbage collected after inactivity)
-
-Saving a plot to the database, then removing it (by shrinking row/col), then re adding it, will result in save errors because we have created a new plot isntance with the same owner and coordinates, but a different id
-
-This can be fixed by not deleting plots on the model side, or by saving to the correct location, or by deleting the plots on the database side
-
-Replanting and reharvesting will currently error if you don't save in between, because the database doesn't recognize that the plot is harvestable. this should be fixed naturally when plantItem is added.
 
 
 Stretch Goals

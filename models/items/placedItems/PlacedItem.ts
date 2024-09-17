@@ -6,7 +6,8 @@ import { placeholderItemTemplates } from "../templates/models/PlaceholderItemTem
 
 export interface PlacedItemDetailsEntity {
 	identifier: string, //itemData.id
-	status: string
+	status: string,
+	usesRemaining: number
 }
 
 export interface PlacedItemEntity extends PlacedItemDetailsEntity {

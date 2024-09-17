@@ -24,12 +24,40 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const plantSeed = (item: InventoryItem, plot: Plot) => {
-		const helper = () => {
+		const helper = async () => {
 
 			if (item.itemData.subtype != ItemSubtypes.SEED.name) {
 				setGardenMessage(` `);
 				return plot.getItem().itemData.icon;
 			}
+			try {
+				const data = {
+					inventoryId: inventory.getInventoryId(), 
+					inventoryItemId: item.getInventoryItemId()
+				}
+				// Making the PATCH request to your API endpoint
+				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/plant`, {
+				  method: 'PATCH',
+				  headers: {
+					'Content-Type': 'application/json',
+				  },
+				  body: JSON.stringify(data), // Send the new xp data in the request body
+				});
+		  
+				// Check if the response is successful
+				if (!response.ok) {
+				  throw new Error('Failed to plant seed');
+				}
+		  
+				// Parsing the response data
+				const result = await response.json();
+				console.log('Successfully planted seed:', result);
+			  } catch (error) {
+				console.error(error);
+				setGardenMessage(` `);
+				return plot.getItem().itemData.icon;
+			  } finally {
+			  }
 			const placeItemResponse = plot.placeItem(inventory, item);
 			if (!placeItemResponse.isSuccessful()) {
 				setGardenMessage(` `);
@@ -54,11 +82,39 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const placeDecoration = (item: InventoryItem, plot: Plot) => {
-		const helper = () => {
+		const helper = async () => {
 			if (item.itemData.subtype != ItemSubtypes.BLUEPRINT.name) {
 				setGardenMessage(` `);
 				return plot.getItem().itemData.icon;
 			}
+			try {
+				const data = {
+					inventoryId: inventory.getInventoryId(), 
+					inventoryItemId: item.getInventoryItemId()
+				}
+				// Making the PATCH request to your API endpoint
+				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/place`, {
+				  method: 'PATCH',
+				  headers: {
+					'Content-Type': 'application/json',
+				  },
+				  body: JSON.stringify(data), // Send the new xp data in the request body
+				});
+		  
+				// Check if the response is successful
+				if (!response.ok) {
+				  throw new Error('Failed to place decoration');
+				}
+		  
+				// Parsing the response data
+				const result = await response.json();
+				console.log('Successfully placed decoration:', result);
+			  } catch (error) {
+				console.error(error);
+				setGardenMessage(` `);
+				return plot.getItem().itemData.icon;
+			  } finally {
+			  }
 			const placeItemResponse = plot.placeItem(inventory, item);
 			if (!placeItemResponse.isSuccessful()) {
 				setGardenMessage(` `);
@@ -88,19 +144,18 @@ export const usePlotActions = () => {
 	 */
 	const clickPlant = (plot: Plot, instantGrow: boolean = false) => {
 		const helper = async () => {
-			if (plot.getItem().itemData.subtype != ItemSubtypes.PLANT.name) {
+			const canHarvest = Plot.canHarvest(plot.getItem().itemData, plot.getPlantTime(), plot.getUsesRemaining(), Date.now());
+			if (!(canHarvest || instantGrow)) {
 				setGardenMessage(` `);
 				return plot.getItem().itemData.icon;
 			}
-			const xp = plot.getExpValue();
 			try {
-				
-				//TODO: api call for harvestPlant
 				const data = {
 					inventoryId: inventory.getInventoryId(), 
 					levelSystemId: user.getLevelSystem().getLevelSystemId(), 
 					numHarvests: 1, //Usually only 1 harvest
-					replacementItem: null //Replace with ground as default
+					replacementItem: null, //Replace with ground as default
+					instantHarvestKey: instantGrow ? 'mangomangobear' : '' //Works in dev environment only
 				}
 				// Making the PATCH request to your API endpoint
 				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/harvest`, {
@@ -124,8 +179,11 @@ export const usePlotActions = () => {
 				//TODO: reload user to fix display issue with xp
 				// const reloadedUser = loadUser() as User;
 				// saveUser(reloadedUser);
+				setGardenMessage(` `);
+				return plot.getItem().itemData.icon;
 			  } finally {
 			  }
+			const xp = plot.getExpValue();
 			const harvestItemResponse = plot.harvestItem(inventory, instantGrow, 1);
 			if (!harvestItemResponse.isSuccessful()) {
 				setGardenMessage(` `);
@@ -151,11 +209,42 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const clickDecoration = (plot: Plot) => {
-		const helper = () => {
+		const helper = async () => {
 			if (plot.getItem().itemData.subtype != ItemSubtypes.DECORATION.name) {
 				setGardenMessage(` `);
 				return plot.getItem().itemData.icon;
 			}
+			try {
+				const data = {
+					inventoryId: inventory.getInventoryId(), 
+					replacementItem: null, //Replace with ground as default
+				}
+				// Making the PATCH request to your API endpoint
+				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/pickup`, {
+				  method: 'PATCH',
+				  headers: {
+					'Content-Type': 'application/json',
+				  },
+				  body: JSON.stringify(data), // Send the new xp data in the request body
+				});
+		  
+				// Check if the response is successful
+				if (!response.ok) {
+				  throw new Error('Failed to pickup decoration');
+				}
+		  
+				// Parsing the response data
+				const result = await response.json();
+				console.log('Successfully picked up decoration:', result);
+			  } catch (error) {
+				console.error(error);
+				//TODO: reload user to fix display issue with xp
+				// const reloadedUser = loadUser() as User;
+				// saveUser(reloadedUser);
+				setGardenMessage(` `);
+				return plot.getItem().itemData.icon;
+			  } finally {
+			  }
 			const pickupItemResponse = plot.pickupItem(inventory);
 			if (!pickupItemResponse.isSuccessful()) {
 				setGardenMessage(` `);
