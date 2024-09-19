@@ -391,29 +391,17 @@ class GardenRepository {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
 			}
-
-			//Lock the row for update
-			const lockResult = await client.query<GardenEntity>(
-				'SELECT * FROM gardens WHERE id = $1',
-				[id]
-			);
-
-			if (!lockResult || lockResult.rows.length === 0) {
-				throw new Error(`Garden not found for id: ${id}`);
-			}
-
-			const currentGardenEntity = lockResult.rows[0];
 		
 			const gardenResult = await client.query<GardenEntity>(
-				'UPDATE gardens SET rows = $1, columns = $2 WHERE id = $3 RETURNING *',
-				[currentGardenEntity.rows + rowDelta, currentGardenEntity.columns + columnDelta, currentGardenEntity.id]
+				'UPDATE gardens SET rows = rows + $1, columns = columns + $2 WHERE id = $3 RETURNING *',
+				[rowDelta, columnDelta, id]
 				);
 
 
 			// Check if result is valid
 			if (!gardenResult || gardenResult.rows.length === 0) {
 				console.error(gardenResult);
-				throw new Error('There was an error updating the garden');
+				throw new Error('There was an error updating the garden size');
 			}
 
 			if (shouldReleaseClient) {

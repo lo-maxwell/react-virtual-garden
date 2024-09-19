@@ -254,6 +254,35 @@ export const usePlotActions = () => {
 				// Parsing the response data
 				const result = await response.json();
 				console.log('Successfully picked up decoration:', result);
+				const pickupItemResponse = plot.pickupItem(inventory);
+				if (!pickupItemResponse.isSuccessful()) {
+					setGardenMessage(` `);
+					return plot.getItem().itemData.icon;
+				} 
+				const itemTemplate = placeholderItemTemplates.getInventoryTemplate(result.identifier);
+				if (!itemTemplate) {
+					setGardenMessage(`There was an error parsing the item id, please contact the developer`);
+					return plot.getItem().itemData.icon;
+				}
+				const inventoryItem = inventory.getItem(itemTemplate);
+				if (!(inventoryItem.isSuccessful())) {
+					setGardenMessage(`There was an error parsing the item, please contact the developer`);
+					return plot.getItem().itemData.icon;
+				}
+				//TODO: Fix this
+				//Hack to ensure consistency between database and model item ids
+				//After we update the database, it returns an id, which we assign to the newly
+				//added inventoryItem
+				(inventoryItem.payload as InventoryItem).setInventoryItemId(result.id);
+				if (!pickupItemResponse.isSuccessful()) {
+					setGardenMessage(` `);
+					return plot.getItem().itemData.icon;
+				}
+				updateInventoryForceRefreshKey();
+				saveInventory(inventory);
+				saveGarden(garden);
+				setGardenMessage(`Picked up ${pickupItemResponse.payload.pickedItem.itemData.name}.`);
+				return plot.getItem().itemData.icon;
 			  } catch (error) {
 				console.error(error);
 				//TODO: reload user to fix display issue with xp
@@ -263,16 +292,7 @@ export const usePlotActions = () => {
 				return plot.getItem().itemData.icon;
 			  } finally {
 			  }
-			const pickupItemResponse = plot.pickupItem(inventory);
-			if (!pickupItemResponse.isSuccessful()) {
-				setGardenMessage(` `);
-				return plot.getItem().itemData.icon;
-			}
-			updateInventoryForceRefreshKey();
-			saveInventory(inventory);
-			saveGarden(garden);
-			setGardenMessage(`Picked up ${pickupItemResponse.payload.pickedItem.itemData.name}.`);
-			return plot.getItem().itemData.icon;
+			
 		}
 		return helper;
 	}

@@ -122,14 +122,7 @@ export async function placeDecoration(plotId: string, inventoryId: string, inven
 	//We always check based on current time
 	const currentTime = Date.now();
 
-	const shouldReleaseClient = !client;
-	if (!client) {
-		client = await pool.connect();
-	}
-	try {
-		if (shouldReleaseClient) {
-			await client.query('BEGIN'); // Start the transaction
-		}
+	const innerFunction = async (client: PoolClient): Promise<boolean> => {
 
 		// Grab all relevant objects concurrently
 		const results = await Promise.allSettled([
@@ -195,21 +188,13 @@ export async function placeDecoration(plotId: string, inventoryId: string, inven
 		await plotRepository.setPlotDetails(plotId, currentTime, 0, client);
 		await placedItemRepository.replacePlacedItemByPlotId(plotId, decorationItemTemplate.id, '', client);
 
-		if (shouldReleaseClient) {
-			await client.query('COMMIT'); // Rollback the transaction on error
-		}
+		
 		return true;
-	} catch (error) {
-		if (shouldReleaseClient) {
-			await client.query('ROLLBACK'); // Rollback the transaction on error
-		}
-		console.error('Error placing decoration:', error);
-		throw error; // Rethrow the error for higher-level handling
-	} finally {
-		if (shouldReleaseClient) {
-			client.release(); // Release the client back to the pool
-		}
-	}
+	} 
+	
+	// Call the transactionWrapper with the innerFunction and appropriate arguments
+	return transactionWrapper(innerFunction, 'PlaceDecoration', client);
+
 }
 
 interface harvestPlotObjects {
@@ -338,21 +323,14 @@ export async function harvestPlot(plotId: string, inventoryId: string, levelSyst
  * @inventoryId the inventory to add the blueprint item to
  * @replacementItem a placedItemDetailsEntity to replace the plot, defaults to ground
  * @client if null, creates a new client
- * @returns an object containing the modified plot and inventoryItem on success (or throws error)
+ * @returns an object containing the blueprint item on success (or throws error)
  */
-export async function pickupDecoration(plotId: string, inventoryId: string, replacementItem?: PlacedItemDetailsEntity, client?: PoolClient): Promise<boolean> {
+export async function pickupDecoration(plotId: string, inventoryId: string, replacementItem?: PlacedItemDetailsEntity, client?: PoolClient): Promise<InventoryItemEntity> {
 	//Can put validation/business logic here
 	//We always check based on current time
 	const currentTime = Date.now();
 
-	const shouldReleaseClient = !client;
-	if (!client) {
-		client = await pool.connect();
-	}
-	try {
-		if (shouldReleaseClient) {
-			await client.query('BEGIN'); // Start the transaction
-		}
+	const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {
 
 		// Grab all relevant objects concurrently
 		const results = await Promise.allSettled([
@@ -411,22 +389,15 @@ export async function pickupDecoration(plotId: string, inventoryId: string, repl
 		//We recreate the item first because we don't have a function that directly takes in the itemEntity
 		
 		const blueprintItem = new Blueprint(uuidv4(), blueprintItemTemplate as BlueprintTemplate, 1);
-		await inventoryItemRepository.addInventoryItem(inventoryId, blueprintItem, client);
+		const result = await inventoryItemRepository.addInventoryItem(inventoryId, blueprintItem, client);
+		
+		if (!result) {
+			throw new Error(`Could not add blueprint item ${blueprintItem.getInventoryItemId()} to inventory`);
+		}
+		return result;
+	} 
 
-		if (shouldReleaseClient) {
-			await client.query('COMMIT'); // Rollback the transaction on error
-		}
-		return true;
-	} catch (error) {
-		if (shouldReleaseClient) {
-			await client.query('ROLLBACK'); // Rollback the transaction on error
-		}
-		console.error('Error harvesting plant:', error);
-		throw error; // Rethrow the error for higher-level handling
-	} finally {
-		if (shouldReleaseClient) {
-			client.release(); // Release the client back to the pool
-		}
-	}
+	// Call the transactionWrapper with the innerFunction and appropriate arguments
+	return transactionWrapper(innerFunction, 'PickupDecoration', client);
 }
 
