@@ -1,7 +1,8 @@
 import { Plot } from "@/models/garden/Plot";
-import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
+import { InventoryItem, InventoryItemEntity } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
+import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { saveUser } from "@/utils/localStorage/user";
@@ -41,7 +42,7 @@ export const usePlotActions = () => {
 				  headers: {
 					'Content-Type': 'application/json',
 				  },
-				  body: JSON.stringify(data), // Send the new xp data in the request body
+				  body: JSON.stringify(data), // Send the data in the request body
 				});
 		  
 				// Check if the response is successful
@@ -98,7 +99,7 @@ export const usePlotActions = () => {
 				  headers: {
 					'Content-Type': 'application/json',
 				  },
-				  body: JSON.stringify(data), // Send the new xp data in the request body
+				  body: JSON.stringify(data), // Send the data in the request body
 				});
 		  
 				// Check if the response is successful
@@ -163,7 +164,7 @@ export const usePlotActions = () => {
 				  headers: {
 					'Content-Type': 'application/json',
 				  },
-				  body: JSON.stringify(data), // Send the new xp data in the request body
+				  body: JSON.stringify(data), // Send the data in the request body
 				});
 		  
 				// Check if the response is successful
@@ -172,8 +173,40 @@ export const usePlotActions = () => {
 				}
 		  
 				// Parsing the response data
-				const result = await response.json();
+				const result: InventoryItemEntity = await response.json();
 				console.log('Successfully harvested:', result);
+
+				const xp = plot.getExpValue();
+				const harvestItemResponse = plot.harvestItem(inventory, instantGrow, 1);
+				if (!harvestItemResponse.isSuccessful()) {
+					setGardenMessage(` `);
+					return plot.getItem().itemData.icon;
+				} 
+				const itemTemplate = placeholderItemTemplates.getInventoryTemplate(result.identifier);
+				if (!itemTemplate) {
+					setGardenMessage(`There was an error parsing the item id, please contact the developer`);
+					return plot.getItem().itemData.icon;
+				}
+				const inventoryItem = inventory.getItem(itemTemplate);
+				if (!(inventoryItem.isSuccessful())) {
+					setGardenMessage(`There was an error parsing the item, please contact the developer`);
+					return plot.getItem().itemData.icon;
+				}
+				//TODO: Fix this
+				//Hack to ensure consistency between database and model item ids
+				//After we update the database, it returns an id, which we assign to the newly
+				//added inventoryItem
+				(inventoryItem.payload as InventoryItem).setInventoryItemId(result.id);
+				updateInventoryForceRefreshKey();
+
+				const pickedItem = harvestItemResponse.payload.pickedItem as PlacedItem;
+				user.updateHarvestHistory(pickedItem);
+				user.addExp(xp);
+				saveInventory(inventory);
+				saveGarden(garden);
+				saveUser(user);
+				setGardenMessage(`Harvested ${harvestItemResponse.payload.pickedItem.itemData.name}.`);
+				return plot.getItem().itemData.icon;
 			  } catch (error) {
 				console.error(error);
 				//TODO: reload user to fix display issue with xp
@@ -183,22 +216,7 @@ export const usePlotActions = () => {
 				return plot.getItem().itemData.icon;
 			  } finally {
 			  }
-			const xp = plot.getExpValue();
-			const harvestItemResponse = plot.harvestItem(inventory, instantGrow, 1);
-			if (!harvestItemResponse.isSuccessful()) {
-				setGardenMessage(` `);
-				return plot.getItem().itemData.icon;
-			} 
-			updateInventoryForceRefreshKey();
-
-			const pickedItem = harvestItemResponse.payload.pickedItem as PlacedItem;
-			user.updateHarvestHistory(pickedItem);
-			user.addExp(xp);
-			saveInventory(inventory);
-			saveGarden(garden);
-			saveUser(user);
-			setGardenMessage(`Harvested ${harvestItemResponse.payload.pickedItem.itemData.name}.`);
-			return plot.getItem().itemData.icon;
+			
 		}
 		return helper;
 	}
@@ -225,7 +243,7 @@ export const usePlotActions = () => {
 				  headers: {
 					'Content-Type': 'application/json',
 				  },
-				  body: JSON.stringify(data), // Send the new xp data in the request body
+				  body: JSON.stringify(data), // Send the data in the request body
 				});
 		  
 				// Check if the response is successful

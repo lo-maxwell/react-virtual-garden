@@ -276,8 +276,16 @@
   * PlaceDecoration
   * HarvestPlant
   * PickupDecoration
+  * Expand/Shrink Garden Rows
+  * Expand/Shrink Garden Columns
 
 TODO:
+
+Make itemList query based on item identifier, not name
+
+Put transactionWrappers around other service functions
+Validate garden bounds for plant/harvest
+Write plantAll and harvestAll to not query the same data multiple times
 
 Change mouseover color for inventoryItems
 

@@ -394,7 +394,7 @@ class GardenRepository {
 
 			//Lock the row for update
 			const lockResult = await client.query<GardenEntity>(
-				'SELECT * FROM gardens WHERE id = $1 FOR UPDATE',
+				'SELECT * FROM gardens WHERE id = $1',
 				[id]
 			);
 
@@ -406,12 +406,13 @@ class GardenRepository {
 		
 			const gardenResult = await client.query<GardenEntity>(
 				'UPDATE gardens SET rows = $1, columns = $2 WHERE id = $3 RETURNING *',
-				[currentGardenEntity.rows + rowDelta, currentGardenEntity.columns + columnDelta, currentGardenEntity.owner]
+				[currentGardenEntity.rows + rowDelta, currentGardenEntity.columns + columnDelta, currentGardenEntity.id]
 				);
 
 
 			// Check if result is valid
 			if (!gardenResult || gardenResult.rows.length === 0) {
+				console.error(gardenResult);
 				throw new Error('There was an error updating the garden');
 			}
 
@@ -424,7 +425,7 @@ class GardenRepository {
 			if (shouldReleaseClient) {
 				await client.query('ROLLBACK'); // Rollback the transaction on error
 			}
-			console.error('Error gaining xp:', error);
+			console.error('Error updating garden size:', error);
 			throw error; // Rethrow the error for higher-level handling
 		} finally {
 			if (shouldReleaseClient) {

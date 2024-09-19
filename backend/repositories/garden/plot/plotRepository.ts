@@ -98,31 +98,16 @@ class PlotRepository {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
 			}
-			// Check if the plot already exists, based on owner and coordinates
-			// We're basically guaranteed to not have the same id so dont need to check there
-			const existingPlotResult = await client.query<{plot_id: string}>(
-				'SELECT plots.id AS plot_id FROM plots WHERE plots.owner = $1 AND plots.row_index = $2 AND plots.col_index = $3',
-				[ownerId, rowIndex, columnIndex]
-			);
-
-			if (existingPlotResult.rows.length > 0) {
-				// Plot already exists
-				const extendedPlotEntity: ExtendedPlotEntity = {
-					id: existingPlotResult.rows[0].plot_id,
-					row_index: rowIndex,
-					col_index: columnIndex,
-					plant_time: plot.getPlantTime().toString(), //plant_time is a string
-					uses_remaining: plot.getUsesRemaining()
-				}
-				console.warn(`Plot already exists for garden ${ownerId} with this ID: ${existingPlotResult.rows[0].plot_id}`);
-				return extendedPlotEntity;
-				// return makePlotObject(extendedPlotEntity); 
-			}
-			
-			const result = await query<ExtendedPlotEntity>(
-				'INSERT INTO plots (id, owner, row_index, col_index, plant_time, uses_remaining) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, owner, row_index, col_index, plant_time, uses_remaining',
+			const result = await client.query<ExtendedPlotEntity>(
+				`INSERT INTO plots (id, owner, row_index, col_index, plant_time, uses_remaining) 
+				VALUES ($1, $2, $3, $4, $5, $6) 
+				ON CONFLICT (owner, row_index, col_index) 
+				DO UPDATE SET
+					plant_time = EXCLUDED.plant_time,
+					uses_remaining = EXCLUDED.uses_remaining
+				RETURNING id, owner, row_index, col_index, plant_time, uses_remaining`,
 				[plot.getPlotId(), ownerId, rowIndex, columnIndex, plot.getPlantTime(), plot.getUsesRemaining()]
-				);
+			);
 
 			// Check if result is valid
 			if (!result || result.rows.length === 0) {
@@ -133,10 +118,7 @@ class PlotRepository {
 				await client.query('COMMIT'); // Rollback the transaction on error
 			}
 
-			// Return the created Plot as an instance
 			return result.rows[0];
-			// const instance = makePlotObject(result.rows[0]);
-			// return instance;
 		} catch (error) {
 			if (shouldReleaseClient) {
 				await client.query('ROLLBACK'); // Rollback the transaction on error

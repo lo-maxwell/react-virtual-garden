@@ -1,4 +1,5 @@
 import { pool, query } from "@/backend/connection/db";
+import { transactionWrapper } from "@/backend/services/utility/utility";
 import { InventoryItem, InventoryItemEntity } from "@/models/items/inventoryItems/InventoryItem";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
@@ -88,54 +89,37 @@ class InventoryItemRepository {
 	 * @returns an InventoryItemEntity with the corresponding data if success, null if failure (or throws error)
 	 */
 	async createInventoryItem(ownerId: string, inventoryItem: InventoryItem, client?: PoolClient): Promise<InventoryItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
+		
+		const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {
 
-			// Check if the inventoryItem already exists
-			const existingInventoryItemResult = await client.query<InventoryItemEntity>(
-				'SELECT id AS id, owner, identifier, quantity FROM inventory_items WHERE owner = $1 AND identifier = $2',
-				[ownerId, inventoryItem.itemData.id]
+			const existingItemResult = await client.query<InventoryItemEntity>(
+				`SELECT id, owner, identifier, quantity FROM inventory_items 
+				WHERE id = $1 OR (owner = $2 AND identifier = $3)`, 
+				[inventoryItem.getInventoryItemId(), ownerId, inventoryItem.itemData.id]
 			);
 
-			if (existingInventoryItemResult.rows.length > 0) {
-				// InventoryItem already exists
-				console.warn(`InventoryItem already exists for garden ${ownerId} with this ID: ${existingInventoryItemResult.rows[0].id}`);
-				return existingInventoryItemResult.rows[0];
-				// return makeInventoryItemObject(existingInventoryItemResult.rows[0]); 
+			if (existingItemResult.rows.length > 0) {
+				return existingItemResult.rows[0];
 			}
-			
-			const result = await query<InventoryItemEntity>(
-				'INSERT INTO inventory_items (id, owner, identifier, quantity) VALUES ($1, $2, $3, $4) RETURNING id, owner, identifier, quantity',
+
+			const result = await client.query<InventoryItemEntity>(
+				`INSERT INTO inventory_items (id, owner, identifier, quantity) 
+				VALUES ($1, $2, $3, $4)
+				ON CONFLICT (id) 
+				DO NOTHING
+				RETURNING id, owner, identifier, quantity`,
 				[inventoryItem.getInventoryItemId(), ownerId, inventoryItem.itemData.id, inventoryItem.getQuantity()]
-				);
+			);
 
 			// Check if result is valid
 			if (!result || result.rows.length === 0) {
 				throw new Error('There was an error creating the inventoryItem');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-
 			return result.rows[0];
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error creating inventoryItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		} 
+
+		return transactionWrapper(innerFunction, "createInventoryItem", client);
 	}
 
 
@@ -149,17 +133,11 @@ class InventoryItemRepository {
 	 * @returns a InventoryItemEntity with the corresponding data if success, null if failure (or throws error)
 	 */
 	async addInventoryItem(ownerId: string, inventoryItem: InventoryItem, client?: PoolClient): Promise<InventoryItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
+		if (inventoryItem.getQuantity() <= 0) {
+			throw new Error(`Cannot add inventory item with quantity ${inventoryItem.getQuantity()}`);
 		}
-		try {
-			if (inventoryItem.getQuantity() <= 0) {
-				throw new Error(`Cannot add inventory item with quantity ${inventoryItem.getQuantity()}`);
-			}
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
+		
+		const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {
 			// Check if the inventoryItem already exists
 			const existingInventoryItemResult = await this.getInventoryItemByOwnerId(ownerId, inventoryItem.itemData.id);
 
@@ -180,23 +158,12 @@ class InventoryItemRepository {
 				throw new Error('There was an error creating the inventoryItem');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-
 			// Return the created InventoryItem as an instance
 			return result;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error creating inventoryItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
 		}
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'addInventoryItem', client);
+
 	}
 
 	/**
@@ -331,44 +298,8 @@ class InventoryItemRepository {
 	 * @returns a InventoryItemEntity with the new data on success (or throws error)
 	 */
 	async updateInventoryItemQuantity(id: string, quantityDelta: number, client?: PoolClient): Promise<InventoryItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-
-			// //Lock the row for update
-			// const lockResult = await client.query<{id: string, current_quantity: number}>(
-			// 	'SELECT id, quantity AS current_quantity FROM inventory_items WHERE id = $1 FOR UPDATE',
-			// 	[id]
-			// );
-
-			// if (lockResult.rows.length === 0) {
-			// 	throw new Error(`InventoryItem not found for id: ${id}`);
-			// }
-
-			// const newQuantity = lockResult.rows[0].current_quantity + quantityDelta;
-
-			// if (newQuantity < 0) {
-			// throw new Error('Final quantity cannot be negative');
-			// }
-
-			// Does not delete
-
-			// if (newQuantity === 0) {
-			// 	// If the new quantity is zero, delete the row
-			// 	const deleteResult = await this.deleteInventoryItemById(lockResult.rows[0].id, client);
 		
-			// 	if (shouldReleaseClient) {
-			// 	await client.query('COMMIT');
-			// 	}
-		
-			// 	return deleteResult;
-			// }
-		
+		const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {
 			const inventoryItemResult = await client.query<InventoryItemEntity>(
 				'UPDATE inventory_items SET quantity = quantity + $1 WHERE id = $2 RETURNING id, owner, identifier, quantity',
 				[quantityDelta, id]
@@ -380,22 +311,12 @@ class InventoryItemRepository {
 				throw new Error('There was an error updating the inventoryItem');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
 			const updatedRow = inventoryItemResult.rows[0];
 			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating inventoryItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		} 
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'addInventoryItem', client);
 	}
 
 

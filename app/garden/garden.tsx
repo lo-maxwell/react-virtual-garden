@@ -10,6 +10,7 @@ import { usePlotActions } from "@/app/hooks/garden/plotActions";
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import { useUser } from "@/app/hooks/contexts/UserContext";
 import GardenExpansionTooltip from "./gardenExpansionTooltip";
+import { Garden } from "@/models/garden/Garden";
 
 const GardenComponent = () => {
 	const { inventory } = useInventory();
@@ -132,37 +133,145 @@ const GardenComponent = () => {
 	}
 
 
-	function addColumn() {
+	async function addColumn() {
 		if (!garden || !user) {
 			return;
 		}
+		try {
+			const data = {
+				axis: 'column',
+				expand: true
+			}
+			// Making the PATCH request to your API endpoint
+			const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`, {
+			  method: 'PATCH',
+			  headers: {
+				'Content-Type': 'application/json',
+			  },
+			  body: JSON.stringify(data), // Send the data in the request body
+			});
+	  
+			// Check if the response is successful
+			if (!response.ok) {
+			  throw new Error('Failed to add column');
+			}
+	  
+			// Parsing the response data
+			const result = await response.json();
+			console.log('Successfully added column:', result);
+		  } catch (error) {
+			console.error(error);
+			return;
+		  } finally {
+		  }
 		garden.addColumn(user);
 		saveGarden(garden);
 		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 	}
 
-	function addRow() {
+	async function addRow() {
 		if (!garden || !user) {
 			return;
 		}
+		try {
+			const data = {
+				axis: 'row',
+				expand: true
+			}
+			// Making the PATCH request to your API endpoint
+			const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`, {
+			  method: 'PATCH',
+			  headers: {
+				'Content-Type': 'application/json',
+			  },
+			  body: JSON.stringify(data), // Send the data in the request body
+			});
+	  
+			// Check if the response is successful
+			if (!response.ok) {
+			  throw new Error('Failed to add row');
+			}
+	  
+			// Parsing the response data
+			const result = await response.json();
+			console.log('Successfully added row:', result);
+		  } catch (error) {
+			console.error(error);
+			return;
+		  } finally {
+		  }
 		garden.addRow(user);
 		saveGarden(garden);
 		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 	}
 
-	function removeColumn() {
+	async function removeColumn() {
 		if (!garden) {
 			return;
 		}
+		try {
+			const data = {
+				axis: 'column',
+				expand: false
+			}
+			// Making the PATCH request to your API endpoint
+			const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`, {
+			  method: 'PATCH',
+			  headers: {
+				'Content-Type': 'application/json',
+			  },
+			  body: JSON.stringify(data), // Send the data in the request body
+			});
+	  
+			// Check if the response is successful
+			if (!response.ok) {
+			  throw new Error('Failed to remove column');
+			}
+	  
+			// Parsing the response data
+			const result = await response.json();
+			console.log('Successfully removed column:', result);
+		  } catch (error) {
+			console.error(error);
+			return;
+		  } finally {
+		  }
 		garden?.removeColumn();
 		saveGarden(garden);
 		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 	}
 
-	function removeRow() {
+	async function removeRow() {
 		if (!garden) {
 			return;
 		}
+		try {
+			const data = {
+				axis: 'row',
+				expand: false
+			}
+			// Making the PATCH request to your API endpoint
+			const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`, {
+			  method: 'PATCH',
+			  headers: {
+				'Content-Type': 'application/json',
+			  },
+			  body: JSON.stringify(data), // Send the data in the request body
+			});
+	  
+			// Check if the response is successful
+			if (!response.ok) {
+			  throw new Error('Failed to remove row');
+			}
+	  
+			// Parsing the response data
+			const result = await response.json();
+			console.log('Successfully removed row:', result);
+		  } catch (error) {
+			console.error(error);
+			return;
+		  } finally {
+		  }
 		garden?.removeRow();
 		saveGarden(garden);
 		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
@@ -174,9 +283,9 @@ const GardenComponent = () => {
 
 	const enableGardenExpansionButton = (row: boolean, expand: boolean) => {
 		if (row && expand) {
-			return !garden.canAddRow(user);
+			return !Garden.canAddRow(garden.getRows(), user.getLevel());
 		} else if (!row && expand) {
-			return !garden.canAddColumn(user);
+			return !Garden.canAddColumn(garden.getCols(), user.getLevel());
 		} else if (row && !expand) { 
 			return garden.getRows() < 2;
 		} else { //(!row && !expand)

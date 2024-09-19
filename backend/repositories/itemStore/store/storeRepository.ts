@@ -159,7 +159,7 @@ class StoreRepository {
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns a new StoreEntity with the corresponding data if success, null if failure (or throws error)
 	*/
-	async createOrUpdateStore(userId: string, store: Store, client: PoolClient): Promise<StoreEntity> {
+	async createOrUpdateStore(userId: string, store: Store, client?: PoolClient): Promise<StoreEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();

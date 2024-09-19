@@ -327,7 +327,7 @@ export class ItemList {
 			//TODO: Investigate type assertion
 			if (ItemList.isInventoryItem(item)) {
 				const itemClass = getItemClassFromSubtype(item) as ItemConstructor<InventoryItem>;
-				newItem = new itemClass(uuidv4(), item.itemData, quantity);
+				newItem = new itemClass(item.getInventoryItemId(), item.itemData, quantity);
 			} else if (ItemList.isItemTemplate(item) && item instanceof InventoryItemTemplate) {
 				const itemClass = getItemClassFromSubtype(item)  as ItemConstructor<InventoryItem>;
 				newItem = new itemClass(uuidv4(), item, quantity);

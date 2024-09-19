@@ -95,23 +95,25 @@ class StoreItemRepository {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
 			}
-			// Check if the storeItem already exists
-			const existingStoreItemResult = await client.query<StoreItemEntity>(
-				'SELECT id, owner, identifier, quantity FROM store_items WHERE owner = $1 AND identifier = $2',
-				[ownerId, storeItem.itemData.id]
+
+			const existingItemResult = await client.query<StoreItemEntity>(
+				`SELECT id, owner, identifier, quantity FROM store_items 
+				WHERE id = $1 OR (owner = $2 AND identifier = $3)`, 
+				[storeItem.getInventoryItemId(), ownerId, storeItem.itemData.id]
 			);
 
-			if (existingStoreItemResult.rows.length > 0) {
-				// StoreItem already exists
-				console.warn(`StoreItem already exists for store ${ownerId} with this ID: ${existingStoreItemResult.rows[0].id}`);
-				return existingStoreItemResult.rows[0];
-				// return makeStoreItemObject(existingStoreItemResult.rows[0]); 
+			if (existingItemResult.rows.length > 0) {
+				return existingItemResult.rows[0];
 			}
 			
-			const result = await query<StoreItemEntity>(
-				'INSERT INTO store_items (id, owner, identifier, quantity) VALUES ($1, $2, $3, $4) RETURNING id, owner, identifier, quantity',
+			const result = await client.query<StoreItemEntity>(
+				`INSERT INTO store_items (id, owner, identifier, quantity) 
+				VALUES ($1, $2, $3, $4)
+				ON CONFLICT (id) 
+				DO NOTHING
+				RETURNING id, owner, identifier, quantity`,
 				[storeItem.getInventoryItemId(), ownerId, storeItem.itemData.id, storeItem.getQuantity()]
-				);
+			);
 
 			// Check if result is valid
 			if (!result || result.rows.length === 0) {

@@ -53,7 +53,7 @@ export class GardenUpgrades {
 	 */
 	static expandRow(garden: Garden, store: Store, inventory: Inventory, user: User): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		if (!garden.canAddColumn(user)) {
+		if (!Garden.canAddColumn(garden.getCols(), user.getLevel())) {
 			const levelRequired = (garden.getCols() + 1 - 5) * 5;
 			response.addErrorMessage(`Need to be level ${levelRequired} to expand row, currently level ${user.getLevel()}`);
 			return response;
@@ -74,7 +74,7 @@ export class GardenUpgrades {
 	 */
 	 static expandColumn(garden: Garden, store: Store, inventory: Inventory, user: User): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		if (!garden.canAddRow(user)) {
+		if (!Garden.canAddRow(garden.getRows(), user.getLevel())) {
 			const levelRequired = (garden.getRows() + 1 - 5) * 5;
 			response.addErrorMessage(`Need to be level ${levelRequired} to expand column, currently level ${user.getLevel()}`);
 			return response;

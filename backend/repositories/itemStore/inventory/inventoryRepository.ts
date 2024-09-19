@@ -12,7 +12,7 @@ class InventoryRepository {
 		for (const itemResult of itemResults) {
 			try {
 				const item = inventoryItemRepository.makeInventoryItemObject(itemResult);
-				items.addItem(item.itemData, item.getQuantity());
+				items.addItem(item, item.getQuantity());
 			} catch (error) {
 				console.error(`Failure while initializing items for inventory from database: `);
 				console.error(error);
@@ -148,7 +148,7 @@ class InventoryRepository {
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns a new InventoryEntity with the corresponding data if success, null if failure (or throws error)
 	*/
-	async createOrUpdateInventory(userId: string, inventory: Inventory, client: PoolClient): Promise<InventoryEntity> {
+	async createOrUpdateInventory(userId: string, inventory: Inventory, client?: PoolClient): Promise<InventoryEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
@@ -167,7 +167,7 @@ class InventoryRepository {
 
 			if (existingInventoryResult.rows.length > 0) {
 				// Inventory already exists
-				result = await this.updateInventoryGold(inventory.getInventoryId(), inventory.getGold(), client);
+				result = await this.setInventoryGold(inventory.getInventoryId(), inventory.getGold(), client);
 				if (!result) {
 					throw new Error(`Error updating inventory with id ${inventory.getInventoryId()}`);
 				} 

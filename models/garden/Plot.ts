@@ -112,7 +112,7 @@ export class Plot {
 	getItem(): PlacedItem {
 		//TODO: Investigate type correction
 		const itemClass = getItemClassFromSubtype(this.item);
-		const newItem = new itemClass(uuidv4(), this.item.itemData, this.item.getStatus()) as PlacedItem;
+		const newItem = new itemClass(this.item.getPlacedItemId(), this.item.itemData, this.item.getStatus()) as PlacedItem;
 		return newItem;
 	}
 

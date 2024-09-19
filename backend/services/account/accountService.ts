@@ -16,6 +16,7 @@ import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { Store } from "@/models/itemStore/store/Store";
 import User from "@/models/user/User";
 import { PoolClient } from "pg";
+import { transactionWrapper } from "../utility/utility";
 
 /**
  * Begins a transaction if there is not already one. Creates a new row in the users, levels, itemstores, inventoryItems (if there are existing items), garden, plots tables.
@@ -29,32 +30,22 @@ import { PoolClient } from "pg";
  * @returns true if success, throws error on failure
  */
  export async function createAccountInDatabase(user: User, inventory: Inventory, store: Store, garden: Garden, client?: PoolClient): Promise<boolean | null> {
-	const shouldReleaseClient = !client;
-	if (!client) {
-		client = await pool.connect();
-	}
-	try {
-		if (shouldReleaseClient) {
-			await client.query('BEGIN'); // Start the transaction
-		}
-
+	// The function passed into the transaction wrapper
+	const innerFunction = async (client: PoolClient) => {
 		//Create user
 		const userResult = await userRepository.createUser(user, client);
-		// Check if result is valid
 		if (!userResult) {
 			throw new Error('There was an error creating the user');
 		}
-		
+
 		//Create level (relies on user)
 		const levelResult = await levelRepository.createLevelSystem(userResult.id, 'user', user.getLevelSystem(), client);
-		// Check if result is valid
 		if (!levelResult) {
 			throw new Error('There was an error creating the level system');
 		}
 
 		//Create garden
 		const gardenResult = await gardenRepository.createGarden(userResult.id, garden, client);
-		// Check if result is valid
 		if (!gardenResult) {
 			throw new Error('There was an error creating the garden');
 		}
@@ -63,9 +54,9 @@ import { PoolClient } from "pg";
 		const allPromises: Promise<void>[] = [];
 
 		// Create plots and placed items concurrently
-		for (let i = 0; i < garden.getRows(); i++) {
-			for (let j = 0; j < garden.getCols(); j++) {
-				const plot = garden.getPlotByRowAndColumn(i, j);
+		for (let i = 0; i < garden.getAllPlots().length; i++) {
+			for (let j = 0; j < garden.getAllPlots()[0].length; j++) {
+				const plot = (garden.getAllPlots())[i][j].clone();
 				if (!plot) {
 					throw new Error(`Could not find plot at row ${i}, col ${j}`);
 				}
@@ -84,7 +75,6 @@ import { PoolClient } from "pg";
 							return; // No item to place, so skip
 						}
 
-						// Explicitly return void, since we no longer need this
 						return placedItemRepository.createPlacedItem(plotResult.id, item, client).then(() => {});
 					})
 					.catch((error) => {
@@ -115,8 +105,7 @@ import { PoolClient } from "pg";
 					inventoryItemPromises.push(inventoryItemPromise);
 				});
 
-				// Wait for all inventory item promises to resolve
-				await Promise.allSettled(inventoryItemPromises); // Explicitly return void
+				await Promise.allSettled(inventoryItemPromises);
 			})
 			.catch((error) => {
 				console.error('Error creating inventory or inventory items:', error);
@@ -144,33 +133,22 @@ import { PoolClient } from "pg";
 					storeItemPromises.push(storeItemPromise);
 				});
 
-				// Wait for all store item promises to resolve
-				await Promise.allSettled(storeItemPromises); // Explicitly return void
+				await Promise.allSettled(storeItemPromises);
 			})
 			.catch((error) => {
 				console.error('Error creating store or store items:', error);
 			});
 
 		allPromises.push(storeResultPromise);
-
 		// Wait for all promises to resolve
 		await Promise.allSettled(allPromises);
 
-		if (shouldReleaseClient) {
-			await client.query('COMMIT'); // Rollback the transaction on error
-		}
 		return true;
-	} catch (error) {
-		if (shouldReleaseClient) {
-			await client.query('ROLLBACK'); // Rollback the transaction on error
-		}
-		console.error('Error creating account:', error);
-		throw error; // Rethrow the error for higher-level handling
-	} finally {
-		if (shouldReleaseClient) {
-			client.release(); // Release the client back to the pool
-		}
-	}
+	};
+
+	// Call transactionWrapper with inner function and description
+	return transactionWrapper(innerFunction, 'createAccountInDatabase', client);
+
 }
 
 
@@ -188,36 +166,9 @@ import { PoolClient } from "pg";
  export async function saveAccountToDatabase(user: User, inventory: Inventory, store: Store, garden: Garden, client?: PoolClient): Promise<boolean | null> {
 	//TODO: Make this atomic
 	//Right now create and save are 2 different things, so we can create but not save
-	const shouldReleaseClient = !client;
-	if (!client) {
-		client = await pool.connect();
-	}
-	try {
-		//Create all fields first
-		await createAccountInDatabase(user, inventory, store, garden, client);
-		if (shouldReleaseClient) {
-			await client.query('COMMIT'); // Rollback the transaction on error
-		}
-	} catch (error) {
-		if (shouldReleaseClient) {
-			await client.query('ROLLBACK'); // Rollback the transaction on error
-		}
-		console.error('Error updating account:', error);
-		throw error; // Rethrow the error for higher-level handling
-	} finally {
-		if (shouldReleaseClient) {
-			client.release(); // Release the client back to the pool
-		}
-	}
+	await createAccountInDatabase(user, inventory, store, garden, client);
 
-	// const shouldReleaseClient = !client;
-	if (shouldReleaseClient) {
-		client = await pool.connect();
-	}
-	try {
-		if (shouldReleaseClient) {
-			await client.query('BEGIN'); // Start the transaction
-		}
+	const innerFunction = async (client: PoolClient) => {
 		
 		// //Create user
 		const userResult = await userRepository.createOrUpdateUser(user, client);
@@ -244,9 +195,9 @@ import { PoolClient } from "pg";
 		const allPromises: Promise<void>[] = [];
 
 		// Create plots and placed items concurrently
-		for (let i = 0; i < garden.getRows(); i++) {
-			for (let j = 0; j < garden.getCols(); j++) {
-				const plot = garden.getPlotByRowAndColumn(i, j);
+		for (let i = 0; i < garden.getAllPlots().length; i++) {
+			for (let j = 0; j < garden.getAllPlots()[0].length; j++) {
+				const plot = (garden.getAllPlots())[i][j].clone();
 				if (!plot) {
 					throw new Error(`Could not find plot at row ${i}, col ${j}`);
 				}
@@ -337,21 +288,11 @@ import { PoolClient } from "pg";
 		// Wait for all promises to resolve
 		await Promise.allSettled(allPromises);
 
-		if (shouldReleaseClient) {
-			await client.query('COMMIT'); // Rollback the transaction on error
-		}
 		return true;
-	} catch (error) {
-		if (shouldReleaseClient) {
-			await client.query('ROLLBACK'); // Rollback the transaction on error
-		}
-		console.error('Error updating account:', error);
-		throw error; // Rethrow the error for higher-level handling
-	} finally {
-		if (shouldReleaseClient) {
-			client.release(); // Release the client back to the pool
-		}
 	}
+
+	// Call transactionWrapper with inner function and description
+	return transactionWrapper(innerFunction, 'updateAccountInDatabase', client);
 }
 
 export interface AccountObjects {
@@ -370,15 +311,7 @@ export interface AccountObjects {
  * @returns AccountObjects object containing user, garden, inventory, store in plainObject format, or throws error
  */
  export async function getAccountFromDatabase(userId: string, client?: PoolClient): Promise<AccountObjects> {
-	const shouldReleaseClient = !client;
-	if (!client) {
-		client = await pool.connect();
-	}
-	try {
-		if (shouldReleaseClient) {
-			await client.query('BEGIN'); // Start the transaction
-		}
-
+	const innerFunction = async (client: PoolClient) => {
 		//Create user
 		const userResult = await userRepository.getUserEntityById(userId);
 		// Check if result is valid
@@ -417,22 +350,9 @@ export interface AccountObjects {
 			plainInventoryObject: inventoryInstance.toPlainObject(),
 			plainStoreObject: storeInstance.toPlainObject()
 		}
-		// Return the created User as an instance
-		// const instance = makeUserObject(userResult.rows[0]);
-		if (shouldReleaseClient) {
-			await client.query('COMMIT'); // Rollback the transaction on error
-		}
+
 		return returnObject;
-		// return user;
-	} catch (error) {
-		if (shouldReleaseClient) {
-			await client.query('ROLLBACK'); // Rollback the transaction on error
-		}
-		console.error('Error creating user:', error);
-		throw error; // Rethrow the error for higher-level handling
-	} finally {
-		if (shouldReleaseClient) {
-			client.release(); // Release the client back to the pool
-		}
 	}
+	// Call transactionWrapper with inner function and description
+	return transactionWrapper(innerFunction, 'fetchAccountFromDatabase', client);
 }

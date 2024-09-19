@@ -72,6 +72,14 @@ export abstract class PlacedItem extends Item {
 	}
 
 	/**
+	 * TODO: Fix any function that uses this, this is a dangerous operation
+	 * Sets the id for database access.
+	 */
+	 setPlacedItemId(newId: string): void {
+		this.placedItemId = newId;
+	}
+
+	/**
 	 * @returns the status
 	 */
 	 getStatus(): string {

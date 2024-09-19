@@ -130,7 +130,7 @@ class LevelRepository {
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns a new LevelSystemEntity with the corresponding data if success, null if failure (or throws error)
 	*/
-	async createOrUpdateLevelSystem(userId: string, ownerType: string, levelSystem: LevelSystem, client: PoolClient): Promise<LevelSystemEntity> {
+	async createOrUpdateLevelSystem(userId: string, ownerType: string, levelSystem: LevelSystem, client?: PoolClient): Promise<LevelSystemEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();

@@ -7,6 +7,7 @@ import levelRepository from "@/backend/repositories/level/levelRepository";
 import { Plot, PlotEntity } from "@/models/garden/Plot";
 import { Blueprint } from "@/models/items/inventoryItems/Blueprint";
 import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
+import { InventoryItemEntity } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { PlacedItem, PlacedItemDetailsEntity, PlacedItemEntity } from "@/models/items/placedItems/PlacedItem";
 import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
@@ -20,6 +21,7 @@ import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
 import { stringToBigIntNumber } from "@/models/utility/BigInt";
 import { PoolClient } from "pg";
 import { v4 as uuidv4 } from 'uuid';
+import { transactionWrapper } from "../../utility/utility";
 
 /**
  * Attempts to plant a seed, removing the respective seed item from the inventory.
@@ -34,14 +36,7 @@ export async function plantSeed(plotId: string, inventoryId: string, inventoryIt
 	//We always check based on current time
 	const currentTime = Date.now();
 
-	const shouldReleaseClient = !client;
-	if (!client) {
-		client = await pool.connect();
-	}
-	try {
-		if (shouldReleaseClient) {
-			await client.query('BEGIN'); // Start the transaction
-		}
+	const innerFunction = async (client: PoolClient): Promise<boolean> => {
 
 		// Grab all relevant objects concurrently
 		const results = await Promise.allSettled([
@@ -107,21 +102,11 @@ export async function plantSeed(plotId: string, inventoryId: string, inventoryIt
 		await plotRepository.setPlotDetails(plotId, currentTime, (plantItemTemplate as PlantTemplate).numHarvests, client);
 		await placedItemRepository.replacePlacedItemByPlotId(plotId, plantItemTemplate.id, '', client);
 
-		if (shouldReleaseClient) {
-			await client.query('COMMIT'); // Rollback the transaction on error
-		}
 		return true;
-	} catch (error) {
-		if (shouldReleaseClient) {
-			await client.query('ROLLBACK'); // Rollback the transaction on error
-		}
-		console.error('Error planting seed:', error);
-		throw error; // Rethrow the error for higher-level handling
-	} finally {
-		if (shouldReleaseClient) {
-			client.release(); // Release the client back to the pool
-		}
-	}
+	} 
+
+	// Call the transactionWrapper with the innerFunction and appropriate arguments
+	return transactionWrapper(innerFunction, 'PlantSeed', client);
 }
 
 /**
@@ -243,9 +228,9 @@ interface harvestPlotObjects {
  * @replacementItem a placedItemDetailsEntity to replace the plot if its usesRemaining drop to 0, defaults to ground
  * @instantHarvestKey if matches the key in the environment, ignores harvest timers
  * @client if null, creates a new client
- * @returns an object containing the modified level system, plot, and inventoryItem on success (or throws error)
+ * @returns an object containing the harvested item on success (or throws error)
  */
-export async function harvestPlot(plotId: string, inventoryId: string, levelSystemId: string, numHarvests: number, replacementItem?: PlacedItemDetailsEntity, instantHarvestKey?: string, client?: PoolClient): Promise<boolean> {
+export async function harvestPlot(plotId: string, inventoryId: string, levelSystemId: string, numHarvests: number, replacementItem?: PlacedItemDetailsEntity, instantHarvestKey?: string, client?: PoolClient): Promise<InventoryItemEntity> {
 	//Can put validation/business logic here
 	//We always check based on current time
 	const currentTime = Date.now();
@@ -253,15 +238,7 @@ export async function harvestPlot(plotId: string, inventoryId: string, levelSyst
 		throw new Error(`Invalid number of harvests`);
 	}
 
-	const shouldReleaseClient = !client;
-	if (!client) {
-		client = await pool.connect();
-	}
-	try {
-		if (shouldReleaseClient) {
-			await client.query('BEGIN'); // Start the transaction
-		}
-
+	const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {
 		// Grab all relevant objects concurrently
 		const results = await Promise.allSettled([
 			plotRepository.getPlotById(plotId),
@@ -341,25 +318,17 @@ export async function harvestPlot(plotId: string, inventoryId: string, levelSyst
 		//inventory item is added
 		//TODO: Fix inefficiency
 		//We recreate the item first because we don't have a function that directly takes in the itemEntity
-		
-		const harvestedItem = new HarvestedItem(uuidv4(), harvestedItemTemplate, possibleHarvests);
-		await inventoryItemRepository.addInventoryItem(inventoryId, harvestedItem, client);
 
-		if (shouldReleaseClient) {
-			await client.query('COMMIT'); // Rollback the transaction on error
+		const harvestedItem = new HarvestedItem(uuidv4(), harvestedItemTemplate, possibleHarvests);
+		const result = await inventoryItemRepository.addInventoryItem(inventoryId, harvestedItem, client);
+		if (!result) {
+			throw new Error(`Could not add harvested item ${harvestedItem.getInventoryItemId()} to inventory`);
 		}
-		return true;
-	} catch (error) {
-		if (shouldReleaseClient) {
-			await client.query('ROLLBACK'); // Rollback the transaction on error
-		}
-		console.error('Error harvesting plant:', error);
-		throw error; // Rethrow the error for higher-level handling
-	} finally {
-		if (shouldReleaseClient) {
-			client.release(); // Release the client back to the pool
-		}
-	}
+		return result;
+	} 
+
+	// Call the transactionWrapper with the innerFunction and appropriate arguments
+	return transactionWrapper(innerFunction, 'HarvestPlant', client);
 }
 
 

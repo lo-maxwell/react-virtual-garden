@@ -80,23 +80,25 @@ class PlacedItemRepository {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
 			}
-			// Check if the placedItem already exists
-			const existingPlacedItemResult = await client.query<PlacedItemEntity>(
-				'SELECT id, owner, identifier, status FROM placed_items WHERE owner = $1',
-				[plotId]
+
+			const existingItemResult = await client.query<PlacedItemEntity>(
+				`SELECT id, owner, identifier, status FROM placed_items 
+				WHERE id = $1 OR owner = $2`, 
+				[placedItem.getPlacedItemId(), plotId]
 			);
 
-			if (existingPlacedItemResult.rows.length > 0) {
-				// PlacedItem already exists
-				console.warn(`PlacedItem already exists for plot ${plotId} with this ID: ${existingPlacedItemResult.rows[0].id}`);
-				return existingPlacedItemResult.rows[0];
-				// return makePlacedItemObject(existingPlacedItemResult.rows[0]); 
+			if (existingItemResult.rows.length > 0) {
+				return existingItemResult.rows[0];
 			}
 			
-			const result = await query<PlacedItemEntity>(
-				'INSERT INTO placed_items (id, owner, identifier, status) VALUES ($1, $2, $3, $4) RETURNING id, owner, identifier, status',
+			const result = await client.query<PlacedItemEntity>(
+				`INSERT INTO placed_items (id, owner, identifier, status) 
+				VALUES ($1, $2, $3, $4)
+				ON CONFLICT (owner) 
+				DO NOTHING
+				RETURNING id, owner, identifier, status`,
 				[placedItem.getPlacedItemId(), plotId, placedItem.itemData.id, placedItem.getStatus()]
-				);
+			);
 
 			// Check if result is valid
 			if (!result || result.rows.length === 0) {

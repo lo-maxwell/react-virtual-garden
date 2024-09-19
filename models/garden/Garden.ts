@@ -126,6 +126,13 @@ export class Garden {
 	}
 
 	/**
+	 * @returns all plots of this garden, even hidden ones
+	 */
+	getAllPlots(): Plot[][] {
+		return this.plots;
+	}
+
+	/**
      * Creates a 2D array of Empty Plots.
      * @rows number of rows 
 	 * @cols number of columns
@@ -152,20 +159,24 @@ export class Garden {
 	/**
 	 * Calculates if this garden can add a row (expand column).
 	 * Can only add a row if number of rows is less than 5 + (level / 5).
+	 * @currentRows the number of rows
+	 * @currentLevel the level
 	 * @returns true or false
 	 */
-	canAddRow(user: User) : boolean {
-		if (this.getRows() + 1 <= 5 + Math.floor(user.getLevel()/5)) return true;
+	static canAddRow(currentRows: number, currentLevel: number) : boolean {
+		if (currentRows + 1 <= 5 + Math.floor(currentLevel/5)) return true;
 		return false;
 	}
 
 	/**
 	 * Calculates if this garden can add a column (expand row).
 	 * Can only add a column if number of columns is less than 5 + (level / 5).
+	 * @currentColumns the number of columns
+	 * @currentLevel the level
 	 * @returns true or false
 	 */
-	canAddColumn(user: User) : boolean {
-		if (this.getCols() + 1 <= 5 + Math.floor(user.getLevel()/5)) return true;
+	static canAddColumn(currentColumns: number, currentLevel: number) : boolean {
+		if (currentColumns + 1 <= 5 + Math.floor(currentLevel/5)) return true;
 		return false;
 	}
 
@@ -174,7 +185,7 @@ export class Garden {
 	 * @returns success or failure
 	 */
 	addRow(user: User): boolean {
-		if (!this.canAddRow(user)) return false;
+		if (!Garden.canAddRow(this.getRows(), user.getLevel())) return false;
 		this.setGardenSize(this.getRows() + 1, this.getCols());
 		return true;
 	}
@@ -184,9 +195,25 @@ export class Garden {
 	 * @returns success or failure
 	 */
 	addColumn(user: User): boolean {
-		if (!this.canAddColumn(user)) return false;
+		if (!Garden.canAddColumn(this.getCols(), user.getLevel())) return false;
 		this.setGardenSize(this.getRows(), this.getCols() + 1);
 		return true;
+	}
+
+	/**
+	 * @currentRows the current number of rows
+	 * @returns true/false
+	 */
+	static canRemoveRow(currentRows: number): boolean {
+		return currentRows > 1;
+	}
+
+	/**
+	 * @currentColumns the current number of columns
+	 * @returns true/false
+	 */
+	static canRemoveColumn(currentColumns: number): boolean {
+		return currentColumns > 1;
 	}
 
 
@@ -196,7 +223,7 @@ export class Garden {
 	 * @returns success or failure
 	 */
 	removeRow(): boolean {
-		if (this.getRows() <= 1) return false;
+		if (!Garden.canRemoveRow(this.getRows())) return false;
 		this.setGardenSize(this.getRows() - 1, this.getCols());
 		return true;
 	}
@@ -206,7 +233,7 @@ export class Garden {
 	 * @returns success or failure
 	 */
 	removeColumn(): boolean {
-		if (this.getCols() <= 1) return false;
+		if (!Garden.canRemoveColumn(this.getCols())) return false;
 		this.setGardenSize(this.getRows(), this.getCols() - 1);
 		return true;
 	}

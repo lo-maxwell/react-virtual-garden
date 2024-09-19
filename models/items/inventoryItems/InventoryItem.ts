@@ -73,6 +73,14 @@ export abstract class InventoryItem extends Item {
 	getInventoryItemId(): string {
 		return this.inventoryItemId;
 	}
+
+	/**
+	 * TODO: Fix any function that uses this, this is a dangerous operation
+	 * Sets the id for database access.
+	 */
+	 setInventoryItemId(newId: string): void {
+		this.inventoryItemId = newId;
+	}
 	
 	/**
 	 * @returns the quantity

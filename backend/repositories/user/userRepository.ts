@@ -132,7 +132,7 @@ class UserRepository {
 		}
 	}
 
-	async createOrUpdateUser(user: User, client: PoolClient): Promise<UserEntity> {
+	async createOrUpdateUser(user: User, client?: PoolClient): Promise<UserEntity> {
 		const shouldReleaseClient = !client;
 		if (!client) {
 			client = await pool.connect();
