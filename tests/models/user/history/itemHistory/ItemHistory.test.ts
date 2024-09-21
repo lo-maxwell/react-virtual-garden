@@ -12,7 +12,7 @@ import { HarvestedItemTemplate } from "@/models/items/templates/models/Harvested
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
 import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
-import { PlantHistory } from "@/models/user/history/itemHistory/PlantHistory";
+import ItemHistory from "@/models/user/history/itemHistory/ItemHistory";
 import { v4 as uuidv4 } from 'uuid';
 
 let seedItem: Seed;
@@ -43,70 +43,66 @@ beforeEach(() => {
 	emptyItem = new EmptyItem(uuidv4(), emptyTemplate, 'ground');
 })
 
-test('Should Initialize PlantHistory Object', () => {
-	const newPlantHistory = new PlantHistory(plantTemplate, 0);
-	expect(newPlantHistory.getItemData().name).toBe('apple');
-	expect(newPlantHistory.getItemData().subtype).toBe(ItemSubtypes.PLANT.name);
-	expect(newPlantHistory.getHarvestedQuantity()).toBe(0);
-	newPlantHistory.updateHarvestedQuantity(100);
-	expect(newPlantHistory.getHarvestedQuantity()).toBe(100);
-	newPlantHistory.updateHarvestedQuantity(-99);
-	expect(newPlantHistory.getHarvestedQuantity()).toBe(1);
+test('Should Initialize ItemHistory Object', () => {
+	const newItemHistory = new ItemHistory(plantTemplate, 0);
+	expect(newItemHistory.getItemData().name).toBe('apple');
+	expect(newItemHistory.getItemData().subtype).toBe(ItemSubtypes.PLANT.name);
+	expect(newItemHistory.getQuantity()).toBe(0);
+	newItemHistory.updateQuantity(100);
+	expect(newItemHistory.getQuantity()).toBe(100);
+	newItemHistory.updateQuantity(-99);
+	expect(newItemHistory.getQuantity()).toBe(1);
 })
 
-test('Should Combine PlantHistory', () => {
-	const newPlantHistory1 = new PlantHistory(plantTemplate, 10);
-	const newPlantHistory2 = new PlantHistory(plantTemplate, 20);
-	expect(newPlantHistory1.getHarvestedQuantity()).toBe(10);
-	expect(newPlantHistory2.getHarvestedQuantity()).toBe(20);
-	const combineResponse = newPlantHistory1.combineHistory(newPlantHistory2);
+test('Should Combine ItemHistory', () => {
+	const newItemHistory1 = new ItemHistory(plantTemplate, 10);
+	const newItemHistory2 = new ItemHistory(plantTemplate, 20);
+	expect(newItemHistory1.getQuantity()).toBe(10);
+	expect(newItemHistory2.getQuantity()).toBe(20);
+	const combineResponse = newItemHistory1.combineHistory(newItemHistory2);
 	expect(combineResponse.isSuccessful()).toBe(true);
-	const plantHistory = combineResponse.payload as PlantHistory;
-	expect(plantHistory.getHarvestedQuantity()).toBe(30);
-	expect(newPlantHistory1.getHarvestedQuantity()).toBe(30);
+	const plantHistory = combineResponse.payload as ItemHistory;
+	expect(plantHistory.getQuantity()).toBe(30);
+	expect(newItemHistory1.getQuantity()).toBe(30);
 })
 
 
-test('Should Not Combine PlantHistory With Invalid HarvestedQuantity', () => {
-	const newPlantHistory1 = new PlantHistory(plantTemplate, 10);
-	const newPlantHistory2 = new PlantHistory(plantTemplate, -20);
-	expect(newPlantHistory1.getHarvestedQuantity()).toBe(10);
-	expect(newPlantHistory2.getHarvestedQuantity()).toBe(-20);
-	const combineResponse = newPlantHistory1.combineHistory(newPlantHistory2);
+test('Should Not Combine ItemHistory With Invalid HarvestedQuantity', () => {
+	const newItemHistory1 = new ItemHistory(plantTemplate, 10);
+	const newItemHistory2 = new ItemHistory(plantTemplate, -20);
+	expect(newItemHistory1.getQuantity()).toBe(10);
+	expect(newItemHistory2.getQuantity()).toBe(-20);
+	const combineResponse = newItemHistory1.combineHistory(newItemHistory2);
 	expect(combineResponse.isSuccessful()).toBe(false);
-	expect(newPlantHistory1.getHarvestedQuantity()).toBe(10);
+	expect(newItemHistory1.getQuantity()).toBe(10);
 })
 
-test('Should Not Combine PlantHistory With Different Templates', () => {
-	const newPlantHistory1 = new PlantHistory(plantTemplate, 10);
+test('Should Not Combine ItemHistory With Different Templates', () => {
+	const newItemHistory1 = new ItemHistory(plantTemplate, 10);
 	const plantTemplate2 = placeholderItemTemplates.getPlacedItemTemplateByName('banana') as PlantTemplate;
-	const newPlantHistory2 = new PlantHistory(plantTemplate2, 20);
-	expect(newPlantHistory1.getHarvestedQuantity()).toBe(10);
-	expect(newPlantHistory2.getHarvestedQuantity()).toBe(20);
-	const combineResponse = newPlantHistory1.combineHistory(newPlantHistory2);
+	const newItemHistory2 = new ItemHistory(plantTemplate2, 20);
+	expect(newItemHistory1.getQuantity()).toBe(10);
+	expect(newItemHistory2.getQuantity()).toBe(20);
+	const combineResponse = newItemHistory1.combineHistory(newItemHistory2);
 	expect(combineResponse.isSuccessful()).toBe(false);
-	expect(newPlantHistory1.getHarvestedQuantity()).toBe(10);
+	expect(newItemHistory1.getQuantity()).toBe(10);
 })
 
-test('Should Create PlantHistory Object From PlainObject', () => {
-	const newPlantHistory1 = new PlantHistory(plantTemplate, 10);
-	const serializedHistory = JSON.stringify(newPlantHistory1.toPlainObject());
-	const history = PlantHistory.fromPlainObject(JSON.parse(serializedHistory));
+test('Should Create ItemHistory Object From PlainObject', () => {
+	const newItemHistory1 = new ItemHistory(plantTemplate, 10);
+	const serializedHistory = JSON.stringify(newItemHistory1.toPlainObject());
+	const history = ItemHistory.fromPlainObject(JSON.parse(serializedHistory));
 	expect(history).toBeTruthy();
 	expect(history?.getItemData().name).toBe('apple');
-	expect(history?.getHarvestedQuantity()).toBe(10);
+	expect(history?.getQuantity()).toBe(10);
 })
 
-test('Should Not Create Invalid PlantHistory Object From PlainObject', () => {	
+test('Should Not Create Invalid ItemHistory Object From PlainObject', () => {	
 	//Mute console error
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-	const newPlantHistory1 = new PlantHistory(decorationTemplate as PlantTemplate, 10);
-	const serializedHistory = JSON.stringify(newPlantHistory1.toPlainObject());
-	const corruptedHistory1 = PlantHistory.fromPlainObject(JSON.parse(serializedHistory));
-	expect(corruptedHistory1).toBe(null);
-	const corruptedHistory2 = PlantHistory.fromPlainObject(123);
+	const corruptedHistory2 = ItemHistory.fromPlainObject(123);
 	expect(corruptedHistory2).toBe(null);
-	const corruptedHistory3 = PlantHistory.fromPlainObject({itemData: plantTemplate.toPlainObject(), harvestedQuantity: "abc"});
+	const corruptedHistory3 = ItemHistory.fromPlainObject({itemData: plantTemplate.toPlainObject(), harvestedQuantity: "abc"});
 	expect(corruptedHistory3).toBe(null);
 	consoleErrorSpy.mockRestore();
 })

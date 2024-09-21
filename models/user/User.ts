@@ -9,14 +9,11 @@ import { PlantTemplate } from "../items/templates/models/PlantTemplate";
 import LevelSystem, { LevelSystemEntity } from "../level/LevelSystem";
 import { BooleanResponse } from "../utility/BooleanResponse";
 import { actionHistoryFactory } from "./history/actionHistory/ActionHistoryFactory";
-import { actionHistoryRepository } from "./history/actionHistory/ActionHistoryRepository";
 import { ActionHistoryList } from "./history/ActionHistoryList";
-import { DecorationHistory } from "./history/itemHistory/DecorationHistory";
-import ItemHistory from "./history/itemHistory/ItemHistory";
-import { PlantHistory } from "./history/itemHistory/PlantHistory";
 import { ItemHistoryList } from "./history/ItemHistoryList";
 import Icon from "./icons/Icon";
 import { v4 as uuidv4 } from 'uuid';
+import ItemHistory from "./history/itemHistory/ItemHistory";
 
 export interface UserEntity {
 	id: string;
@@ -163,7 +160,7 @@ class User {
 			response.addErrorMessage(`Error updating history: attempting to harvest item of type ${plantItem.itemData.subtype}`);
 			return response;
 		}
-		const itemHistory = new PlantHistory(plantItem.itemData as PlantTemplate, 1);
+		const itemHistory = new ItemHistory(plantItem.itemData, 1);
 		this.itemHistory.addItemHistory(itemHistory);
 		const harvestAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(plantItem.itemData.subtype, 'all', 'harvested', 1);
 		const harvestCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(plantItem.itemData.subtype, plantItem.itemData.category, 'harvested', 1);
@@ -196,7 +193,7 @@ class User {
 			response.addErrorMessage(`Error updating history: attempting to place item of type ${decorationItem.itemData.subtype}`);
 			return response;
 		}
-		const itemHistory = new DecorationHistory(decorationItem.itemData as DecorationTemplate, 1);
+		const itemHistory = new ItemHistory(decorationItem.itemData, 1);
 		this.itemHistory.addItemHistory(itemHistory);
 		// const harvestAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(decorationItem.itemData.subtype, 'all', 'harvested', 1);
 		const placeDecorationHistory = actionHistoryFactory.createActionHistoryByIdentifiers(decorationItem.itemData.subtype, decorationItem.itemData.category, 'placed', 1);

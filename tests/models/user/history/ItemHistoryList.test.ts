@@ -13,8 +13,7 @@ import { HarvestedItemTemplate } from "@/models/items/templates/models/Harvested
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
 import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
-import { DecorationHistory } from "@/models/user/history/itemHistory/DecorationHistory";
-import { PlantHistory } from "@/models/user/history/itemHistory/PlantHistory";
+import ItemHistory from "@/models/user/history/itemHistory/ItemHistory";
 import { ItemHistoryList } from "@/models/user/history/ItemHistoryList";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -30,8 +29,8 @@ let harvestedTemplate: HarvestedItemTemplate;
 let plantTemplate: PlantTemplate;
 let decorationTemplate: DecorationTemplate;
 let emptyTemplate: EmptyItemTemplate;
-let plantHistory: PlantHistory;
-let decorationHistory: DecorationHistory;
+let plantHistory: ItemHistory;
+let decorationHistory: ItemHistory;
 let testItemHistoryList: ItemHistoryList;
 
 beforeEach(() => {
@@ -47,8 +46,8 @@ beforeEach(() => {
 	decorationItem = new Decoration(uuidv4(), decorationTemplate, '');
 	emptyTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('ground') as EmptyItemTemplate;
 	emptyItem = new EmptyItem(uuidv4(), emptyTemplate, 'ground');
-	plantHistory = new PlantHistory(plantTemplate, 1);
-	decorationHistory = new DecorationHistory(decorationTemplate, 1);
+	plantHistory = new ItemHistory(plantTemplate, 1);
+	decorationHistory = new ItemHistory(decorationTemplate, 1);
 	testItemHistoryList = new ItemHistoryList();
 })
 
@@ -75,11 +74,8 @@ test('Should Not Create Invalid ItemHistoryList Object From PlainObject', () => 
 	//Mute console error
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 	const list = new ItemHistoryList();
-	const invalidHistory = new PlantHistory(emptyTemplate as PlantTemplate, -100);
+	const invalidHistory = new ItemHistory(emptyTemplate as PlantTemplate, -100);
 	list.addItemHistory(invalidHistory);
-	const serializedHistory = JSON.stringify(list.toPlainObject());
-	const corruptedHistory1 = ItemHistoryList.fromPlainObject(JSON.parse(serializedHistory));
-	expect(corruptedHistory1.size()).toBe(0);
 	const corruptedHistory2 = ItemHistoryList.fromPlainObject(123);
 	expect(corruptedHistory2.size()).toBe(0);
 	const corruptedHistory3 = ItemHistoryList.fromPlainObject({itemHistories: [plantHistory, null]});
@@ -180,19 +176,19 @@ test('Should Add Existing History to ItemHistoryList', () => {
 	const addResponse = testItemHistoryList.addItemHistory(plantHistory);
 	expect(addResponse.isSuccessful()).toBe(true);
 	expect(testItemHistoryList.size()).toBe(1);
-	const hist = testItemHistoryList.getHistory(plantHistory.getItemData()).payload as PlantHistory;
-	expect(hist.getHarvestedQuantity()).toBe(1);
+	const hist = testItemHistoryList.getHistory(plantHistory.getItemData()).payload as ItemHistory;
+	expect(hist.getQuantity()).toBe(1);
 	const addResponse2 = testItemHistoryList.addItemHistory(plantHistory);
 	expect(addResponse2.isSuccessful()).toBe(true);
-	const hist2 = testItemHistoryList.getHistory(plantHistory.getItemData()).payload as PlantHistory;
-	expect(hist2.getHarvestedQuantity()).toBe(2);
+	const hist2 = testItemHistoryList.getHistory(plantHistory.getItemData()).payload as ItemHistory;
+	expect(hist2.getQuantity()).toBe(2);
 	expect(testItemHistoryList.size()).toBe(1);
 })
 
 test('Should Not Add Invalid History', () => {
 	testItemHistoryList.addItemHistory(plantHistory);
 	const corruptedTemplate = new PlantTemplate(plantTemplate.id, '', '', 'PlacedItem', 'Decoration', '', '', 1, 1, '', 1, 1, 1, 1);
-	const corruptedHistory = new PlantHistory(corruptedTemplate, 1);
+	const corruptedHistory = new ItemHistory(corruptedTemplate, 1);
 	const addResponse = testItemHistoryList.addItemHistory(corruptedHistory);
 	expect(addResponse.isSuccessful()).toBe(false);
 })
@@ -202,19 +198,19 @@ test('Should Directly Update History to ItemHistoryList', () => {
 	const addResponse = testItemHistoryList.addItemHistory(plantHistory);
 	expect(addResponse.isSuccessful()).toBe(true);
 	expect(testItemHistoryList.size()).toBe(1);
-	const hist = testItemHistoryList.getHistory(plantHistory.getItemData()).payload as PlantHistory;
-	expect(hist.getHarvestedQuantity()).toBe(1);
+	const hist = testItemHistoryList.getHistory(plantHistory.getItemData()).payload as ItemHistory;
+	expect(hist.getQuantity()).toBe(1);
 	const updateResponse = testItemHistoryList.updateItemHistory(plantHistory);
 	expect(updateResponse.isSuccessful()).toBe(true);
-	const hist2 = testItemHistoryList.getHistory(plantHistory.getItemData()).payload as PlantHistory;
-	expect(hist2.getHarvestedQuantity()).toBe(2);
+	const hist2 = testItemHistoryList.getHistory(plantHistory.getItemData()).payload as ItemHistory;
+	expect(hist2.getQuantity()).toBe(2);
 	expect(testItemHistoryList.size()).toBe(1);
 })
 
 test('Should Not Update Invalid History', () => {
 	testItemHistoryList.addItemHistory(plantHistory);
 	const corruptedTemplate = new PlantTemplate(plantTemplate.id, '', '', 'PlacedItem', 'Decoration', '', '', 1, 1, '', 1, 1, 1, 1);
-	const corruptedHistory = new PlantHistory(corruptedTemplate, 1);
+	const corruptedHistory = new ItemHistory(corruptedTemplate, 1);
 	const updateResponse = testItemHistoryList.updateItemHistory(corruptedHistory);
 	expect(updateResponse.isSuccessful()).toBe(false);
 	const updateResponse2 = testItemHistoryList.updateItemHistory(decorationHistory);

@@ -281,6 +281,8 @@
 
 TODO:
 
+Combine itemhistories
+
 Make itemList query based on item identifier, not name
 
 Put transactionWrappers around other service functions
