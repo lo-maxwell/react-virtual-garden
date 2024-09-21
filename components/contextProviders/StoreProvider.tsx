@@ -23,21 +23,22 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		function generateItems() { 
 			return stocklistFactory.getStocklistInterfaceById("0")?.items;
 		}
-		const storeId = 0;
-		const storeName = "Default Store";
-		const storeInterface = storeFactory.getStoreInterfaceById(0);
+		const storeIdentifier = 1;
+		const storeInterface = storeFactory.getStoreInterfaceById(storeIdentifier);
+		let storeName = "Default Store";
 		let buyMultiplier = 2;
 		let sellMultiplier = 1;
 		let upgradeMultiplier = 1;
 		let restockTime = Date.now();
 		let restockInterval = 300000;
 		if (storeInterface) {
+			storeName = storeInterface.name;
 			buyMultiplier = storeInterface.buyMultiplier;
 			sellMultiplier = storeInterface.sellMultiplier;
 			upgradeMultiplier = storeInterface.upgradeMultiplier;
 			restockInterval = storeInterface.restockInterval;
 		}
-		const initialStore = new Store(randomUuid, storeId, storeName, buyMultiplier, sellMultiplier, upgradeMultiplier, new ItemList(), generateItems(), restockTime, restockInterval);
+		const initialStore = new Store(randomUuid, storeIdentifier, storeName, buyMultiplier, sellMultiplier, upgradeMultiplier, new ItemList(), generateItems(), restockTime, restockInterval);
 		initialStore.restockStore();
 		return initialStore;
 	}
@@ -62,39 +63,74 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 	  }, []);
 	
 
-    const restockStore = () => {
+    const restockStore = async () => {
 		if (store) {
+			if (!store.needsRestock()) {
+				return "UNNECESSARY";
+			}
+			try {
+				const data = {
+				}
+				// Making the PATCH request to your API endpoint
+				const response = await fetch(`/api/store/${store.getStoreId()}/restock`, {
+				  method: 'PATCH',
+				  headers: {
+					'Content-Type': 'application/json',
+				  },
+				  body: JSON.stringify(data), // Send the data in the request body
+				});
+		  
+				// Check if the response is successful
+				if (!response.ok) {
+				  throw new Error('Failed to restock store');
+				}
+		  
+				// Parsing the response data
+				const result = await response.json();
+				console.log('Successfully restocked store:', result);
+				if (result === false) return "NOT TIME";
+			  } catch (error) {
+				console.error(error);
+				return "ERROR";
+			  } finally {
+			  }
 			const response = store.restockStore();
-			if (!response.isSuccessful()) return response;
+			if (!response.isSuccessful()) return "ERROR";
 			saveStore(store);
-			return response;
+			//TODO: Add forceRefreshKey?
+			return "SUCCESS"
 		} 
-		const response = new InventoryTransactionResponse();
-		response.addErrorMessage('Error restocking store: store does not exist');
-		return response;
+		return "ERROR";
     };
 
 	const restockTimeout = useRef<number | null>(null);
 	const updateRestockTimer = useCallback(() => {
 		if (!store) return;
+		if (restockTimeout.current) return; //do not interrupt existing timeouts
 		const currentTime = Date.now();
+
 		if (currentTime > store.getRestockTime() && store.needsRestock()) {
 			//Store is waiting for a restock, timer is finished
 			const newRestockTime = currentTime + store.getRestockInterval();
 			store.setRestockTime(newRestockTime);
 			// Set a new timeout to trigger restock after the interval
 			const remainingTime = newRestockTime - currentTime;
-			restockTimeout.current = window.setTimeout(() => {
-				if (store) {
-					store.restockStore();
+			restockTimeout.current = window.setTimeout(async () => {
+				const restockResult = await restockStore();
+				restockTimeout.current = null;
+				if (restockResult === "NOT TIME") {
+					updateRestockTimer()
 				}
+				
 			}, remainingTime);
 		} else if (store.needsRestock()) {
 			 // Set a timeout for the remaining time until the next restock
 			const remainingTime = store.getRestockTime() - currentTime;
-			restockTimeout.current = window.setTimeout(() => {
-				if (store) {
-					store.restockStore();
+			restockTimeout.current = window.setTimeout(async () => {
+				const restockResult = await restockStore();
+				restockTimeout.current = null;
+				if (restockResult === "NOT TIME") {
+					updateRestockTimer()
 				}
 			}, remainingTime);
 		}
@@ -119,7 +155,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 	}
 
     return (
-        <StoreContext.Provider value={{ store: store!, restockStore, resetStore, updateRestockTimer }}>
+        <StoreContext.Provider value={{ store: store!, resetStore, updateRestockTimer }}>
             {children}
         </StoreContext.Provider>
     );

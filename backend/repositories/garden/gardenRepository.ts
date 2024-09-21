@@ -1,4 +1,5 @@
 import { pool, query } from "@/backend/connection/db";
+import { transactionWrapper } from "@/backend/services/utility/utility";
 import { GardenEntity, Garden, ExtendedGardenEntity, GardenDimensionEntity } from "@/models/garden/Garden";
 import { ExtendedPlotEntity, Plot } from "@/models/garden/Plot";
 import { PoolClient } from "pg";
@@ -112,15 +113,8 @@ class GardenRepository {
 	 * @returns an ExtendedGardenEntity with the corresponding data if success, null if failure (or throws error)
 	 */
 	async createGarden(userId: string, garden: Garden, client?: PoolClient): Promise<ExtendedGardenEntity> {
-		//TODO: Call createPlots here
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
+		// Define the inner function that handles the core logic inside the transaction
+		const innerFunction = async (client: PoolClient): Promise<ExtendedGardenEntity> => {
 
 			// Check if the garden already exists
 			const existingGardenResult = await client.query<{id: string}>(
@@ -149,11 +143,8 @@ class GardenRepository {
 					columns: garden.getCols()
 				}
 				console.warn(`Garden already exists for user ${username} with this ID: ${existingGardenResult.rows[0].id}`);
-				if (shouldReleaseClient) {
-					await client.query('ROLLBACK'); // Rollback the transaction on error
-				}
+				
 				return extendedGardenEntity;
-				// return makeGardenObject(extendedGardenEntity); 
 			}
 
 			
@@ -182,22 +173,11 @@ class GardenRepository {
 				[newGardenId]
 			);
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-
 			return extendedResult.rows[0];
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error creating garden:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		} 
+		
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'createGarden', client);
 	}
 
 	/**
@@ -208,14 +188,8 @@ class GardenRepository {
 	 * @returns a new GardenEntity with the corresponding data if success, null if failure (or throws error)
 	*/
 	async createOrUpdateGarden(userId: string, garden: Garden, client?: PoolClient): Promise<ExtendedGardenEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
+		// Define the inner function that handles the core logic inside the transaction
+		const innerFunction = async (client: PoolClient): Promise<ExtendedGardenEntity> => {
 			// Check if the garden already exists
 			const existingGardenResult = await client.query<{id: string}>(
 				'SELECT id FROM gardens WHERE id = $1',
@@ -236,23 +210,11 @@ class GardenRepository {
 					throw new Error(`Error creating garden with id ${garden.getGardenId()}`);
 				} 
 			}
-
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-
 			return result;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error creating plot:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
 		}
+		
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'createOrUpdateGarden', client);
 	}
 
 	/**
@@ -266,14 +228,8 @@ class GardenRepository {
 	 * @returns a GardenEntity with the corresponding data if success, null if failure (or throws error)
 	 */
 	 async updateEntireGarden(garden: Garden, client?: PoolClient): Promise<ExtendedGardenEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
+		// Define the inner function that handles the core logic inside the transaction
+		const innerFunction = async (client: PoolClient): Promise<ExtendedGardenEntity> => {
 			// Check if the garden already exists
 			const existingGardenResult = await client.query<{id: string}>(
 				'SELECT id FROM gardens WHERE id = $1',
@@ -310,22 +266,11 @@ class GardenRepository {
 				[newGardenId]
 			);
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-
 			return extendedResult.rows[0];
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating garden:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		} 
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'updateEntireGarden', client);
 	}
 
 
@@ -337,14 +282,8 @@ class GardenRepository {
 	 * @returns a GardenEntity with the new data on success (or throws error)
 	 */
 	async setGardenSize(id: string, rowCount: number, columnCount: number, client?: PoolClient): Promise<GardenEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
+		// Define the inner function that handles the core logic inside the transaction
+		const innerFunction = async (client: PoolClient): Promise<GardenEntity> => {
 		
 			const gardenResult = await client.query<GardenEntity>(
 				'UPDATE gardens SET rows = $1, columns = $2 WHERE id = $3 RETURNING *',
@@ -357,22 +296,13 @@ class GardenRepository {
 				throw new Error('There was an error updating the garden');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
 			const updatedRow = gardenResult.rows[0];
 			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating garden:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		} 
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'setGardenSize', client);
+		
 	}
 
 	/**
@@ -383,20 +313,13 @@ class GardenRepository {
 	 * @returns a GardenEntity with the new data on success (or throws error)
 	 */
 	async updateGardenSize(id: string, rowDelta: number, columnDelta: number, client?: PoolClient): Promise<GardenEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
+		// Define the inner function that handles the core logic inside the transaction
+		const innerFunction = async (client: PoolClient): Promise<GardenEntity> => {
 		
 			const gardenResult = await client.query<GardenEntity>(
 				'UPDATE gardens SET rows = rows + $1, columns = columns + $2 WHERE id = $3 RETURNING *',
 				[rowDelta, columnDelta, id]
 				);
-
 
 			// Check if result is valid
 			if (!gardenResult || gardenResult.rows.length === 0) {
@@ -404,22 +327,12 @@ class GardenRepository {
 				throw new Error('There was an error updating the garden size');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
 			const updatedRow = gardenResult.rows[0];
 			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating garden size:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
 		}
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'updateGardenSize', client);
 	}
 
 }

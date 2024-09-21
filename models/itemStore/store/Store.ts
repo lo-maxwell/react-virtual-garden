@@ -7,6 +7,7 @@ import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
 import { storeFactory } from "./StoreFactory";
 import { v4 as uuidv4 } from 'uuid';
 import { stocklistFactory } from "./StocklistFactory";
+import { DataRouterContext } from "react-router/dist/lib/context";
 
 export interface StoreEntity {
 	id: string,
@@ -240,6 +241,10 @@ export class Store extends ItemStore {
 	getBuyPrice(item: InventoryItem): number {
 		return item.itemData.value * this.buyMultiplier;
 	}
+
+	canBuyItem(item: InventoryItem, quantity: number, inventory: Inventory): boolean {
+		return inventory.getGold() >= this.getBuyPrice(item) * quantity;
+	}
 	
 	// Calculate the price to sell an item to the store
 	getSellPrice(item: InventoryItem): number {
@@ -332,6 +337,17 @@ export class Store extends ItemStore {
 	emptyStore(): InventoryTransactionResponse {
 		const response = this.deleteAll();
 		return response;
+	}
+
+
+	/**
+	 * Checks if the current time is past the restock time
+	 * @lastRestockTime ms since epoch time
+	 * @restockInterval in ms
+	 * @currentTime defaults to Date.now()
+	 */
+	static isRestockTime(lastRestockTime: number, restockInterval: number, currentTime: number = Date.now()): boolean {
+		return currentTime > lastRestockTime + restockInterval;
 	}
 
 	/**

@@ -167,7 +167,8 @@ class InventoryItemRepository {
 	}
 
 	/**
-	 * If the item does not exist, creates it for the specified inventory. Otherwise, modifies its identifier and/or quantity.
+	 * If the item does not exist, creates it for the specified inventory. Otherwise, sets its identifier and/or quantity.
+	 * Do not use this to add inventory items.
 	 * @inventoryId the id of the inventory that this item belongs to
 	 * @item the inventory item
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.

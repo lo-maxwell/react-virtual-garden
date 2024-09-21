@@ -1,4 +1,5 @@
 import { pool, query } from "@/backend/connection/db";
+import { transactionWrapper } from "@/backend/services/utility/utility";
 import { InventoryItem, StoreItemEntity } from "@/models/items/inventoryItems/InventoryItem";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
@@ -87,14 +88,7 @@ class StoreItemRepository {
 	 * @returns an StoreItemEntity with the corresponding data if success, null if failure (or throws error)
 	 */
 	async createStoreItem(ownerId: string, storeItem: InventoryItem, client?: PoolClient): Promise<StoreItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
+		const innerFunction = async (client: PoolClient): Promise<StoreItemEntity> => {
 
 			const existingItemResult = await client.query<StoreItemEntity>(
 				`SELECT id, owner, identifier, quantity FROM store_items 
@@ -120,25 +114,11 @@ class StoreItemRepository {
 				throw new Error('There was an error creating the storeItem');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-
 			return result.rows[0];
-			// Return the created StoreItem as an instance
-			// const instance = makeStoreItemObject(result.rows[0]);
-			// return instance;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error creating storeItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		} 
+	
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'createStoreItem', client);
 	}
 
 	//TODO: Move this to a service
@@ -151,17 +131,11 @@ class StoreItemRepository {
 	 * @returns a StoreItemEntity with the corresponding data if success, null if failure (or throws error)
 	 */
 	async addStoreItem(ownerId: string, storeItem: InventoryItem, client?: PoolClient): Promise<StoreItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (storeItem.getQuantity() <= 0) {
+		if (storeItem.getQuantity() <= 0) {
 				throw new Error(`Cannot add inventory item with quantity ${storeItem.getQuantity()}`);
 			}
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
+		const innerFunction = async (client: PoolClient): Promise<StoreItemEntity> => {
+			
 			// Check if the storeItem already exists
 			const existingStoreItemResult = await this.getStoreItemByOwnerId(ownerId, storeItem.itemData.id);
 
@@ -182,23 +156,12 @@ class StoreItemRepository {
 				throw new Error('There was an error creating the storeItem');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-
 			// Return the created StoreItem as an instance
 			return result;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error creating storeItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		} 
+	
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'addStoreItem', client);
 	}
 
 	/**
@@ -209,14 +172,7 @@ class StoreItemRepository {
 	 * @returns a new StoreItemEntity with the corresponding data if success, null if failure (or throws error)
 	*/
 	async createOrUpdateStoreItem(storeId: string, item: InventoryItem, client?: PoolClient): Promise<StoreItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
+		const innerFunction = async (client: PoolClient): Promise<StoreItemEntity> => {
 			// Check if the store item already exists
 			const existingStoreItemResult = await client.query<{id: string}>(
 				'SELECT id FROM store_items WHERE owner = $1 AND identifier = $2',
@@ -229,31 +185,20 @@ class StoreItemRepository {
 				// Plot already exists
 				result = await this.setStoreItemQuantity(existingStoreItemResult.rows[0].id, item.getQuantity(), client);
 				if (!result) {
-					throw new Error(`Error updating inventory item with id ${item.getInventoryItemId()}`);
+					throw new Error(`Error updating store item with id ${item.getInventoryItemId()}`);
 				} 
 			} else {
 				result = await this.createStoreItem(storeId, item, client);
 				if (!result) {
-					throw new Error(`Error creating plot with id ${item.getInventoryItemId()}`);
+					throw new Error(`Error creating store item with id ${item.getInventoryItemId()}`);
 				} 
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-
 			return result;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error creating plot:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		} 
+	
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'createOrUpdateStoreItem', client);
 	}
 
 	/**
@@ -278,6 +223,44 @@ class StoreItemRepository {
 	}
 
 	/**
+	 * If the item does not exist, creates it for the specified store. Otherwise, modifies its identifier and/or quantity.
+	 * @storeId the id of the store that this item belongs to
+	 * @item the inventory item
+	 * @client the pool client that this is nested within, or null if it should create its own transaction.
+	 * @returns a new StoreItemEntity with the corresponding data if success, null if failure (or throws error)
+	*/
+	async createOrRestockStoreItem(storeId: string, item: InventoryItem, client?: PoolClient): Promise<StoreItemEntity> {
+		
+		const innerFunction = async (client: PoolClient): Promise<StoreItemEntity> => {
+			// Check if the store item already exists
+			const existingStoreItemResult = await client.query<{id: string}>(
+				'SELECT id FROM store_items WHERE owner = $1 AND identifier = $2',
+				[storeId, item.itemData.id]
+			);
+
+			let result;
+
+			if (existingStoreItemResult.rows.length > 0) {
+				// Plot already exists
+				result = await this.restockStoreItem(existingStoreItemResult.rows[0].id, item.getQuantity(), client);
+				if (!result) {
+					throw new Error(`Error restocking store item with id ${item.getInventoryItemId()}`);
+				} 
+			} else {
+				result = await this.createStoreItem(storeId, item, client);
+				if (!result) {
+					throw new Error(`Error creating store item with id ${item.getInventoryItemId()}`);
+				} 
+			}
+
+			return result;
+		} 
+	
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'createOrRestockStoreItem', client);
+	}
+
+	/**
 	 * Sets the quantity of the storeItem. Does not validate quantity amount, except for checking that it is nonnegative. Uses row level locking.
 	 * Does not delete the item if quantity is set to 0. Use deleteStoreItemById for that.
 	 * @id the id of the item
@@ -285,14 +268,8 @@ class StoreItemRepository {
 	 * @returns a StoreItemEntity with the new data on success (or throws error)
 	 */
 	async setStoreItemQuantity(id: string, newQuantity: number, client?: PoolClient): Promise<StoreItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
+		
+		const innerFunction = async (client: PoolClient): Promise<StoreItemEntity> => {
 		
 			const storeItemResult = await client.query<StoreItemEntity>(
 				'UPDATE store_items SET quantity = $1 WHERE id = $2 RETURNING id, owner, identifier, quantity',
@@ -305,22 +282,47 @@ class StoreItemRepository {
 				throw new Error('There was an error updating the storeItem');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
 			const updatedRow = storeItemResult.rows[0];
 			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
+		} 
+	
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'setStoreItemQuantity', client);
+	}
+
+
+
+	/**
+	 * If the quantity of the storeItem is below minQuantity, sets it to minQuantity. Does not validate quantity amount, except for checking that it is nonnegative. Uses row level locking.
+	 * Does not delete the item if quantity is set to 0. Use deleteStoreItemById for that.
+	 * @id the id of the item
+	 * @minQuantity the minimum quantity to replace with
+	 * @returns a StoreItemEntity with the new data on success (or throws error)
+	 */
+	 async restockStoreItem(id: string, minQuantity: number, client?: PoolClient): Promise<StoreItemEntity> {
+		
+		const innerFunction = async (client: PoolClient): Promise<StoreItemEntity> => {
+			const storeItemResult = await client.query<StoreItemEntity>(
+				`UPDATE store_items SET quantity = CASE
+					WHEN $1 > quantity THEN $1
+					ELSE quantity
+					END
+				WHERE id = $2 RETURNING id, owner, identifier, quantity`,
+				[minQuantity, id]
+				);
+
+
+			// Check if result is valid
+			if (!storeItemResult || storeItemResult.rows.length === 0) {
+				throw new Error('There was an error updating the storeItem');
 			}
-			console.error('Error updating storeItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+
+			const updatedRow = storeItemResult.rows[0];
+			return updatedRow;
+		} 
+	
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'restockStoreItem', client);
 	}
 
 	/**

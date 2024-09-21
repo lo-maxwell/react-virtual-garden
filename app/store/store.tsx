@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 const StoreComponent = ({onInventoryItemClickFunction}: {onInventoryItemClickFunction: (arg: any) => void}) => {
 
-	const {store, restockStore, resetStore} = useStore();
+	const {store} = useStore();
 
 	const [timeRemaining, setTimeRemaining] = useState<number>(0);
 	const [canRestock, setCanRestock] = useState<boolean>(false);
@@ -31,27 +31,6 @@ const StoreComponent = ({onInventoryItemClickFunction}: {onInventoryItemClickFun
 			clearInterval(intervalId);
 		}
 	}, [store]);
-
-	const handleRestock = () => {
-		if (Date.now() > store.getRestockTime()) {
-			const response = restockStore();
-			if (!response.isSuccessful()) {
-				console.log('there was an error');
-				return;
-			}
-			
-			setCanRestock(false);
-		} else {
-			const now = Date.now();
-			const calculatedTimeRemaining = Math.max(0, store.getRestockTime() - now);
-			setTimeRemaining(calculatedTimeRemaining);
-			if (calculatedTimeRemaining == 0) {
-				setCanRestock(true);
-			} else {
-				setCanRestock(false);
-			}
-		}
-	}
 
 	const RenderStoreDiscountString = () => {
 

@@ -38,12 +38,12 @@ export class Plot {
 		if (typeof plantTime === 'number') {
 			this.plantTime = plantTime;
 		} else {
-			let convertedRestockTime = BigInt(plantTime);
+			let convertedPlantTime = BigInt(plantTime);
 			const MAX_SAFE_INTEGER = BigInt(Number.MAX_SAFE_INTEGER);
-			const lastRestockTimeMsNumber = convertedRestockTime > MAX_SAFE_INTEGER 
+			const lastPlantTimeMsNumber = convertedPlantTime > MAX_SAFE_INTEGER 
 				? Number.MAX_SAFE_INTEGER 
-				: Number(convertedRestockTime);
-			this.plantTime = lastRestockTimeMsNumber;
+				: Number(convertedPlantTime);
+			this.plantTime = lastPlantTimeMsNumber;
 		}
 		if (usesRemaining && usesRemaining >= 0) {
 			this.usesRemaining = usesRemaining;

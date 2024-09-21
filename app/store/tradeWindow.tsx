@@ -13,6 +13,8 @@ import ChangeQuantityButton from "./changeQuantityButton";
 import { useStore } from "@/app/hooks/contexts/StoreContext";
 import { useInventory } from "@/app/hooks/contexts/InventoryContext";
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
+import { InventoryTransactionResponse } from "@/models/itemStore/inventory/InventoryTransactionResponse";
+import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 
 
 const TradeWindowComponent = ({costMultiplier}: {costMultiplier: number}) => {
@@ -26,7 +28,7 @@ const TradeWindowComponent = ({costMultiplier}: {costMultiplier: number}) => {
 	const [quantity, setQuantity] = useState(1);
 	const [tradeWindowMessage, setTradeWindowMessage] = useState(defaultTradeWindowMessage);
 	
-	const {store, restockStore, updateRestockTimer} = useStore();
+	const {store, updateRestockTimer} = useStore();
 
 	const renderInventoryItem = () => {
 		if (selectedItem && owner != null) {
@@ -119,25 +121,126 @@ const TradeWindowComponent = ({costMultiplier}: {costMultiplier: number}) => {
 		}
 	}, [selectedItem, inventory, owner]);
 
-	const onConfirmClick = () => {
+	const onConfirmClick = async () => {
 		if (!selectedItem) return;
 		if (owner instanceof Store) {
-			const response = store.buyItemFromStore(inventory, selectedItem, quantity);
-			if (!response.isSuccessful()) {
-				response.printErrorMessages();
-				setTradeWindowMessage(response.messages[0]);
+			if (!store.canBuyItem(selectedItem, quantity, inventory)) {
+				setTradeWindowMessage(`Not enough gold for purchase!`);
 				return;
 			}
-			setTradeWindowMessage('Purchase Successful!');
-			updateRestockTimer();
+			try {
+				const data = {
+					itemIdentifier: selectedItem.itemData.id, 
+					purchaseQuantity: quantity, 
+					inventoryId: inventory.getInventoryId()
+				}
+				// Making the PATCH request to your API endpoint
+				const response = await fetch(`/api/store/${store.getStoreId()}/buy`, {
+				  method: 'PATCH',
+				  headers: {
+					'Content-Type': 'application/json',
+				  },
+				  body: JSON.stringify(data), // Send the data in the request body
+				});
+		  
+				// Check if the response is successful
+				if (!response.ok) {
+				  throw new Error('Failed to purchase item');
+				}
+		  
+				// Parsing the response data
+				const result = await response.json();
+				console.log('Successfully purchased item:', result);
+				const buyResponse = store.buyItemFromStore(inventory, selectedItem, quantity);
+				if (!buyResponse.isSuccessful()) {
+					buyResponse.printErrorMessages();
+					setTradeWindowMessage(buyResponse.messages[0]);
+					return;
+				}
+				const itemTemplate = placeholderItemTemplates.getInventoryTemplate(result.identifier);
+				if (!itemTemplate) {
+					setTradeWindowMessage(`There was an error parsing the item id, please contact the developer`);
+					return;
+				}
+				const inventoryItem = inventory.getItem(itemTemplate);
+				if (!(inventoryItem.isSuccessful())) {
+					setTradeWindowMessage(`There was an error parsing the item, please contact the developer`);
+					return;
+				}
+				//TODO: Fix this
+				//Hack to ensure consistency between database and model item ids
+				//After we update the database, it returns an id, which we assign to the newly
+				//added inventoryItem
+				(inventoryItem.payload as InventoryItem).setInventoryItemId(result.id);
+
+				
+				setTradeWindowMessage('Purchase Successful!');
+				updateRestockTimer();
+			  } catch (error) {
+				console.error(error);
+				const response = new InventoryTransactionResponse();
+				response.addErrorMessage(`Unknown database error while purchasing item`);
+				setTradeWindowMessage(response.messages[0]);
+				return;
+			  } finally {
+			  }
+			
 		} else if (owner instanceof Inventory) {
-			const response = store.sellItemToStore(inventory, selectedItem, quantity);
-			if (!response.isSuccessful()) {
-				response.printErrorMessages();
+			try {
+				const data = {
+					itemIdentifier: selectedItem.itemData.id, 
+					sellQuantity: quantity, 
+					inventoryId: inventory.getInventoryId()
+				}
+				// Making the PATCH request to your API endpoint
+				const response = await fetch(`/api/store/${store.getStoreId()}/sell`, {
+				  method: 'PATCH',
+				  headers: {
+					'Content-Type': 'application/json',
+				  },
+				  body: JSON.stringify(data), // Send the data in the request body
+				});
+		  
+				// Check if the response is successful
+				if (!response.ok) {
+				  throw new Error('Failed to sell item');
+				}
+		  
+				// Parsing the response data
+				const result = await response.json();
+				console.log('Successfully sold item:', result);
+				const sellResponse = store.sellItemToStore(inventory, selectedItem, quantity);
+				if (!sellResponse.isSuccessful()) {
+					sellResponse.printErrorMessages();
+					setTradeWindowMessage(sellResponse.messages[0]);
+					return;
+				}
+				const itemTemplate = placeholderItemTemplates.getInventoryTemplate(result.identifier);
+				if (!itemTemplate) {
+					setTradeWindowMessage(`There was an error parsing the item id, please contact the developer`);
+					return;
+				}
+				const storeItem = store.getItem(itemTemplate);
+				if (!(storeItem.isSuccessful())) {
+					setTradeWindowMessage(`There was an error parsing the item, please contact the developer`);
+					return;
+				}
+				//TODO: Fix this
+				//Hack to ensure consistency between database and model item ids
+				//After we update the database, it returns an id, which we assign to the newly
+				//added inventoryItem
+				(storeItem.payload as InventoryItem).setInventoryItemId(result.id);
+				
+				setTradeWindowMessage('Sale Successful!');
+			  } catch (error) {
+				console.error(error);
+				const response = new InventoryTransactionResponse();
+				response.addErrorMessage(`Unknown database error while purchasing item`);
 				setTradeWindowMessage(response.messages[0]);
 				return;
-			}
-			setTradeWindowMessage('Sale Successful!');
+			  } finally {
+			  }
+
 		} else {
 			//owner == null, should never occur
 			return;
