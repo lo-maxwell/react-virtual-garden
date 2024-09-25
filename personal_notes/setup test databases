@@ -1,13 +1,6 @@
 -- Enable the uuid-ossp extension (requires superuser privileges)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- user id = '00000000-0000-0000-0000-000000000000'
--- inventory id = '00000000-0000-0000-0000-000000000001'
--- store id = '00000000-0000-0000-0000-000000000002'
--- level id = '00000000-0000-0000-0000-000000000003'
--- garden id = '00000000-0000-0000-0000-000000000004'
--- plot ids = '00000000-0000-0000-0000-111111111111', '00000000-0000-0000-0000-222222222222', etc.
-
 --Icons
 -- Use a DO block for procedural execution
 DO $$
@@ -57,11 +50,6 @@ BEGIN
 		);
 		table_created := TRUE;
 	END IF;
-	 -- Insert rows only if the table was newly created
-    -- IF table_created THEN
-	-- 	INSERT INTO users (id, username, password_hash, password_salt, icon) VALUES 
-	-- 		('00000000-0000-0000-0000-000000000000', 'test user', 'hash', 'salt', 'mango');
-	-- END IF;
 END $$;
 
 
@@ -84,11 +72,6 @@ BEGIN
 		);
 		table_created := TRUE;
 	END IF;
-	 -- Insert rows only if the table was newly created
-    -- IF table_created THEN
-	-- 	INSERT INTO inventories (id, owner, gold) VALUES
-	-- 	('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000000', 10000);
-	-- END IF;
 END $$;
 
 --Stores
@@ -111,11 +94,6 @@ BEGIN
 		);
 		table_created := TRUE;
 	END IF;
-	 -- Insert rows only if the table was newly created
-    -- IF table_created THEN
-	-- 	INSERT INTO stores (id, owner, identifier, last_restock_time_ms) VALUES
-	-- 	('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000000', 1, 0);
-	-- END IF;
 END $$;
 
 --Levels
@@ -140,11 +118,6 @@ BEGIN
 		);
 		table_created := TRUE;
 	END IF;
-	 -- Insert rows only if the table was newly created
-    -- IF table_created THEN
-	-- 	INSERT INTO levels (id, owner, owner_type) VALUES
-	-- 		('00000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000000', 'user');
-	-- END IF;
 END $$;
 
 --Inventory items
@@ -168,14 +141,6 @@ BEGIN
 		);
 		table_created := TRUE;
 	END IF;
-	 -- Insert rows only if the table was newly created
-    -- IF table_created THEN
-	-- 	INSERT INTO inventory_items (owner, identifier, quantity) VALUES
-	-- 		('00000000-0000-0000-0000-000000000001', '1-01-09-01-00', 100), --apple seed
-	-- 		('00000000-0000-0000-0000-000000000001', '1-05-01-03-00', 5), --construction sign
-	-- 		('00000000-0000-0000-0000-000000000001', '1-03-10-03-03', 1) --magic mango
-	-- 	;
-	-- END IF;
 END $$;
 
 
@@ -200,16 +165,6 @@ BEGIN
 		);
 		table_created := TRUE;
 	END IF;
-	 -- Insert rows only if the table was newly created
-    -- IF table_created THEN
-	-- 	INSERT INTO store_items (owner, identifier, quantity) VALUES
-	-- 		('00000000-0000-0000-0000-000000000002', '1-01-09-01-00', 100), --apple seed
-	-- 		('00000000-0000-0000-0000-000000000002', '1-01-01-06-00', 25), --yellow onion seed
-	-- 		('00000000-0000-0000-0000-000000000002', '1-01-10-01-00', 50), --banana seed
-	-- 		('00000000-0000-0000-0000-000000000002', '1-05-01-03-00', 5), --construction sign
-	-- 		('00000000-0000-0000-0000-000000000002', '1-03-10-03-03', 1) --magic mango
-	-- 	;
-	-- END IF;
 END $$;
 
 --Gardens
@@ -232,11 +187,6 @@ BEGIN
 		);
 		table_created := TRUE;
 	END IF;
-	 -- Insert rows only if the table was newly created
-    -- IF table_created THEN
-	-- 	INSERT INTO gardens (id, owner, rows, columns) VALUES
-	-- 		('00000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000000', 2, 2);
-	-- END IF;
 END $$;
 
 --Plots
@@ -262,14 +212,6 @@ BEGIN
 		);
 		table_created := TRUE;
 	END IF;
-	 -- Insert rows only if the table was newly created
-    -- IF table_created THEN
-	-- 	INSERT INTO plots (id, owner, row_index, col_index) VALUES
-	-- 		('00000000-0000-0000-0000-111111111111', '00000000-0000-0000-0000-000000000003', 0, 0),
-	-- 		('00000000-0000-0000-0000-222222222222', '00000000-0000-0000-0000-000000000003', 0, 1),
-	-- 		('00000000-0000-0000-0000-333333333333', '00000000-0000-0000-0000-000000000003', 1, 0),
-	-- 		('00000000-0000-0000-0000-444444444444', '00000000-0000-0000-0000-000000000003', 1, 1);
-	-- END IF;
 END $$;
 
 --Placed items
@@ -293,19 +235,50 @@ BEGIN
 		);
 		table_created := TRUE;
 	END IF;
-	 -- Insert rows only if the table was newly created
-    -- IF table_created THEN
-	-- 	INSERT INTO placed_items (owner, identifier, status) VALUES
-	-- 		('00000000-0000-0000-0000-111111111111', '0-02-09-01-00', 'apple'), --apple
-	-- 		('00000000-0000-0000-0000-222222222222', '0-04-01-02-00', 'flamingo'), --flamingo
-	-- 		('00000000-0000-0000-0000-333333333333', '0-02-10-03-03', 'magic mango'), --magic mango
-	-- 		('00000000-0000-0000-0000-444444444444', '0-00-00-00-00', 'empty') --ground
-	-- 	;
-	-- END IF;
 END $$;
 
---Gets the list of inventory items owned by the user with id 0000...
--- SELECT inventory_items.identifier, inventory_items.quantity
--- FROM inventory_items
--- INNER JOIN inventories ON inventory_items.owner = inventories.id
--- WHERE inventories.owner = '00000000-0000-0000-0000-000000000000';
+--Action Histories
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'action_histories'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS action_histories (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,            -- User Id (foreign key from the 'users' table)
+			identifier VARCHAR(255) NOT NULL,      -- Indexes into actionhistories data, ie. "plant:all:harvested"
+			quantity INTEGER NOT NULL CHECK (quantity >= 0), -- Number this history tracks
+			FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table
+			UNIQUE (owner, identifier)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Item Histories
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'item_histories'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS item_histories (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,            -- User Id (foreign key from the 'users' table)
+			identifier CHAR(13) NOT NULL,      -- item template reference
+			quantity INTEGER NOT NULL CHECK (quantity >= 0), -- Number this history tracks
+			FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table
+			UNIQUE (owner, identifier)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;

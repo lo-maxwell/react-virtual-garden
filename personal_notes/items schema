@@ -93,7 +93,6 @@ type (string)
 CREATE TABLE IF NOT EXISTS inventories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
     owner UUID NOT NULL,         -- User ID (foreign key from the 'users' table)
-    owner_name VARCHAR(255) NOT NULL, -- owner name
     gold INTEGER NOT NULL CHECK (gold >= 0),       -- Inventory's gold
     FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
 );
@@ -159,4 +158,34 @@ CREATE TABLE IF NOT EXISTS gardens (
     rows INTEGER NOT NULL CHECK (rows >= 1),            -- Number of rows in garden
     columns INTEGER NOT NULL CHECK (columns >= 1),         -- Number of columns in garden
     FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
+);
+
+-Each ActionHistory needs:
+internal id
+owner (user id)
+identifier (string)
+quantity (int)
+
+CREATE TABLE IF NOT EXISTS action_histories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    owner UUID NOT NULL,            -- User Id (foreign key from the 'users' table)
+    identifier VARCHAR(255) NOT NULL,      -- Indexes into actionhistories data, ie. "plant:all:harvested"
+    quantity INTEGER NOT NULL CHECK (quantity >= 0), -- Number this history tracks
+    FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table
+    UNIQUE (owner, identifier)
+);
+
+-Each ItemHistory needs:
+internal id
+owner (user id)
+identifier (string)
+quantity (int)
+
+CREATE TABLE IF NOT EXISTS item_histories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    owner UUID NOT NULL,            -- User Id (foreign key from the 'users' table)
+    identifier CHAR(13) NOT NULL,      -- item template reference
+    quantity INTEGER NOT NULL CHECK (quantity >= 0), -- Number this history tracks
+    FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table
+    UNIQUE (owner, identifier)
 );
