@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool, QueryResult, QueryResultRow } from 'pg';
 
 export const pool = new Pool({
 	host: process.env.DATABASE_HOST || 'localhost',
@@ -8,4 +8,4 @@ export const pool = new Pool({
 	database: process.env.DATABASE_NAME,
   });
 
-export const query = <T>(text: string, params: any[]): Promise<{ rows: T[] }> => pool.query(text, params);
+export const query = <T>(text: string, params: any[]): Promise<QueryResult<QueryResultRow>> => pool.query(text, params);
