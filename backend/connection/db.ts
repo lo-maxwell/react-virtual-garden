@@ -8,4 +8,6 @@ export const pool = new Pool({
 	database: process.env.DATABASE_NAME,
   });
 
-export const query = <T>(text: string, params: any[]): Promise<any> => pool.query(text, params);
+export const query = <T>(text: string, params: any[]): Promise<{ rows: T[] }> => {
+	return pool.query<T>(text, params);
+};
