@@ -281,6 +281,8 @@
 
 TODO:
 
+Combine providers into 1 file and wrap layout
+
 Combine itemhistories
 
 Make itemList query based on item identifier, not name
