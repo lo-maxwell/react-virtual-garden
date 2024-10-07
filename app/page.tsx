@@ -13,7 +13,7 @@ const HomePage = () => {
   return (
     <>
       <div className="flex flex-1 flex-col bg-reno-sand-200 text-black"> 
-      <div className="mx-4 mb-4">The home page isn't done yet! Check out these other pages in the meantime.</div>
+      <div className="mx-4 mb-4">The home page isn&apos;t done yet! Check out these other pages in the meantime.</div>
       <div className="mx-4">
         <Link
           href={"/garden"}
