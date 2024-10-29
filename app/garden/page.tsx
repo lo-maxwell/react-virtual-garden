@@ -10,7 +10,7 @@ import { useUser } from "@/app/hooks/contexts/UserContext";
 const GardenPage = () => {
   const { user } = useUser();
   const { garden, gardenForceRefreshKey } = useGarden();
-  const { inventory } = useInventory();
+  const { inventory, inventoryForceRefreshKey } = useInventory();
 
   const {selectedItem, toggleSelectedItem} = useSelectedItem();
 
@@ -26,7 +26,7 @@ const GardenPage = () => {
 
   const RenderInventory = () => {
     if (!inventory) return <div>Loading Inventory...</div>;
-    return <InventoryComponent onInventoryItemClickFunction={toggleSelectedItem} costMultiplier={1}/>;
+    return <InventoryComponent forceRefreshKey={inventoryForceRefreshKey} onInventoryItemClickFunction={toggleSelectedItem} costMultiplier={1}/>;
   }
 
   return (<>
