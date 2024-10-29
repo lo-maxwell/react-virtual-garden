@@ -49,6 +49,7 @@ class ItemTemplateInterfaceRepository {
 		  category: item.category,
 		  description: item.description,
 		  value: item.value,
+		  level: item.level,
 		  transformId: item.transformId,
 		  baseExp: item.baseExp,
 		  growTime: item.growTime,
@@ -68,6 +69,7 @@ class ItemTemplateInterfaceRepository {
 		  category: item.category,
 		  description: item.description,
 		  value: item.value,
+		  level: item.level,
 		  transformId: item.transformId,
 		  // Add additional properties if needed
 		};
@@ -83,6 +85,7 @@ class ItemTemplateInterfaceRepository {
 		  category: item.category,
 		  description: item.description,
 		  value: item.value,
+		  level: item.level,
 		  transformId: item.transformId,
 		  // Add additional properties if needed
 		};
@@ -98,6 +101,7 @@ class ItemTemplateInterfaceRepository {
 		  category: item.category,
 		  description: item.description,
 		  value: item.value,
+		  level: item.level,
 		  transformId: item.transformId,
 		  // Add additional properties if needed
 		};
@@ -113,6 +117,7 @@ class ItemTemplateInterfaceRepository {
 		  category: item.category,
 		  description: item.description,
 		  value: item.value,
+		  level: item.level,
 		  // Add additional properties if needed
 		};
 	  }
@@ -127,6 +132,7 @@ class ItemTemplateInterfaceRepository {
 		category: item.category,
 		description: item.description,
         value: item.value,
+		level: item.level,
         transformId: item.transformId,
         // Add additional properties if needed
       };

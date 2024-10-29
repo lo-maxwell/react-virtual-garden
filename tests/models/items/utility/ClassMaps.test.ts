@@ -62,13 +62,13 @@ test('Should Get Class From Subtype', () => {
 
 test('Should Not Get Class From Invalid Type', () => {
 	try {
-		const invalidClass = getItemClassFromSubtype(new Seed(new SeedTemplate('1', '1', '1', "InventoryItem", "InvalidSubtype" as ItemSubtype, "", "", 1, "1"), 1));
+		const invalidClass = getItemClassFromSubtype(new Seed(new SeedTemplate('1', '1', '1', "InventoryItem", "InvalidSubtype" as ItemSubtype, "", "", 1, 0, "1"), 1));
 		// Fail test if above expression doesn't throw anything.
 		fail();
 	} catch (e) {
 	}
 	try {
-		const invalidClass = getItemClassFromSubtype(new SeedTemplate('1', '1', '1', "InventoryItem", "InvalidSubtype" as ItemSubtype, "", "", 1, "1"));
+		const invalidClass = getItemClassFromSubtype(new SeedTemplate('1', '1', '1', "InventoryItem", "InvalidSubtype" as ItemSubtype, "", "", 1, 0, "1"));
 		// Fail test if above expression doesn't throw anything.
 		fail();
 	} catch (e) {
@@ -92,7 +92,7 @@ test('Should Get Template From Subtype', () => {
 
 test('Should Not Get Template From Invalid Type', () => {
 	try {
-		const invalidTemplate = getItemTemplateFromSubtype(new SeedTemplate('1', '1', '1', "InventoryItem", "InvalidSubtype" as ItemSubtype, "", "", 1, "1"));
+		const invalidTemplate = getItemTemplateFromSubtype(new SeedTemplate('1', '1', '1', "InventoryItem", "InvalidSubtype" as ItemSubtype, "", "", 1, 0, "1"));
 		// Fail test if above expression doesn't throw anything.
 		fail();
 	} catch (e) {

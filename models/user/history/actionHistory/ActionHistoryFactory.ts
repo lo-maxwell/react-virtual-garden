@@ -34,14 +34,7 @@ class ActionHistoryFactory {
 	 */
 	createActionHistoryByIdentifiers(subtype: string, category: string, action: string, quantity: number): ActionHistory | null {
 		const identifierString = `${subtype.toLowerCase()}:${category.toLowerCase()}:${action.toLowerCase()}`;
-		const histories = Object.values(this.repository.histories).flat().filter(history => history.identifier === identifierString);
-		if (histories.length === 1) return new ActionHistory(histories[0].name, histories[0].description, histories[0].identifier, quantity);		
-		else if (histories.length === 0) return null;
-		else {
-			console.error('Error: found multiple histories with the same name!');
-			console.error(histories);
-			return null;
-		}
+		return this.createActionHistoryByIdentifierString(identifierString, quantity);
 	}
 
 	/**
@@ -50,9 +43,10 @@ class ActionHistoryFactory {
 	 * @quantity
 	 * @returns the created actionHistory object or null
 	 */
-	 getActionHistoryByIdentifierString(identifier: string): ActionHistory | null {
+	 createActionHistoryByIdentifierString(identifier: string, quantity: number): ActionHistory | null {
 		const histories = Object.values(this.repository.histories).flat().filter(history => history.identifier === identifier);
-		if (histories.length === 1) return new ActionHistory(histories[0].name, histories[0].description, histories[0].identifier, histories[0].quantity);		else if (histories.length === 0) return null;
+		if (histories.length === 1) return new ActionHistory(histories[0].name, histories[0].description, histories[0].identifier, quantity);		
+		else if (histories.length === 0) return null;
 		else {
 			console.error('Error: found multiple histories with the same name!');
 			console.error(histories);

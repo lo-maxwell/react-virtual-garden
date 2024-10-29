@@ -1,16 +1,29 @@
 import { ItemSubtype, ItemSubtypes, ItemType, ItemTypes } from "../../ItemTypes";
+import { InventoryItemTemplateInterface } from "../interfaces/InventoryItemTemplateInterface";
 import { itemTemplateInterfaceRepository } from "../interfaces/ItemTemplateRepository";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
 
 export class BlueprintTemplate extends InventoryItemTemplate{
 	transformId: string;
-	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, transformId: string) {
-		super(id, name, icon, type, subtype, category, description, value);
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, level: number, transformId: string) {
+		super(id, name, icon, type, subtype, category, description, value, level);
 		this.transformId = transformId;
 	}
 
 	static getErrorTemplate() {
-		return new BlueprintTemplate("1-05-99-99-99", "error", "❌", "InventoryItem", "Blueprint", "Error", "Error", 0, "0-04-99-99-99");
+		return new BlueprintTemplate("1-05-99-99-99", "error", "❌", "InventoryItem", "Blueprint", "Error", "Error", 0, 0, "0-04-99-99-99");
+	}
+
+
+	static createBlueprintTemplateFromInterface(templateInterface: InventoryItemTemplateInterface) {
+		if (templateInterface.name === 'error') {
+			throw new Error('Cannot create error template');
+		}
+		if (templateInterface.subtype !== ItemSubtypes.BLUEPRINT.name) {
+			throw new Error('Found non blueprint for blueprint template');
+		}
+		const typedTemplate = templateInterface as BlueprintTemplate;
+		return new BlueprintTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.level, typedTemplate.transformId);
 	}
 
 	static fromPlainObject(plainObject: any): BlueprintTemplate {
@@ -26,15 +39,7 @@ export class BlueprintTemplate extends InventoryItemTemplate{
 			}
 			let template = itemTemplateInterfaceRepository.getInventoryTemplateInterface(id);
 			if (template) {
-				if (template.name === 'error') {
-					throw new Error('Cannot create error template');
-				}
-				if (template.subtype !== ItemSubtypes.BLUEPRINT.name) {
-					throw new Error('Found non blueprint for blueprint template');
-				}
-				const blueprintTemplate = template as BlueprintTemplate;
-				return new BlueprintTemplate(blueprintTemplate.id, blueprintTemplate.name, blueprintTemplate.icon, blueprintTemplate.type, blueprintTemplate.subtype, blueprintTemplate.category, blueprintTemplate.description, blueprintTemplate.value, blueprintTemplate.transformId);
-				
+				return BlueprintTemplate.createBlueprintTemplateFromInterface(template);
 			}
 			if (typeof name !== 'string') {
 				throw new Error('Invalid name property in plainObject for BlueprintTemplate');
@@ -44,14 +49,7 @@ export class BlueprintTemplate extends InventoryItemTemplate{
 			}
 			template = itemTemplateInterfaceRepository.getInventoryItemTemplateInterfaceByName(name);
 			if (template) {
-				if (template.name === 'error') {
-					throw new Error('Cannot create error template');
-				}
-				if (template.subtype !== ItemSubtypes.BLUEPRINT.name) {
-					throw new Error('Found non blueprint for blueprint template');
-				}
-				const typedTemplate = template as BlueprintTemplate;
-				return new BlueprintTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId);
+				return BlueprintTemplate.createBlueprintTemplateFromInterface(template);
 			}
 			throw new Error('Could not find valid id or name for BlueprintTemplate');
 		} catch (err) {

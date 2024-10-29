@@ -1,5 +1,6 @@
 import { ItemType, ItemSubtype, ItemTypes, ItemSubtypes } from "../../ItemTypes";
 import { itemTemplateInterfaceRepository } from "../interfaces/ItemTemplateRepository";
+import { PlacedItemTemplateInterface } from "../interfaces/PlacedItemTemplateInterface";
 import { PlacedItemTemplate } from "./PlacedItemTemplate";
 
 export class PlantTemplate extends PlacedItemTemplate{
@@ -8,8 +9,8 @@ export class PlantTemplate extends PlacedItemTemplate{
 	repeatedGrowTime: number;
 	numHarvests: number;
 	
-	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, transformId: string, baseExp: number, growTime: number, repeatedGrowTime: number, numHarvests: number) {
-		super(id, name, icon, type, subtype, category, description, value, transformId);
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, level: number, transformId: string, baseExp: number, growTime: number, repeatedGrowTime: number, numHarvests: number) {
+		super(id, name, icon, type, subtype, category, description, value, level, transformId);
 		this.baseExp = baseExp;
 		this.growTime = growTime;
 		this.repeatedGrowTime = repeatedGrowTime;
@@ -17,7 +18,19 @@ export class PlantTemplate extends PlacedItemTemplate{
 	}
 
 	static getErrorTemplate() {
-		return new PlantTemplate("0-02-99-99-99", "error", "❌", "PlacedItem", "Plant", "Error", "Error", 0, "1-03-99-99-99", 0, 0, 0, 1);
+		return new PlantTemplate("0-02-99-99-99", "error", "❌", "PlacedItem", "Plant", "Error", "Error", 0, 0, "1-03-99-99-99", 0, 0, 0, 1);
+	}
+
+
+	static createPlantTemplateFromInterface(templateInterface: PlacedItemTemplateInterface) {
+		if (templateInterface.name === 'error') {
+			throw new Error('Cannot create error template');
+		}
+		if (templateInterface.subtype !== ItemSubtypes.PLANT.name) {
+			throw new Error('Found non plant for plant template');
+		}
+		const typedTemplate = templateInterface as PlantTemplate;
+		return new PlantTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.level, typedTemplate.transformId, typedTemplate.baseExp, typedTemplate.growTime, typedTemplate.repeatedGrowTime, typedTemplate.numHarvests);
 	}
 
 	static fromPlainObject(plainObject: any): PlantTemplate {
@@ -33,14 +46,7 @@ export class PlantTemplate extends PlacedItemTemplate{
 			}
 			let template = itemTemplateInterfaceRepository.getPlacedTemplateInterface(id);
 			if (template) {
-				if (template.name === 'error') {
-					throw new Error('Cannot create error template');
-				}
-				if (template.subtype !== ItemSubtypes.PLANT.name) {
-					throw new Error('Found non Plant for Plant template');
-				}
-				const typedTemplate = template as PlantTemplate;
-				return new PlantTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId, typedTemplate.baseExp, typedTemplate.growTime, typedTemplate.repeatedGrowTime, typedTemplate.numHarvests);
+				return PlantTemplate.createPlantTemplateFromInterface(template);	
 			}
 			if (typeof name !== 'string') {
 				throw new Error('Invalid name property in plainObject for PlantTemplate');
@@ -52,14 +58,7 @@ export class PlantTemplate extends PlacedItemTemplate{
 			
 			template = itemTemplateInterfaceRepository.getPlacedItemTemplateInterfaceByName(name);
 			if (template) {
-				if (template.name === 'error') {
-					throw new Error('Cannot create error template');
-				}
-				if (template.subtype !== ItemSubtypes.PLANT.name) {
-					throw new Error('Found non plant for Plant template');
-				}
-				const typedTemplate = template as PlantTemplate;
-				return new PlantTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId, typedTemplate.baseExp, typedTemplate.growTime, typedTemplate.repeatedGrowTime, typedTemplate.numHarvests);
+				return PlantTemplate.createPlantTemplateFromInterface(template);	
 			}
 			throw new Error('Could not find valid id or name for PlantTemplate');
 		} catch (err) {
@@ -78,6 +77,11 @@ export class PlantTemplate extends PlacedItemTemplate{
 
 	getGrowTimeString(): string {
 		const growTime = this.growTime;
+
+		if (growTime === 0) {
+			return 'Grow Time: Instant';
+		}
+
 		// Calculate days, hours, minutes, and seconds
 		const growDays = Math.floor(growTime / (24 * 3600));
 		const growHours = Math.floor((growTime % (24 * 3600)) / 3600);
