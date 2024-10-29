@@ -1,0 +1,13 @@
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_GettingStarted.CreatingConnecting.PostgreSQL.html
+
+
+# where ec2-database-connect-key.pem is the filepath to the key pair
+ssh -i ec2-database-connect-key.pem ec2-user@ec2-18-144-24-65.us-west-1.compute.amazonaws.com
+
+psql --host=database-test1.clmmqim6603p.us-west-1.rds.amazonaws.com --port=5432 --dbname=postgres --username=postgres
+
+#password is under bitwarden aws rds postgres database-test1
+
+# onPgAdmin 4: ssh tunnel password is empty (it would exist if the pem file was encrypted)
+# postgres user password is under bitwarden aws rds postgres database-test1
+

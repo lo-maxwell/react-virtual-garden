@@ -1,15 +1,27 @@
 import { ItemSubtype, ItemSubtypes, ItemType, ItemTypes } from "../../ItemTypes";
 import { itemTemplateInterfaceRepository } from "../interfaces/ItemTemplateRepository";
+import { PlacedItemTemplateInterface } from "../interfaces/PlacedItemTemplateInterface";
 import { PlacedItemTemplate } from "./PlacedItemTemplate";
 
 export class DecorationTemplate extends PlacedItemTemplate{
 	
-	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, transformId: string) {
-		super(id, name, icon, type, subtype, category, description, value, transformId);
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, level: number, transformId: string) {
+		super(id, name, icon, type, subtype, category, description, value, level, transformId);
 	}
 
 	static getErrorTemplate() {
-		return new DecorationTemplate("0-04-99-99-99", "error", "❌", "PlacedItem", "Decoration", "Error", "Error", 0, "1-05-99-99-99");
+		return new DecorationTemplate("0-04-99-99-99", "error", "❌", "PlacedItem", "Decoration", "Error", "Error", 0, 0, "1-05-99-99-99");
+	}
+
+	static createDecorationTemplateFromInterface(templateInterface: PlacedItemTemplateInterface) {
+		if (templateInterface.name === 'error') {
+			throw new Error('Cannot create error template');
+		}
+		if (templateInterface.subtype !== ItemSubtypes.DECORATION.name) {
+			throw new Error('Found non decoration for decoration template');
+		}
+		const typedTemplate = templateInterface as DecorationTemplate;
+		return new DecorationTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.level, typedTemplate.transformId);
 	}
 
 	static fromPlainObject(plainObject: any): DecorationTemplate {
@@ -25,15 +37,9 @@ export class DecorationTemplate extends PlacedItemTemplate{
 			}
 			let template = itemTemplateInterfaceRepository.getPlacedTemplateInterface(id);
 			if (template) {
-				if (template.name === 'error') {
-					throw new Error('Cannot create error template');
-				}
-				if (template.subtype !== ItemSubtypes.DECORATION.name) {
-					throw new Error('Found non decoration for decoration template');
-				}
-				const typedTemplate = template as DecorationTemplate;
-				return new DecorationTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId);
+				return DecorationTemplate.createDecorationTemplateFromInterface(template);
 			}
+			
 			if (typeof name !== 'string') {
 				throw new Error('Invalid name property in plainObject for DecorationTemplate');
 			}
@@ -44,14 +50,7 @@ export class DecorationTemplate extends PlacedItemTemplate{
 			
 			template = itemTemplateInterfaceRepository.getPlacedItemTemplateInterfaceByName(name);
 			if (template) {
-				if (template.name === 'error') {
-					throw new Error('Cannot create error template');
-				}
-				if (template.subtype !== ItemSubtypes.DECORATION.name) {
-					throw new Error('Found non decoration for decoration template');
-				}
-				const typedTemplate = template as DecorationTemplate;
-				return new DecorationTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.transformId);
+				return DecorationTemplate.createDecorationTemplateFromInterface(template);
 			}
 			throw new Error('Could not find valid id or name for DecorationTemplate');
 		} catch (err) {

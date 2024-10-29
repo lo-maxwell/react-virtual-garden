@@ -4,6 +4,7 @@ import { Seed } from "@/models/items/inventoryItems/Seed";
 import { Decoration } from "@/models/items/placedItems/Decoration";
 import { EmptyItem } from "@/models/items/placedItems/EmptyItem";
 import { Plant } from "@/models/items/placedItems/Plant";
+import { generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";
 import { BlueprintTemplate } from "@/models/items/templates/models/BlueprintTemplate";
 import { DecorationTemplate } from "@/models/items/templates/models/DecorationTemplate";
 import { EmptyItemTemplate } from "@/models/items/templates/models/EmptyItemTemplate";
@@ -93,4 +94,35 @@ test('Should Not Create PlantTemplate Object From Corrupted Data', () => {
 	const errorTemplate19 = PlantTemplate.fromPlainObject({id: "1", name: "a", icon: "abc", type: "PlacedItem", subtype: "Plant", value: 0, transformId: "1", baseExp: 1, growTime: "10"});
 	expect(errorTemplate19.name).toBe('error');
 	consoleErrorSpy.mockRestore();
+})
+
+test('Should Return Correct Grow Time String', () => {
+	const apple = placeholderItemTemplates.getPlacedItemTemplateByName('apple');
+	const banana = placeholderItemTemplates.getPlacedItemTemplateByName('banana');
+	const yellow = placeholderItemTemplates.getPlacedItemTemplateByName('yellow onion');
+	const coconut = placeholderItemTemplates.getPlacedItemTemplateByName('coconut');
+	const peach = placeholderItemTemplates.getPlacedItemTemplateByName('peach');
+	const magic = placeholderItemTemplates.getPlacedItemTemplateByName('magic mango');
+	expect((apple as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 10 s");
+	expect((banana as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 3 min");
+	expect((yellow as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 15 min");
+	expect((coconut as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 6 hours");
+	expect((peach as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 2 hours");
+	expect((magic as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 1 day 6 hours");
+	const testTemplate = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, 0, "", 0, 0, 0, 0);
+	expect((testTemplate as PlantTemplate).getGrowTimeString()).toBe("Grow Time: Instant");
+	const testTemplate2 = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, 0, "", 0, 1, 0, 0);
+	expect((testTemplate2 as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 1 s");
+	const testTemplate3 = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, 0, "", 0, 10, 0, 0);
+	expect((testTemplate3 as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 10 s");
+	const testTemplate4 = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, 0, "", 0, 100, 0, 0);
+	expect((testTemplate4 as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 1 min 40 s");
+	const testTemplate5 = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, 0, "", 0, 1000, 0, 0);
+	expect((testTemplate5 as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 16 min 40 s");
+	const testTemplate6 = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, 0, "", 0, 10000, 0, 0);
+	expect((testTemplate6 as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 2 hours 46 min");
+	const testTemplate7 = new PlantTemplate("", "", "", "PlacedItem", "Plant", "", "", 0, 0, "", 0, 100000, 0, 0);
+	expect((testTemplate7 as PlantTemplate).getGrowTimeString()).toBe("Grow Time: 1 day 3 hours");
+
+	
 })
