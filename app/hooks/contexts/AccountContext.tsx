@@ -6,6 +6,7 @@ interface AccountContextType {
     account: Account;
     cloudSave: boolean;
     toggleCloudSave: () => boolean;
+    environmentTestKey: string;
     // Add any other actions or state you need
 }
 

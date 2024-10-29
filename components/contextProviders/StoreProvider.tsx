@@ -1,4 +1,5 @@
 'use client'
+import { useAccount } from '@/app/hooks/contexts/AccountContext';
 import { StoreContext } from '@/app/hooks/contexts/StoreContext';
 import { useUser } from '@/app/hooks/contexts/UserContext';
 import { generateNewPlaceholderInventoryItem } from '@/models/items/PlaceholderItems';
@@ -20,13 +21,14 @@ interface StoreProviderProps {
 export const StoreProvider = ({ children }: StoreProviderProps) => {
     const [store, setStore] = useState<Store | null>(null);
 	const { user } = useUser();
+	const { account, cloudSave } = useAccount();
  
 	function generateInitialStore() {
 		const randomUuid = uuidv4();
 		function generateItems() { 
 			return stocklistFactory.getStocklistInterfaceById("0")?.items;
 		}
-		const storeIdentifier = 1;
+		const storeIdentifier = 0;
 		const storeInterface = storeFactory.getStoreInterfaceById(storeIdentifier);
 		let storeName = "Default Store";
 		let buyMultiplier = 2;
@@ -126,9 +128,15 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 	}
 	
     const restockStore = async () => {
+		console.log('restocking store');
 		if (!store) return "ERROR";
 		const localResult = restockStoreLocal();
 		if (localResult) {
+			// Terminate early before api call
+			if (!cloudSave) {
+				return "SUCCESS";
+			}
+
 			const apiResult = await restockStoreAPI();
 			if (!apiResult) {
 				syncStore(user, store);

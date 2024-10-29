@@ -18,6 +18,7 @@ import { saveInventory } from "@/utils/localStorage/inventory";
 import { saveStore } from "@/utils/localStorage/store";
 import { useAccount } from "../hooks/contexts/AccountContext";
 import { useEffect, useState } from "react";
+import { env } from "process";
 
 const UserPage = () => {
   
@@ -26,8 +27,7 @@ const UserPage = () => {
     const { inventory } = useInventory();
     const { store } = useStore();
     const { garden } = useGarden();
-    const { account, cloudSave, toggleCloudSave } = useAccount();
-    // const [displayCloudSave, setDisplayCloudSave] = useState(cloudSave);
+    const { account, cloudSave, toggleCloudSave, environmentTestKey } = useAccount();
 
     if (!user || !account) {
       return <></>;
@@ -199,6 +199,36 @@ const UserPage = () => {
       toggleCloudSave();
     }
 
+    function renderAccountManagementButtons() {
+      if (!environmentTestKey) {
+        return (
+          <>
+            <div>Could not fetch environment, currently in local save mode</div>
+          </>
+        );
+      }
+
+      // Check the value of environmentTestKey and render buttons accordingly
+      if (environmentTestKey === 'this is the local environment' || environmentTestKey === 'this is the dev environment') {
+        return (
+          <>
+            <div><button onClick={handleCreateAccountButton}> Create user in Database </button></div>
+            <div><button onClick={handleSaveAccountButton}> Save user to Database </button></div>
+            <div><button onClick={handleFetchAccountButton}> Fetch user from Database </button></div>
+            <div><button onClick={handleToggleCloudSaveButton}> {`Toggle Cloud Saving ${cloudSave ? '(Currently on)' : '(Currently off)'}`} </button></div>
+          </>
+        );
+      } else if (environmentTestKey === 'this is the prod environment') {
+        return (<></>);
+      } else {
+        return (
+          <>
+            <div>{environmentTestKey}</div>
+          </>
+        );
+      }
+    }
+
     return <>
       <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
         <div className="flex">
@@ -211,11 +241,8 @@ const UserPage = () => {
               <LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} />
             </div>
             <div>Friends List goes here!</div>
-            <div><button onClick={handleCreateAccountButton}> Create user in Database </button></div>
-            <div><button onClick={handleSaveAccountButton}> Save user to Database </button></div>
-            <div><button onClick={handleFetchAccountButton}> Fetch user from Database </button></div>
-            <div><button onClick={handleToggleCloudSaveButton}> {`Toggle Cloud Saving ${cloudSave ? '(Currently on)' : '(Currently off)'}`} </button></div>
-          </div>
+            {renderAccountManagementButtons()}
+            </div>
 
           <div className={`w-2/3`}>
             <UserStats />

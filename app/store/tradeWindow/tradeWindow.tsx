@@ -123,6 +123,8 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 
 				// Terminate early before api call
 				if (!cloudSave) {
+					updateRestockTimer();
+					saveStore(store);
 					return;
 				}
 
@@ -146,6 +148,8 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 
 				// Terminate early before api call
 				if (!cloudSave) {
+					updateRestockTimer();
+					saveStore(store);
 					return;
 				}
 
@@ -165,6 +169,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 			return;
 		}
 		updateRestockTimer();
+		saveStore(store);
 	}
 
 	const renderQuantityButtons = () => {
