@@ -1,6 +1,7 @@
 import Tooltip from "@/components/window/tooltip";
-import { useGarden } from "@/hooks/contexts/GardenContext";
-import { useUser } from "@/hooks/contexts/UserContext";
+import { useGarden } from "@/app/hooks/contexts/GardenContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
+import { Garden } from "@/models/garden/Garden";
 
 const GardenExpansionTooltip = ({ children, row, expand }: { children: React.ReactNode, row: boolean, expand: boolean}) => {
 
@@ -11,7 +12,7 @@ const GardenExpansionTooltip = ({ children, row, expand }: { children: React.Rea
 	
 	const RenderTooltip = () => {
 		if (row && expand) {
-			if (garden.canAddRow(user)) {
+			if (Garden.canAddRow(garden.getRows(), user.getLevel())) {
 				visible = false;
 				return <></>
 			} else {
@@ -19,7 +20,7 @@ const GardenExpansionTooltip = ({ children, row, expand }: { children: React.Rea
 				return <div>{`Requires level ${requiredLevel}`}</div>;
 			}
 		} else if (!row && expand) {
-			if (garden.canAddColumn(user)) {
+			if (Garden.canAddColumn(garden.getCols(), user.getLevel())) {
 				visible = false;
 				return <></>
 			} else {

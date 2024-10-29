@@ -3,13 +3,18 @@ import { Plot } from "@/models/garden/Plot";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import React, { useEffect, useRef, useState } from "react";
-import { useInventory } from "@/hooks/contexts/InventoryContext";
-import { useGarden } from "@/hooks/contexts/GardenContext";
+import { useInventory } from "@/app/hooks/contexts/InventoryContext";
+import { useGarden } from "@/app/hooks/contexts/GardenContext";
 import { saveGarden } from "@/utils/localStorage/garden";
-import { usePlotActions } from "@/hooks/garden/plotActions";
-import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
-import { useUser } from "@/hooks/contexts/UserContext";
+import { usePlotActions } from "@/app/hooks/garden/plotActions";
+import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
 import GardenExpansionTooltip from "./gardenExpansionTooltip";
+import { Garden } from "@/models/garden/Garden";
+import { addColumnAPI, addColumnLocal, addRowAPI, addRowLocal, harvestAllAPI, plantAllAPI, removeColumnAPI, removeColumnLocal, removeRowAPI, removeRowLocal, syncGardenSize, syncUserGardenInventory } from "./gardenFunctions";
+import { Inventory } from "@/models/itemStore/inventory/Inventory";
+import { saveInventory } from "@/utils/localStorage/inventory";
+import { useAccount } from "../hooks/contexts/AccountContext";
 
 const GardenComponent = () => {
 	const { inventory } = useInventory();
@@ -19,6 +24,8 @@ const GardenComponent = () => {
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
 	const [showExpansionOptions, setShowExpansionOptions] = useState(false);
+	const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
+	const { account, cloudSave } = useAccount();
 
 	const [currentTime, setCurrentTime] = useState(Date.now());
 	// const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
@@ -32,7 +39,7 @@ const GardenComponent = () => {
 	}, []);
 
 	const GetPlotAction = (plot: Plot, selected: InventoryItem | null) => {
-		const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
+		
 		if (plot.getItemSubtype() == ItemSubtypes.GROUND.name && selected != null) {
 			if (selected.itemData.subtype == ItemSubtypes.SEED.name) {
 				return plantSeed(selected, plot);
@@ -68,7 +75,7 @@ const GardenComponent = () => {
 								key={index} 
 								ref={el => {plotRefs.current[rowIndex][colIndex] = el!}}
 								plot={plot} 
-								onPlotClick={GetPlotAction(plot, selectedItem)} 
+								onPlotClickHelpers={GetPlotAction(plot, selectedItem)} 
 								currentTime={currentTime}
 							/>
 						);
@@ -81,87 +88,172 @@ const GardenComponent = () => {
 		);
 	}
 
-	const plantAll = ()  => {
+	const plantAll = async ()  => {
 		if (selectedItem == null || selectedItem.itemData.subtype != ItemSubtypes.SEED.name) return;
 		const getItemResponse = inventory.getItem(selectedItem);
 		if (!getItemResponse.isSuccessful()) return;
 		let numRemaining = getItemResponse.payload.getQuantity();
+
+		const plantedPlotIds = [];
 		let numPlanted = 0;
 		for (const row of plotRefs.current) {
 			for (const plotRef of row) {
+				if (numRemaining <= 0) break;
 				if (plotRef && plotRef.plot.getItemSubtype() === ItemSubtypes.GROUND.name) {
-					plotRef.click();
-					numPlanted++;
-					numRemaining--;
-					if (numRemaining <= 0) {
-						return;
+					const plantSeedAction = plantSeed(selectedItem, plotRef.plot).uiHelper;
+					// Performs local update
+					const plantSeedResult = plantSeedAction();
+					if (plantSeedResult.success) {
+						numPlanted++;
+						numRemaining--;
+						plantedPlotIds.push(plotRef.plot.getPlotId());
+						plotRef.refresh();
 					}
 				}
 			}
 		}
+		
+		// Terminate early before api call
+		if (!cloudSave) {
+			return;
+		}
+
+		//api call
 		setGardenMessage(`Planted ${numPlanted} ${getItemResponse.payload.itemData.name}.`);
+		const apiResult = await plantAllAPI(plantedPlotIds, inventory, selectedItem, user, garden);
+		if (!apiResult) {
+			syncUserGardenInventory(user, garden, inventory);
+			setGardenMessage(`There was an error planting 1 or more seeds! Please refresh the page!`);
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+			// return;
+		}
+		
 	}
 
-	const harvestAll = () => {
-		let currentPlants = 0;
-		inventory.getAllItems().forEach((item) => {
-			if (item.itemData.subtype === ItemSubtypes.HARVESTED.name) {
-				currentPlants += item.getQuantity();
-			}
-		})
+	const harvestAll = async () => {
+		const harvestedPlotIds: string[] = [];
+		let numHarvested = 0;
 
 		plotRefs.current.forEach(row => {
 			row.forEach(plotRef => {
 			  if (plotRef && plotRef.plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
-				plotRef.click();
+				const harvestPlantAction = clickPlant(plotRef.plot, instantGrow).uiHelper;
+					// Performs local update
+					const harvestPlantResult = harvestPlantAction();
+					if (harvestPlantResult.success) {
+						numHarvested++;
+						harvestedPlotIds.push(plotRef.plot.getPlotId());
+						plotRef.refresh();
+					}
 			  }
 			});
 		  });
 
-		let newCurrentPlants = 0;
-		inventory.getAllItems().forEach((item) => {
-			if (item.itemData.subtype === ItemSubtypes.HARVESTED.name) {
-				newCurrentPlants += item.getQuantity();
+		setGardenMessage(`Harvested ${numHarvested} plants.`);
+
+		// Terminate early before api call
+		if (!cloudSave) {
+			return;
+		}
+
+		//api call
+		const apiResult = await harvestAllAPI(harvestedPlotIds, inventory, user, garden, instantGrow);
+		if (!apiResult) {
+			syncUserGardenInventory(user, garden, inventory);
+			setGardenMessage(`There was an error harvesting 1 or more plants! Please refresh the page!`);
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+			
+		}
+	}
+
+
+	async function addColumn() {
+		if (!garden || !user) {
+			return;
+		}
+		const localResult = addColumnLocal(garden, user);
+		if (localResult) {
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+			
+			// Terminate early before api call
+			if (!cloudSave) {
+				return;
 			}
-		})
-		setGardenMessage(`Harvested ${newCurrentPlants - currentPlants} plants.`);
+
+			const apiResult = await addColumnAPI(garden, user);
+			if (!apiResult) {
+				syncGardenSize(garden, user);
+				// setGardenMessage(`There was an error expanding the garden, please refresh the page!`);
+				// removeColumnLocal(garden);
+			}
+		}
+		
 	}
 
-
-	function addColumn() {
+	async function addRow() {
 		if (!garden || !user) {
 			return;
 		}
-		garden.addColumn(user);
-		saveGarden(garden);
-		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
-	}
+		const localResult = addRowLocal(garden, user);
+		if (localResult) {
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 
-	function addRow() {
-		if (!garden || !user) {
-			return;
+			// Terminate early before api call
+			if (!cloudSave) {
+				return;
+			}
+			
+			const apiResult = await addRowAPI(garden, user);
+			if (!apiResult) {
+				syncGardenSize(garden, user);
+				// setGardenMessage(`There was an error expanding the garden, please refresh the page!`);
+				// removeRowLocal(garden);
+			}
 		}
-		garden.addRow(user);
-		saveGarden(garden);
-		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 	}
 
-	function removeColumn() {
+	async function removeColumn() {
 		if (!garden) {
 			return;
 		}
-		garden?.removeColumn();
-		saveGarden(garden);
-		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+		const localResult = removeColumnLocal(garden);
+		if (localResult) {
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+			
+			// Terminate early before api call
+			if (!cloudSave) {
+				return;
+			}
+		
+			const apiResult = await removeColumnAPI(garden, user);
+			if (!apiResult) {
+				syncGardenSize(garden, user);
+				// setGardenMessage(`There was an error shrinking the garden, please refresh the page!`);
+				// addColumnLocal(garden, user);
+			}
+		}
 	}
 
-	function removeRow() {
+	async function removeRow() {
 		if (!garden) {
 			return;
 		}
-		garden?.removeRow();
-		saveGarden(garden);
-		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+		const localResult = removeRowLocal(garden);
+		if (localResult) {
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+		
+			// Terminate early before api call
+			if (!cloudSave) {
+				return;
+			}
+
+			const apiResult = await removeRowAPI(garden, user);
+			if (!apiResult) {
+				syncGardenSize(garden, user);
+				// setGardenMessage(`There was an error shrinking the garden, please refresh the page!`);
+				// addRowLocal(garden, user);
+			}
+		}
 	}
 
 	function handleGardenExpansionDisplay() {
@@ -170,9 +262,9 @@ const GardenComponent = () => {
 
 	const enableGardenExpansionButton = (row: boolean, expand: boolean) => {
 		if (row && expand) {
-			return !garden.canAddRow(user);
+			return !Garden.canAddRow(garden.getRows(), user.getLevel());
 		} else if (!row && expand) {
-			return !garden.canAddColumn(user);
+			return !Garden.canAddColumn(garden.getCols(), user.getLevel());
 		} else if (row && !expand) { 
 			return garden.getRows() < 2;
 		} else { //(!row && !expand)

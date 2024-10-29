@@ -4,12 +4,25 @@ import { ItemSubtypes } from "../ItemTypes";
 import { PlacedItemTemplate } from "../templates/models/PlacedItemTemplate";
 import { placeholderItemTemplates } from "../templates/models/PlaceholderItemTemplate";
 
+export interface PlacedItemDetailsEntity {
+	identifier: string, //itemData.id
+	status: string,
+	usesRemaining: number
+}
+
+export interface PlacedItemEntity extends PlacedItemDetailsEntity {
+	id: string,
+	owner: string, //maps to a plot
+}
+
 export abstract class PlacedItem extends Item { 
+	protected placedItemId: string;
 	itemData: PlacedItemTemplate;
 	protected status: string;
 
-	constructor(itemData: PlacedItemTemplate, status: string) {
+	constructor(placedItemId: string, itemData: PlacedItemTemplate, status: string) {
 		super();
+		this.placedItemId = placedItemId;
 		this.itemData = itemData;
 		this.status = status;
 	}
@@ -49,6 +62,22 @@ export abstract class PlacedItem extends Item {
     }
 
 	abstract toPlainObject(): any;
+
+
+	/**
+	 * @returns the placedItemId for database access
+	 */
+	getPlacedItemId(): string {
+		return this.placedItemId;
+	}
+
+	/**
+	 * TODO: Fix any function that uses this, this is a dangerous operation
+	 * Sets the id for database access.
+	 */
+	 setPlacedItemId(newId: string): void {
+		this.placedItemId = newId;
+	}
 
 	/**
 	 * @returns the status

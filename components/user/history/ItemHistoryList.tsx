@@ -1,7 +1,5 @@
-import { useUser } from "@/hooks/contexts/UserContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
-import { DecorationHistory } from "@/models/user/history/itemHistory/DecorationHistory";
-import { PlantHistory } from "@/models/user/history/itemHistory/PlantHistory";
 
 const ItemHistoryListComponent = ({}) => {
 	//TODO: ItemHistoryComponent that looks more like square bubbles with information about each plant, ie almanac
@@ -12,23 +10,19 @@ const ItemHistoryListComponent = ({}) => {
 			<div>
 			{histories.map((history, index) => {
 				if (history.getItemData().subtype === ItemSubtypes.PLANT.name) {
-					const plantHistory = history as PlantHistory;
 					return (
-						<div key={plantHistory.getItemData().name}>
-							{plantHistory.getItemData().name} {plantHistory.getItemData().icon}: {plantHistory.getHarvestedQuantity()}
+						<div key={history.getItemData().name + index}>
+							{history.getItemData().name} {history.getItemData().icon}: {history.getQuantity()}
 						</div>
 					);
 				} else if (history.getItemData().subtype === ItemSubtypes.DECORATION.name) {
-					const decorationHistory = history as DecorationHistory;
 					return (
-						<div key={decorationHistory.getItemData().name}>
-							{decorationHistory.getItemData().name}: {decorationHistory.getPlacedQuantity()}
+						<div key={history.getItemData().name + index}>
+							{history.getItemData().name}: {history.getQuantity()}
 						</div>
 					);
 				} else {
-					return (
-						<></>
-					);
+					return null;
 				}
 			})}
 			</div>

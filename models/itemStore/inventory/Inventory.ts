@@ -4,16 +4,24 @@ import { InventoryTransactionResponse } from "./InventoryTransactionResponse";
 import { ItemList } from "../ItemList";
 import { ItemStore } from "../ItemStore";
 import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
+import { v4 as uuidv4 } from 'uuid';
+
+export interface InventoryEntity {
+	id: string,
+	owner: string,
+	gold: number
+}
 
 export class Inventory extends ItemStore{
-	
-	private userId: string;
+	private inventoryId: string;
+	private ownerName: string;
 	private gold: number;
 	// private items: ItemList;
 	
-	constructor(userId: string, gold: number = 0, items: ItemList = new ItemList()) {
+	constructor(inventoryId: string, ownerName: string, gold: number = 0, items: ItemList = new ItemList()) {
 		super(items);
-		this.userId = userId;
+		this.inventoryId = inventoryId;
+		this.ownerName = ownerName;
 		this.gold = gold;
 		// this.items = items;
 	}
@@ -26,13 +34,18 @@ export class Inventory extends ItemStore{
 		}
 		
 		// Initialize default values
-		let userId = '';
+		let inventoryId = uuidv4();
+		let ownerName = '';
 		let gold = 0;
 		let items = new ItemList();
+		// Validate and assign ownerName
+		if (plainObject && typeof plainObject.inventoryId === 'string') {
+			inventoryId = plainObject.inventoryId;
+		}
 	
-		// Validate and assign userId
-		if (plainObject && typeof plainObject.userId === 'string') {
-			userId = plainObject.userId;
+		// Validate and assign ownerName
+		if (plainObject && typeof plainObject.ownerName === 'string') {
+			ownerName = plainObject.ownerName;
 		}
 	
 		// Validate and assign gold
@@ -47,24 +60,31 @@ export class Inventory extends ItemStore{
 			}
 		}
 	
-		return new Inventory(userId, gold, items);
+		return new Inventory(inventoryId, ownerName, gold, items);
 		
 	}
 
 	toPlainObject(): any {
 		return {
-			userId: this.userId,
+			inventoryId: this.inventoryId,
+			ownerName: this.ownerName,
 			gold: this.gold,
 			items: this.items.toPlainObject()
 		}
 	} 
 	
+	/**
+	 * @returns the inventory id for database access
+	 */
+	 getInventoryId(): string {
+		return this.inventoryId;
+	}
 
 	/**
-	 * @returns the userId of the owner of the inventory.
+	 * @returns the name of the owner of the inventory.
 	 */
-	getUserId(): string {
-		return this.userId;
+	getOwnerName(): string {
+		return this.ownerName;
 	}
 
 	/**
@@ -209,7 +229,6 @@ export class Inventory extends ItemStore{
 
 	/**
 	 * Consumes x quantity from the specified item. Fails if there is not enough quantity of item.
-	 * If the quantity hits 0, deletes the item from the inventory.
 	 * Performs a specific action depending on the item type:
 	 * Blueprint -> returns the Decoration ItemTemplate corresponding to the Blueprint
 	 * Seed -> returns the Plant ItemTemplate corresponding to the Seed
@@ -222,16 +241,17 @@ export class Inventory extends ItemStore{
 	 */
 	 useItem(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
 		const response = this.items.useItem(item, quantity);
-		if (response.isSuccessful()) {
-			if (response.payload.originalItem.quantity <= 0) {
-				const deleteResponse = this.deleteItem(response.payload.originalItem);
-				if (!deleteResponse.isSuccessful()) {
-					response.addErrorMessage(`Error deleting item after using down to 0 quantity`);
-					return response;
-				}
-				//we throw away the response from delete if it succeeds
-			}
-		}
+		//Does not delete upon hitting 0 quantity
+		// if (response.isSuccessful()) {
+		// 	if (response.payload.originalItem.quantity <= 0) {
+		// 		const deleteResponse = this.deleteItem(response.payload.originalItem);
+		// 		if (!deleteResponse.isSuccessful()) {
+		// 			response.addErrorMessage(`Error deleting item after using down to 0 quantity`);
+		// 			return response;
+		// 		}
+		// 		//we throw away the response from delete if it succeeds
+		// 	}
+		// }
 		return response;
 	}
 

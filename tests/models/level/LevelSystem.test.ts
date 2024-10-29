@@ -1,9 +1,10 @@
 import LevelSystem from "@/models/level/LevelSystem";
+import { v4 as uuidv4 } from 'uuid';
 
 let testLevelSystem: LevelSystem;
 
 beforeEach(() => {
-	testLevelSystem = new LevelSystem(1, 0, 1);
+	testLevelSystem = new LevelSystem(uuidv4(), 1, 0, 1);
 });
 
 test('Should level up', () => {
@@ -30,7 +31,7 @@ test('Should level up and get overflow xp', () => {
 })
 
 test('Should gain xp and level with different growth rate', () => {
-	testLevelSystem = new LevelSystem(5, 0, 0.5);
+	testLevelSystem = new LevelSystem(uuidv4(), 5, 0, 0.5);
 	testLevelSystem.addExperience(2000);
 	expect(testLevelSystem.getLevel()).toBe(6);
 	expect(testLevelSystem.getExpToLevelUp()).toBe(1400);

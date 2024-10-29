@@ -13,7 +13,7 @@ import { placeholderItemTemplates } from "@/models/items/templates/models/Placeh
 import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
 import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
 import { getItemClassFromSubtype, getItemTemplateFromSubtype } from "@/models/items/utility/classMaps";
-
+import { v4 as uuidv4 } from 'uuid';
 
 let seedItem: Seed;
 let blueprintItem: Blueprint;
@@ -30,17 +30,17 @@ let emptyTemplate: EmptyItemTemplate;
 
 beforeEach(() => {
 	seedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple seed') as SeedTemplate;
-	seedItem = new Seed(seedTemplate, 1);
+	seedItem = new Seed(uuidv4(), seedTemplate, 1);
 	blueprintTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
-	blueprintItem = new Blueprint(blueprintTemplate, 1);
+	blueprintItem = new Blueprint(uuidv4(), blueprintTemplate, 1);
 	harvestedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple') as HarvestedItemTemplate;
-	harvestedItem = new HarvestedItem(harvestedTemplate, 1);
+	harvestedItem = new HarvestedItem(uuidv4(), harvestedTemplate, 1);
 	plantTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate;
-	plantItem = new Plant(plantTemplate, '');
+	plantItem = new Plant(uuidv4(), plantTemplate, '');
 	decorationTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('bench') as DecorationTemplate;
-	decorationItem = new Decoration(decorationTemplate, '');
+	decorationItem = new Decoration(uuidv4(), decorationTemplate, '');
 	emptyTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('ground') as EmptyItemTemplate;
-	emptyItem = new EmptyItem(emptyTemplate, 'ground');
+	emptyItem = new EmptyItem(uuidv4(), emptyTemplate, 'ground');
 })
 
 test('Should Get Class From Subtype', () => {
@@ -62,7 +62,7 @@ test('Should Get Class From Subtype', () => {
 
 test('Should Not Get Class From Invalid Type', () => {
 	try {
-		const invalidClass = getItemClassFromSubtype(new Seed(new SeedTemplate('1', '1', '1', "InventoryItem", "InvalidSubtype" as ItemSubtype, "", "", 1, 0, "1"), 1));
+		const invalidClass = getItemClassFromSubtype(new Seed(uuidv4(), new SeedTemplate('1', '1', '1', "InventoryItem", "InvalidSubtype" as ItemSubtype, "", "", 1, 0, "1"), 1));
 		// Fail test if above expression doesn't throw anything.
 		fail();
 	} catch (e) {

@@ -1,3 +1,8 @@
+export interface IconEntity {
+	name: string;
+	icon: string;
+}
+
 class Icon {
 	private name: string;
 	private icon: string;

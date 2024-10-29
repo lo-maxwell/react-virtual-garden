@@ -1,18 +1,31 @@
-import { actionHistoryRepository } from "./ActionHistoryRepository";
+import { actionHistoryMetadataRepository } from "./ActionHistoryMetadataRepository";
 import { ActionHistoryTransactionResponse } from "./ActionHistoryTransactionResponse";
+import { v4 as uuidv4 } from 'uuid';
+
+export interface ActionHistoryEntity {
+	id: string,
+	owner: string, //maps to user
+	identifier: string,
+	quantity: number
+}
 
 export default class ActionHistory {
-
+	protected actionHistoryId: string;
 	protected name: string;
 	protected description: string;
 	protected identifier: string;
 	protected quantity: number;
 	
-	constructor(name: string, description: string, identifier: string, quantity: number) {
+	constructor(actionHistoryId: string, name: string, description: string, identifier: string, quantity: number) {
+		this.actionHistoryId = actionHistoryId;
 		this.name = name;
 		this.description = description;
 		this.identifier = identifier;
 		this.quantity = quantity;
+	}
+
+	getActionHistoryId(): string {
+		return this.actionHistoryId;
 	}
 
 	getName(): string {
@@ -53,8 +66,11 @@ export default class ActionHistory {
             if (!plainObject || typeof plainObject !== 'object') {
                 throw new Error('Invalid plainObject structure for ActionHistory');
             }
-			const { name, description, identifier, quantity } = plainObject;
+			const { actionHistoryId, name, description, identifier, quantity } = plainObject;
 			// Perform additional type checks if necessary
+			if (typeof actionHistoryId !== 'string') {
+				throw new Error('Invalid id in plainObject for ActionHistory');
+			}
 			if (typeof name !== 'string') {
 				throw new Error('Invalid name in plainObject for ActionHistory');
 			}
@@ -69,29 +85,31 @@ export default class ActionHistory {
 			}
 
 			//Fetch existing data based on identifier
-			let updatedActionHistory = actionHistoryRepository.getActionHistoryInterfaceByIdentifierString(identifier);
+			let updatedActionHistory = actionHistoryMetadataRepository.getActionHistoryInterfaceByIdentifierString(identifier);
 			if (updatedActionHistory != null) {
-				return new ActionHistory(updatedActionHistory.name, updatedActionHistory.description, updatedActionHistory.identifier, quantity);
+				return new ActionHistory(actionHistoryId, updatedActionHistory.name, updatedActionHistory.description, updatedActionHistory.identifier, quantity);
 			}
 
 			//Fetch existing data based on name
-			updatedActionHistory = actionHistoryRepository.getActionHistoryInterfaceByName(name);
+			updatedActionHistory = actionHistoryMetadataRepository.getActionHistoryInterfaceByName(name);
 			if (updatedActionHistory != null) {
-				return new ActionHistory(updatedActionHistory.name, updatedActionHistory.description, updatedActionHistory.identifier, quantity);
+				return new ActionHistory(actionHistoryId, updatedActionHistory.name, updatedActionHistory.description, updatedActionHistory.identifier, quantity);
 			}
 			
 			//Create new object -- danger -- should be unnecessary unless large data migration was made
 			console.error(`Created new ActionHistory object: ${name}, ${description}, ${identifier}`);
-			return new ActionHistory(name, description, identifier, quantity);
+			return new ActionHistory(uuidv4(), name, description, identifier, quantity);
 			
 		} catch (err) {
 			console.error('Error creating ActionHistory from plainObject:', err);
+			console.error(plainObject);
             return null;
 		}
 	}
 
 	toPlainObject(): any {
 		return {
+			actionHistoryId: this.actionHistoryId,
 			name: this.name,
 			description: this.description,
 			identifier: this.identifier,

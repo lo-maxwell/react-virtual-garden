@@ -5,6 +5,7 @@ import { DecorationTemplate } from "@/models/items/templates/models/DecorationTe
 import { EmptyItemTemplate } from "@/models/items/templates/models/EmptyItemTemplate";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
+import { v4 as uuidv4 } from 'uuid';
 
 let plantItem: Plant;
 let decorationItem: Decoration;
@@ -12,11 +13,11 @@ let emptyItem: EmptyItem;
 
 beforeEach(() => {
 	let template = placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate;
-	plantItem = new Plant(template, '');
+	plantItem = new Plant(uuidv4(), template, '');
 	let template2 = placeholderItemTemplates.getPlacedItemTemplateByName('bench') as DecorationTemplate;
-	decorationItem = new Decoration(template2, '');
+	decorationItem = new Decoration(uuidv4(), template2, '');
 	let template3 = placeholderItemTemplates.getPlacedItemTemplateByName('ground') as EmptyItemTemplate;
-	emptyItem = new EmptyItem(template3, 'ground');
+	emptyItem = new EmptyItem(uuidv4(), template3, 'ground');
 })
 
 test('Should Initialize PlacedItem Object', () => {

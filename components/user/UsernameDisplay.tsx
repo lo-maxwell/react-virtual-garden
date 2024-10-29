@@ -1,16 +1,20 @@
+import { useUser } from '@/app/hooks/contexts/UserContext';
 import React, { useState } from 'react';
 import colors from '../colors/colors';
 
 const UsernameDisplay = ({ username, onUsernameChange }: { username: string, onUsernameChange: Function}) => {
     const [editing, setEditing] = useState(false);
     const [newUsername, setNewUsername] = useState(username);
+    const { user } = useUser();
 
     const handleEdit = () => {
         setEditing(true);
     };
 
     const handleSave = () => {
-        onUsernameChange(newUsername);
+        if (newUsername !== user.getUsername()) {
+            onUsernameChange(newUsername);
+        }
         setEditing(false);
     };
 

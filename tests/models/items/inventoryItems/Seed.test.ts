@@ -6,6 +6,7 @@ import { BlueprintTemplate } from "@/models/items/templates/models/BlueprintTemp
 import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
+import { v4 as uuidv4 } from 'uuid';
 
 let seedItem: Seed;
 let blueprintItem: Blueprint;
@@ -13,11 +14,11 @@ let harvestedItem: HarvestedItem;
 
 beforeEach(() => {
 	let template = placeholderItemTemplates.getInventoryItemTemplateByName('apple seed') as SeedTemplate;
-	seedItem = new Seed(template, 1);
+	seedItem = new Seed(uuidv4(), template, 1);
 	let template2 = placeholderItemTemplates.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
-	blueprintItem = new Blueprint(template2, 1);
+	blueprintItem = new Blueprint(uuidv4(), template2, 1);
 	let template3 = placeholderItemTemplates.getInventoryItemTemplateByName('apple') as HarvestedItemTemplate;
-	harvestedItem = new HarvestedItem(template3, 1);
+	harvestedItem = new HarvestedItem(uuidv4(), template3, 1);
 })
 
 test('Should Create Seed Object From PlainObject', () => {

@@ -5,10 +5,8 @@ import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
 import { ItemList } from "@/models/itemStore/ItemList";
 import { ItemHistoryTransactionResponse } from "./itemHistory/ItemHistoryTransactionResponse";
 import ItemHistory from "./itemHistory/ItemHistory";
-import { PlantHistory } from "./itemHistory/PlantHistory";
 import { CustomResponse } from "@/models/utility/CustomResponse";
 import { BooleanResponse } from "@/models/utility/BooleanResponse";
-import { DecorationHistory } from "./itemHistory/DecorationHistory";
 
 export class ItemHistoryList {
 	private history: ItemHistory[];
@@ -37,23 +35,12 @@ export class ItemHistoryList {
 		try {
             // Validate plainObject structure
             if (!plainObject || typeof plainObject !== 'object') {
-                throw new Error('Invalid plainObject structure for PlantHistory');
+                throw new Error('Invalid plainObject structure for ItemHistoryList');
             }
 			const { itemHistories } = plainObject;
 			const histories = itemHistories.map((itemHistory: any) => {
 				if (!itemHistory) return null;
-				switch (itemHistory.itemData.subtype) {
-					case ItemSubtypes.PLANT.name:
-						return PlantHistory.fromPlainObject(itemHistory);
-					case ItemSubtypes.DECORATION.name:
-						return DecorationHistory.fromPlainObject(itemHistory);
-					case ItemSubtypes.GROUND.name:
-					case ItemSubtypes.BLUEPRINT.name:
-					case ItemSubtypes.SEED.name:
-					case ItemSubtypes.HARVESTED.name:
-					default:
-						return null;
-				}
+				return ItemHistory.fromPlainObject(itemHistory);
 			}).filter((item: null | ItemHistory) => item !== null);
 			return new ItemHistoryList(histories);
 			
@@ -67,13 +54,13 @@ export class ItemHistoryList {
 		const toReturn = {
 			itemHistories: this.history.map(itemHistory => {
 				return itemHistory.toPlainObject();
-			}) // Convert each InventoryItem to a plain object
+			}) // Convert each itemHistory to a plain object
 		};
 		return toReturn;
 	} 
 
 	/**
-	 * @returns a copy of the inventory items within the list.
+	 * @returns a copy of the item histories within the list.
 	 */
 	getAllHistories(): ItemHistory[] {
 		return this.history.slice();

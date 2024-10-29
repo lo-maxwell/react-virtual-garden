@@ -1,6 +1,7 @@
 import { PlacedItemTemplate } from "./PlacedItemTemplate";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
 import { ItemTemplateRepository } from "./ItemTemplateRepository";
+import { ItemTemplate } from "./ItemTemplate";
 
 //Make this the factory
 
@@ -52,7 +53,6 @@ class PlaceholderItemTemplates {
 	 */
 	getPlacedTemplate(id: string): PlacedItemTemplate | null {
 		const placedItems = Object.values(this.repository.PlacedItems).flat().filter(item => item.id === id);
-		
 		if (placedItems.length === 1) return placedItems[0];
 		else if (placedItems.length === 0) return null;
 		else {
@@ -75,6 +75,18 @@ class PlaceholderItemTemplates {
 			console.error('Error: found multiple items with the same id!');
 			console.error(inventoryItems);
 			return null;
+		}
+	}
+
+	/**
+	 * Returns the template matching the id, can find both placed and inventory items
+	 * @id the item identifier
+	 */
+	getTemplate(id: string): ItemTemplate | null{
+		if (this.getInventoryTemplate(id)) {
+			return this.getInventoryTemplate(id);
+		} else {
+			return this.getPlacedTemplate(id);
 		}
 	}
 }

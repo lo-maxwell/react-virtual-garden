@@ -1,35 +1,44 @@
 import ItemStoreComponent from "@/components/itemStore/itemStore";
 import { triggerAsyncId } from "async_hooks";
+import Toolbox from "../garden/tools/Toolbox";
 import { ItemSubtypes } from "../items/ItemTypes";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { DecorationTemplate } from "../items/templates/models/DecorationTemplate";
 import { placeholderItemTemplates } from "../items/templates/models/PlaceholderItemTemplate";
 import { PlantTemplate } from "../items/templates/models/PlantTemplate";
-import LevelSystem from "../level/LevelSystem";
+import LevelSystem, { LevelSystemEntity } from "../level/LevelSystem";
 import { BooleanResponse } from "../utility/BooleanResponse";
 import { actionHistoryFactory } from "./history/actionHistory/ActionHistoryFactory";
-import { actionHistoryRepository } from "./history/actionHistory/ActionHistoryRepository";
 import { ActionHistoryList } from "./history/ActionHistoryList";
-import { DecorationHistory } from "./history/itemHistory/DecorationHistory";
-import ItemHistory from "./history/itemHistory/ItemHistory";
-import { PlantHistory } from "./history/itemHistory/PlantHistory";
 import { ItemHistoryList } from "./history/ItemHistoryList";
 import Icon from "./icons/Icon";
+import { v4 as uuidv4 } from 'uuid';
+import ItemHistory from "./history/itemHistory/ItemHistory";
+
+export interface UserEntity {
+	id: string;
+	username: string;
+	icon: string;
+}
 
 class User {
-
+	private userId: string;
 	private username: string;
 	private icon: string; //indexes into a list of icons by name
 	private level: LevelSystem;
 	private itemHistory: ItemHistoryList;
 	private actionHistory: ActionHistoryList;
+	private toolbox: Toolbox;
 
-	constructor(username: string, icon: string, level: LevelSystem = new LevelSystem(), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList()) {
+	//TODO: New Users should get a random UUID as their userId
+	constructor(userId: string, username: string, icon: string, level: LevelSystem = new LevelSystem(uuidv4()), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList(), toolbox: Toolbox = new Toolbox()) {
+		this.userId = userId;
 		this.username = username;
 		this.icon = icon;
 		this.level = level;
 		this.itemHistory = itemHistory;
 		this.actionHistory = actionHistory;
+		this.toolbox = toolbox;
 	}
 
 	static fromPlainObject(plainObject: any) {
@@ -38,8 +47,11 @@ class User {
             if (!plainObject || typeof plainObject !== 'object') {
                 throw new Error('Invalid plainObject structure for User');
             }
-			const { username, icon, level, itemHistory, actionHistory } = plainObject;
+			const { userId, username, icon, level, itemHistory, actionHistory, toolbox } = plainObject;
 			// Perform additional type checks if necessary
+			if (typeof userId !== 'string') {
+				throw new Error('Invalid userId property in plainObject for User');
+			}
 			if (typeof username !== 'string') {
 				throw new Error('Invalid username property in plainObject for User');
 			}
@@ -49,22 +61,29 @@ class User {
 			const hydratedLevel = LevelSystem.fromPlainObject(level);
 			const hydratedItemHistory = ItemHistoryList.fromPlainObject(itemHistory);
 			const hydratedActionHistory = ActionHistoryList.fromPlainObject(actionHistory);
-			return new User(username, icon, hydratedLevel, hydratedItemHistory, hydratedActionHistory);
+			const hydratedToolbox = Toolbox.fromPlainObject(toolbox);
+			return new User(userId, username, icon, hydratedLevel, hydratedItemHistory, hydratedActionHistory, hydratedToolbox);
 			
 		} catch (err) {
 			console.error('Error creating User from plainObject:', err);
-            return new User("Error User", "error");
+            return new User("99999999-9999-9999-9999-999999999999", "Error User", "error");
 		}
 	}
 
 	toPlainObject(): any {
 		return {
+			userId: this.userId,
 			username: this.username,
 			icon: this.icon,
 			level: this.level.toPlainObject(),
 			itemHistory: this.itemHistory.toPlainObject(),
 			actionHistory: this.actionHistory.toPlainObject(),
+			toolbox: this.toolbox.toPlainObject(),
 		};
+	}
+
+	getUserId(): string {
+		return this.userId;
 	}
 
 	getUsername(): string {
@@ -119,6 +138,10 @@ class User {
 		return this.level.getGrowthRate();
 	}
 
+	getLevelSystem(): LevelSystem {
+		return this.level;
+	}
+
 	/**
 	 * @exp the quantity of xp to add
 	 */
@@ -137,7 +160,7 @@ class User {
 			response.addErrorMessage(`Error updating history: attempting to harvest item of type ${plantItem.itemData.subtype}`);
 			return response;
 		}
-		const itemHistory = new PlantHistory(plantItem.itemData as PlantTemplate, 1);
+		const itemHistory = new ItemHistory(uuidv4(), plantItem.itemData, 1);
 		this.itemHistory.addItemHistory(itemHistory);
 		const harvestAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(plantItem.itemData.subtype, 'all', 'harvested', 1);
 		const harvestCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(plantItem.itemData.subtype, plantItem.itemData.category, 'harvested', 1);
@@ -160,8 +183,8 @@ class User {
 	}
 
 	/**
-	 * Updates this user's itemHistory and actionHistory following the harvest of an item.
-	 * @item the item that was harvested
+	 * Updates this user's itemHistory and actionHistory following the placement of a decoration.
+	 * @item the item that was placedharvested
 	 * @returns Response containing true or an error message on failure
 	 */
 	 updateDecorationHistory(decorationItem: PlacedItem): BooleanResponse {
@@ -170,7 +193,7 @@ class User {
 			response.addErrorMessage(`Error updating history: attempting to place item of type ${decorationItem.itemData.subtype}`);
 			return response;
 		}
-		const itemHistory = new DecorationHistory(decorationItem.itemData as DecorationTemplate, 1);
+		const itemHistory = new ItemHistory(uuidv4(), decorationItem.itemData, 1);
 		this.itemHistory.addItemHistory(itemHistory);
 		// const harvestAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(decorationItem.itemData.subtype, 'all', 'harvested', 1);
 		const placeDecorationHistory = actionHistoryFactory.createActionHistoryByIdentifiers(decorationItem.itemData.subtype, decorationItem.itemData.category, 'placed', 1);

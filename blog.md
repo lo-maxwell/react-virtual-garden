@@ -227,8 +227,69 @@
   * Added some test files for querying from local postgres db
   * Not pushing .env, some things will break if forked
 
+## Day 19
+
+### Added infrastructure for toolbox class
+
+  * Users will have a toolbox, which appears on the garden screen for special actions
+  * ie. a shovel to remove plants and move decorations
+  * TODO: tools are upgradeable and can give special bonuses, so we store each user's individual set of tools
+  * TODO: tools can be purchased in the store (on a separate page, not as part of the inventory), which removes the existing tool of that type if there is one (only 1 shovel at a time)
+  * TODO: tools actually impact the garden
+
+## Day 20
+
+### Wasted money on AWS aurora instance even though the database was empty
+
+### Added postgres local database
+
+  * Accessible with pool/query
+  * Writing services and apis to interact with db
+  * Harvest all is broken for xp because it calculates the new xp before updating the database, so all writes will update the db with the same values. Need to stagger read times or calculate the expected xp increase.
+  * Plots need ids (or just row/column/owner) so we can track them in database
+  * Maybe plots are always in existence (once user is leveled), expanding/shrinking just shows/hides them and makes them uninteractable
+
+## Day 21-30
+
+### Working on database schemas, services, api routing, integrating database queries with updating backend models
+
+### Added repository, service, routing for the following:
+  * User
+  * LevelSystem
+  * Garden
+  * Plot
+  * PlacedItem
+  * Inventory
+  * InventoryItem
+  * Store
+  * StoreItem
+  * ItemHistory
+  * ActionHistory
+  * Contains various functions to interact with database and send/receive data from api routes
+
+### Create X Service functions should take in the model and use it to produce the entire object in database
+
+### Plots are no longer deleted by resizing garden, only hidden
+
+### Added service functions for the following:
+
+  * Create/Save/Fetch Account
+  * PlantSeed
+  * PlaceDecoration
+  * HarvestPlant
+  * PickupDecoration
+  * Expand/Shrink Garden Rows
+  * Expand/Shrink Garden Columns
+  * Buy/Sell Items
+  * Update username/icon
+
+### Added cloud save enable/disable button (currently disabled for production)
+
+
 
 TODO:
+
+Validate garden bounds for plant/harvest
 
 Change mouseover color for inventoryItems
 
@@ -243,8 +304,6 @@ Make Garden more interactive than plant all -> harvest
 Add level requirement to plants/seeds
 
 Add way to delete in progress plants, some sort of select delete tool
-
-Add multiple harvests to some plants
 
 Add crop rotation - either assign plant families or just individual plants + soil health; low soil health -> cannot be fertilized for a duration + yield reduction, high soil health -> free stronger fertilizer
 
@@ -266,6 +325,15 @@ Grow zombies/other creatures - randomly move around and give bonuses (automatic 
 
 User almanac - displays how many of each plant were grown, some extra details about them
 
+User sends harvest plant request alongside their user auth token -> backend checks the token matches the user (or fetches the user that matches that token), attempts to perform the harvest plant request, sends back success/failure state -> frontend updates display based on result
+
+auth0 provides a user id, which we need to stick into the sql database
+
+New user -> backend sets up user, garden, inventory, store, etc. (choose uuids here) -> backend pushes to database, forcing uuids of certain type
+
+Old user -> backend checks for current id -> grab data from database based on current id -> push to backend model
+
+
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time
 This is a design flaw, not a coding one -- right now supports exponential growth when it should be linear, also easier to make iterative progress
@@ -275,3 +343,4 @@ Add random events/natural disasters that interact with decorations ie. scarecrow
 Small, medium, large stores with different restock intervals and stock limits
 Item metadata migration tool
 Dev/Prod external dbs, and dev/prod branches
+Garden Stock Market - buying/selling pressure, variable costs, options and futures

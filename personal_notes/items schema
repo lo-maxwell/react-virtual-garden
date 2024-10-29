@@ -1,0 +1,193 @@
+reference = string/number mapping to a specific hardcoded value stored in data
+
+user id = '00000000-0000-0000-0000-000000000000'
+inventory id = '00000000-0000-0000-0000-000000000001'
+level id = '00000000-0000-0000-0000-000000000002'
+
+--Look into adding indexing on columns for faster querying
+--Look into adding timestamps for created at and updated at, and functions to automatically set updated
+
+-Each icon needs:
+internal id
+name (string)
+icon (char 1)
+
+CREATE TABLE IF NOT EXISTS icons (
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(50),
+	icon CHAR(1),
+	UNIQUE (name)	
+);
+
+-Each user levelsystem needs:
+internal id
+owner (user id)
+owner type (string)
+level (int)
+current xp (int)
+growthRate (float)
+
+CREATE TABLE IF NOT EXISTS levels (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    owner UUID NOT NULL,               -- User ID (foreign key from the 'users' table)
+    owner_type VARCHAR(50) NOT NULL,   -- Type of owner (ie. user, garden)
+    level INTEGER NOT NULL DEFAULT 1 CHECK (level >= 0),     -- Level (integer, defaulting to 1)
+    current_xp INTEGER NOT NULL DEFAULT 0 CHECK (current_xp >= 0), -- Current XP (integer, defaulting to 0)
+    growth_rate FLOAT NOT NULL DEFAULT 1.0, -- Growth rate (float, defaulting to 1.0)
+    UNIQUE (owner, owner_type)
+);
+
+-Each inventory item row needs:
+internal id
+owner (inventory id)
+identifier (template reference)
+quantity (int)
+
+CREATE TABLE IF NOT EXISTS inventory_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    owner UUID NOT NULL,            -- Inventory ID (foreign key from the 'inventories' table)
+    identifier CHAR(13) NOT NULL,      -- Template reference (could be a foreign key if related to another table)
+    quantity INTEGER NOT NULL CHECK (quantity >= 0), 		   -- Quantity
+    FOREIGN KEY (owner) REFERENCES inventories(id),  -- Establishing relationship with 'inventories' table
+    UNIQUE (owner, identifier)
+);
+
+
+-Each store item row needs:
+internal id
+owner (inventory id)
+identifier (template reference)
+quantity (int)
+
+CREATE TABLE IF NOT EXISTS store_items (
+	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    owner UUID NOT NULL,            -- Inventory ID (foreign key from the 'stores' table)
+    identifier CHAR(13) NOT NULL,      -- Template reference (could be a foreign key if related to another table)
+    quantity INTEGER NOT NULL CHECK (quantity >= 0), 		   -- Quantity
+    FOREIGN KEY (owner) REFERENCES stores(id),  -- Establishing relationship with 'stores' table
+    UNIQUE (owner, identifier)
+);
+
+
+--TODO
+-Each store needs:
+internal id
+owner (user id)
+identifier (integer)
+last restock time (long)
+
+CREATE TABLE IF NOT EXISTS stores (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    owner UUID NOT NULL,         -- User ID (foreign key from the 'users' table)
+    identifier INTEGER NOT NULL DEFAULT 0, -- Indexes into list of possible stores for data fields
+    last_restock_time_ms BIGINT NOT NULL DEFAULT 0,         -- Last restock in milliseconds since epoch time
+    FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
+);
+
+
+-Each inventory needs:
+internal id
+owner (user id)
+type (string)
+
+CREATE TABLE IF NOT EXISTS inventories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    owner UUID NOT NULL,         -- User ID (foreign key from the 'users' table)
+    gold INTEGER NOT NULL CHECK (gold >= 0),       -- Inventory's gold
+    FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
+);
+
+-Each user needs:
+internal id
+username (string)
+password hash (string)
+password salt (string)
+icon (icon reference)
+
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    username VARCHAR(255) NOT NULL, -- Username (string)
+    password_hash TEXT NOT NULL,    -- Password hash (string)
+    password_salt TEXT NOT NULL,    -- Password salt (string)
+    icon VARCHAR(50)               -- Icon reference (can be a foreign key if linked to another table)
+);
+
+-Each placed item row needs:
+internal id
+owner (plot id)
+identifier (template reference)
+status (string)
+
+CREATE TABLE IF NOT EXISTS placed_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    owner UUID NOT NULL,            -- Plot ID (foreign key from the 'plots' table)
+    identifier CHAR(13) NOT NULL,      -- Template reference (could be a foreign key if related to another table)
+    status TEXT, 		   -- Status String
+    FOREIGN KEY (owner) REFERENCES plots(id),  -- Establishing relationship with 'plots' table
+    UNIQUE (owner)
+);
+
+-Each plot needs:
+internal id
+owner (garden id)
+row (int)
+column (int)
+plantTime (int)
+numUses (int)
+
+CREATE TABLE IF NOT EXISTS plots (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    owner UUID NOT NULL,         -- User ID (foreign key from the 'gardens' table)
+    row_index INTEGER NOT NULL CHECK (row_index >= 0),            -- Row index (0 indexed)
+    col_index INTEGER NOT NULL CHECK (col_index >= 0),         -- Column index (0 indexed)
+    plant_time BIGINT NOT NULL DEFAULT 0,       -- Time planted as ms since epoch time
+    uses_remaining INTEGER NOT NULL DEFAULT 0,  -- Number of uses (usually harvests)
+    FOREIGN KEY (owner) REFERENCES gardens(id), -- Establishing relationship with 'gardens' table
+    UNIQUE (owner, row_index, col_index)  -- Only 1 plot per row/column slot in a garden
+);
+
+-Each garden needs:
+internal id
+owner (user id)
+rows (int)
+columns (int)
+
+CREATE TABLE IF NOT EXISTS gardens (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    owner UUID NOT NULL,         -- User ID (foreign key from the 'users' table)
+    rows INTEGER NOT NULL CHECK (rows >= 1),            -- Number of rows in garden
+    columns INTEGER NOT NULL CHECK (columns >= 1),         -- Number of columns in garden
+    FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
+);
+
+-Each ActionHistory needs:
+internal id
+owner (user id)
+identifier (string)
+quantity (int)
+
+CREATE TABLE IF NOT EXISTS action_histories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    owner UUID NOT NULL,            -- User Id (foreign key from the 'users' table)
+    identifier VARCHAR(255) NOT NULL,      -- Indexes into actionhistories data, ie. "plant:all:harvested"
+    quantity INTEGER NOT NULL CHECK (quantity >= 0), -- Number this history tracks
+    FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table
+    UNIQUE (owner, identifier)
+);
+
+-Each ItemHistory needs:
+internal id
+owner (user id)
+identifier (string)
+quantity (int)
+
+CREATE TABLE IF NOT EXISTS item_histories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+    owner UUID NOT NULL,            -- User Id (foreign key from the 'users' table)
+    identifier CHAR(13) NOT NULL,      -- item template reference
+    quantity INTEGER NOT NULL CHECK (quantity >= 0), -- Number this history tracks
+    FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table
+    UNIQUE (owner, identifier)
+);
+
+--We don't need actionhistorylist/itemhistorylist schemas because they save no unique data that isn't stored in the action/item history itself

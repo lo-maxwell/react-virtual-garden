@@ -1,6 +1,7 @@
-import { useGarden } from "@/hooks/contexts/GardenContext";
-import { useInventory } from "@/hooks/contexts/InventoryContext";
-import { useUser } from "@/hooks/contexts/UserContext";
+import { useGarden } from "@/app/hooks/contexts/GardenContext";
+import { useInventory } from "@/app/hooks/contexts/InventoryContext";
+import { useStore } from "@/app/hooks/contexts/StoreContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { saveUser } from "@/utils/localStorage/user";
@@ -9,6 +10,7 @@ const GardenDebugOptions = () => {
 	const { user, resetUser } = useUser();
 	const { garden, resetGarden, updateGardenForceRefreshKey, toggleInstantGrow } = useGarden();
 	const { inventory, resetInventory, updateInventoryForceRefreshKey } = useInventory();
+	const { resetStore } = useStore();
 	
 	function addAppleSeed() {
 		if (!inventory) return;
@@ -61,6 +63,9 @@ const GardenDebugOptions = () => {
 		</div>
 		<div>
 			<button onClick={resetUser} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>reset user (debug)</button>
+		</div>
+		<div>
+			<button onClick={resetStore} className={`bg-gray-300 px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>reset store (debug)</button>
 		</div>
 		</>
 	);

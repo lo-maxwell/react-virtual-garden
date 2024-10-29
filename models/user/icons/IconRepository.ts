@@ -1,7 +1,7 @@
 import Icon from "./Icon";
 import iconData from "@/data/user/Icons.json";
 
-class IconRepository {
+class IconFactory {
 	Icons: Record<string, Icon[]> = {};
 
 	constructor() {
@@ -46,4 +46,4 @@ class IconRepository {
 	
 }
 
-export const iconRepository = new IconRepository();
+export const iconFactory = new IconFactory();

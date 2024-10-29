@@ -1,13 +1,13 @@
-import { useUser } from '@/hooks/contexts/UserContext';
+import { useUser } from '@/app/hooks/contexts/UserContext';
 import { placeholderItemTemplates } from '@/models/items/templates/models/PlaceholderItemTemplate';
 import Icon from '@/models/user/icons/Icon';
-import { iconRepository } from '@/models/user/icons/IconRepository';
+import { iconFactory } from '@/models/user/icons/IconRepository';
 import React, { useState } from 'react';
 import DropdownComponent from '../../lists/DropdownComponent';
 import { PopupWindow } from '../../window/popupWindow';
 import IconButton from './IconButton';
 
-const availableIcons = iconRepository.Icons; // Example list of icons
+const availableIcons = iconFactory.Icons; // Example list of icons
 
 const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconChange: Function}) => {
     const [showAllIcons, setShowAllIcons] = useState(false);
@@ -18,12 +18,14 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
     }
 
     const onIconClick = (iconOption: Icon) => {
+        if (iconOption.getName() !== user.getIcon()) {
+            onIconChange(iconOption);
+        }
         setShowAllIcons(false);
-        return onIconChange(iconOption.getName());
     }
 
     const RenderCategoryFilter = () => {
-		const categories = iconRepository.getIconCategories();
+		const categories = iconFactory.getIconCategories();
 		const selectCategoryFilter = (value: string | null) => {
 			setCategoryFilter(value);
 		}
@@ -44,7 +46,7 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
         const iconSet: Icon[] = [];
 
         if (!categoryFilter || categoryFilter === '') {
-            iconRepository.getIconCategories().map((categoryName) => {
+            iconFactory.getIconCategories().map((categoryName) => {
                 availableIcons[categoryName].map((iconOption) => {
                     if(user.isIconUnlocked(iconOption)) {
                         iconSet.push(iconOption);
@@ -86,7 +88,7 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
 	return (
         <span className="icon-selector">
             <IconButton icon={iconIndex} onClickFunction={showAllIconsWindow} borderColor={`coffee-700`} size={"text-4xl"}/>
-            {/* <button onClick={showAllIconsWindow} className="px-1 py-1 border border-2 border-coffee-700 align-text-bottom text-center bg-gray-300 min-w-12 min-h-12 text-3xl text-purple-600 font-semibold rounded-lg" >{iconRepository.getIconByName(iconIndex)}</button> */}
+            {/* <button onClick={showAllIconsWindow} className="px-1 py-1 border border-2 border-coffee-700 align-text-bottom text-center bg-gray-300 min-w-12 min-h-12 text-3xl text-purple-600 font-semibold rounded-lg" >{iconFactory.getIconByName(iconIndex)}</button> */}
             <PopupWindow showWindow={showAllIcons} setShowWindow={setShowAllIcons}>
                 <div className="w-max bg-reno-sand-200 text-black p-8 rounded-lg shadow-md justify-between items-center">
                     <div className="text-2xl text-semibold"> Select a new icon: </div>

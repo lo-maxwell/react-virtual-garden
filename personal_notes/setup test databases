@@ -1,0 +1,284 @@
+-- Enable the uuid-ossp extension (requires superuser privileges)
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+--Icons
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'icons'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS icons (
+			id SERIAL PRIMARY KEY,
+			name VARCHAR(50),
+			icon CHAR(1),
+			UNIQUE (name)	
+		);
+		table_created := TRUE;
+	END IF;
+	 -- Insert rows only if the table was newly created
+    IF table_created THEN
+		INSERT INTO icons (name, icon) VALUES
+			('error', '❌'),
+			('mango', '🥭'),
+			('construction sign', '🚧'),
+			('flamingo', '🦩');
+	END IF;
+END $$;
+
+--Users
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'users'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS users (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			username VARCHAR(255) NOT NULL, -- Username (string)
+			password_hash TEXT NOT NULL,    -- Password hash (string)
+			password_salt TEXT NOT NULL,    -- Password salt (string)
+			icon VARCHAR(50)               -- Icon reference (can be a foreign key if linked to another table)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+
+--Inventories
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'inventories'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS inventories (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,         -- User ID (foreign key from the 'users' table)
+			gold INTEGER NOT NULL CHECK (gold >= 0),       -- Inventory's gold
+			FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Stores
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'stores'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS stores (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,         -- User ID (foreign key from the 'users' table)
+			identifier INTEGER NOT NULL DEFAULT 0, -- Indexes into list of possible stores for data fields
+			last_restock_time_ms BIGINT NOT NULL DEFAULT 0, -- Last restock in milliseconds since epoch time
+			FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Levels
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'levels'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS levels (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,               -- User ID (foreign key from the 'users' table)
+			owner_type VARCHAR(50) NOT NULL,   -- Type of owner (ie. user, garden)
+			level INTEGER NOT NULL DEFAULT 1 CHECK (level >= 0),     -- Level (integer, defaulting to 1)
+			current_xp INTEGER NOT NULL DEFAULT 0 CHECK (current_xp >= 0), -- Current XP (integer, defaulting to 0)
+			growth_rate FLOAT NOT NULL DEFAULT 1.0, -- Growth rate (float, defaulting to 1.0)
+			UNIQUE (owner, owner_type)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Inventory items
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'inventory_items'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS inventory_items (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,            -- Inventory ID (foreign key from the 'inventories' table)
+			identifier CHAR(13) NOT NULL,      -- Template reference (could be a foreign key if related to another table)
+			quantity INTEGER NOT NULL CHECK (quantity >= 0), 		   -- Quantity
+			FOREIGN KEY (owner) REFERENCES inventories(id),  -- Establishing relationship with 'inventories' table
+			UNIQUE (owner, identifier)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+
+--Store items
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'store_items'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS store_items (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,            -- Inventory ID (foreign key from the 'stores' table)
+			identifier CHAR(13) NOT NULL,      -- Template reference (could be a foreign key if related to another table)
+			quantity INTEGER NOT NULL CHECK (quantity >= 0), 		   -- Quantity
+			FOREIGN KEY (owner) REFERENCES stores(id),  -- Establishing relationship with 'stores' table
+			UNIQUE (owner, identifier)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Gardens
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'gardens'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS gardens (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,         -- User ID (foreign key from the 'users' table)
+			rows INTEGER NOT NULL CHECK (rows >= 1),            -- Number of rows in garden
+			columns INTEGER NOT NULL CHECK (columns >= 1),         -- Number of columns in garden
+			FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Plots
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'plots'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS plots (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,         -- User ID (foreign key from the 'gardens' table)
+			row_index INTEGER NOT NULL CHECK (row_index >= 0),            -- Row index (0 indexed)
+			col_index INTEGER NOT NULL CHECK (col_index >= 0),         -- Column index (0 indexed)
+			plant_time BIGINT NOT NULL DEFAULT 0,       -- Time planted as ms since epoch time
+			uses_remaining INTEGER NOT NULL DEFAULT 0,  -- Number of uses (usually harvests)
+			FOREIGN KEY (owner) REFERENCES gardens(id), -- Establishing relationship with 'gardens' table
+			UNIQUE (owner, row_index, col_index)  -- Only 1 plot per row/column slot in a garden
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Placed items
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'placed_items'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS placed_items (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,            -- Plot ID (foreign key from the 'plots' table)
+			identifier CHAR(13) NOT NULL,      -- Template reference (could be a foreign key if related to another table)
+			status TEXT, 		   -- Status String
+			FOREIGN KEY (owner) REFERENCES plots(id),  -- Establishing relationship with 'plots' table
+			UNIQUE (owner)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Action Histories
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'action_histories'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS action_histories (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,            -- User Id (foreign key from the 'users' table)
+			identifier VARCHAR(255) NOT NULL,      -- Indexes into actionhistories data, ie. "plant:all:harvested"
+			quantity INTEGER NOT NULL CHECK (quantity >= 0), -- Number this history tracks
+			FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table
+			UNIQUE (owner, identifier)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Item Histories
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'item_histories'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS item_histories (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,            -- User Id (foreign key from the 'users' table)
+			identifier CHAR(13) NOT NULL,      -- item template reference
+			quantity INTEGER NOT NULL CHECK (quantity >= 0), -- Number this history tracks
+			FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table
+			UNIQUE (owner, identifier)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;

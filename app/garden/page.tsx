@@ -1,16 +1,16 @@
 'use client'
 import GardenComponent from "./garden";
 import UserProfileComponent from "@/components/garden/userProfile";
-import { useInventory } from "@/hooks/contexts/InventoryContext";
-import { useGarden } from "@/hooks/contexts/GardenContext";
-import { useSelectedItem } from "@/hooks/contexts/SelectedItemContext";
+import { useInventory } from "@/app/hooks/contexts/InventoryContext";
+import { useGarden } from "@/app/hooks/contexts/GardenContext";
+import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import InventoryComponent from "@/components/inventory/inventory";
-import { useUser } from "@/hooks/contexts/UserContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
 
 const GardenPage = () => {
   const { user } = useUser();
   const { garden, gardenForceRefreshKey } = useGarden();
-  const { inventory } = useInventory();
+  const { inventory, inventoryForceRefreshKey } = useInventory();
 
   const {selectedItem, toggleSelectedItem} = useSelectedItem();
 
@@ -26,7 +26,7 @@ const GardenPage = () => {
 
   const RenderInventory = () => {
     if (!inventory) return <div>Loading Inventory...</div>;
-    return <InventoryComponent onInventoryItemClickFunction={toggleSelectedItem} costMultiplier={1}/>;
+    return <InventoryComponent forceRefreshKey={inventoryForceRefreshKey} onInventoryItemClickFunction={toggleSelectedItem} costMultiplier={1}/>;
   }
 
   return (<>
