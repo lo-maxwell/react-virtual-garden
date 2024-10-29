@@ -37,4 +37,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-*/secret_notes/
+/personal_notes/secret_notes

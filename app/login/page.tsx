@@ -4,10 +4,10 @@ const LoginPage = () => {
 
   
   return (<>
-      <div className={`flex flex-col mx-4 my-4`}>
-      <div> {`This is the login page, but it's still in development...`}
+      <div className="flex flex-1 bg-reno-sand-200 text-black"> 
+      <div className="mx-4">The login page isn&apos;t done yet!</div>
       </div>
-      </div>
+      {/* </div> */}
     </>
   );
 }
