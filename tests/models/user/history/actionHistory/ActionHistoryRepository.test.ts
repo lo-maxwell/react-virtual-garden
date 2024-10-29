@@ -1,14 +1,14 @@
-import { actionHistoryRepository, ActionHistoryRepository } from "@/models/user/history/actionHistory/ActionHistoryRepository"
+import { actionHistoryMetadataRepository, ActionHistoryMetadataRepository} from "@/models/user/history/actionHistory/ActionHistoryMetadataRepository"
 
-test('Should Initialize ActionHistoryRepository Object', () => {
-	const repo = new ActionHistoryRepository();
-	expect(repo.histories.length).toBe(actionHistoryRepository.histories.length);
+test('Should Initialize ActionHistoryMetadataRepository Object', () => {
+	const repo = new ActionHistoryMetadataRepository();
+	expect(repo.histories.length).toBe(actionHistoryMetadataRepository.histories.length);
 	const history = repo.getActionHistoryInterfaceByIdentifiers('PLANT', 'ONION', 'harvested');
 	expect(history).toBeTruthy();
 })
 
 test('Should Create ActionHistoryInterface By Name', () => {
-	const history = actionHistoryRepository.getActionHistoryInterfaceByName("Total Plants Harvested");
+	const history = actionHistoryMetadataRepository.getActionHistoryInterfaceByName("Total Plants Harvested");
 	expect(history).toBeTruthy();
 	expect(history?.quantity).toBe(0);
 	expect(history?.name).toBe("Total Plants Harvested");
@@ -17,12 +17,12 @@ test('Should Create ActionHistoryInterface By Name', () => {
 })
 
 test('Should Not Create Invalid ActionHistoryInterface By Name', () => {
-	const history = actionHistoryRepository.getActionHistoryInterfaceByName("Invalid name");
+	const history = actionHistoryMetadataRepository.getActionHistoryInterfaceByName("Invalid name");
 	expect(history).toBe(null);
 })
 
 test('Should Create ActionHistoryInterface By Identifiers', () => {
-	const history = actionHistoryRepository.getActionHistoryInterfaceByIdentifiers("plant", "all", "harvested");
+	const history = actionHistoryMetadataRepository.getActionHistoryInterfaceByIdentifiers("plant", "all", "harvested");
 	expect(history).toBeTruthy();
 	expect(history?.quantity).toBe(0);
 	expect(history?.name).toBe("Total Plants Harvested");
@@ -31,12 +31,12 @@ test('Should Create ActionHistoryInterface By Identifiers', () => {
 })
 
 test('Should Not Create Invalid ActionHistoryInterface By Identifiers', () => {
-	const history = actionHistoryRepository.getActionHistoryInterfaceByIdentifiers("Invalid name", "", "");
+	const history = actionHistoryMetadataRepository.getActionHistoryInterfaceByIdentifiers("Invalid name", "", "");
 	expect(history).toBe(null);
 })
 
 test('Should Create ActionHistoryInterface By Identifier String', () => {
-	const history = actionHistoryRepository.getActionHistoryInterfaceByIdentifierString("plant:all:harvested");
+	const history = actionHistoryMetadataRepository.getActionHistoryInterfaceByIdentifierString("plant:all:harvested");
 	expect(history).toBeTruthy();
 	expect(history?.quantity).toBe(0);
 	expect(history?.name).toBe("Total Plants Harvested");
@@ -45,6 +45,6 @@ test('Should Create ActionHistoryInterface By Identifier String', () => {
 })
 
 test('Should Not Create Invalid ActionHistoryInterface By Identifier String', () => {
-	const history = actionHistoryRepository.getActionHistoryInterfaceByIdentifierString("Invalid identifier");
+	const history = actionHistoryMetadataRepository.getActionHistoryInterfaceByIdentifierString("Invalid identifier");
 	expect(history).toBe(null);
 })

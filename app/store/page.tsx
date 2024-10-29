@@ -4,7 +4,7 @@ import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { useEffect, useState } from "react";
 import StoreComponent from "./store";
 import { Store } from "@/models/itemStore/store/Store";
-import TradeWindowComponent from "./tradeWindow";
+import TradeWindowComponent from "./tradeWindow/tradeWindow";
 import { useStore } from "@/app/hooks/contexts/StoreContext";
 import { useInventory } from "@/app/hooks/contexts/InventoryContext";
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
@@ -15,6 +15,8 @@ const StorePage = () => {
     const {store} = useStore();
     const { inventory } = useInventory();
     const {selectedItem, toggleSelectedItem, owner, setOwner} = useSelectedItem();
+    // forceRefreshKey is supposed to help with resyncing store/inventory, but it doesn't work right now
+    const [forceRefreshKey, setForceRefreshKey] = useState(0);
 
     const inventorySetSelected = (arg: InventoryItem | null) => {
       setOwner(inventory);
@@ -33,19 +35,19 @@ const StorePage = () => {
 
     const findStoreComponent = () => {
       if (!store) return <div>Loading Store...</div>;
-      return <StoreComponent onInventoryItemClickFunction={storeSetSelected}/>;
+      return <StoreComponent onInventoryItemClickFunction={storeSetSelected} forceRefreshKey={forceRefreshKey}/>;
     }
 
     const findTradeWindowComponent = () => {
       if (!inventory || !store) return <div>Loading Trade Window...</div>;
-      return <TradeWindowComponent costMultiplier={getCostMultiplier()}/>;
+      return <TradeWindowComponent costMultiplier={getCostMultiplier()} forceRefreshKey={forceRefreshKey} setForceRefreshKey={setForceRefreshKey}/>;
     }
 
     const findInventoryComponent = () => {
       if (!inventory || !store) return <div>Loading Inventory...</div>;
       return <>
         <div className="w-[80%]">
-          <InventoryComponent onInventoryItemClickFunction={inventorySetSelected} costMultiplier={store.getSellMultiplier()}/>
+          <InventoryComponent onInventoryItemClickFunction={inventorySetSelected} costMultiplier={store.getSellMultiplier()} forceRefreshKey={forceRefreshKey}/>
         </div>
       </>
     }

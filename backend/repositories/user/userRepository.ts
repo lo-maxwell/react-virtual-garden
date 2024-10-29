@@ -7,6 +7,8 @@ import User, { UserEntity } from "@/models/user/User";
 import { PoolClient } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
 import levelRepository from "../level/levelRepository";
+import actionHistoryRepository from "./actionHistoryRepository";
+import itemHistoryRepository from "./itemHistoryRepository";
 
 class UserRepository {
 
@@ -15,9 +17,17 @@ class UserRepository {
 			throw new Error(`Invalid types while creating User from UserEntity`);
 		}
 		//TODO: Fetches all relevant data from database and uses it to construct user
-		let level = await levelRepository.getLevelSystemByOwnerId(userEntity.id, "user");
+
+		// Gather all promises
+		const levelPromise = levelRepository.getLevelSystemByOwnerId(userEntity.id, "user");
+		const itemHistoryPromise = itemHistoryRepository.makeItemHistoryListObject(userEntity.id);
+		const actionHistoryPromise = actionHistoryRepository.makeActionHistoryListObject(userEntity.id);
+
+		// Wait for all promises to resolve
+		const [levelResult, itemHistory, actionHistory] = await Promise.all([levelPromise, itemHistoryPromise, actionHistoryPromise]);
+
 		let levelInstance;
-		if (!level) {
+		if (!levelResult) {
 			//Creates a new level system in database if not found
 			const levelSystem = await levelRepository.createLevelSystem(userEntity.id, 'user', new LevelSystem(uuidv4()));
 			if (!levelSystem) {
@@ -25,11 +35,10 @@ class UserRepository {
 			}
 			levelInstance = levelRepository.makeLevelSystemObject(levelSystem);
 		} else {
-			levelInstance = levelRepository.makeLevelSystemObject(level);
+			levelInstance = levelRepository.makeLevelSystemObject(levelResult);
 		} 
+		
 
-		let itemHistory = new ItemHistoryList();
-		let actionHistory = new ActionHistoryList();
 		let toolbox = new Toolbox();
 		return new User(userEntity.id, userEntity.username, userEntity.icon, levelInstance, itemHistory, actionHistory, toolbox);
 	}

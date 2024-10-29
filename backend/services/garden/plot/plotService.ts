@@ -4,6 +4,7 @@ import inventoryItemRepository from "@/backend/repositories/items/inventoryItem/
 import placedItemRepository from "@/backend/repositories/items/placedItem/placedItemRepository";
 import inventoryRepository from "@/backend/repositories/itemStore/inventory/inventoryRepository";
 import levelRepository from "@/backend/repositories/level/levelRepository";
+import userRepository from "@/backend/repositories/user/userRepository";
 import { Plot, PlotEntity } from "@/models/garden/Plot";
 import { Blueprint } from "@/models/items/inventoryItems/Blueprint";
 import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
@@ -22,16 +23,22 @@ import { stringToBigIntNumber } from "@/models/utility/BigInt";
 import { PoolClient } from "pg";
 import { v4 as uuidv4 } from 'uuid';
 import { transactionWrapper } from "../../utility/utility";
+import { actionHistoryFactory } from "@/models/user/history/actionHistory/ActionHistoryFactory";
+import ItemHistory from "@/models/user/history/itemHistory/ItemHistory";
+import actionHistoryRepository from "@/backend/repositories/user/actionHistoryRepository";
+import itemHistoryRepository from "@/backend/repositories/user/itemHistoryRepository";
+
 
 /**
  * Attempts to plant a seed, removing the respective seed item from the inventory.
  * @plotId the plot to add the item to
  * @inventoryId the inventory to remove the seed from
- * @inventoryItemId the seed item
+ * @inventoryItemIdentifier the seed id
+ * @userId the user to verify
  * @client if null, creates a new client
  * @returns an object containing the modified level system, plot, and inventoryItem on success (or throws error)
  */
-export async function plantSeed(plotId: string, inventoryId: string, inventoryItemId: string, client?: PoolClient): Promise<boolean> {
+export async function plantSeed(plotId: string, inventoryId: string, inventoryItemIdentifier: string, userId: string, client?: PoolClient): Promise<boolean> {
 	//Can put validation/business logic here
 	//We always check based on current time
 	const currentTime = Date.now();
@@ -43,7 +50,7 @@ export async function plantSeed(plotId: string, inventoryId: string, inventoryIt
 			plotRepository.getPlotById(plotId),
 			inventoryRepository.getInventoryById(inventoryId),
 			placedItemRepository.getPlacedItemByPlotId(plotId),
-			inventoryItemRepository.getInventoryItemById(inventoryItemId)
+			inventoryItemRepository.getInventoryItemByOwnerId(inventoryId, inventoryItemIdentifier)
 		]);
 
 		// Destructure the results for easier access
@@ -60,7 +67,7 @@ export async function plantSeed(plotId: string, inventoryId: string, inventoryIt
 			throw new Error(`Could not find placedItem matching plot id ${plotId}`);
 		}
 		if (inventoryItemResult.status === 'rejected' || inventoryItemResult.value === null) {
-			throw new Error(`Could not find inventoryItem matching id ${inventoryItemId}`);
+			throw new Error(`Could not find inventoryItem matching identifier ${inventoryItemIdentifier}`);
 		}
 
 		// Extract the resolved values
@@ -113,11 +120,12 @@ export async function plantSeed(plotId: string, inventoryId: string, inventoryIt
  * Attempts to place a decoration, removing the respective blueprint item from the inventory.
  * @plotId the plot to add the item to
  * @inventoryId the inventory to remove the blueprint from
- * @inventoryItemId the blueprint item
+ * @inventoryItemIdentifier the blueprint id
+ * @userId the user to verify with, and update history for
  * @client if null, creates a new client
  * @returns an object containing the modified level system, plot, and inventoryItem on success (or throws error)
  */
-export async function placeDecoration(plotId: string, inventoryId: string, inventoryItemId: string, client?: PoolClient): Promise<boolean> {
+export async function placeDecoration(plotId: string, inventoryId: string, inventoryItemIdentifier: string, userId: string, client?: PoolClient): Promise<boolean> {
 	//Can put validation/business logic here
 	//We always check based on current time
 	const currentTime = Date.now();
@@ -129,7 +137,7 @@ export async function placeDecoration(plotId: string, inventoryId: string, inven
 			plotRepository.getPlotById(plotId),
 			inventoryRepository.getInventoryById(inventoryId),
 			placedItemRepository.getPlacedItemByPlotId(plotId),
-			inventoryItemRepository.getInventoryItemById(inventoryItemId)
+			inventoryItemRepository.getInventoryItemByOwnerId(inventoryId, inventoryItemIdentifier)
 		]);
 
 		// Destructure the results for easier access
@@ -146,7 +154,7 @@ export async function placeDecoration(plotId: string, inventoryId: string, inven
 			throw new Error(`Could not find placedItem matching plot id ${plotId}`);
 		}
 		if (inventoryItemResult.status === 'rejected' || inventoryItemResult.value === null) {
-			throw new Error(`Could not find inventoryItem matching id ${inventoryItemId}`);
+			throw new Error(`Could not find inventoryItem matching identifier ${inventoryItemIdentifier}`);
 		}
 
 		// Extract the resolved values
@@ -188,6 +196,24 @@ export async function placeDecoration(plotId: string, inventoryId: string, inven
 		await plotRepository.setPlotDetails(plotId, currentTime, 0, client);
 		await placedItemRepository.replacePlacedItemByPlotId(plotId, decorationItemTemplate.id, '', client);
 
+		//histories are updated
+		//action histories
+		//decoration: all		
+		//decoration: category
+		// decorations don't have an all category right now
+		// const decorationAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(blueprintItemTemplate.subtype, 'all', 'placed', 1); // Updated to 'picked'
+		// if (!decorationAllHistory) throw new Error(`Could not create action history from identifier category all`);
+		const decorationCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(ItemSubtypes.DECORATION.name, blueprintItemTemplate.category, 'placed', 1); // Updated to 'picked'
+		if (!decorationCategoryHistory) throw new Error(`Could not create action history from identifier category ${blueprintItemTemplate.category}`);
+		
+		// await actionHistoryRepository.addActionHistory(userId, decorationAllHistory, client);
+		
+		await actionHistoryRepository.addActionHistory(userId, decorationCategoryHistory, client);
+	
+		//specific item history
+		const itemHistory = new ItemHistory(uuidv4(), blueprintItemTemplate, 1);
+		
+		await itemHistoryRepository.addItemHistory(userId, itemHistory, client);	
 		
 		return true;
 	} 
@@ -209,13 +235,15 @@ interface harvestPlotObjects {
  * Gains xp on success.
  * @plotId the plot to remove the item from
  * @inventoryId the inventory to add the harvested item to
+ * @levelSystemId the level system to add xp to
+ * @userId the user to grab history from, and verify ownership
  * @numHarvests the number of harvests to attempt
  * @replacementItem a placedItemDetailsEntity to replace the plot if its usesRemaining drop to 0, defaults to ground
  * @instantHarvestKey if matches the key in the environment, ignores harvest timers
  * @client if null, creates a new client
  * @returns an object containing the harvested item on success (or throws error)
  */
-export async function harvestPlot(plotId: string, inventoryId: string, levelSystemId: string, numHarvests: number, replacementItem?: PlacedItemDetailsEntity, instantHarvestKey?: string, client?: PoolClient): Promise<InventoryItemEntity> {
+export async function harvestPlot(plotId: string, inventoryId: string, levelSystemId: string, userId: string, numHarvests: number, replacementItem?: PlacedItemDetailsEntity, instantHarvestKey?: string, client?: PoolClient): Promise<InventoryItemEntity> {
 	//Can put validation/business logic here
 	//We always check based on current time
 	const currentTime = Date.now();
@@ -229,11 +257,12 @@ export async function harvestPlot(plotId: string, inventoryId: string, levelSyst
 			plotRepository.getPlotById(plotId),
 			inventoryRepository.getInventoryById(inventoryId),
 			levelRepository.getLevelSystemById(levelSystemId),
-			placedItemRepository.getPlacedItemByPlotId(plotId)
+			placedItemRepository.getPlacedItemByPlotId(plotId),
+			userRepository.getUserById(userId)
 		]);
 
 		// Destructure the results for easier access
-		const [plotResult, inventoryResult, levelSystemResult, placedItemResult] = results;
+		const [plotResult, inventoryResult, levelSystemResult, placedItemResult, userResult] = results;
 
 		// Check for errors in each promise and handle accordingly
 		if (plotResult.status === 'rejected' || plotResult.value === null) {
@@ -243,10 +272,13 @@ export async function harvestPlot(plotId: string, inventoryId: string, levelSyst
 			throw new Error(`Could not find inventory matching id ${inventoryId}`);
 		}
 		if (levelSystemResult.status === 'rejected' || levelSystemResult.value === null) {
-			throw new Error(`Could not find levelsystem matching id ${levelSystemId}`);
+			throw new Error(`Could not find levelsystem matching user id ${levelSystemId}`);
 		}
 		if (placedItemResult.status === 'rejected' || placedItemResult.value === null) {
 			throw new Error(`Could not find placedItem matching plot id ${plotId}`);
+		}
+		if (userResult.status === 'rejected' || userResult.value === null) { 
+			throw new Error(`Could not find user matching id ${userId}`);
 		}
 
 		// Extract the resolved values
@@ -254,6 +286,7 @@ export async function harvestPlot(plotId: string, inventoryId: string, levelSyst
 		const inventoryEntity = inventoryResult.value;
 		const levelSystemEntity = levelSystemResult.value;
 		const placedItemEntity = placedItemResult.value;
+		const userEntity = userResult.value; // {{ edit_4 }}
 		const plotItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier);
 		if (!plotItemTemplate || plotItemTemplate.subtype !== ItemSubtypes.PLANT.name) {
 			throw new Error(`Could not find valid plant matching identifier ${placedItemEntity.identifier}`);
@@ -270,7 +303,7 @@ export async function harvestPlot(plotId: string, inventoryId: string, levelSyst
 		}
 		
 		const instantGrow = process.env.INSTANT_HARVEST_KEY === instantHarvestKey && process.env.INSTANT_HARVEST_KEY !== undefined;
-		const REAL_TIME_FUDGE = 1000; //Allow for 1s discrepancy between harvest times
+		const REAL_TIME_FUDGE = 2000; //Allow for 1s discrepancy between harvest times
 
 		//Check if harvest is valid
 		if (!instantGrow && !Plot.canHarvest(plotItemTemplate, plantTime - REAL_TIME_FUDGE, plotEntity.uses_remaining, currentTime)) {
@@ -309,6 +342,26 @@ export async function harvestPlot(plotId: string, inventoryId: string, levelSyst
 		if (!result) {
 			throw new Error(`Could not add harvested item ${harvestedItem.getInventoryItemId()} to inventory`);
 		}
+
+		//histories are updated
+		//action histories
+		//plant: all		
+		//plant: category
+		const harvestAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(plotItemTemplate.subtype, 'all', 'harvested', 1);
+		if (!harvestAllHistory) throw new Error(`Could not create action history from identifier category all`);
+		const harvestCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(plotItemTemplate.subtype, plotItemTemplate.category, 'harvested', 1);
+		if (!harvestCategoryHistory) throw new Error(`Could not create action history from identifier category ${plotItemTemplate.category}`);
+		
+		await actionHistoryRepository.addActionHistory(userId, harvestAllHistory, client);
+		
+		await actionHistoryRepository.addActionHistory(userId, harvestCategoryHistory, client);
+	
+		//specific item history
+		const itemHistory = new ItemHistory(uuidv4(), plotItemTemplate, 1);
+		await itemHistoryRepository.addItemHistory(userId, itemHistory, client);	
+		
+		//Needs to return the created histories as well (?)
+		//Or we need to hack it so we can update with anything and fetch correct later
 		return result;
 	} 
 
@@ -321,11 +374,12 @@ export async function harvestPlot(plotId: string, inventoryId: string, levelSyst
  * Attempts to pickup a decoration, removing the item from it and adding it to the inventory.
  * @plotId the plot to remove the item from
  * @inventoryId the inventory to add the blueprint item to
+ * @userId the user to verify with, and update histories for
  * @replacementItem a placedItemDetailsEntity to replace the plot, defaults to ground
  * @client if null, creates a new client
  * @returns an object containing the blueprint item on success (or throws error)
  */
-export async function pickupDecoration(plotId: string, inventoryId: string, replacementItem?: PlacedItemDetailsEntity, client?: PoolClient): Promise<InventoryItemEntity> {
+export async function pickupDecoration(plotId: string, inventoryId: string, userId: string, replacementItem?: PlacedItemDetailsEntity, client?: PoolClient): Promise<InventoryItemEntity> {
 	//Can put validation/business logic here
 	//We always check based on current time
 	const currentTime = Date.now();
@@ -400,4 +454,6 @@ export async function pickupDecoration(plotId: string, inventoryId: string, repl
 	// Call the transactionWrapper with the innerFunction and appropriate arguments
 	return transactionWrapper(innerFunction, 'PickupDecoration', client);
 }
+
+
 

@@ -1,11 +1,12 @@
 import ActionHistory from "./ActionHistory";
-import { ActionHistoryRepository } from "./ActionHistoryRepository";
+import { ActionHistoryMetadataRepository } from "./ActionHistoryMetadataRepository";
+import { v4 as uuidv4 } from 'uuid';
 
 class ActionHistoryFactory {
-	repository: ActionHistoryRepository;
+	repository: ActionHistoryMetadataRepository;
 
 	constructor() {
-		this.repository = new ActionHistoryRepository();
+		this.repository = new ActionHistoryMetadataRepository();
 	}
 
 	/**
@@ -16,7 +17,7 @@ class ActionHistoryFactory {
 	 */
 	createActionHistoryByName(name: string, quantity: number): ActionHistory | null {
 		const histories = Object.values(this.repository.histories).flat().filter(history => history.name === name);
-		if (histories.length === 1) return new ActionHistory(histories[0].name, histories[0].description, histories[0].identifier, quantity);
+		if (histories.length === 1) return new ActionHistory(uuidv4(), histories[0].name, histories[0].description, histories[0].identifier, quantity);
 		else if (histories.length === 0) return null;
 		else {
 			console.error('Error: found multiple histories with the same name!');
@@ -45,7 +46,7 @@ class ActionHistoryFactory {
 	 */
 	 createActionHistoryByIdentifierString(identifier: string, quantity: number): ActionHistory | null {
 		const histories = Object.values(this.repository.histories).flat().filter(history => history.identifier === identifier);
-		if (histories.length === 1) return new ActionHistory(histories[0].name, histories[0].description, histories[0].identifier, quantity);		
+		if (histories.length === 1) return new ActionHistory(uuidv4(), histories[0].name, histories[0].description, histories[0].identifier, quantity);		
 		else if (histories.length === 0) return null;
 		else {
 			console.error('Error: found multiple histories with the same name!');

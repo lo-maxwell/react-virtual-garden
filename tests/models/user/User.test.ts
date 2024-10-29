@@ -31,7 +31,7 @@ test('Should Initialize User Object', () => {
 
 test('Should Create User Object From PlainObject', () => {
 	const testActionHistory = actionHistoryFactory.createActionHistoryByName("Total Plants Harvested", 1);
-	const user = new User('00000000-0000-0000-0000-000000000000', 'test', '', new LevelSystem(uuidv4(), 100), new ItemHistoryList([new ItemHistory(placeholderItemTemplates.getPlacedItemTemplateByName('apple')!, 1)]), new ActionHistoryList([testActionHistory!]), new Toolbox());
+	const user = new User('00000000-0000-0000-0000-000000000000', 'test', '', new LevelSystem(uuidv4(), 100), new ItemHistoryList([new ItemHistory(uuidv4(), placeholderItemTemplates.getPlacedItemTemplateByName('apple')!, 1)]), new ActionHistoryList([testActionHistory!]), new Toolbox());
 	const serializedUser = JSON.stringify(user.toPlainObject());
 	const parsedUser = User.fromPlainObject(JSON.parse(serializedUser));
 	expect(parsedUser).toBeTruthy();

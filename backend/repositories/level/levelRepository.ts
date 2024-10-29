@@ -53,8 +53,6 @@ class LevelRepository {
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
 		return result.rows[0];
-		// const instance = makeLevelSystemObject(result.rows[0]);
-		// return instance;
 	}
 
 	/**

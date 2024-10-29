@@ -3,7 +3,7 @@ import ItemStoreComponent from "@/components/itemStore/itemStore";
 import { useStore } from "@/app/hooks/contexts/StoreContext";
 import { useEffect, useState } from "react";
 
-const StoreComponent = ({onInventoryItemClickFunction}: {onInventoryItemClickFunction: (arg: any) => void}) => {
+const StoreComponent = ({onInventoryItemClickFunction, forceRefreshKey}: {onInventoryItemClickFunction: (arg: any) => void, forceRefreshKey: number}) => {
 
 	const {store} = useStore();
 
@@ -65,7 +65,7 @@ const StoreComponent = ({onInventoryItemClickFunction}: {onInventoryItemClickFun
 
 	return (
 		<>
-		<div className="w-[80%]">
+		<div className="w-[80%]" key={forceRefreshKey}>
 			<div className="font-bold text-3xl">{store.getStoreName()}</div>
 			<div>{RenderStoreDiscountString()}</div>
 			<ItemStoreComponent itemStore={store} onInventoryItemClickFunction={onInventoryItemClickFunction} costMultiplier={store.getBuyMultiplier()} maxHeightPercentage={60}/>

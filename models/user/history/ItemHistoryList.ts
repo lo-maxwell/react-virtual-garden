@@ -54,13 +54,13 @@ export class ItemHistoryList {
 		const toReturn = {
 			itemHistories: this.history.map(itemHistory => {
 				return itemHistory.toPlainObject();
-			}) // Convert each InventoryItem to a plain object
+			}) // Convert each itemHistory to a plain object
 		};
 		return toReturn;
 	} 
 
 	/**
-	 * @returns a copy of the inventory items within the list.
+	 * @returns a copy of the item histories within the list.
 	 */
 	getAllHistories(): ItemHistory[] {
 		return this.history.slice();

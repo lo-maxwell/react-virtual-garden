@@ -263,6 +263,8 @@
   * InventoryItem
   * Store
   * StoreItem
+  * ItemHistory
+  * ActionHistory
   * Contains various functions to interact with database and send/receive data from api routes
 
 ### Create X Service functions should take in the model and use it to produce the entire object in database
@@ -278,18 +280,16 @@
   * PickupDecoration
   * Expand/Shrink Garden Rows
   * Expand/Shrink Garden Columns
+  * Buy/Sell Items
+  * Update username/icon
+
+### Added cloud save enable/disable button (currently disabled for production)
+
+
 
 TODO:
 
-Combine providers into 1 file and wrap layout
-
-Combine itemhistories
-
-Make itemList query based on item identifier, not name
-
-Put transactionWrappers around other service functions
 Validate garden bounds for plant/harvest
-Write plantAll and harvestAll to not query the same data multiple times
 
 Change mouseover color for inventoryItems
 
@@ -304,8 +304,6 @@ Make Garden more interactive than plant all -> harvest
 Add level requirement to plants/seeds
 
 Add way to delete in progress plants, some sort of select delete tool
-
-Add multiple harvests to some plants
 
 Add crop rotation - either assign plant families or just individual plants + soil health; low soil health -> cannot be fertilized for a duration + yield reduction, high soil health -> free stronger fertilizer
 
@@ -328,10 +326,6 @@ Grow zombies/other creatures - randomly move around and give bonuses (automatic 
 User almanac - displays how many of each plant were grown, some extra details about them
 
 User sends harvest plant request alongside their user auth token -> backend checks the token matches the user (or fetches the user that matches that token), attempts to perform the harvest plant request, sends back success/failure state -> frontend updates display based on result
-
-If the user hacks the api and sends multiple harvest/plant requests, the backend needs to verify that it is disallowed and fail
-
-Can use begin/commit/rollback in database, along with SELECT * FOR UPDATE for row level locking
 
 auth0 provides a user id, which we need to stick into the sql database
 

@@ -1,6 +1,7 @@
 import ActionHistory from "@/models/user/history/actionHistory/ActionHistory";
 import { actionHistoryFactory } from "@/models/user/history/actionHistory/ActionHistoryFactory";
 import { ActionHistoryList } from "@/models/user/history/ActionHistoryList";
+import { v4 as uuidv4 } from 'uuid';
 
 let allHistory: ActionHistory;
 let onionHistory: ActionHistory;
@@ -93,7 +94,7 @@ test('Should Add Existing History to ActionHistoryList', () => {
 })
 
 test('Should Not Add Invalid History', () => {
-	const invalidHistory = new ActionHistory("Total Plants Harvested", "The number of plants harvested by this user", "plant:all:harvested", -100);
+	const invalidHistory = new ActionHistory(uuidv4(), "Total Plants Harvested", "The number of plants harvested by this user", "plant:all:harvested", -100);
 
 	const addResponse = list.addActionHistory(invalidHistory);
 	expect(addResponse.isSuccessful()).toBe(false);
@@ -103,17 +104,17 @@ test('Should Not Add Invalid History', () => {
 })
 
 test('Should Directly Update History to ActionHistoryList', () => {
-	const updateResponse = list.updateActionHistory(new ActionHistory("Total Plants Harvested", "The number of plants harvested by this user", "plant:all:harvested", 15));
+	const updateResponse = list.updateActionHistory(new ActionHistory(uuidv4(), "Total Plants Harvested", "The number of plants harvested by this user", "plant:all:harvested", 15));
 	expect(updateResponse.isSuccessful()).toBe(true);
 	expect(updateResponse.payload?.getQuantity()).toBe(25);
 	expect(list.getHistoryByIdentifierString("plant:all:harvested").payload?.getQuantity()).toBe(25);
 })
 
 test('Should Not Update Invalid History', () => {
-	const updateResponse = list.updateActionHistory(new ActionHistory("Total Plants Harvested", "", "plant:all:harvested", 100));
+	const updateResponse = list.updateActionHistory(new ActionHistory(uuidv4(), "Total Plants Harvested", "", "plant:all:harvested", 100));
 	expect(updateResponse.isSuccessful()).toBe(false);
 	expect(list.getHistoryByIdentifierString("plant:all:harvested").payload?.getQuantity()).toBe(10);
-	const updateResponse2 = list.updateActionHistory(new ActionHistory("Total Plants Harvested", "", "", 100));
+	const updateResponse2 = list.updateActionHistory(new ActionHistory(uuidv4(), "Total Plants Harvested", "", "", 100));
 	expect(updateResponse2.isSuccessful()).toBe(false);
 	expect(list.getHistoryByIdentifierString("plant:all:harvested").payload?.getQuantity()).toBe(10);
 })

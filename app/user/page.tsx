@@ -16,6 +16,8 @@ import { Store } from "@/models/itemStore/store/Store";
 import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { saveStore } from "@/utils/localStorage/store";
+import { useAccount } from "../hooks/contexts/AccountContext";
+import { useEffect, useState } from "react";
 
 const UserPage = () => {
   
@@ -24,8 +26,10 @@ const UserPage = () => {
     const { inventory } = useInventory();
     const { store } = useStore();
     const { garden } = useGarden();
+    const { account, cloudSave, toggleCloudSave } = useAccount();
+    // const [displayCloudSave, setDisplayCloudSave] = useState(cloudSave);
 
-    if (!user) {
+    if (!user || !account) {
       return <></>;
     }
 
@@ -55,7 +59,6 @@ const UserPage = () => {
         console.log('Successfully posted:', result);
       } catch (error) {
         console.error(error);
-      } finally {
       }
     }
 
@@ -85,7 +88,6 @@ const UserPage = () => {
         console.log('Successfully updated:', result);
       } catch (error) {
         console.error(error);
-      } finally {
       }
     }
 
@@ -118,11 +120,17 @@ const UserPage = () => {
         saveStore(Store.fromPlainObject(result.plainStoreObject));
       } catch (error) {
         console.error(error);
-      } finally {
       }
     }
 
     const onIconChangeHandler = async (icon: Icon) => {
+      handleChangeIcon(icon);
+
+      // Terminate early before api call
+      if (!cloudSave) {
+        return;
+      }
+
       try {
         const data = {
           userId: user.getUserId(),
@@ -145,15 +153,20 @@ const UserPage = () => {
         // Parsing the response data
         const result = await response.json();
         console.log('Successfully posted:', result);
-        handleChangeIcon(icon);
       } catch (error) {
         console.error(error);
-      } finally {
       }
       return;
     }
 
     const onUsernameChangeHandler = async (username: string) => {
+      handleChangeUsername(username);
+
+      // Terminate early before api call
+      if (!cloudSave) {
+        return;
+      }
+
       try {
         const data = {
           userId: user.getUserId(),
@@ -176,12 +189,14 @@ const UserPage = () => {
         // Parsing the response data
         const result = await response.json();
         console.log('Successfully posted:', result);
-        handleChangeUsername(username);
       } catch (error) {
         console.error(error);
-      } finally {
       }
       return;
+    }
+
+    const handleToggleCloudSaveButton = () => {
+      toggleCloudSave();
     }
 
     return <>
@@ -199,6 +214,7 @@ const UserPage = () => {
             <div><button onClick={handleCreateAccountButton}> Create user in Database </button></div>
             <div><button onClick={handleSaveAccountButton}> Save user to Database </button></div>
             <div><button onClick={handleFetchAccountButton}> Fetch user from Database </button></div>
+            <div><button onClick={handleToggleCloudSaveButton}> {`Toggle Cloud Saving ${cloudSave ? '(Currently on)' : '(Currently off)'}`} </button></div>
           </div>
 
           <div className={`w-2/3`}>

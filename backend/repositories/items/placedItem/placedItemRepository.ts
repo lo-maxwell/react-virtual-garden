@@ -1,4 +1,5 @@
 import { pool, query } from "@/backend/connection/db";
+import { transactionWrapper } from "@/backend/services/utility/utility";
 import { PlacedItemEntity, PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
@@ -64,6 +65,25 @@ class PlacedItemRepository {
 	}
 
 	/**
+	 * Given an array of plot ids, returns the row data of the respective placed items
+	 * @plotIds the ids of the plots in the database
+	 */
+	async getPlacedItemsByPlotIds(plotIds: string[]): Promise<PlacedItemEntity[]> {
+		if (plotIds.length === 0) {
+			return []; // Return an empty array if no plot IDs are provided
+		}
+
+		// Create a parameterized query with placeholders for each plot ID
+		const placeholders = plotIds.map((_, index) => `$${index + 1}`).join(', ');
+		const queryText = `SELECT id, owner, identifier, status FROM placed_items WHERE owner IN (${placeholders})`;
+
+		const result = await query<PlacedItemEntity>(queryText, plotIds);
+		
+		// If no rows are returned, return an empty array
+		return result.rows.length > 0 ? result.rows : [];
+	}
+
+	/**
 	 * Begins a transaction if there is not already one. Creates a new placedItem row.
 	 * On error, rolls back.
 	 * @plotId the id of the owner (plot) of this placedItem. If the owner cannot be found, fails.
@@ -72,15 +92,7 @@ class PlacedItemRepository {
 	 * @returns a PlacedItemEntity with the corresponding data if success, null if failure (or throws error)
 	 */
 	async createPlacedItem(plotId: string, placedItem: PlacedItem, client?: PoolClient): Promise<PlacedItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-
+		const innerFunction = async (client: PoolClient): Promise<PlacedItemEntity> => {
 			const existingItemResult = await client.query<PlacedItemEntity>(
 				`SELECT id, owner, identifier, status FROM placed_items 
 				WHERE id = $1 OR owner = $2`, 
@@ -90,7 +102,7 @@ class PlacedItemRepository {
 			if (existingItemResult.rows.length > 0) {
 				return existingItemResult.rows[0];
 			}
-			
+
 			const result = await client.query<PlacedItemEntity>(
 				`INSERT INTO placed_items (id, owner, identifier, status) 
 				VALUES ($1, $2, $3, $4)
@@ -105,26 +117,10 @@ class PlacedItemRepository {
 				throw new Error('There was an error creating the placedItem');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-
-
 			return result.rows[0];
-			// Return the created PlacedItem as an instance
-			// const instance = makePlacedItemObject(result.rows[0]);
-			// return instance;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error creating placedItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		};
+
+		return transactionWrapper(innerFunction, 'createPlacedItem', client);
 	}
 
 	/**
@@ -135,22 +131,8 @@ class PlacedItemRepository {
 	 * @returns a new PlacedItemEntity with the corresponding data if success, null if failure (or throws error)
 	*/
 	async createOrUpdatePlacedItem(plotId: string, item: PlacedItem, client?: PoolClient): Promise<PlacedItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-			//TODO: Fix this
-			// owner check is so that we don't have 2 placedItems mapped to the same plot
-			// but we should really delete the old one instead of modifying it
-			// id check is to make sure this plot doesn't already exist,
-			// this is fine but it is technically possible to fetch 2 items at once 
-			// with this query, which will result in unexpected outputs
-			// Check if the placedItem already exists
-			const existingPlacedItemResult = await client.query<{id: string}>(
+		const innerFunction = async (client: PoolClient): Promise<PlacedItemEntity> => {
+			const existingPlacedItemResult = await client.query<{ id: string }>(
 				'SELECT id FROM placed_items WHERE id = $1 OR owner = $2',
 				[item.getPlacedItemId(), plotId]
 			);
@@ -162,31 +144,19 @@ class PlacedItemRepository {
 				result = await this.replacePlacedItemById(existingPlacedItemResult.rows[0].id, item.itemData.id, item.getStatus(), client);
 				if (!result) {
 					throw new Error(`Error updating placedItem with id ${item.getPlacedItemId()}`);
-				} 
+				}
 			} else {
 				console.error(`creating placedItem for plot id ${plotId}`);
 				result = await this.createPlacedItem(plotId, item, client);
 				if (!result) {
 					throw new Error(`Error creating placedItem with id ${item.getPlacedItemId()}`);
-				} 
-			}
-
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
+				}
 			}
 
 			return result;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error creating plot:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		};
+
+		return transactionWrapper(innerFunction, 'createOrUpdatePlacedItem', client);
 	}
 
 	/**
@@ -197,19 +167,11 @@ class PlacedItemRepository {
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
 	async replacePlacedItemById(id: string, newIdentifier: string, newStatus?: string, client?: PoolClient): Promise<PlacedItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-
+		const innerFunction = async (client: PoolClient): Promise<PlacedItemEntity> => {
 			if (!newStatus) {
 				newStatus = '';
 			}
-		
+
 			const placedItemResult = await client.query<PlacedItemEntity>(
 				`WITH updated AS (
 				   UPDATE placed_items 
@@ -221,8 +183,7 @@ class PlacedItemRepository {
 				 FROM placed_items
 				 WHERE id = $3;`,
 				[newIdentifier, newStatus, id]
-			  );
-
+			);
 
 			// Check if result is valid
 			if (!placedItemResult) {
@@ -233,22 +194,10 @@ class PlacedItemRepository {
 				console.warn(`No changes made for placedItem with id ${id}`);
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-			const updatedRow = placedItemResult.rows[0];
-			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating placedItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+			return placedItemResult.rows[0];
+		};
+
+		return transactionWrapper(innerFunction, 'replacePlacedItemById', client);
 	}
 
 	/**
@@ -259,46 +208,69 @@ class PlacedItemRepository {
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
 	async replacePlacedItemByPlotId(plotId: string, newIdentifier: string, newStatus?: string, client?: PoolClient): Promise<PlacedItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-
+		const innerFunction = async (client: PoolClient): Promise<PlacedItemEntity> => {
 			if (!newStatus) {
 				newStatus = '';
 			}
-		
+
 			const placedItemResult = await client.query<PlacedItemEntity>(
 				'UPDATE placed_items SET identifier = $1, status = $2 WHERE owner = $3 RETURNING id, owner, identifier, status',
 				[newIdentifier, newStatus, plotId]
-				);
-
+			);
 
 			// Check if result is valid
 			if (!placedItemResult || placedItemResult.rows.length === 0) {
 				throw new Error('There was an error updating the placedItem');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
+			return placedItemResult.rows[0];
+		};
+
+		return transactionWrapper(innerFunction, 'replacePlacedItemByPlotId', client);
+	}
+
+	/**
+	 * Sets the identifier of the placedItems, effectively changing the item. Uses row level locking.
+	 * @plotIds the ids of the owner (plot)
+	 * @newIdentifier the item template id
+	 * @newStatus the new status, defaults to empty string
+	 * @returns an object containing an array of successfully updated PlacedItemEntity and an array of errored plot IDs
+	 */
+	async replacePlacedItemsByPlotIds(plotIds: string[], newIdentifier: string, newStatus?: string, client?: PoolClient): Promise<{ updatedItems: PlacedItemEntity[], erroredPlotIds: string[] }> {
+		const innerFunction = async (client: PoolClient): Promise<{ updatedItems: PlacedItemEntity[], erroredPlotIds: string[] }> => {
+			if (!newStatus) {
+				newStatus = '';
 			}
-			const updatedRow = placedItemResult.rows[0];
-			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
+
+			const updatedItems: PlacedItemEntity[] = [];
+			const erroredPlotIds: string[] = [];
+
+			// Perform the bulk update
+			const placedItemResult = await client.query<PlacedItemEntity>(
+				'UPDATE placed_items SET identifier = $1, status = $2 WHERE owner = ANY($3) RETURNING *',
+				[newIdentifier, newStatus, plotIds]
+			);
+
+			// Collect updated plot IDs
+			const updatedItemIds = placedItemResult.rows.map(item => item.owner);
+
+			// Identify errored plot IDs (those that were not updated)
+			for (const plotId of plotIds) {
+				if (!updatedItemIds.includes(plotId)) {
+					erroredPlotIds.push(plotId); // If the ID is not in the updated results, consider it errored
+				} else {
+					const updatedItem = placedItemResult.rows.find(item => item.owner === plotId);
+					if (updatedItem) {
+						updatedItems.push(updatedItem); // Add the successfully updated item
+					}
+				}
 			}
-			console.error('Error updating placedItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+
+			return { updatedItems, erroredPlotIds };
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'replacePlacedItemsByPlotIds', client);
 	}
 
 
@@ -309,42 +281,21 @@ class PlacedItemRepository {
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
 	async setPlacedItemStatusById(id: string, newStatus: string, client?: PoolClient): Promise<PlacedItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-		
+		const innerFunction = async (client: PoolClient): Promise<PlacedItemEntity> => {
 			const placedItemResult = await client.query<PlacedItemEntity>(
 				'UPDATE placed_items SET status = $1 WHERE id = $2 RETURNING id, owner, identifier, status',
 				[newStatus, id]
-				);
-
+			);
 
 			// Check if result is valid
 			if (!placedItemResult || placedItemResult.rows.length === 0) {
 				throw new Error('There was an error updating the placedItem');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-			const updatedRow = placedItemResult.rows[0];
-			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating placedItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+			return placedItemResult.rows[0];
+		};
+
+		return transactionWrapper(innerFunction, 'setPlacedItemStatusById', client);
 	}
 
 	/**
@@ -354,42 +305,21 @@ class PlacedItemRepository {
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
 	async setPlacedItemStatusByPlotId(plotId: string, newStatus: string, client?: PoolClient): Promise<PlacedItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-		
+		const innerFunction = async (client: PoolClient): Promise<PlacedItemEntity> => {
 			const placedItemResult = await client.query<PlacedItemEntity>(
 				'UPDATE placed_items SET status = $1 WHERE owner = $2 RETURNING id, owner, identifier, status',
 				[newStatus, plotId]
-				);
-
+			);
 
 			// Check if result is valid
 			if (!placedItemResult || placedItemResult.rows.length === 0) {
 				throw new Error('There was an error updating the placedItem');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-			const updatedRow = placedItemResult.rows[0];
-			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating placedItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+			return placedItemResult.rows[0];
+		};
+
+		return transactionWrapper(innerFunction, 'setPlacedItemStatusByPlotId', client);
 	}
 
 	/**
@@ -398,36 +328,20 @@ class PlacedItemRepository {
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
 	async deletePlacedItemById(id: string, client?: PoolClient): Promise<PlacedItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-
+		const innerFunction = async (client: PoolClient): Promise<PlacedItemEntity> => {
 			const deleteResult = await client.query<PlacedItemEntity>(
 				'DELETE FROM placed_items WHERE id = $1 RETURNING id, owner, identifier, status',
 				[id]
 			);
-		
-			if (shouldReleaseClient) {
-				await client.query('COMMIT');
+
+			if (deleteResult.rows.length === 0) {
+				throw new Error('No placedItem found to delete');
 			}
-		
+
 			return deleteResult.rows[0];
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error deleting placedItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		};
+
+		return transactionWrapper(innerFunction, 'deletePlacedItemById', client);
 	}
 
 
@@ -437,36 +351,20 @@ class PlacedItemRepository {
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
 	async deletePlacedItemByPlotId(plotId: string, client?: PoolClient): Promise<PlacedItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-
+		const innerFunction = async (client: PoolClient): Promise<PlacedItemEntity> => {
 			const deleteResult = await client.query<PlacedItemEntity>(
 				'DELETE FROM placed_items WHERE owner = $1 RETURNING id, owner, identifier, status',
 				[plotId]
 			);
-		
-			if (shouldReleaseClient) {
-				await client.query('COMMIT');
+
+			if (deleteResult.rows.length === 0) {
+				throw new Error('No placedItem found to delete');
 			}
-		
+
 			return deleteResult.rows[0];
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error deleting placedItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		};
+
+		return transactionWrapper(innerFunction, 'deletePlacedItemByPlotId', client);
 	}
 
 	/**
@@ -477,16 +375,8 @@ class PlacedItemRepository {
 	 * @returns a PlacedItemEntity with the new data on success (or throws error)
 	 */
 	async deletePlacedItemFromGarden(gardenId: string, rowIndex: number, columnIndex: number, client?: PoolClient): Promise<PlacedItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-
-			const existingPlotResult = await client.query<{plot_id: string}>(
+		const innerFunction = async (client: PoolClient): Promise<PlacedItemEntity> => {
+			const existingPlotResult = await client.query<{ plot_id: string }>(
 				'SELECT id as plot_id FROM plots WHERE owner = $1 AND row_index = $2 and col_index = $3',
 				[gardenId, rowIndex, columnIndex]
 			);
@@ -499,23 +389,15 @@ class PlacedItemRepository {
 				'DELETE FROM placed_items WHERE owner = $1 RETURNING id, owner, identifier, status',
 				[existingPlotResult.rows[0].plot_id]
 			);
-		
-			if (shouldReleaseClient) {
-				await client.query('COMMIT');
+
+			if (deleteResult.rows.length === 0) {
+				throw new Error('No placedItem found to delete');
 			}
-		
+
 			return deleteResult.rows[0];
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error deleting placedItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		};
+
+		return transactionWrapper(innerFunction, 'deletePlacedItemFromGarden', client);
 	}
 }
 

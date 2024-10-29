@@ -11,20 +11,18 @@ const ItemHistoryListComponent = ({}) => {
 			{histories.map((history, index) => {
 				if (history.getItemData().subtype === ItemSubtypes.PLANT.name) {
 					return (
-						<div key={history.getItemData().name}>
+						<div key={history.getItemData().name + index}>
 							{history.getItemData().name} {history.getItemData().icon}: {history.getQuantity()}
 						</div>
 					);
 				} else if (history.getItemData().subtype === ItemSubtypes.DECORATION.name) {
 					return (
-						<div key={history.getItemData().name}>
+						<div key={history.getItemData().name + index}>
 							{history.getItemData().name}: {history.getQuantity()}
 						</div>
 					);
 				} else {
-					return (
-						<></>
-					);
+					return null;
 				}
 			})}
 			</div>

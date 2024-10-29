@@ -3,13 +3,16 @@ import { InventoryItem, InventoryItemEntity } from "@/models/items/inventoryItem
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
-import { saveGarden } from "@/utils/localStorage/garden";
-import { saveInventory } from "@/utils/localStorage/inventory";
-import { saveUser } from "@/utils/localStorage/user";
+import { loadGarden, saveGarden } from "@/utils/localStorage/garden";
+import { loadInventory, saveInventory } from "@/utils/localStorage/inventory";
+import { loadUser, saveUser } from "@/utils/localStorage/user";
 import { useGarden } from "../contexts/GardenContext";
 import { useInventory } from "../contexts/InventoryContext";
 import { useSelectedItem } from "../contexts/SelectedItemContext";
 import { useUser } from "../contexts/UserContext";
+import { Garden } from "@/models/garden/Garden";
+import { Inventory } from "@/models/itemStore/inventory/Inventory";
+import User from "@/models/user/User";
 
 //contains static onclick functions for plot components
 export const usePlotActions = () => {
@@ -25,55 +28,71 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const plantSeed = (item: InventoryItem, plot: Plot) => {
-		const helper = async () => {
-
-			if (item.itemData.subtype != ItemSubtypes.SEED.name) {
-				setGardenMessage(` `);
-				return plot.getItem().itemData.icon;
-			}
-			try {
-				const data = {
-					inventoryId: inventory.getInventoryId(), 
-					inventoryItemId: item.getInventoryItemId()
-				}
-				// Making the PATCH request to your API endpoint
-				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/plant`, {
-				  method: 'PATCH',
-				  headers: {
-					'Content-Type': 'application/json',
-				  },
-				  body: JSON.stringify(data), // Send the data in the request body
-				});
-		  
-				// Check if the response is successful
-				if (!response.ok) {
-				  throw new Error('Failed to plant seed');
-				}
-		  
-				// Parsing the response data
-				const result = await response.json();
-				console.log('Successfully planted seed:', result);
-			  } catch (error) {
-				console.error(error);
-				setGardenMessage(` `);
-				return plot.getItem().itemData.icon;
-			  } finally {
-			  }
+		let originalGardenObject: any;
+		let originalInventoryObject: any;
+		let originalIcon: string;
+		const uiHelper = () => {
+			originalIcon = plot.getItem().itemData.icon;
+			originalGardenObject = garden.toPlainObject();
+			originalInventoryObject = inventory.toPlainObject();
+			// Optimistically update the local state
+			const originalItem = plot.getItem();
 			const placeItemResponse = plot.placeItem(inventory, item);
 			if (!placeItemResponse.isSuccessful()) {
 				setGardenMessage(` `);
-				return plot.getItem().itemData.icon; 
+				return {success: false, displayIcon: originalItem.itemData.icon};
 			}
 			updateInventoryForceRefreshKey();
 			if (item.getQuantity() <= 0) {
 				toggleSelectedItem(null);
 			}
+
 			saveInventory(inventory);
 			saveGarden(garden);
 			setGardenMessage(`Planted ${item.itemData.name}.`);
-			return plot.getItem().itemData.icon;
+			return {success: true, displayIcon: plot.getItem().itemData.icon};
 		}
-		return helper;
+
+		const apiHelper = async () => {
+			const originalItem = plot.getItem();
+			const data = {
+				inventoryId: inventory.getInventoryId(), 
+				inventoryItemIdentifier: item.itemData.id
+			};
+
+			try {
+				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/plant`, {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(data),
+				});
+				if (!response.ok) {
+					throw new Error('Failed to plant seed');
+				}
+				const result = await response.json();
+				console.log('Successfully planted seed:', result);
+				return {success: true, displayIcon: plot.getItem().itemData.icon};
+			} catch (error) {
+				console.error(error);
+				// Rollback the optimistic update
+				const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
+				if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
+				const rollbackInventory = Inventory.fromPlainObject(originalInventoryObject);
+				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
+				// plot.rollbackItem(originalItem);
+				console.warn(`There was an error planting a seed, rolled back to previous plot`);
+				setGardenMessage(`There was an error! Please refresh the page!`);
+				return {success: false, displayIcon: originalIcon};
+			}
+		}
+
+		const toReturn = {
+			uiHelper: uiHelper,
+			apiHelper: apiHelper
+		}
+		return toReturn;
 	}
 
 	/**
@@ -83,58 +102,66 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const placeDecoration = (item: InventoryItem, plot: Plot) => {
-		const helper = async () => {
-			if (item.itemData.subtype != ItemSubtypes.BLUEPRINT.name) {
-				setGardenMessage(` `);
-				return plot.getItem().itemData.icon;
-			}
-			try {
-				const data = {
-					inventoryId: inventory.getInventoryId(), 
-					inventoryItemId: item.getInventoryItemId()
-				}
-				// Making the PATCH request to your API endpoint
-				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/place`, {
-				  method: 'PATCH',
-				  headers: {
-					'Content-Type': 'application/json',
-				  },
-				  body: JSON.stringify(data), // Send the data in the request body
-				});
-		  
-				// Check if the response is successful
-				if (!response.ok) {
-				  throw new Error('Failed to place decoration');
-				}
-		  
-				// Parsing the response data
-				const result = await response.json();
-				console.log('Successfully placed decoration:', result);
-			  } catch (error) {
-				console.error(error);
-				setGardenMessage(` `);
-				return plot.getItem().itemData.icon;
-			  } finally {
-			  }
+		let originalGardenObject: any;
+		let originalInventoryObject: any;
+		let originalIcon: string;
+		const uiHelper = () => {
+			originalIcon = plot.getItem().itemData.icon;
+			originalGardenObject = garden.toPlainObject();
+			originalInventoryObject = inventory.toPlainObject();
+			// Optimistically update the local state
 			const placeItemResponse = plot.placeItem(inventory, item);
 			if (!placeItemResponse.isSuccessful()) {
 				setGardenMessage(` `);
-				return plot.getItem().itemData.icon; 
+				return {success: false, displayIcon: originalIcon};
 			}
 			updateInventoryForceRefreshKey();
-
-			const placedItem = placeItemResponse.payload.newItem as PlacedItem;
-			user.updateDecorationHistory(placedItem);
-			if (item.getQuantity() <= 0) {
-				toggleSelectedItem(null);
-			}
 			saveInventory(inventory);
 			saveGarden(garden);
-			saveUser(user);
-			setGardenMessage(`Placed ${placeItemResponse.payload.newItem.itemData.name}.`);
-			return plot.getItem().itemData.icon;
+			setGardenMessage(`Placed ${item.itemData.name}.`);
+			return {success: true, displayIcon: plot.getItem().itemData.icon};
 		}
-		return helper;
+
+		const apiHelper = async () => {
+			const originalItem = plot.getItem();
+
+			const data = {
+				inventoryId: inventory.getInventoryId(), 
+				inventoryItemIdentifier: item.itemData.id
+			};
+
+			try {
+				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/place`, {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(data),
+				});
+				if (!response.ok) {
+					throw new Error('Failed to place decoration');
+				}
+				const result = await response.json();
+				console.log('Successfully placed decoration:', result);
+				return {success: true, displayIcon: plot.getItem().itemData.icon};
+			} catch (error) {
+				console.error(error);
+				// Rollback the optimistic update
+				const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
+				if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
+				const rollbackInventory = Inventory.fromPlainObject(originalInventoryObject);
+				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
+				console.warn(`There was an error placing a decoration, rolled back to previous plot`);
+				setGardenMessage(`There was an error! Please refresh the page!`);
+				return {success: false, displayIcon: originalIcon};
+			}
+		}
+		
+		const toReturn = {
+			uiHelper: uiHelper,
+			apiHelper: apiHelper
+		}
+		return toReturn;
 	}
 
 	/**
@@ -144,81 +171,87 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const clickPlant = (plot: Plot, instantGrow: boolean = false) => {
-		const helper = async () => {
+		let originalGardenObject: any;
+		let originalInventoryObject: any;
+		let originalUserObject: any;
+		let originalIcon: string;
+		const uiHelper = () => {
+			originalIcon = plot.getItem().itemData.icon;
+			originalGardenObject = garden.toPlainObject();
+			originalInventoryObject = inventory.toPlainObject();
+			originalUserObject = user.toPlainObject();
+			// Optimistically update the local state
+			// const originalItem = plot.getItem();
 			const canHarvest = Plot.canHarvest(plot.getItem().itemData, plot.getPlantTime(), plot.getUsesRemaining(), Date.now());
 			if (!(canHarvest || instantGrow)) {
 				setGardenMessage(` `);
-				return plot.getItem().itemData.icon;
+				return {success: false, displayIcon: originalIcon};
+			}
+			const xp = plot.getExpValue();
+			const harvestItemResponse = plot.harvestItem(inventory, instantGrow, 1);
+			const pickedItem = harvestItemResponse.payload.pickedItem as PlacedItem;
+			user.updateHarvestHistory(pickedItem);
+			user.addExp(xp);			
+			updateInventoryForceRefreshKey();
+			saveInventory(inventory);
+			saveGarden(garden);
+			saveUser(user);
+			setGardenMessage(`Harvested ${harvestItemResponse.payload.pickedItem.itemData.name}.`);
+			return {success: true, displayIcon: plot.getItem().itemData.icon};
+		}
+
+		const apiHelper = async () => {
+			const data = {
+				inventoryId: inventory.getInventoryId(), 
+				levelSystemId: user.getLevelSystem().getLevelSystemId(), 
+				numHarvests: 1, // Usually only 1 harvest
+				replacementItem: null, // Replace with ground as default
+				instantHarvestKey: instantGrow ? 'mangomangobear' : '' // Works in dev environment only
 			}
 			try {
-				const data = {
-					inventoryId: inventory.getInventoryId(), 
-					levelSystemId: user.getLevelSystem().getLevelSystemId(), 
-					numHarvests: 1, //Usually only 1 harvest
-					replacementItem: null, //Replace with ground as default
-					instantHarvestKey: instantGrow ? 'mangomangobear' : '' //Works in dev environment only
-				}
-				// Making the PATCH request to your API endpoint
 				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/harvest`, {
-				  method: 'PATCH',
-				  headers: {
-					'Content-Type': 'application/json',
-				  },
-				  body: JSON.stringify(data), // Send the data in the request body
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(data),
 				});
-		  
-				// Check if the response is successful
 				if (!response.ok) {
-				  throw new Error('Failed to harvest plant');
+					throw new Error('Failed to harvest plant');
 				}
-		  
-				// Parsing the response data
 				const result: InventoryItemEntity = await response.json();
-				console.log('Successfully harvested:', result);
 
-				const xp = plot.getExpValue();
-				const harvestItemResponse = plot.harvestItem(inventory, instantGrow, 1);
-				if (!harvestItemResponse.isSuccessful()) {
-					setGardenMessage(` `);
-					return plot.getItem().itemData.icon;
-				} 
 				const itemTemplate = placeholderItemTemplates.getInventoryTemplate(result.identifier);
 				if (!itemTemplate) {
-					setGardenMessage(`There was an error parsing the item id, please contact the developer`);
-					return plot.getItem().itemData.icon;
+					throw new Error(`Error parsing item template`);
 				}
 				const inventoryItem = inventory.getItem(itemTemplate);
 				if (!(inventoryItem.isSuccessful())) {
-					setGardenMessage(`There was an error parsing the item, please contact the developer`);
-					return plot.getItem().itemData.icon;
+					throw new Error(`Error finding item in inventory`);
 				}
-				//TODO: Fix this
-				//Hack to ensure consistency between database and model item ids
-				//After we update the database, it returns an id, which we assign to the newly
-				//added inventoryItem
 				(inventoryItem.payload as InventoryItem).setInventoryItemId(result.id);
-				updateInventoryForceRefreshKey();
-
-				const pickedItem = harvestItemResponse.payload.pickedItem as PlacedItem;
-				user.updateHarvestHistory(pickedItem);
-				user.addExp(xp);
-				saveInventory(inventory);
-				saveGarden(garden);
-				saveUser(user);
-				setGardenMessage(`Harvested ${harvestItemResponse.payload.pickedItem.itemData.name}.`);
-				return plot.getItem().itemData.icon;
-			  } catch (error) {
+				console.log('Successfully harvested:', result);
+				return {success: true, displayIcon: plot.getItem().itemData.icon};
+			} catch (error) {
 				console.error(error);
-				//TODO: reload user to fix display issue with xp
-				// const reloadedUser = loadUser() as User;
-				// saveUser(reloadedUser);
-				setGardenMessage(` `);
-				return plot.getItem().itemData.icon;
-			  } finally {
-			  }
-			
+				// Rollback the optimistic update
+				const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
+				if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
+				const rollbackInventory = Inventory.fromPlainObject(originalInventoryObject);
+				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
+				const rollbackUser = User.fromPlainObject(originalUserObject);
+				if (rollbackUser instanceof User) saveUser(rollbackUser);
+				console.warn(`There was an error clicking a plant, rolled back`);
+				setGardenMessage(`There was an error! Please refresh the page!`);
+				return {success: false, displayIcon: originalIcon};
+			}
 		}
-		return helper;
+		
+		const toReturn = {
+			uiHelper: uiHelper,
+			apiHelper: apiHelper
+		}
+		return toReturn;
 	}
 
 	/**
@@ -227,82 +260,97 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const clickDecoration = (plot: Plot) => {
-		const helper = async () => {
+		let originalGardenObject: any;
+		let originalInventoryObject: any;
+		let originalIcon: string;
+		const uiHelper = () => {
+			originalIcon = plot.getItem().itemData.icon;
+			originalGardenObject = garden.toPlainObject();
+			originalInventoryObject = inventory.toPlainObject();
+			// Optimistically update the local state
+			// const originalItem = plot.getItem();
 			if (plot.getItem().itemData.subtype != ItemSubtypes.DECORATION.name) {
 				setGardenMessage(` `);
-				return plot.getItem().itemData.icon;
+				return {success: false, displayIcon: originalIcon};
+			}
+			const pickupItemResponse = plot.pickupItem(inventory);
+			const pickedItem = pickupItemResponse.payload.pickedItem as PlacedItem;
+			const xp = plot.getExpValue();
+			user.updateHarvestHistory(pickedItem);
+			user.addExp(xp);			
+			updateInventoryForceRefreshKey();
+			saveInventory(inventory);
+			saveGarden(garden);
+			saveUser(user);
+			setGardenMessage(`Picked up ${pickupItemResponse.payload.pickedItem.itemData.name}.`);
+			return {success: true, displayIcon: plot.getItem().itemData.icon};
+		}
+
+		const apiHelper = async () => {
+			const data = {
+				inventoryId: inventory.getInventoryId(), 
+				replacementItem: null, // Replace with ground as default
 			}
 			try {
-				const data = {
-					inventoryId: inventory.getInventoryId(), 
-					replacementItem: null, //Replace with ground as default
-				}
-				// Making the PATCH request to your API endpoint
 				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/pickup`, {
-				  method: 'PATCH',
-				  headers: {
-					'Content-Type': 'application/json',
-				  },
-				  body: JSON.stringify(data), // Send the data in the request body
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(data),
 				});
-		  
-				// Check if the response is successful
 				if (!response.ok) {
-				  throw new Error('Failed to pickup decoration');
+					throw new Error('Failed to pickup decoration');
 				}
-		  
-				// Parsing the response data
-				const result = await response.json();
-				console.log('Successfully picked up decoration:', result);
-				const pickupItemResponse = plot.pickupItem(inventory);
-				if (!pickupItemResponse.isSuccessful()) {
-					setGardenMessage(` `);
-					return plot.getItem().itemData.icon;
-				} 
+				const result: InventoryItemEntity = await response.json();
+
 				const itemTemplate = placeholderItemTemplates.getInventoryTemplate(result.identifier);
 				if (!itemTemplate) {
-					setGardenMessage(`There was an error parsing the item id, please contact the developer`);
-					return plot.getItem().itemData.icon;
+					throw new Error(`Error parsing item template`);
 				}
 				const inventoryItem = inventory.getItem(itemTemplate);
 				if (!(inventoryItem.isSuccessful())) {
-					setGardenMessage(`There was an error parsing the item, please contact the developer`);
-					return plot.getItem().itemData.icon;
+					throw new Error(`Error finding item in inventory`)
 				}
-				//TODO: Fix this
-				//Hack to ensure consistency between database and model item ids
-				//After we update the database, it returns an id, which we assign to the newly
-				//added inventoryItem
 				(inventoryItem.payload as InventoryItem).setInventoryItemId(result.id);
-				if (!pickupItemResponse.isSuccessful()) {
-					setGardenMessage(` `);
-					return plot.getItem().itemData.icon;
-				}
-				updateInventoryForceRefreshKey();
-				saveInventory(inventory);
-				saveGarden(garden);
-				setGardenMessage(`Picked up ${pickupItemResponse.payload.pickedItem.itemData.name}.`);
-				return plot.getItem().itemData.icon;
-			  } catch (error) {
+				console.log('Successfully picked up decoration:', result);
+				return {success: true, displayIcon: plot.getItem().itemData.icon};
+			} catch (error) {
 				console.error(error);
-				//TODO: reload user to fix display issue with xp
-				// const reloadedUser = loadUser() as User;
-				// saveUser(reloadedUser);
-				setGardenMessage(` `);
-				return plot.getItem().itemData.icon;
-			  } finally {
-			  }
-			
+				// Rollback the optimistic update
+				const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
+				if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
+				const rollbackInventory = Inventory.fromPlainObject(originalInventoryObject);
+				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
+				console.warn(`There was an error clicking a decoration, rolled back`);
+				setGardenMessage(`There was an error! Please refresh the page!`);
+				return {success: false, displayIcon: originalIcon};
+			}
 		}
-		return helper;
+		
+		const toReturn = {
+			uiHelper: uiHelper,
+			apiHelper: apiHelper
+		}
+		return toReturn;
 	}
 
 	const doNothing = (plot: Plot) => {
-		const helper = () => {
+		const uiHelper = () => {
 			setGardenMessage(` `);
-			return plot.getItem().itemData.icon;
+			return {success: true, displayIcon: plot.getItem().itemData.icon};
 		}
-		return helper;
+
+		const apiHelper = async () => {
+			setGardenMessage(` `);
+			return {success: true, displayIcon: plot.getItem().itemData.icon};
+		}
+		
+		const toReturn = {
+			uiHelper: uiHelper,
+			apiHelper: apiHelper
+		}
+		return toReturn;
 	}
 
 	return {

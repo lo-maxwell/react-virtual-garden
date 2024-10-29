@@ -123,7 +123,6 @@ class InventoryItemRepository {
 	}
 
 
-	//TODO: Move this to a service
 	/**
 	 * Adds an item to the database. If the item already exists, adds to its quantity. Otherwise, creates a new item row. Begins a transaction if there is not already one. 
 	 * On error, rolls back.
@@ -175,15 +174,7 @@ class InventoryItemRepository {
 	 * @returns a new InventoryItemEntity with the corresponding data if success, null if failure (or throws error)
 	*/
 	async createOrUpdateInventoryItem(inventoryId: string, item: InventoryItem, client?: PoolClient): Promise<InventoryItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-
+		const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {
 			// Check if the item already exists
 			const existingInventoryItemResult = await client.query<{id: string}>(
 				'SELECT id FROM inventory_items WHERE owner = $1 AND identifier = $2',
@@ -193,7 +184,7 @@ class InventoryItemRepository {
 			let result;
 
 			if (existingInventoryItemResult.rows.length > 0) {
-				// item already exists
+				// Item already exists
 				result = await this.setInventoryItemQuantity(existingInventoryItemResult.rows[0].id, item.getQuantity(), client);
 				if (!result) {
 					throw new Error(`Error updating inventory item with id ${item.getInventoryItemId()}`);
@@ -201,26 +192,15 @@ class InventoryItemRepository {
 			} else {
 				result = await this.createInventoryItem(inventoryId, item, client);
 				if (!result) {
-					throw new Error(`Error creating plot with id ${item.getInventoryItemId()}`);
+					throw new Error(`Error creating inventory item with id ${item.getInventoryItemId()}`);
 				} 
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-
 			return result;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error creating plot:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'createOrUpdateInventoryItem', client);
 	}
 
 	/**
@@ -252,49 +232,28 @@ class InventoryItemRepository {
 	 * @returns a InventoryItemEntity with the new data on success (or throws error)
 	 */
 	async setInventoryItemQuantity(id: string, newQuantity: number, client?: PoolClient): Promise<InventoryItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-
+		const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {
 			const inventoryItemResult = await client.query<InventoryItemEntity>(
 				'UPDATE inventory_items SET quantity = $1 WHERE id = $2 RETURNING id, owner, identifier, quantity',
 				[newQuantity, id]
-				);
-
+			);
 
 			// Check if result is valid
 			if (!inventoryItemResult || inventoryItemResult.rows.length === 0) {
 				throw new Error('There was an error updating the inventoryItem');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-			const updatedRow = inventoryItemResult.rows[0];
-			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating inventoryItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+			return inventoryItemResult.rows[0];
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'setInventoryItemQuantity', client);
 	}
 
 	/**
-	 * Sets the quantity of the inventoryItem. Does not validate quantity amount, except that the result must be nonnegative. Uses row level locking.
+	 * Updates the quantity of the inventoryItem. Does not validate quantity amount, except that the result must be nonnegative. Uses row level locking.
 	 * If the quantity drops to 0, the item is not deleted from the database.
 	 * @id the id of the inventoryitem
-	 * @identifier the item template id
 	 * @quantityDelta the quantity change
 	 * @returns a InventoryItemEntity with the new data on success (or throws error)
 	 */
@@ -327,16 +286,8 @@ class InventoryItemRepository {
 	 * @returns a InventoryItemEntity with the new data on success (or throws error)
 	 */
 	async deleteInventoryItemById(id: string, client?: PoolClient): Promise<InventoryItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-
-			//Lock the row for update
+		const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {
+			// Lock the row for update
 			const lockResult = await client.query<{id: string, current_quantity: number}>(
 				'SELECT id, quantity AS current_quantity FROM inventory_items WHERE id = $1',
 				[id]
@@ -349,23 +300,12 @@ class InventoryItemRepository {
 				'DELETE FROM inventory_items WHERE id = $1 RETURNING id, owner, identifier, quantity',
 				[id]
 			);
-		
-			if (shouldReleaseClient) {
-				await client.query('COMMIT');
-			}
-		
+
 			return deleteResult.rows[0];
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error deleting inventoryItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'deleteInventoryItemById', client);
 	}
 
 
@@ -376,16 +316,8 @@ class InventoryItemRepository {
 	 * @returns a InventoryItemEntity with the new data on success (or throws error)
 	 */
 	async deleteInventoryItemByOwnerId(ownerId: string, identifier: string, client?: PoolClient): Promise<InventoryItemEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-
-			//Lock the row for update
+		const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {
+			// Lock the row for update
 			const lockResult = await client.query<{id: string, current_quantity: number}>(
 				'SELECT id, quantity AS current_quantity FROM inventory_items WHERE owner = $1 AND identifier = $2 FOR UPDATE',
 				[ownerId, identifier]
@@ -398,23 +330,12 @@ class InventoryItemRepository {
 				'DELETE FROM inventory_items WHERE owner = $1 AND identifier = $2 RETURNING id, owner, identifier, quantity',
 				[ownerId, identifier]
 			);
-		
-			if (shouldReleaseClient) {
-				await client.query('COMMIT');
-			}
-		
+
 			return deleteResult.rows[0];
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error deleting inventoryItem:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'deleteInventoryItemByOwnerId', client);
 	}
 }
 

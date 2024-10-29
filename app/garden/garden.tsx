@@ -11,6 +11,10 @@ import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import { useUser } from "@/app/hooks/contexts/UserContext";
 import GardenExpansionTooltip from "./gardenExpansionTooltip";
 import { Garden } from "@/models/garden/Garden";
+import { addColumnAPI, addColumnLocal, addRowAPI, addRowLocal, harvestAllAPI, plantAllAPI, removeColumnAPI, removeColumnLocal, removeRowAPI, removeRowLocal, syncGardenSize, syncUserGardenInventory } from "./gardenFunctions";
+import { Inventory } from "@/models/itemStore/inventory/Inventory";
+import { saveInventory } from "@/utils/localStorage/inventory";
+import { useAccount } from "../hooks/contexts/AccountContext";
 
 const GardenComponent = () => {
 	const { inventory } = useInventory();
@@ -21,6 +25,7 @@ const GardenComponent = () => {
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
 	const [showExpansionOptions, setShowExpansionOptions] = useState(false);
 	const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
+	const { account, cloudSave } = useAccount();
 
 	const [currentTime, setCurrentTime] = useState(Date.now());
 	// const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
@@ -70,7 +75,7 @@ const GardenComponent = () => {
 								key={index} 
 								ref={el => {plotRefs.current[rowIndex][colIndex] = el!}}
 								plot={plot} 
-								onPlotClick={GetPlotAction(plot, selectedItem)} 
+								onPlotClickHelpers={GetPlotAction(plot, selectedItem)} 
 								currentTime={currentTime}
 							/>
 						);
@@ -83,53 +88,82 @@ const GardenComponent = () => {
 		);
 	}
 
-	const plantAll = ()  => {
-
-		//TODO: change this to not use click()
+	const plantAll = async ()  => {
 		if (selectedItem == null || selectedItem.itemData.subtype != ItemSubtypes.SEED.name) return;
 		const getItemResponse = inventory.getItem(selectedItem);
 		if (!getItemResponse.isSuccessful()) return;
 		let numRemaining = getItemResponse.payload.getQuantity();
+
+		const plantedPlotIds = [];
 		let numPlanted = 0;
 		for (const row of plotRefs.current) {
 			for (const plotRef of row) {
+				if (numRemaining <= 0) break;
 				if (plotRef && plotRef.plot.getItemSubtype() === ItemSubtypes.GROUND.name) {
-					plotRef.click();
-					numPlanted++;
-					numRemaining--;
-					if (numRemaining <= 0) {
-						return;
+					const plantSeedAction = plantSeed(selectedItem, plotRef.plot).uiHelper;
+					// Performs local update
+					const plantSeedResult = plantSeedAction();
+					if (plantSeedResult.success) {
+						numPlanted++;
+						numRemaining--;
+						plantedPlotIds.push(plotRef.plot.getPlotId());
+						plotRef.refresh();
 					}
 				}
 			}
 		}
+		
+		// Terminate early before api call
+		if (!cloudSave) {
+			return;
+		}
+
+		//api call
 		setGardenMessage(`Planted ${numPlanted} ${getItemResponse.payload.itemData.name}.`);
+		const apiResult = await plantAllAPI(plantedPlotIds, inventory, selectedItem, user, garden);
+		if (!apiResult) {
+			syncUserGardenInventory(user, garden, inventory);
+			setGardenMessage(`There was an error planting 1 or more seeds! Please refresh the page!`);
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+			// return;
+		}
+		
 	}
 
-	const harvestAll = () => {
-		//TODO: change this to not use click()
-		let currentPlants = 0;
-		inventory.getAllItems().forEach((item) => {
-			if (item.itemData.subtype === ItemSubtypes.HARVESTED.name) {
-				currentPlants += item.getQuantity();
-			}
-		})
+	const harvestAll = async () => {
+		const harvestedPlotIds: string[] = [];
+		let numHarvested = 0;
 
 		plotRefs.current.forEach(row => {
 			row.forEach(plotRef => {
 			  if (plotRef && plotRef.plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
-				plotRef.click();
+				const harvestPlantAction = clickPlant(plotRef.plot, instantGrow).uiHelper;
+					// Performs local update
+					const harvestPlantResult = harvestPlantAction();
+					if (harvestPlantResult.success) {
+						numHarvested++;
+						harvestedPlotIds.push(plotRef.plot.getPlotId());
+						plotRef.refresh();
+					}
 			  }
 			});
 		  });
 
-		let newCurrentPlants = 0;
-		inventory.getAllItems().forEach((item) => {
-			if (item.itemData.subtype === ItemSubtypes.HARVESTED.name) {
-				newCurrentPlants += item.getQuantity();
-			}
-		})
-		setGardenMessage(`Harvested ${newCurrentPlants - currentPlants} plants.`);
+		setGardenMessage(`Harvested ${numHarvested} plants.`);
+
+		// Terminate early before api call
+		if (!cloudSave) {
+			return;
+		}
+
+		//api call
+		const apiResult = await harvestAllAPI(harvestedPlotIds, inventory, user, garden, instantGrow);
+		if (!apiResult) {
+			syncUserGardenInventory(user, garden, inventory);
+			setGardenMessage(`There was an error harvesting 1 or more plants! Please refresh the page!`);
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+			
+		}
 	}
 
 
@@ -137,144 +171,89 @@ const GardenComponent = () => {
 		if (!garden || !user) {
 			return;
 		}
-		try {
-			const data = {
-				axis: 'column',
-				expand: true
+		const localResult = addColumnLocal(garden, user);
+		if (localResult) {
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+			
+			// Terminate early before api call
+			if (!cloudSave) {
+				return;
 			}
-			// Making the PATCH request to your API endpoint
-			const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`, {
-			  method: 'PATCH',
-			  headers: {
-				'Content-Type': 'application/json',
-			  },
-			  body: JSON.stringify(data), // Send the data in the request body
-			});
-	  
-			// Check if the response is successful
-			if (!response.ok) {
-			  throw new Error('Failed to add column');
+
+			const apiResult = await addColumnAPI(garden, user);
+			if (!apiResult) {
+				syncGardenSize(garden, user);
+				// setGardenMessage(`There was an error expanding the garden, please refresh the page!`);
+				// removeColumnLocal(garden);
 			}
-	  
-			// Parsing the response data
-			const result = await response.json();
-			console.log('Successfully added column:', result);
-		  } catch (error) {
-			console.error(error);
-			return;
-		  } finally {
-		  }
-		garden.addColumn(user);
-		saveGarden(garden);
-		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+		}
+		
 	}
 
 	async function addRow() {
 		if (!garden || !user) {
 			return;
 		}
-		try {
-			const data = {
-				axis: 'row',
-				expand: true
+		const localResult = addRowLocal(garden, user);
+		if (localResult) {
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+
+			// Terminate early before api call
+			if (!cloudSave) {
+				return;
 			}
-			// Making the PATCH request to your API endpoint
-			const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`, {
-			  method: 'PATCH',
-			  headers: {
-				'Content-Type': 'application/json',
-			  },
-			  body: JSON.stringify(data), // Send the data in the request body
-			});
-	  
-			// Check if the response is successful
-			if (!response.ok) {
-			  throw new Error('Failed to add row');
+			
+			const apiResult = await addRowAPI(garden, user);
+			if (!apiResult) {
+				syncGardenSize(garden, user);
+				// setGardenMessage(`There was an error expanding the garden, please refresh the page!`);
+				// removeRowLocal(garden);
 			}
-	  
-			// Parsing the response data
-			const result = await response.json();
-			console.log('Successfully added row:', result);
-		  } catch (error) {
-			console.error(error);
-			return;
-		  } finally {
-		  }
-		garden.addRow(user);
-		saveGarden(garden);
-		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+		}
 	}
 
 	async function removeColumn() {
 		if (!garden) {
 			return;
 		}
-		try {
-			const data = {
-				axis: 'column',
-				expand: false
+		const localResult = removeColumnLocal(garden);
+		if (localResult) {
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+			
+			// Terminate early before api call
+			if (!cloudSave) {
+				return;
 			}
-			// Making the PATCH request to your API endpoint
-			const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`, {
-			  method: 'PATCH',
-			  headers: {
-				'Content-Type': 'application/json',
-			  },
-			  body: JSON.stringify(data), // Send the data in the request body
-			});
-	  
-			// Check if the response is successful
-			if (!response.ok) {
-			  throw new Error('Failed to remove column');
+		
+			const apiResult = await removeColumnAPI(garden, user);
+			if (!apiResult) {
+				syncGardenSize(garden, user);
+				// setGardenMessage(`There was an error shrinking the garden, please refresh the page!`);
+				// addColumnLocal(garden, user);
 			}
-	  
-			// Parsing the response data
-			const result = await response.json();
-			console.log('Successfully removed column:', result);
-		  } catch (error) {
-			console.error(error);
-			return;
-		  } finally {
-		  }
-		garden?.removeColumn();
-		saveGarden(garden);
-		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+		}
 	}
 
 	async function removeRow() {
 		if (!garden) {
 			return;
 		}
-		try {
-			const data = {
-				axis: 'row',
-				expand: false
+		const localResult = removeRowLocal(garden);
+		if (localResult) {
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+		
+			// Terminate early before api call
+			if (!cloudSave) {
+				return;
 			}
-			// Making the PATCH request to your API endpoint
-			const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`, {
-			  method: 'PATCH',
-			  headers: {
-				'Content-Type': 'application/json',
-			  },
-			  body: JSON.stringify(data), // Send the data in the request body
-			});
-	  
-			// Check if the response is successful
-			if (!response.ok) {
-			  throw new Error('Failed to remove row');
+
+			const apiResult = await removeRowAPI(garden, user);
+			if (!apiResult) {
+				syncGardenSize(garden, user);
+				// setGardenMessage(`There was an error shrinking the garden, please refresh the page!`);
+				// addRowLocal(garden, user);
 			}
-	  
-			// Parsing the response data
-			const result = await response.json();
-			console.log('Successfully removed row:', result);
-		  } catch (error) {
-			console.error(error);
-			return;
-		  } finally {
-		  }
-		garden?.removeRow();
-		saveGarden(garden);
-		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+		}
 	}
 
 	function handleGardenExpansionDisplay() {

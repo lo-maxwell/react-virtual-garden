@@ -44,7 +44,7 @@ beforeEach(() => {
 })
 
 test('Should Initialize ItemHistory Object', () => {
-	const newItemHistory = new ItemHistory(plantTemplate, 0);
+	const newItemHistory = new ItemHistory(uuidv4(), plantTemplate, 0);
 	expect(newItemHistory.getItemData().name).toBe('apple');
 	expect(newItemHistory.getItemData().subtype).toBe(ItemSubtypes.PLANT.name);
 	expect(newItemHistory.getQuantity()).toBe(0);
@@ -55,8 +55,8 @@ test('Should Initialize ItemHistory Object', () => {
 })
 
 test('Should Combine ItemHistory', () => {
-	const newItemHistory1 = new ItemHistory(plantTemplate, 10);
-	const newItemHistory2 = new ItemHistory(plantTemplate, 20);
+	const newItemHistory1 = new ItemHistory(uuidv4(), plantTemplate, 10);
+	const newItemHistory2 = new ItemHistory(uuidv4(), plantTemplate, 20);
 	expect(newItemHistory1.getQuantity()).toBe(10);
 	expect(newItemHistory2.getQuantity()).toBe(20);
 	const combineResponse = newItemHistory1.combineHistory(newItemHistory2);
@@ -68,8 +68,8 @@ test('Should Combine ItemHistory', () => {
 
 
 test('Should Not Combine ItemHistory With Invalid HarvestedQuantity', () => {
-	const newItemHistory1 = new ItemHistory(plantTemplate, 10);
-	const newItemHistory2 = new ItemHistory(plantTemplate, -20);
+	const newItemHistory1 = new ItemHistory(uuidv4(), plantTemplate, 10);
+	const newItemHistory2 = new ItemHistory(uuidv4(), plantTemplate, -20);
 	expect(newItemHistory1.getQuantity()).toBe(10);
 	expect(newItemHistory2.getQuantity()).toBe(-20);
 	const combineResponse = newItemHistory1.combineHistory(newItemHistory2);
@@ -78,9 +78,9 @@ test('Should Not Combine ItemHistory With Invalid HarvestedQuantity', () => {
 })
 
 test('Should Not Combine ItemHistory With Different Templates', () => {
-	const newItemHistory1 = new ItemHistory(plantTemplate, 10);
+	const newItemHistory1 = new ItemHistory(uuidv4(), plantTemplate, 10);
 	const plantTemplate2 = placeholderItemTemplates.getPlacedItemTemplateByName('banana') as PlantTemplate;
-	const newItemHistory2 = new ItemHistory(plantTemplate2, 20);
+	const newItemHistory2 = new ItemHistory(uuidv4(), plantTemplate2, 20);
 	expect(newItemHistory1.getQuantity()).toBe(10);
 	expect(newItemHistory2.getQuantity()).toBe(20);
 	const combineResponse = newItemHistory1.combineHistory(newItemHistory2);
@@ -89,7 +89,7 @@ test('Should Not Combine ItemHistory With Different Templates', () => {
 })
 
 test('Should Create ItemHistory Object From PlainObject', () => {
-	const newItemHistory1 = new ItemHistory(plantTemplate, 10);
+	const newItemHistory1 = new ItemHistory(uuidv4(), plantTemplate, 10);
 	const serializedHistory = JSON.stringify(newItemHistory1.toPlainObject());
 	const history = ItemHistory.fromPlainObject(JSON.parse(serializedHistory));
 	expect(history).toBeTruthy();

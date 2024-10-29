@@ -18,7 +18,7 @@
 				"buyMultiplier": 2,
 				"sellMultiplier": 1,
 				"upgradeMultiplier": 1,
-				"restockInterval": 10000
+				"restockInterval": 30000
 			}
 	]
 }

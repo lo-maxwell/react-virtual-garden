@@ -1,11 +1,21 @@
 import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
 import { getItemTemplateFromSubtype } from "@/models/items/utility/classMaps";
 import { ItemHistoryTransactionResponse } from "./ItemHistoryTransactionResponse";
+
+export interface ItemHistoryEntity {
+	id: string,
+	owner: string, //maps to user
+	identifier: string, //item identifier
+	quantity: number
+}
+
 class ItemHistory {
+	protected itemHistoryId: string;
 	protected itemData: ItemTemplate;
 	protected quantity: number;
 	
-	constructor(item: ItemTemplate, quantity: number) {
+	constructor(itemHistoryId: string, item: ItemTemplate, quantity: number) {
+		this.itemHistoryId = itemHistoryId;
 		this.itemData = item;
 		this.quantity = quantity;
 	}
@@ -19,7 +29,7 @@ class ItemHistory {
             if (!plainObject || typeof plainObject !== 'object') {
                 throw new Error('Invalid plainObject structure for ItemHistory');
             }
-			const { itemData, quantity } = plainObject;
+			const { itemHistoryId, itemData, quantity } = plainObject;
 			// Perform additional type checks if necessary
 			const itemTemplate = getItemTemplateFromSubtype(itemData);
 			if (!itemTemplate) {
@@ -29,7 +39,7 @@ class ItemHistory {
 			if (typeof quantity !== 'number') {
 				throw new Error('Invalid quantity in plainObject for ItemHistory');
 			}
-			return new ItemHistory(validatedItemData, quantity);
+			return new ItemHistory(itemHistoryId, validatedItemData, quantity);
 			
 		} catch (err) {
 			console.error('Error creating ItemHistory from plainObject:', err);
@@ -39,9 +49,14 @@ class ItemHistory {
 
 	toPlainObject(): any {
 		return {
+			itemHistoryId: this.itemHistoryId,
 			itemData: this.itemData,
 			quantity: this.quantity
 		};
+	}
+
+	getItemHistoryId(): string {
+		return this.itemHistoryId;
 	}
 
 	/**

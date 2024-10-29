@@ -51,7 +51,7 @@ export async function restockStore(storeId: string, client?: PoolClient): Promis
 		}
 
 		
-		const REAL_TIME_FUDGE = 1000; //Allow for 1s discrepancy between harvest times
+		const REAL_TIME_FUDGE = 1000; //Allow for 1s discrepancy between restock times
 
 		//Check if restock is valid
 		if (!Store.isRestockTime(restockTime + REAL_TIME_FUDGE, storeInterface.restockInterval, currentTime)) {
@@ -246,4 +246,26 @@ export async function sellItem(storeId: string, itemIdentifier: string, sellQuan
 
 	// Call the transactionWrapper with the innerFunction and appropriate arguments
 	return transactionWrapper(innerFunction, 'SellItem', client);
+}
+
+/**
+ * @returns a store plain object
+ */
+export async function getStoreFromDatabase(storeId: string, userId: string, client?: PoolClient): Promise<any> {
+	const innerFunction = async (client: PoolClient) => {
+		//Create store
+		const storeResult = await storeRepository.getStoreById(storeId);
+		// Check if result is valid
+		if (!storeResult) {
+			throw new Error(`Could not find the store for id ${storeId}`);
+		}
+		if (storeResult.owner !== userId) {
+			throw new Error(`Invalid owner of store ${storeId}`);
+		}
+		const storeInstance = await storeRepository.makeStoreObject(storeResult);
+
+		return storeInstance.toPlainObject();
+	}
+	// Call transactionWrapper with inner function and description
+	return transactionWrapper(innerFunction, 'fetchStoreFromDatabase', client);
 }

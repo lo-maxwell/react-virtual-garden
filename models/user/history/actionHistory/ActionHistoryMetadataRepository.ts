@@ -1,7 +1,7 @@
 import historyData from '@/data/user/ActionHistories.json';
 import ActionHistoryInterface from "./ActionHistoryInterface";
 
-export class ActionHistoryRepository {
+export class ActionHistoryMetadataRepository {
 	histories: ActionHistoryInterface[];
 
 	constructor() {
@@ -71,4 +71,4 @@ export class ActionHistoryRepository {
 
 }
 
-export const actionHistoryRepository = new ActionHistoryRepository();
+export const actionHistoryMetadataRepository = new ActionHistoryMetadataRepository();

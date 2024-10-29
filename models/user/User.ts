@@ -160,7 +160,7 @@ class User {
 			response.addErrorMessage(`Error updating history: attempting to harvest item of type ${plantItem.itemData.subtype}`);
 			return response;
 		}
-		const itemHistory = new ItemHistory(plantItem.itemData, 1);
+		const itemHistory = new ItemHistory(uuidv4(), plantItem.itemData, 1);
 		this.itemHistory.addItemHistory(itemHistory);
 		const harvestAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(plantItem.itemData.subtype, 'all', 'harvested', 1);
 		const harvestCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(plantItem.itemData.subtype, plantItem.itemData.category, 'harvested', 1);
@@ -183,8 +183,8 @@ class User {
 	}
 
 	/**
-	 * Updates this user's itemHistory and actionHistory following the harvest of an item.
-	 * @item the item that was harvested
+	 * Updates this user's itemHistory and actionHistory following the placement of a decoration.
+	 * @item the item that was placedharvested
 	 * @returns Response containing true or an error message on failure
 	 */
 	 updateDecorationHistory(decorationItem: PlacedItem): BooleanResponse {
@@ -193,7 +193,7 @@ class User {
 			response.addErrorMessage(`Error updating history: attempting to place item of type ${decorationItem.itemData.subtype}`);
 			return response;
 		}
-		const itemHistory = new ItemHistory(decorationItem.itemData, 1);
+		const itemHistory = new ItemHistory(uuidv4(), decorationItem.itemData, 1);
 		this.itemHistory.addItemHistory(itemHistory);
 		// const harvestAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(decorationItem.itemData.subtype, 'all', 'harvested', 1);
 		const placeDecorationHistory = actionHistoryFactory.createActionHistoryByIdentifiers(decorationItem.itemData.subtype, decorationItem.itemData.category, 'placed', 1);

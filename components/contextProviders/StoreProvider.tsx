@@ -1,11 +1,13 @@
 'use client'
 import { StoreContext } from '@/app/hooks/contexts/StoreContext';
+import { useUser } from '@/app/hooks/contexts/UserContext';
 import { generateNewPlaceholderInventoryItem } from '@/models/items/PlaceholderItems';
 import { InventoryTransactionResponse } from '@/models/itemStore/inventory/InventoryTransactionResponse';
 import { ItemList } from '@/models/itemStore/ItemList';
 import { stocklistFactory } from '@/models/itemStore/store/StocklistFactory';
 import { Store } from '@/models/itemStore/store/Store';
 import { storeFactory } from '@/models/itemStore/store/StoreFactory';
+import User from '@/models/user/User';
 import { loadStore, saveStore } from '@/utils/localStorage/store';
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,7 +19,8 @@ interface StoreProviderProps {
 
 export const StoreProvider = ({ children }: StoreProviderProps) => {
     const [store, setStore] = useState<Store | null>(null);
-
+	const { user } = useUser();
+ 
 	function generateInitialStore() {
 		const randomUuid = uuidv4();
 		function generateItems() { 
@@ -61,46 +64,78 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		const initialStore = setupStore();
 		setStore(initialStore);
 	  }, []);
-	
 
-    const restockStore = async () => {
-		if (store) {
-			if (!store.needsRestock()) {
-				return "UNNECESSARY";
+	function restockStoreLocal () {
+		if (!store) return false;
+		if (!store.needsRestock()) return false;
+		const response = store.restockStore();
+		if (!response.isSuccessful()) return false;
+		saveStore(store);
+		return true;
+	}
+
+	async function restockStoreAPI () {
+		if (!store) return false;
+		try {
+			const data = {
 			}
-			try {
-				const data = {
-				}
-				// Making the PATCH request to your API endpoint
-				const response = await fetch(`/api/store/${store.getStoreId()}/restock`, {
-				  method: 'PATCH',
-				  headers: {
-					'Content-Type': 'application/json',
-				  },
-				  body: JSON.stringify(data), // Send the data in the request body
-				});
-		  
-				// Check if the response is successful
-				if (!response.ok) {
-				  throw new Error('Failed to restock store');
-				}
-		  
-				// Parsing the response data
-				const result = await response.json();
-				console.log('Successfully restocked store:', result);
-				if (result === false) return "NOT TIME";
-			  } catch (error) {
-				console.error(error);
-				return "ERROR";
-			  } finally {
-			  }
-			const response = store.restockStore();
-			if (!response.isSuccessful()) return "ERROR";
-			saveStore(store);
-			//TODO: Add forceRefreshKey?
-			return "SUCCESS"
-		} 
-		return "ERROR";
+			// Making the PATCH request to your API endpoint
+			const response = await fetch(`/api/user/${`TODO: REPLACE VALUE`}/store/${store.getStoreId()}/restock`, {
+			  method: 'PATCH',
+			  headers: {
+				'Content-Type': 'application/json',
+			  },
+			  body: JSON.stringify(data), // Send the data in the request body
+			});
+	  
+			// Check if the response is successful
+			if (!response.ok) {
+			  throw new Error('Failed to restock store');
+			}
+	  
+			// Parsing the response data
+			const result = await response.json();
+			console.log('Successfully restocked store:', result);
+			if (result === false) return "NOT TIME";
+		  } catch (error) {
+			console.error(error);
+			return "ERROR";
+		  }
+	}
+
+	async function syncStore (user: User, store: Store) {
+	try {
+        // Sync store data
+        const storeResponse = await fetch(`/api/user/${user.getUserId()}/store/${store.getStoreId()}/get`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        if (!storeResponse.ok) {
+          throw new Error('Failed to fetch store');
+        }
+        const storeResult = await storeResponse.json();
+		saveStore(Store.fromPlainObject(storeResult));
+		Object.assign(store, Store.fromPlainObject(storeResult));
+        return true;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
+	}
+	
+    const restockStore = async () => {
+		if (!store) return "ERROR";
+		const localResult = restockStoreLocal();
+		if (localResult) {
+			const apiResult = await restockStoreAPI();
+			if (!apiResult) {
+				syncStore(user, store);
+				return "NOT TIME";
+			}
+		}
+		return "SUCCESS";
     };
 
 	const restockTimeout = useRef<number | null>(null);

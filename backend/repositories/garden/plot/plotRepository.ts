@@ -8,6 +8,7 @@ import { generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItem
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { PoolClient } from "pg";
 import placedItemRepository from "../../items/placedItem/placedItemRepository";
+import { transactionWrapper } from "@/backend/services/utility/utility";
 
 class PlotRepository {
 
@@ -48,13 +49,32 @@ class PlotRepository {
 	 * @id the id of the plot in the database
 	 */
 	async getPlotById(id: string): Promise<ExtendedPlotEntity | null> {
-		const result = await query<ExtendedPlotEntity>('SELECT id, row_index, plant_time, uses_remaining FROM plots WHERE id = $1', [id]);
+		const result = await query<ExtendedPlotEntity>('SELECT id, row_index, col_index, plant_time, uses_remaining FROM plots WHERE id = $1', [id]);
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
 		return result.rows[0];
 		// const instance = makePlotObject(result.rows[0]);
 		// return instance;
+	}
+
+	/**
+	 * Given an array of ids, returns the row data of plots matching an id from the database.
+	 * @ids the ids of the plots in the database
+	 */
+	async getPlotsByIds(ids: string[]): Promise<ExtendedPlotEntity[]> {
+		if (ids.length === 0) {
+			return []; // Return null if no IDs are provided
+		}
+
+		// Create a parameterized query with placeholders for each ID
+		const placeholders = ids.map((_, index) => `$${index + 1}`).join(', ');
+		const queryText = `SELECT id, row_index, col_index, plant_time, uses_remaining FROM plots WHERE id IN (${placeholders})`;
+
+		const result = await query<ExtendedPlotEntity>(queryText, ids);
+		
+		// If no rows are returned, return an empty array instead of null
+		return result.rows.length > 0 ? result.rows : [];
 	}
 
 	/**
@@ -65,7 +85,7 @@ class PlotRepository {
 	 */
 	async getPlotByGardenId(gardenId: string, rowIndex: number, columnIndex: number): Promise<ExtendedPlotEntity | null> {
 		const result = await query<ExtendedPlotEntity>(
-			'SELECT id, row_index, plant_time, uses_remaining FROM plots WHERE owner = $1 AND row_index = $2 AND col_index = $3',
+			'SELECT id, row_index, col_index, plant_time, uses_remaining FROM plots WHERE owner = $1 AND row_index = $2 AND col_index = $3',
 			[gardenId, rowIndex, columnIndex]
 			);
 		// If no rows are returned, return null
@@ -87,17 +107,11 @@ class PlotRepository {
 	 * @returns an ExtendedPlotEntity with the corresponding data if success, null if failure (or throws error)
 	 */
 	async createPlot(ownerId: string, rowIndex: number, columnIndex: number, plot?: Plot, client?: PoolClient): Promise<ExtendedPlotEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		if (!plot) {
-			plot = Garden.generateEmptyPlot(rowIndex, columnIndex);
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
+		const innerFunction = async (client: PoolClient): Promise<ExtendedPlotEntity> => {
+			if (!plot) {
+				plot = Garden.generateEmptyPlot(rowIndex, columnIndex);
 			}
+
 			const result = await client.query<ExtendedPlotEntity>(
 				`INSERT INTO plots (id, owner, row_index, col_index, plant_time, uses_remaining) 
 				VALUES ($1, $2, $3, $4, $5, $6) 
@@ -111,25 +125,14 @@ class PlotRepository {
 
 			// Check if result is valid
 			if (!result || result.rows.length === 0) {
-				throw new Error(`There was an error creating the plot with id ${result.rows[0].id}`);
-			}
-
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
+				throw new Error(`There was an error creating the plot with owner ${ownerId}`);
 			}
 
 			return result.rows[0];
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error creating plot:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'createPlot', client);
 	}
 
 	/**
@@ -142,53 +145,33 @@ class PlotRepository {
 	 * @returns a new GardenEntity with the corresponding data if success, null if failure (or throws error)
 	*/
 	async createOrUpdatePlot(gardenId: string, rowIndex: number, columnIndex: number, plot: Plot, client?: PoolClient): Promise<ExtendedPlotEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-			//TODO: Delete plots if they are found here
+		const innerFunction = async (client: PoolClient): Promise<ExtendedPlotEntity> => {
 			// Check if the plot already exists
-
-			const existingPlotResult = await client.query<{id: string}>(
+			const existingPlotResult = await client.query<{ id: string }>(
 				'SELECT id FROM plots WHERE id = $1 OR (owner = $2 AND row_index = $3 AND col_index = $4)',
 				[plot.getPlotId(), gardenId, rowIndex, columnIndex]
 			);
 
-			let result;
+			let result: ExtendedPlotEntity;
 
 			if (existingPlotResult.rows.length > 0) {
 				// Plot already exists
 				result = await this.updateEntirePlot(plot, client);
 				if (!result) {
 					throw new Error(`Error updating plot with id ${plot.getPlotId()}`);
-				} 
+				}
 			} else {
 				result = await this.createPlot(gardenId, rowIndex, columnIndex, plot, client);
 				if (!result) {
 					throw new Error(`Error creating plot with id ${plot.getPlotId()}`);
-				} 
-			}
-
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
+				}
 			}
 
 			return result;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error creating plot:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'createOrUpdatePlot', client);
 	}
 
 	/**
@@ -197,41 +180,22 @@ class PlotRepository {
 	 * @returns a PlotEntity with the new data on success (or throws error)
 	 */
 	 async updateEntirePlot(plot: Plot, client?: PoolClient): Promise<ExtendedPlotEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-		
+		const innerFunction = async (client: PoolClient): Promise<ExtendedPlotEntity> => {
 			const plotResult = await client.query<ExtendedPlotEntity>(
 				'UPDATE plots SET plant_time = $1, uses_remaining = $2 WHERE id = $3 RETURNING *',
 				[plot.getPlantTime(), plot.getUsesRemaining(), plot.getPlotId()]
-				);
+			);
 
 			// Check if result is valid
 			if (!plotResult || plotResult.rows.length === 0) {
 				throw new Error('There was an error updating the plot');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-			const updatedRow = plotResult.rows[0];
-			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating plot:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+			return plotResult.rows[0];
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'updateEntirePlot', client);
 	}
 
 
@@ -244,42 +208,22 @@ class PlotRepository {
 	 * @returns a PlotEntity with the new data on success (or throws error)
 	 */
 	async setPlotCoords(id: string, newRowIndex: number, newColumnIndex: number, client?: PoolClient): Promise<PlotEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-		
+		const innerFunction = async (client: PoolClient): Promise<PlotEntity> => {
 			const plotResult = await client.query<PlotEntity>(
 				'UPDATE plots SET row_index = $1, column_index = $2 WHERE id = $3 RETURNING *',
 				[newRowIndex, newColumnIndex, id]
-				);
-
+			);
 
 			// Check if result is valid
 			if (!plotResult || plotResult.rows.length === 0) {
 				throw new Error('There was an error updating the plot');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-			const updatedRow = plotResult.rows[0];
-			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating plot:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+			return plotResult.rows[0];
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'setPlotCoords', client);
 	}
 
 	/**
@@ -290,42 +234,62 @@ class PlotRepository {
 	 * @returns a PlotEntity with the new data on success (or throws error)
 	 */
 	 async setPlotDetails(id: string, newPlantTime: number, newUsesRemaining: number, client?: PoolClient): Promise<PlotEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-		
+		const innerFunction = async (client: PoolClient): Promise<PlotEntity> => {
 			const plotResult = await client.query<PlotEntity>(
 				'UPDATE plots SET plant_time = $1, uses_remaining = $2 WHERE id = $3 RETURNING *',
 				[newPlantTime, newUsesRemaining, id]
-				);
-
+			);
 
 			// Check if result is valid
 			if (!plotResult || plotResult.rows.length === 0) {
 				throw new Error('There was an error updating the plot');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
+			return plotResult.rows[0];
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'setPlotDetails', client);
+	}
+
+	/**
+	 * Sets the plant time and usesRemaining of all plots.
+	 * @ids the ids of the plots
+	 * @newPlantTime the new plant time
+	 * @newUsesRemaining the new uses remaining
+	 * @returns a PlotEntity with the new data on success (or throws error)
+	 */
+	async setMultiplePlotDetails(ids: string[], newPlantTime: number, newUsesRemaining: number, client?: PoolClient): Promise<{ updatedPlots: ExtendedPlotEntity[], erroredPlots: string[] }> {
+		const innerFunction = async (client: PoolClient): Promise<{ updatedPlots: ExtendedPlotEntity[], erroredPlots: string[] }> => {
+			const updatedPlots: ExtendedPlotEntity[] = [];
+			const erroredPlots: string[] = [];
+
+			// Perform the bulk update
+			const plotResult = await client.query<ExtendedPlotEntity>(
+				'UPDATE plots SET plant_time = $1, uses_remaining = $2 WHERE id = ANY($3) RETURNING *',
+				[newPlantTime, newUsesRemaining, ids]
+			);
+
+			// Collect updated plot IDs
+			const updatedPlotIds = plotResult.rows.map(plot => plot.id);
+
+			// Identify errored plots (those that were not updated)
+			for (const id of ids) {
+				if (!updatedPlotIds.includes(id)) {
+					erroredPlots.push(id); // If the ID is not in the updated results, consider it errored
+				} else {
+					const updatedPlot = plotResult.rows.find(plot => plot.id === id);
+					if (updatedPlot) {
+						updatedPlots.push(updatedPlot); // Add the successfully updated plot
+					}
+				}
 			}
-			const updatedRow = plotResult.rows[0];
-			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating plot:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+
+			return { updatedPlots, erroredPlots };
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'setMultiplePlotDetails', client);
 	}
 
 	/**
@@ -335,42 +299,47 @@ class PlotRepository {
 	 * @returns a PlotEntity with the new data on success (or throws error)
 	 */
 	async setPlotPlantTime(id: string, newPlantTime: number, client?: PoolClient): Promise<PlotEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-		
+		const innerFunction = async (client: PoolClient): Promise<PlotEntity> => {
 			const plotResult = await client.query<PlotEntity>(
 				'UPDATE plots SET plant_time = $1 WHERE id = $2 RETURNING *',
 				[newPlantTime, id]
-				);
-
+			);
 
 			// Check if result is valid
 			if (!plotResult || plotResult.rows.length === 0) {
 				throw new Error('There was an error updating the plot');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
+			return plotResult.rows[0];
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'setPlotPlantTime', client);
+	}
+
+	/**
+	 * Sets the plant time of the plot. Uses row level locking.
+	 * @id the id of the plot
+	 * @newPlantTime the new plant time
+	 * @returns a PlotEntity with the new data on success (or throws error)
+	 */
+	async setMultiplePlotPlantTime(ids: string[], newPlantTime: number, client?: PoolClient): Promise<PlotEntity[]> {
+		const innerFunction = async (client: PoolClient): Promise<PlotEntity[]> => {
+			const plotResult = await client.query<PlotEntity>(
+				'UPDATE plots SET plant_time = $1 WHERE id = ANY($2) RETURNING *',
+				[newPlantTime, ids]
+			);
+
+			// Check if result is valid
+			if (!plotResult || plotResult.rows.length === 0) {
+				throw new Error('There was an error updating the plots');
 			}
-			const updatedRow = plotResult.rows[0];
-			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating plot:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+
+			return plotResult.rows; // Return all updated plots
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'setMultiplePlotPlantTime', client);
 	}
 
 
@@ -381,42 +350,22 @@ class PlotRepository {
 	 * @returns a PlotEntity with the new data on success (or throws error)
 	 */
 	async setPlotUsesRemaining(id: string, newUsesRemaining: number, client?: PoolClient): Promise<PlotEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-		
+		const innerFunction = async (client: PoolClient): Promise<PlotEntity> => {
 			const plotResult = await client.query<PlotEntity>(
 				'UPDATE plots SET uses_remaining = $1 WHERE id = $2 RETURNING *',
 				[newUsesRemaining, id]
-				);
-
+			);
 
 			// Check if result is valid
 			if (!plotResult || plotResult.rows.length === 0) {
 				throw new Error('There was an error updating the plot');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
-			}
-			const updatedRow = plotResult.rows[0];
-			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating plot:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+			return plotResult.rows[0];
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'setPlotUsesRemaining', client);
 	}
 
 
@@ -427,17 +376,9 @@ class PlotRepository {
 	 * @returns a PlotEntity with the new data on success (or throws error)
 	 */
 	async updatePlotUsesRemaining(id: string, usesDelta: number, client?: PoolClient): Promise<PlotEntity> {
-		const shouldReleaseClient = !client;
-		if (!client) {
-			client = await pool.connect();
-		}
-		try {
-			if (shouldReleaseClient) {
-				await client.query('BEGIN'); // Start the transaction
-			}
-
-			//Lock the row for update
-			const lockResult = await client.query<{id: string, uses_remaining: number}>(
+		const innerFunction = async (client: PoolClient): Promise<PlotEntity> => {
+			// Lock the row for update
+			const lockResult = await client.query<{ id: string, uses_remaining: number }>(
 				'SELECT id, uses_remaining FROM plots WHERE id = $1 FOR UPDATE',
 				[id]
 			);
@@ -445,34 +386,50 @@ class PlotRepository {
 			if (lockResult.rows.length === 0) {
 				throw new Error(`Plot not found for id: ${id}`);
 			}
-		
+
+			const updatedUsesRemaining = lockResult.rows[0].uses_remaining + usesDelta;
+
 			const plotResult = await client.query<PlotEntity>(
 				'UPDATE plots SET uses_remaining = $1 WHERE id = $2 RETURNING *',
-				[lockResult.rows[0].uses_remaining + usesDelta, id]
-				);
-
+				[updatedUsesRemaining, id]
+			);
 
 			// Check if result is valid
 			if (!plotResult || plotResult.rows.length === 0) {
 				throw new Error('There was an error updating the plot');
 			}
 
-			if (shouldReleaseClient) {
-				await client.query('COMMIT'); // Rollback the transaction on error
+			return plotResult.rows[0];
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'updatePlotUsesRemaining', client);
+	}
+
+	/**
+	 * Updates the uses remaining of the plot. Does not verify that the plot has enough uses remaining.
+	 * @ids the plot ids
+	 * @usesDelta the number of uses to change by (use -1 for decreasing by 1)
+	 * @returns an array of PlotEntity with the new data on success (or throws error)
+	 */
+	async updateMultiplePlotUsesRemaining(ids: string[], usesDelta: number, client?: PoolClient): Promise<PlotEntity[]> {
+		const innerFunction = async (client: PoolClient): Promise<PlotEntity[]> => {
+			
+			const plotResult = await client.query<PlotEntity>(
+				'UPDATE plots SET uses_remaining = uses_remaining + $1 WHERE id = ANY($2) RETURNING *',
+				[usesDelta, ids]
+			);
+
+			// Check if result is valid
+			if (!plotResult || plotResult.rows.length === 0) {
+				throw new Error('There was an error updating the plots');
 			}
-			const updatedRow = plotResult.rows[0];
-			return updatedRow;
-		} catch (error) {
-			if (shouldReleaseClient) {
-				await client.query('ROLLBACK'); // Rollback the transaction on error
-			}
-			console.error('Error updating plot:', error);
-			throw error; // Rethrow the error for higher-level handling
-		} finally {
-			if (shouldReleaseClient) {
-				client.release(); // Release the client back to the pool
-			}
-		}
+
+			return plotResult.rows; // Return all updated plots
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'updateMultiplePlotUsesRemaining', client);
 	}
 }
 

@@ -189,3 +189,5 @@ CREATE TABLE IF NOT EXISTS item_histories (
     FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table
     UNIQUE (owner, identifier)
 );
+
+--We don't need actionhistorylist/itemhistorylist schemas because they save no unique data that isn't stored in the action/item history itself

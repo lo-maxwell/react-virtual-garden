@@ -46,8 +46,8 @@ beforeEach(() => {
 	decorationItem = new Decoration(uuidv4(), decorationTemplate, '');
 	emptyTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('ground') as EmptyItemTemplate;
 	emptyItem = new EmptyItem(uuidv4(), emptyTemplate, 'ground');
-	plantHistory = new ItemHistory(plantTemplate, 1);
-	decorationHistory = new ItemHistory(decorationTemplate, 1);
+	plantHistory = new ItemHistory(uuidv4(), plantTemplate, 1);
+	decorationHistory = new ItemHistory(uuidv4(), decorationTemplate, 1);
 	testItemHistoryList = new ItemHistoryList();
 })
 
@@ -74,7 +74,7 @@ test('Should Not Create Invalid ItemHistoryList Object From PlainObject', () => 
 	//Mute console error
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 	const list = new ItemHistoryList();
-	const invalidHistory = new ItemHistory(emptyTemplate as PlantTemplate, -100);
+	const invalidHistory = new ItemHistory(uuidv4(), emptyTemplate as PlantTemplate, -100);
 	list.addItemHistory(invalidHistory);
 	const corruptedHistory2 = ItemHistoryList.fromPlainObject(123);
 	expect(corruptedHistory2.size()).toBe(0);
@@ -188,7 +188,7 @@ test('Should Add Existing History to ItemHistoryList', () => {
 test('Should Not Add Invalid History', () => {
 	testItemHistoryList.addItemHistory(plantHistory);
 	const corruptedTemplate = new PlantTemplate(plantTemplate.id, '', '', 'PlacedItem', 'Decoration', '', '', 1, 1, '', 1, 1, 1, 1);
-	const corruptedHistory = new ItemHistory(corruptedTemplate, 1);
+	const corruptedHistory = new ItemHistory(uuidv4(), corruptedTemplate, 1);
 	const addResponse = testItemHistoryList.addItemHistory(corruptedHistory);
 	expect(addResponse.isSuccessful()).toBe(false);
 })
@@ -210,7 +210,7 @@ test('Should Directly Update History to ItemHistoryList', () => {
 test('Should Not Update Invalid History', () => {
 	testItemHistoryList.addItemHistory(plantHistory);
 	const corruptedTemplate = new PlantTemplate(plantTemplate.id, '', '', 'PlacedItem', 'Decoration', '', '', 1, 1, '', 1, 1, 1, 1);
-	const corruptedHistory = new ItemHistory(corruptedTemplate, 1);
+	const corruptedHistory = new ItemHistory(uuidv4(), corruptedTemplate, 1);
 	const updateResponse = testItemHistoryList.updateItemHistory(corruptedHistory);
 	expect(updateResponse.isSuccessful()).toBe(false);
 	const updateResponse2 = testItemHistoryList.updateItemHistory(decorationHistory);

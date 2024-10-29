@@ -1,4 +1,3 @@
-
 import { pool } from "@/backend/connection/db";
 import gardenRepository from "@/backend/repositories/garden/gardenRepository";
 import plotRepository from "@/backend/repositories/garden/plot/plotRepository";
@@ -8,10 +7,10 @@ import placedItemRepository from "@/backend/repositories/items/placedItem/placed
 import inventoryRepository from "@/backend/repositories/itemStore/inventory/inventoryRepository";
 import storeRepository from "@/backend/repositories/itemStore/store/storeRepository";
 import levelRepository from "@/backend/repositories/level/levelRepository";
+import actionHistoryRepository from "@/backend/repositories/user/actionHistoryRepository";
+import itemHistoryRepository from "@/backend/repositories/user/itemHistoryRepository";
 import userRepository from "@/backend/repositories/user/userRepository";
 import { Garden } from "@/models/garden/Garden";
-import { ExtendedPlotEntity } from "@/models/garden/Plot";
-import { PlacedItemEntity } from "@/models/items/placedItems/PlacedItem";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { Store } from "@/models/itemStore/store/Store";
 import User from "@/models/user/User";
@@ -52,6 +51,24 @@ import { transactionWrapper } from "../utility/utility";
 
 		// Array to store all promises
 		const allPromises: Promise<void>[] = [];
+
+		// Create action histories
+		const actionHistoryPromises: Promise<void>[] = user.getActionHistory().getAllHistories().map(async (elem) => {
+			const result = await actionHistoryRepository.createActionHistory(elem, user.getUserId(), client);
+			if (!result) {
+				throw new Error(`Error creating action history for user ${user.getUserId()}`);
+			}
+		});
+		allPromises.push(...actionHistoryPromises);
+
+		// Create item histories
+		const itemHistoryPromises: Promise<void>[] = user.getItemHistory().getAllHistories().map(async (elem) => {
+			const result = await itemHistoryRepository.createItemHistory(elem, user.getUserId(), client);
+			if (!result) {
+				throw new Error(`Error creating item history for user ${user.getUserId()}`);
+			}
+		});
+		allPromises.push(...itemHistoryPromises);
 
 		// Create plots and placed items concurrently
 		for (let i = 0; i < garden.getAllPlots().length; i++) {
@@ -193,6 +210,24 @@ import { transactionWrapper } from "../utility/utility";
 
 		// Array to store all promises
 		const allPromises: Promise<void>[] = [];
+
+		// Save action histories
+		const actionHistoryPromises: Promise<void>[] = user.getActionHistory().getAllHistories().map(async (elem) => {
+			const result = await actionHistoryRepository.createOrUpdateActionHistory(elem, user.getUserId(), client);
+			if (!result) {
+				throw new Error(`Error saving action history for user ${user.getUserId()}`);
+			}
+		});
+		allPromises.push(...actionHistoryPromises);
+
+		// Save item histories
+		const itemHistoryPromises: Promise<void>[] = user.getItemHistory().getAllHistories().map(async (elem) => {
+			const result = await itemHistoryRepository.createOrUpdateItemHistory(elem, user.getUserId(), client);
+			if (!result) {
+				throw new Error(`Error saving item history for user ${user.getUserId()}`);
+			}
+		});
+		allPromises.push(...itemHistoryPromises);
 
 		// Create plots and placed items concurrently
 		for (let i = 0; i < garden.getAllPlots().length; i++) {
@@ -356,3 +391,4 @@ export interface AccountObjects {
 	// Call transactionWrapper with inner function and description
 	return transactionWrapper(innerFunction, 'fetchAccountFromDatabase', client);
 }
+

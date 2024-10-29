@@ -1,5 +1,7 @@
 import userRepository from "@/backend/repositories/user/userRepository";
 import { UserEntity } from "@/models/user/User";
+import { PoolClient } from "pg";
+import { transactionWrapper } from "../utility/utility";
 
 /**
  * Changes the username for the given user id
@@ -27,4 +29,22 @@ export async function updateUserUsername(userId: string, newUsername: string): P
 		throw new Error(`Invalid new icon length`);
 	}
 	return userRepository.updateUserIcon(userId, newIcon);
+}
+
+/**
+ * @returns a user plain object
+ */
+export async function getUserFromDatabase(userId: string, client?: PoolClient): Promise<any> {
+	const innerFunction = async (client: PoolClient) => {
+		//Create user
+		const userResult = await userRepository.getUserById(userId);
+		// Check if result is valid
+		if (!userResult) {
+			throw new Error(`Could not find the user for id ${userId}`);
+		}
+
+		return userResult.toPlainObject();
+	}
+	// Call transactionWrapper with inner function and description
+	return transactionWrapper(innerFunction, 'fetchUserFromDatabase', client);
 }
