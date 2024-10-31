@@ -69,7 +69,7 @@ export const generateNewPlaceholderInventoryItem = (itemName: string, quantity: 
 			const harvestedItemData = itemData as HarvestedItemTemplate;
 			return new HarvestedItem(uuidv4(), harvestedItemData, quantity);
 		default:
-			console.log('Could not find item, generating error item.');
+			console.log(`Could not find item ${itemName}, generating error item.`);
 			return new Seed(uuidv4(), SeedTemplate.getErrorTemplate(), 1);
 	}
 }

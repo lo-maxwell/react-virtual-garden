@@ -135,7 +135,9 @@ test('Should Add Item to List', () => {
 	expect(inv).not.toBeUndefined();
 	expect(inv).not.toBeNull();
 	expect(inv.size()).toBe(0);
-	inv.addItem(generateRandomPlaceholderInventoryItem(), 1);
+	const randItem = generateRandomPlaceholderInventoryItem();
+	console.log(randItem);
+	inv.addItem(randItem, 1);
 	expect(inv.size()).toBe(1);
 });
 

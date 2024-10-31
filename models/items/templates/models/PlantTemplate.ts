@@ -8,17 +8,19 @@ export class PlantTemplate extends PlacedItemTemplate{
 	growTime: number;
 	repeatedGrowTime: number;
 	numHarvests: number;
+	transformShinyIds?: { [key: string]: { id: string; probability: number } };
 	
-	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, level: number, transformId: string, baseExp: number, growTime: number, repeatedGrowTime: number, numHarvests: number) {
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, level: number, transformId: string, baseExp: number, growTime: number, repeatedGrowTime: number, numHarvests: number, transformShinyIds?: { [key: string]: { id: string; probability: number } }) {
 		super(id, name, icon, type, subtype, category, description, value, level, transformId);
 		this.baseExp = baseExp;
 		this.growTime = growTime;
 		this.repeatedGrowTime = repeatedGrowTime;
 		this.numHarvests = numHarvests;
+		this.transformShinyIds = transformShinyIds;
 	}
 
 	static getErrorTemplate() {
-		return new PlantTemplate("0-02-99-99-99", "error", "❌", "PlacedItem", "Plant", "Error", "Error", 0, 0, "1-03-99-99-99", 0, 0, 0, 1);
+		return new PlantTemplate("0-02-99-99-99", "error", "❌", "PlacedItem", "Plant", "Error", "Error", 0, 0, "1-03-99-99-99", 0, 0, 0, 1, {});
 	}
 
 
@@ -30,7 +32,7 @@ export class PlantTemplate extends PlacedItemTemplate{
 			throw new Error('Found non plant for plant template');
 		}
 		const typedTemplate = templateInterface as PlantTemplate;
-		return new PlantTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.level, typedTemplate.transformId, typedTemplate.baseExp, typedTemplate.growTime, typedTemplate.repeatedGrowTime, typedTemplate.numHarvests);
+		return new PlantTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.level, typedTemplate.transformId, typedTemplate.baseExp, typedTemplate.growTime, typedTemplate.repeatedGrowTime, typedTemplate.numHarvests, typedTemplate.transformShinyIds);
 	}
 
 	static fromPlainObject(plainObject: any): PlantTemplate {

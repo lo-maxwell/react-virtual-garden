@@ -33,7 +33,8 @@ export class ItemTemplateRepository {
         item.baseExp,
 		    item.growTime,
         item.repeatedGrowTime,
-        item.numHarvests
+        item.numHarvests,
+        item.transformShinyIds
       )
     );
 	this.PlacedItems['Decorations'] = itemsData.PlacedItems.Decorations.map((item: any) =>
