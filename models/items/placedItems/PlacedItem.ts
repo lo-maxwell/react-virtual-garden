@@ -3,6 +3,7 @@ import { Item } from "../Item";
 import { ItemSubtypes } from "../ItemTypes";
 import { PlacedItemTemplate } from "../templates/models/PlacedItemTemplate";
 import { placeholderItemTemplates } from "../templates/models/PlaceholderItemTemplate";
+import { PlantTemplate } from "../templates/models/PlantTemplate";
 
 export interface PlacedItemDetailsEntity {
 	identifier: string, //itemData.id
@@ -117,6 +118,33 @@ export abstract class PlacedItem extends Item {
 				response.addErrorMessage(`item is of type ${this.itemData.subtype}, cannot be used`);
 				break;
 		}
+		return response;
+	}
+
+	harvest(): GardenTransactionResponse {
+		const response = new GardenTransactionResponse();
+		if (this.itemData.subtype !== ItemSubtypes.PLANT.name) {
+			response.addErrorMessage(`item is of type ${this.itemData.subtype}, cannot be harvested`);
+			return response;
+		}
+		response.payload = {
+			originalItem: this,
+			newTemplate: placeholderItemTemplates.getInventoryTemplate(this.itemData.transformId),
+		};
+		return response;
+	}
+
+	harvestShiny(tier: string): GardenTransactionResponse {
+		const response = new GardenTransactionResponse();
+		if (this.itemData.subtype !== ItemSubtypes.PLANT.name) {
+			response.addErrorMessage(`item is of type ${this.itemData.subtype}, cannot be harvested`);
+			return response;
+		}
+
+		response.payload = {
+			originalItem: this,
+			newTemplate: placeholderItemTemplates.getInventoryTemplate((this.itemData as PlantTemplate).transformShinyIds[tier].id),
+		};
 		return response;
 	}
 }

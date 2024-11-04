@@ -122,7 +122,7 @@ const GardenComponent = () => {
 		setGardenMessage(`Planted ${numPlanted} ${getItemResponse.payload.itemData.name}.`);
 		const apiResult = await plantAllAPI(plantedPlotIds, inventory, selectedItem, user, garden);
 		if (!apiResult) {
-			syncUserGardenInventory(user, garden, inventory);
+			await syncUserGardenInventory(user, garden, inventory);
 			setGardenMessage(`There was an error planting 1 or more seeds! Please refresh the page!`);
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			// return;
@@ -159,7 +159,7 @@ const GardenComponent = () => {
 		//api call
 		const apiResult = await harvestAllAPI(harvestedPlotIds, inventory, user, garden, instantGrow);
 		if (!apiResult) {
-			syncUserGardenInventory(user, garden, inventory);
+			await syncUserGardenInventory(user, garden, inventory);
 			setGardenMessage(`There was an error harvesting 1 or more plants! Please refresh the page!`);
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			

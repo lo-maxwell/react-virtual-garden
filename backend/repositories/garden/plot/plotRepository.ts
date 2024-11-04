@@ -17,7 +17,7 @@ class PlotRepository {
 	 * @extendedPlotEntity - the plot entity
 	 */
 	async makePlotObject(extendedPlotEntity: ExtendedPlotEntity): Promise<Plot> {
-		if (!extendedPlotEntity || (typeof extendedPlotEntity.id !== 'string') || (typeof extendedPlotEntity.plant_time !== 'string') || (typeof extendedPlotEntity.uses_remaining !== 'number')) {
+		if (!extendedPlotEntity || (typeof extendedPlotEntity.id !== 'string') || (typeof extendedPlotEntity.plant_time !== 'string') || (typeof extendedPlotEntity.uses_remaining !== 'number')  || (typeof extendedPlotEntity.random_seed !== 'number')) {
 			console.error(extendedPlotEntity);
 			throw new Error(`Invalid types while creating Plot from PlotEntity`);
 		}
@@ -31,7 +31,7 @@ class PlotRepository {
 		}
 
 		const instance = new Plot(extendedPlotEntity.id, item, extendedPlotEntity.plant_time, extendedPlotEntity.uses_remaining);
-		
+		instance.setRandomSeed(extendedPlotEntity.random_seed);
 		return instance;
 	}
 
@@ -49,7 +49,7 @@ class PlotRepository {
 	 * @id the id of the plot in the database
 	 */
 	async getPlotById(id: string): Promise<ExtendedPlotEntity | null> {
-		const result = await query<ExtendedPlotEntity>('SELECT id, row_index, col_index, plant_time, uses_remaining FROM plots WHERE id = $1', [id]);
+		const result = await query<ExtendedPlotEntity>('SELECT id, row_index, col_index, plant_time, uses_remaining, random_seed FROM plots WHERE id = $1', [id]);
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
@@ -69,7 +69,7 @@ class PlotRepository {
 
 		// Create a parameterized query with placeholders for each ID
 		const placeholders = ids.map((_, index) => `$${index + 1}`).join(', ');
-		const queryText = `SELECT id, row_index, col_index, plant_time, uses_remaining FROM plots WHERE id IN (${placeholders})`;
+		const queryText = `SELECT id, owner, row_index, col_index, plant_time, uses_remaining, random_seed FROM plots WHERE id IN (${placeholders})`;
 
 		const result = await query<ExtendedPlotEntity>(queryText, ids);
 		
@@ -85,7 +85,7 @@ class PlotRepository {
 	 */
 	async getPlotByGardenId(gardenId: string, rowIndex: number, columnIndex: number): Promise<ExtendedPlotEntity | null> {
 		const result = await query<ExtendedPlotEntity>(
-			'SELECT id, row_index, col_index, plant_time, uses_remaining FROM plots WHERE owner = $1 AND row_index = $2 AND col_index = $3',
+			'SELECT id, owner, row_index, col_index, plant_time, uses_remaining, random_seed FROM plots WHERE owner = $1 AND row_index = $2 AND col_index = $3',
 			[gardenId, rowIndex, columnIndex]
 			);
 		// If no rows are returned, return null
@@ -119,7 +119,7 @@ class PlotRepository {
 				DO UPDATE SET
 					plant_time = EXCLUDED.plant_time,
 					uses_remaining = EXCLUDED.uses_remaining
-				RETURNING id, owner, row_index, col_index, plant_time, uses_remaining`,
+				RETURNING id, owner, row_index, col_index, plant_time, uses_remaining, random_seed`,
 				[plot.getPlotId(), ownerId, rowIndex, columnIndex, plot.getPlantTime(), plot.getUsesRemaining()]
 			);
 
@@ -430,6 +430,97 @@ class PlotRepository {
 
 		// Call the transactionWrapper with the innerFunction and appropriate arguments
 		return transactionWrapper(innerFunction, 'updateMultiplePlotUsesRemaining', client);
+	}
+
+	/**
+	 * Updates the plot random seed, based on an internal formula.
+	 * @id the id of the plot
+	 * @iterations the number of times to update (usually 2 for harvesting plants)
+	 * @returns a PlotEntity with the new data on success (or throws error)
+	 */
+	 async updatePlotSeed(id: string, iterations: number, client?: PoolClient): Promise<PlotEntity> {
+		const innerFunction = async (client: PoolClient): Promise<PlotEntity> => {
+			// Lock the row for update
+			const lockResult = await client.query<{ id: string, random_seed: number }>(
+				'SELECT id, random_seed FROM plots WHERE id = $1 FOR UPDATE',
+				[id]
+			);
+
+			if (lockResult.rows.length === 0) {
+				throw new Error(`Plot not found for id: ${id}`);
+			}
+
+			let updatedSeed = lockResult.rows[0].random_seed;
+			for (let i = 0; i < iterations; i++) {
+				updatedSeed = Plot.getNextRandomSeed(updatedSeed);
+			}
+
+			const plotResult = await client.query<PlotEntity>(
+				'UPDATE plots SET random_seed = $1 WHERE id = $2 RETURNING *',
+				[updatedSeed, id]
+			);
+
+			// Check if result is valid
+			if (!plotResult || plotResult.rows.length === 0) {
+				throw new Error('There was an error updating the plot random seed');
+			}
+			return plotResult.rows[0];
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'updatePlotSeed', client);
+	}
+
+	/**
+	 * Updates the plot random seed for multiple plots.
+	 * @plotSeedMap map of plot id -> new random seed value
+	 * @returns an array of ExtendedPlotEntity with the new data on success (or throws error)
+	 */
+	async updateMultiplePlotSeed(plotSeedMap: Map<string, number>, client?: PoolClient): Promise<ExtendedPlotEntity[]> {
+		const innerFunction = async (client: PoolClient): Promise<ExtendedPlotEntity[]> => {
+			if (plotSeedMap.size === 0) {
+				console.warn('No plots to update. plotSeedMap is empty.');
+				return []; // Return an empty array or handle as needed
+			}
+
+			// Construct the SQL query
+			const plotIds = Array.from(plotSeedMap.keys());
+			const updatedSeeds = Array.from(plotSeedMap.values());
+
+			// Ensure all updated seeds are integers
+			updatedSeeds.forEach(seed => {
+				if (typeof seed !== 'number') {
+					throw new Error(`Invalid seed value: ${seed}. Expected a number.`);
+				}
+			});
+
+			// Create the CASE statement for the update
+			const caseStatements = plotIds.map((id, index) => `WHEN id = $${index + 1}::uuid THEN $${plotIds.length + index + 1}::integer`).join(' ');
+
+			// Construct the full SQL query
+			const sql = `
+				UPDATE plots
+				SET random_seed = CASE ${caseStatements} END
+				WHERE id IN (${plotIds.map((_, index) => `$${index + 1}::uuid`).join(', ')})
+				RETURNING *;
+			`;
+
+			// Prepare the parameters for the query
+			const params = [...plotIds, ...updatedSeeds];
+
+			// Execute the query
+			const plotResult = await client.query<ExtendedPlotEntity>(sql, params);
+
+			// Check if result is valid
+			if (!plotResult || plotResult.rows.length === 0) {
+				throw new Error('There was an error updating the plot random seed');
+			}
+
+			return plotResult.rows;
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'updateMultiplePlotSeed', client);
 	}
 }
 

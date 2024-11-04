@@ -51,10 +51,10 @@ export async function restockStore(storeId: string, client?: PoolClient): Promis
 		}
 
 		
-		const REAL_TIME_FUDGE = 1000; //Allow for 1s discrepancy between restock times
+		const REAL_TIME_FUDGE = 2500; //Allow for 1s discrepancy between restock times
 
 		//Check if restock is valid
-		if (!Store.isRestockTime(restockTime + REAL_TIME_FUDGE, storeInterface.restockInterval, currentTime)) {
+		if (!Store.isRestockTime(restockTime - REAL_TIME_FUDGE, storeInterface.restockInterval, currentTime)) {
 			// throw new Error(`Not time to restock store yet!`);
 			console.warn(`Not time to restock store yet!`);
 			return false;

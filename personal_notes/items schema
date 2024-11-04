@@ -133,7 +133,8 @@ owner (garden id)
 row (int)
 column (int)
 plantTime (int)
-numUses (int)
+usesRemaining (int)
+randomSeed (int)
 
 CREATE TABLE IF NOT EXISTS plots (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
@@ -142,6 +143,7 @@ CREATE TABLE IF NOT EXISTS plots (
     col_index INTEGER NOT NULL CHECK (col_index >= 0),         -- Column index (0 indexed)
     plant_time BIGINT NOT NULL DEFAULT 0,       -- Time planted as ms since epoch time
     uses_remaining INTEGER NOT NULL DEFAULT 0,  -- Number of uses (usually harvests)
+    random_seed INTEGER NOT NULL DEFAULT (FLOOR(RANDOM() * (2147483647 - 1 + 1))),  -- Random seed between 1 and max_int
     FOREIGN KEY (owner) REFERENCES gardens(id), -- Establishing relationship with 'gardens' table
     UNIQUE (owner, row_index, col_index)  -- Only 1 plot per row/column slot in a garden
 );

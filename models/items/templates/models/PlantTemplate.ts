@@ -8,9 +8,9 @@ export class PlantTemplate extends PlacedItemTemplate{
 	growTime: number;
 	repeatedGrowTime: number;
 	numHarvests: number;
-	transformShinyIds?: { [key: string]: { id: string; probability: number } };
+	transformShinyIds: { [key: string]: { id: string; probability: number } };
 	
-	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, level: number, transformId: string, baseExp: number, growTime: number, repeatedGrowTime: number, numHarvests: number, transformShinyIds?: { [key: string]: { id: string; probability: number } }) {
+	constructor(id: string, name: string, icon: string, type: ItemType, subtype: ItemSubtype, category: string, description: string, value: number, level: number, transformId: string, baseExp: number, growTime: number, repeatedGrowTime: number, numHarvests: number, transformShinyIds: { [key: string]: { id: string; probability: number } }) {
 		super(id, name, icon, type, subtype, category, description, value, level, transformId);
 		this.baseExp = baseExp;
 		this.growTime = growTime;

@@ -33,7 +33,7 @@
             },
             {
                 "id": "0-02-01-06-00",
-                "name": "yellow onion",
+                "name": "onion",
                 "icon": "🧅",
                 "type": "PlacedItem",
                 "subtype": "Plant",
@@ -434,7 +434,7 @@
             },
             {
                 "id": "1-01-01-06-00",
-                "name": "yellow onion seed",
+                "name": "onion seed",
                 "icon": "🧅",
                 "type": "InventoryItem",
                 "subtype": "Seed",
@@ -600,7 +600,7 @@
             },
             {
                 "id": "1-03-01-06-00",
-                "name": "yellow onion",
+                "name": "onion",
                 "icon": "🧅",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
@@ -611,34 +611,34 @@
             },
             {
                 "id": "1-03-01-06-01",
-                "name": "Bronze yellow onion",
+                "name": "Bronze onion",
                 "icon": "🧅",
                 "type": "InventoryItem",
                 "subtype": "Harvested",
                 "category": "Onion",
-                "description": "Bronze version of yellow onion",
+                "description": "Bronze version of onion",
                 "value": 60,
                 "level": 0
             },
             {
                 "id": "1-03-01-06-02",
-                "name": "Silver yellow onion",
+                "name": "Silver onion",
                 "icon": "🧅",
                 "type": "InventoryItem",
                 "subtype": "Harvested",
                 "category": "Onion",
-                "description": "Silver version of yellow onion",
+                "description": "Silver version of onion",
                 "value": 150,
                 "level": 0
             },
             {
                 "id": "1-03-01-06-03",
-                "name": "Gold yellow onion",
+                "name": "Gold onion",
                 "icon": "🧅",
                 "type": "InventoryItem",
                 "subtype": "Harvested",
                 "category": "Onion",
-                "description": "Gold version of yellow onion",
+                "description": "Gold version of onion",
                 "value": 300,
                 "level": 0
             },

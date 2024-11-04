@@ -31,7 +31,7 @@ for plant in items['PlacedItems']['Plants']:
                 'subtype': 'Harvested',  # You can adjust this as needed
                 'category': plant['category'],  # Use the same category
                 'description': f"{tier.capitalize()} version of {original_name}",  # Description
-                'value': original_value * multiplier,  # Adjusted value based on tier
+                'value': -1,  # Hardcoded invalid value so we can fix it later
                 'level': plant['level']  # Set level as needed
             }
             # Use the name as the key to overwrite existing items

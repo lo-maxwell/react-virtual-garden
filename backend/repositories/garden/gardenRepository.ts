@@ -1,7 +1,7 @@
 import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
 import { GardenEntity, Garden, ExtendedGardenEntity, GardenDimensionEntity } from "@/models/garden/Garden";
-import { ExtendedPlotEntity, Plot } from "@/models/garden/Plot";
+import { Plot } from "@/models/garden/Plot";
 import { PoolClient } from "pg";
 import plotRepository from "./plot/plotRepository";
 

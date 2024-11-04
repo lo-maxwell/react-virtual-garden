@@ -185,7 +185,7 @@ export const usePlotActions = () => {
 			const canHarvest = Plot.canHarvest(plot.getItem().itemData, plot.getPlantTime(), plot.getUsesRemaining(), Date.now());
 			if (!(canHarvest || instantGrow)) {
 				setGardenMessage(` `);
-				return {success: false, displayIcon: originalIcon};
+				return {success: false, displayIcon: originalIcon, payload: null};
 			}
 			const xp = plot.getExpValue();
 			const harvestItemResponse = plot.harvestItem(inventory, instantGrow, 1);
@@ -197,7 +197,7 @@ export const usePlotActions = () => {
 			saveGarden(garden);
 			saveUser(user);
 			setGardenMessage(`Harvested ${harvestItemResponse.payload.pickedItem.itemData.name}.`);
-			return {success: true, displayIcon: plot.getItem().itemData.icon};
+			return {success: true, displayIcon: plot.getItem().itemData.icon, payload: harvestItemResponse.payload.newItem};
 		}
 
 		const apiHelper = async () => {
@@ -227,7 +227,7 @@ export const usePlotActions = () => {
 				}
 				const inventoryItem = inventory.getItem(itemTemplate);
 				if (!(inventoryItem.isSuccessful())) {
-					throw new Error(`Error finding item in inventory`);
+					throw new Error(`Error finding item in inventory: ${itemTemplate.id}`);
 				}
 				(inventoryItem.payload as InventoryItem).setInventoryItemId(result.id);
 				console.log('Successfully harvested:', result);

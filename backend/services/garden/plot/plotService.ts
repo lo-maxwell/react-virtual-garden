@@ -292,7 +292,14 @@ export async function harvestPlot(plotId: string, inventoryId: string, levelSyst
 			throw new Error(`Could not find valid plant matching identifier ${placedItemEntity.identifier}`);
 		}
 
-		const harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate(plotItemTemplate.transformId);
+		const shinyTier = Plot.checkShinyHarvest(plotItemTemplate as PlantTemplate, plotEntity.random_seed, Plot.baseShinyChance);
+		let harvestedItemTemplate;
+		if (shinyTier === 'Regular') {
+			harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate(plotItemTemplate.transformId);
+		} else {
+			harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate((plotItemTemplate as PlantTemplate).transformShinyIds[shinyTier].id);
+		}
+
 		if (!harvestedItemTemplate || harvestedItemTemplate.subtype !== ItemSubtypes.HARVESTED.name) {
 			throw new Error(`Could not find valid harvestedItem matching identifier ${plotItemTemplate.transformId}`);
 		}
@@ -303,7 +310,7 @@ export async function harvestPlot(plotId: string, inventoryId: string, levelSyst
 		}
 		
 		const instantGrow = process.env.INSTANT_HARVEST_KEY === instantHarvestKey && process.env.INSTANT_HARVEST_KEY !== undefined;
-		const REAL_TIME_FUDGE = 2000; //Allow for 1s discrepancy between harvest times
+		const REAL_TIME_FUDGE = 2500; //Allow for 2.5s discrepancy between harvest times
 
 		//Check if harvest is valid
 		if (!instantGrow && !Plot.canHarvest(plotItemTemplate, plantTime - REAL_TIME_FUDGE, plotEntity.uses_remaining, currentTime)) {
@@ -329,6 +336,8 @@ export async function harvestPlot(plotId: string, inventoryId: string, levelSyst
 		} else {
 			await plotRepository.setPlotDetails(plotId, currentTime, plotEntity.uses_remaining - possibleHarvests, client);
 		}
+		// We check 2 numbers during harvest shiny, so we update twice
+		await plotRepository.updatePlotSeed(plotId, 2, client);
 
 		//levelsystem gains xp
 		await levelRepository.gainExp(levelSystemId, (plotItemTemplate as PlantTemplate).baseExp, client);

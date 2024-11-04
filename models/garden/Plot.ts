@@ -17,24 +17,27 @@ export interface PlotEntity {
 	row_index: number,
 	col_index: number,
 	plant_time: string,
-	uses_remaining: number
+	uses_remaining: number,
+	random_seed: number
 }
 
 export interface ExtendedPlotEntity extends PlotEntity {
 	id: string
 }
 
-
-//Add row/column to plot class?
 export class Plot {
+	static baseShinyChance: number = 0.1;
 	private plotId: string;
 	private item: PlacedItem;
 	private plantTime: number;
 	private usesRemaining: number;
+	private randomSeed: number;
 
 	constructor(plotId: string, item: PlacedItem, plantTime: number | string = Date.now(), usesRemaining: number | null = null) {
 		this.plotId = plotId;
 		this.item = item;
+		this.randomSeed = Math.floor(Math.random() * 1000000);
+		this.updateRandomSeed();
 		if (typeof plantTime === 'number') {
 			this.plantTime = plantTime;
 		} else {
@@ -65,25 +68,46 @@ export class Plot {
 
 	static fromPlainObject(plainObject: any): Plot {
 		try {
-            // Validate plainObject structure
-            if (!plainObject || typeof plainObject !== 'object' || !plainObject.item) {
-                throw new Error('Invalid plainObject structure for Plot');
-            }
-			const { plotId, item, plantTime, harvestsRemaining } = plainObject;
+			// Validate plainObject structure
+			if (!plainObject || typeof plainObject !== 'object' || !plainObject.item) {
+				throw new Error('Invalid plainObject structure for Plot');
+			}
 
-            // Convert item if valid
+			const { plotId, item, plantTime, harvestsRemaining, randomSeed } = plainObject;
+
+			// Validate types and null checks
+			if (typeof plotId !== 'string' || !plotId) {
+				throw new Error('Invalid plotId: must be a non-empty string');
+			}
+			if (!item || typeof item !== 'object') {
+				throw new Error('Invalid item: must be a non-null object');
+			}
+			if (typeof plantTime !== 'number' || isNaN(plantTime)) {
+				throw new Error('Invalid plantTime: must be a valid number');
+			}
+			if (typeof harvestsRemaining !== 'number' || isNaN(harvestsRemaining)) {
+				throw new Error('Invalid harvestsRemaining: must be a valid number');
+			}
+			if (typeof randomSeed !== 'number' || isNaN(randomSeed)) {
+				throw new Error('Invalid randomSeed: must be a valid number');
+			}
+
+			// Convert item if valid
 			const itemType = getItemClassFromSubtype(item) as ItemConstructor<PlacedItem>;
-            const hydratedItem = itemType.fromPlainObject(item);
+			const hydratedItem = itemType.fromPlainObject(item);
 			if (hydratedItem.itemData.name == 'error') {
 				throw new Error('Invalid item in Plot');
 			}
-            return new Plot(plotId, hydratedItem, plantTime, harvestsRemaining);
-        } catch (error) {
-            console.error('Error creating Plot from plainObject:', error);
-            // Return a default or empty Plot instance in case of error
+
+			const plot = new Plot(plotId, hydratedItem, plantTime, harvestsRemaining);
+			plot.randomSeed = randomSeed; // Use the setter
+			return plot;
+		} catch (error) {
+			console.error('Error creating Plot from plainObject:', error);
+			// Return a default or empty Plot instance in case of error
 			const ground = generateNewPlaceholderPlacedItem("ground", "");
-            return new Plot(uuidv4(), ground, Date.now(), 0);
-        }
+			return new Plot(uuidv4(), ground, Date.now(), 0);
+		}
 	}
 
 	toPlainObject(): any {
@@ -92,6 +116,7 @@ export class Plot {
 			item: this.item.toPlainObject(),
 			plantTime: this.plantTime,
 			harvestsRemaining: this.usesRemaining,
+			randomSeed: this.randomSeed,
 		}
 	} 
 
@@ -104,6 +129,35 @@ export class Plot {
 
 	static generateEmptyItem(): PlacedItem {
 		return new EmptyItem(uuidv4(), Plot.getGroundTemplate(), '');
+	}
+
+	// Getter for randomSeed
+	getRandomSeed(): number {
+        return this.randomSeed;
+    }
+
+    // Setter for randomSeed
+    setRandomSeed(value: number) {
+        this.randomSeed = value;
+    }
+
+	// Updater function for randomSeed
+    updateRandomSeed(): void {
+        const multiplier = 48271; // Example multiplier
+        const increment = 1; // Example increment
+        const modulus = 2147483647; // Example modulus
+
+        // Update the random seed using a simple linear congruential generator formula
+        this.randomSeed = (multiplier * this.randomSeed + increment) % modulus;
+    }
+
+	static getNextRandomSeed(randomSeed: number): number {
+		const multiplier = 48271; // Example multiplier
+        const increment = 1; // Example increment
+        const modulus = 2147483647; // Example modulus
+
+        // Update the random seed using a simple linear congruential generator formula
+        return (multiplier * randomSeed + increment) % modulus;
 	}
 
 	/**
@@ -435,6 +489,49 @@ export class Plot {
 	}
 
 	/**
+	 * Deterministically returns whether an item will harvest as shiny or not
+	 * @itemData - the plant template to harvest
+	 * @randomSeed - the random seed tied to the plot
+	 * @initialChance - initial chance of harvest, as a float from 0.0 to 1.0
+	 * @returns a string containing the shiny tier, or 'Regular' if not shiny
+	 */
+	static checkShinyHarvest(itemData: PlantTemplate, randomSeed: number, initialChance: number): string {
+		if (initialChance <= 0.0) {
+			return 'Regular';
+		}
+		
+		// Use the random seed to generate a pseudo-random number
+		const multiplier = 48271; // Example multiplier
+		const modulus = 2147483647; // Example modulus
+		const increment = 1; // No increment for this example
+	
+		// Generate a pseudo-random number based on the seed
+		randomSeed = (multiplier * randomSeed + increment) % modulus;
+	
+		// Normalize the random number to a value between 0.0 and 1.0
+		const normalizedValue = randomSeed / modulus;
+	
+		// Determine if the harvest is shiny based on the initial chance
+		if (normalizedValue < initialChance) {
+			// If shiny, determine which tier
+			const tiers = itemData.transformShinyIds;
+			randomSeed = (multiplier * randomSeed + increment) % modulus; // Update the seed again for tier selection
+			const randomTierValue = randomSeed / modulus; // Normalize to [0, 1]
+			let cumulativeProbability = 0;
+	
+			for (const tier in tiers) {
+				cumulativeProbability += tiers[tier].probability;
+				if (randomTierValue <= cumulativeProbability) {
+					return tier; // Return the tier name if the random value falls within the cumulative probability
+				}
+			}
+		}
+	
+		return 'Regular'; // Return 'Regular' if not shiny
+	}
+
+	//TODO: Add shiny check
+	/**
 	 * Checks if the plant in this plot is finished growing, then picks it up and adds a harvestedItem to inventory.
 	 * If this is a multiharvest plant with harvests remaining afterwards, the plant stays.
 	 * @inventory the inventory to modify
@@ -474,10 +571,17 @@ export class Plot {
 		}
 		const originalItem = this.item;
 		let useItemResponse: GardenTransactionResponse;
-		useItemResponse = originalItem.use();
+		const shinyTier = Plot.checkShinyHarvest(originalItem.itemData as PlantTemplate, this.getRandomSeed(), Plot.baseShinyChance);
+		if (shinyTier === 'Regular') {
+			useItemResponse = originalItem.harvest();
+		} else {
+			useItemResponse = originalItem.harvestShiny(shinyTier);
+		}
 		if (!useItemResponse.isSuccessful()) {
 			return useItemResponse;
 		}
+		this.updateRandomSeed();
+		this.updateRandomSeed();
 		const harvestedAmt = Math.min(this.getUsesRemaining(), numHarvests);
 		inventory.gainItem(useItemResponse.payload.newTemplate, harvestedAmt);
 		this.updateUsesRemaining(-1 * numHarvests);

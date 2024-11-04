@@ -6,6 +6,9 @@ import { Plant } from "@/models/items/placedItems/Plant";
 import PlotTooltip from "./plotTooltip";
 import colors from "../colors/colors";
 import { useAccount } from "@/app/hooks/contexts/AccountContext";
+import { syncUserGardenInventory } from "@/app/garden/gardenFunctions";
+import { useInventory } from "@/app/hooks/contexts/InventoryContext";
+import { useUser } from "@/app/hooks/contexts/UserContext";
 
 type PlotComponentProps = {
 	plot: Plot;
@@ -25,6 +28,9 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 	const [displayIcon, setDisplayIcon] = useState(plot.getItem().itemData.icon);
 	const [forceRefreshKey, setForceRefreshKey] = useState(0);
 	const { account, cloudSave } = useAccount();
+	const { user } = useUser();
+	const { garden } = useGarden();
+	const { inventory } = useInventory();
 
 	const getColor = () => {
 		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name) {
@@ -109,7 +115,10 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 			setDisplayIcon(apiResult.displayIcon);
 		} else {
 			console.warn(`Api call failed`);
-			setDisplayIcon(apiResult.displayIcon);
+			// setDisplayIcon(apiResult.displayIcon);
+			// TODO: sync plot function?
+			await syncUserGardenInventory(user, garden, inventory);
+			setDisplayIcon(plot.getItem().itemData.icon);
 			setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1); //we force a refresh to clear statuses
 		}
 	}

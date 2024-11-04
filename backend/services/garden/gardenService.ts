@@ -317,6 +317,7 @@ export async function plantAll(plotIds: string[], inventoryId: string, inventory
 	return transactionWrapper(innerFunction, 'PlantAll', client);
 }
 
+//TODO: Add shiny
 /**
  * Harvests a maximum of 1 item per plot at a time
  * @param plotIds 
@@ -346,6 +347,7 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 		let totalExp = 0;
 		const harvestItemMap = new Map<string, number>();
 		const plotItemMap = new Map<string, PlacedItemTemplate>();
+		const plotRandomSeedMap = new Map<string, number>();
 		let nonCriticalError = false;
 		for (const placedItem of placedItemEntities) {
 			if (!plotIds.includes(placedItem.owner)) {
@@ -369,8 +371,15 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 					nonCriticalError = true;
 					continue;
 				}
+				const shinyTier = Plot.checkShinyHarvest(plotItemTemplate as PlantTemplate, plotEntity.random_seed, Plot.baseShinyChance);
+				let harvestedItemTemplate;
+				if (shinyTier === 'Regular') {
+					harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate(plotItemTemplate.transformId);
+				} else {
+					harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate((plotItemTemplate as PlantTemplate).transformShinyIds[shinyTier].id);
+				}
 
-				const harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate(plotItemTemplate.transformId);
+				// const harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate(plotItemTemplate.transformId);
 				if (!harvestedItemTemplate || harvestedItemTemplate.subtype !== ItemSubtypes.HARVESTED.name) {
 					console.warn(`Could not find valid harvestedItem matching identifier ${plotItemTemplate.transformId}, skipping`);
 					nonCriticalError = true;
@@ -385,7 +394,7 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 				}
 				
 				const instantGrow = process.env.INSTANT_HARVEST_KEY === instantHarvestKey && process.env.INSTANT_HARVEST_KEY !== undefined;
-				const REAL_TIME_FUDGE = 2000; //Allow for 1s discrepancy between harvest times
+				const REAL_TIME_FUDGE = 2500; //Allow for 2.5s discrepancy between harvest times
 
 				//Check if harvest is valid
 				if (!instantGrow && !Plot.canHarvest(plotItemTemplate, plantTime - REAL_TIME_FUDGE, plotEntity.uses_remaining, currentTime)) {
@@ -399,6 +408,12 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 				} else {
 					replacePlotIds.push(plotEntity.id);
 				}
+				//Hardcoded 2 iterations of seed generation for harvesting
+				let newSeed = plotEntity.random_seed;
+				for (let i = 0; i < 2; i++) {
+					newSeed = Plot.getNextRandomSeed(newSeed);
+				}
+				plotRandomSeedMap.set(plotEntity.id, newSeed);
 				//keep track of harvested item quantities
 				harvestItemMap.set(harvestedItemTemplate.id, (harvestItemMap.get(harvestedItemTemplate.id) || 0) + 1);
 				plotItemMap.set(harvestedItemTemplate.id, plotItemTemplate);
@@ -439,6 +454,8 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 			
 			await plotRepository.updateMultiplePlotUsesRemaining(keepPlotIds, -1, client);
 		}
+
+		await plotRepository.updateMultiplePlotSeed(plotRandomSeedMap, client);
 
 		//levelsystem gains xp
 		await levelRepository.gainExp(levelSystemId, totalExp, client);
@@ -522,7 +539,7 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 	} 
 
 	// Call the transactionWrapper with the innerFunction and appropriate arguments
-	return transactionWrapper(innerFunction, 'HarvestPlant', client);
+	return transactionWrapper(innerFunction, 'HarvestAll', client);
 }
 
 

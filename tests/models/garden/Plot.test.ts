@@ -176,9 +176,9 @@ test('Should Harvest Apple', () => {
 	const response = newPlot.harvestItem(testInventory, false, 1, generateNewPlaceholderPlacedItem('ground', ''), 1000000);
 	expect(response.isSuccessful()).toBe(true);
 	expect(newPlot.getItem().itemData.name).toBe('ground');
-	expect(response.payload.newItem.itemData.name).toBe('apple');
-	expect(testInventory.contains('apple').payload).toBe(true);
-	expect(testInventory.getItem('apple').payload.quantity).toBe(1);
+	expect(response.payload.newItem.itemData.name).toContain('apple');
+	expect(testInventory.contains(response.payload.newItem.itemData.name).payload).toBe(true);
+	expect(testInventory.getItem(response.payload.newItem.itemData.name).payload.quantity).toBe(1);
 })
 
 test('Should Not Harvest Ungrown Apple', () => {
@@ -194,9 +194,9 @@ test('Should Harvest Ungrown Apple If InstantGrow On', () => {
 	const response = newPlot.harvestItem(testInventory, true, 1, generateNewPlaceholderPlacedItem('ground', ''), 5000);
 	expect(response.isSuccessful()).toBe(true);
 	expect(newPlot.getItem().itemData.name).toBe('ground');
-	expect(response.payload.newItem.itemData.name).toBe('apple');
-	expect(testInventory.contains('apple').payload).toBe(true);
-	expect(testInventory.getItem('apple').payload.quantity).toBe(1);
+	expect(response.payload.newItem.itemData.name).toContain('apple');
+	expect(testInventory.contains(response.payload.newItem.itemData.name).payload).toBe(true);
+	expect(testInventory.getItem(response.payload.newItem.itemData.name).payload.quantity).toBe(1);
 })
 
 test('Should Not Harvest Non Plant', () => {
