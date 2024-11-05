@@ -285,6 +285,20 @@
 
 ### Added cloud save enable/disable button (currently disabled for production)
 
+## Day 31
+
+### Firebase auth
+
+  * Setup firebase project and enable auth
+  * Register this webapp to firebase project
+  * npm install firebase
+  * Create auth context and wrap content in it
+  * Implement sign in and sign out buttons
+  * Protect certain pages when not signed in 
+  * Display user data
+  * Link firebase auth with database
+  * Protect api routes based on login
+
 
 
 TODO:
