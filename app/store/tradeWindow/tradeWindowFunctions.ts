@@ -2,6 +2,7 @@ import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { Store } from "@/models/itemStore/store/Store";
 import User from "@/models/user/User";
+import { makeApiRequest } from "@/utils/api/api";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { saveStore } from "@/utils/localStorage/store";
 
@@ -21,22 +22,8 @@ export async function buyItemAPI (user: User, store: Store, selectedItem: Invent
 			purchaseQuantity: quantity, 
 			inventoryId: inventory.getInventoryId()
 		}
-		// Making the PATCH request to your API endpoint
-		const response = await fetch(`/api/user/${user.getUserId()}/store/${store.getStoreId()}/buy`, {
-		  method: 'PATCH',
-		  headers: {
-			'Content-Type': 'application/json',
-		  },
-		  body: JSON.stringify(data), // Send the data in the request body
-		});
-  
-		// Check if the response is successful
-		if (!response.ok) {
-		  throw new Error('Failed to purchase item');
-		}
-  
-		// Parsing the response data
-		const result = await response.json();
+        const apiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/buy`;
+        const result = await makeApiRequest('PATCH', apiRoute, data, true);
 		console.log('Successfully purchased item:', result);
 		
 		return true;
@@ -62,22 +49,8 @@ export async function sellItemAPI (user: User, store: Store, selectedItem: Inven
 			sellQuantity: quantity, 
 			inventoryId: inventory.getInventoryId()
 		}
-		// Making the PATCH request to your API endpoint
-		const response = await fetch(`/api/user/${user.getUserId()}/store/${store.getStoreId()}/sell`, {
-		  method: 'PATCH',
-		  headers: {
-			'Content-Type': 'application/json',
-		  },
-		  body: JSON.stringify(data), // Send the data in the request body
-		});
-  
-		// Check if the response is successful
-		if (!response.ok) {
-		  throw new Error('Failed to sell item');
-		}
-  
-		// Parsing the response data
-		const result = await response.json();
+        const apiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/sell`;
+        const result = await makeApiRequest('PATCH', apiRoute, data, true);
 		console.log('Successfully sold item:', result);
 		return true;
 	  } catch (error) {
@@ -87,32 +60,18 @@ export async function sellItemAPI (user: User, store: Store, selectedItem: Inven
 	  }
 }
 
+//TODO: Combine into 1 api call
 export async function syncStoreAndInventory (user: User, store: Store, inventory: Inventory) {
 	try {
         // Sync store data
-        const storeResponse = await fetch(`/api/user/${user.getUserId()}/store/${store.getStoreId()}/get`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-        if (!storeResponse.ok) {
-          throw new Error('Failed to fetch store');
-        }
-        const storeResult = await storeResponse.json();
+        const storeApiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/get`;
+        const storeResult = await makeApiRequest('GET', storeApiRoute, {}, true);
 		saveStore(Store.fromPlainObject(storeResult));
 		Object.assign(store, Store.fromPlainObject(storeResult));
+
 		// Sync inventory data
-        const inventoryResponse = await fetch(`/api/user/${user.getUserId()}/inventory/${inventory.getInventoryId()}/get`, {
-			method: 'GET',
-			headers: {
-			  'Content-Type': 'application/json',
-			}
-		});
-		if (!inventoryResponse.ok) {
-		throw new Error('Failed to fetch inventory');
-		}
-		const inventoryResult = await inventoryResponse.json();
+        const inventoryApiRoute = `/api/user/${user.getUserId()}/inventory/${inventory.getInventoryId()}/get`;
+        const inventoryResult = await makeApiRequest('GET', inventoryApiRoute, {}, true);
 		saveInventory(Inventory.fromPlainObject(inventoryResult));
 		Object.assign(inventory, Inventory.fromPlainObject(inventoryResult));
         return true;

@@ -16,17 +16,14 @@ export const GardenProvider = ({ children }: GardenProviderProps) => {
 	const [instantGrow, setInstantGrow] = useState(false);
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 
-	function generateDefaultNewGarden(): Garden {
-		const randomUuid = uuidv4();
-		return new Garden(randomUuid, "Test User");
-	}
+	
 
 	function setupGarden(): Garden {
 		let garden = loadGarden();
 		console.log(garden);
 		if (!(garden instanceof Garden)) {
 		  console.log('garden not found, setting up');
-		  garden = generateDefaultNewGarden();
+		  garden = Garden.generateDefaultNewGarden();
 		  saveGarden(garden);
 		}
 		return garden;
@@ -39,7 +36,7 @@ export const GardenProvider = ({ children }: GardenProviderProps) => {
 	
 
 	function resetGarden() {
-		const garden = generateDefaultNewGarden();
+		const garden = Garden.generateDefaultNewGarden();
 		setGarden(garden);
 		saveGarden(garden);
 		console.log('finished reset');

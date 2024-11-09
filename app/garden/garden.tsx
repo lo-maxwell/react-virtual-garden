@@ -114,7 +114,7 @@ const GardenComponent = () => {
 		}
 		
 		// Terminate early before api call
-		if (!cloudSave) {
+		if (!cloudSave || plantedPlotIds.length <= 0 || numPlanted <= 0) {
 			return;
 		}
 
@@ -152,7 +152,7 @@ const GardenComponent = () => {
 		setGardenMessage(`Harvested ${numHarvested} plants.`);
 
 		// Terminate early before api call
-		if (!cloudSave) {
+		if (!cloudSave || harvestedPlotIds.length <= 0 || numHarvested <= 0) {
 			return;
 		}
 

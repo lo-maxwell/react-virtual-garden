@@ -48,7 +48,11 @@ class LevelRepository {
 	 * @ownerType string defining the owner, ie. 'user' (only users for now, but futureproofing for other possible objects with levels)
 	 */
 	async getLevelSystemByOwnerId(ownerId: string, ownerType: string): Promise<LevelSystemEntity | null> {
-		const result = await query<LevelSystemEntity>('SELECT * FROM levels WHERE owner = $1 AND owner_type = $2', [ownerId, ownerType]);
+		let searchTerm = ownerType === 'user' ? 'owner_uid' : 'owner_uuid';
+		const queryText = `SELECT * FROM levels WHERE ${searchTerm} = $1`;
+
+		const result = await query<LevelSystemEntity>(queryText,
+		 [ownerId]);
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
@@ -73,23 +77,30 @@ class LevelRepository {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
 			}
+			let ownerUUID = null;
+			let ownerUID = null;
+			let searchTerm = null;
+			if (ownerType === 'user') {
+				ownerUID = owner;
+				searchTerm = 'owner_uid';
+			} else {
+				ownerUUID = owner;
+				searchTerm = 'owner_uuid';
+			}
 			// Check if the level already exists
-			const existingLevelResult = await client.query<{id: string}>(
-				'SELECT id FROM levels WHERE owner = $1',
-				[owner]
-			);
+			const existingLevelResult = await this.getLevelSystemByOwnerId(owner, ownerType);
 
-			if (existingLevelResult.rows.length > 0) {
+			if (existingLevelResult) {
 				// Level System already exists
 				const levelSystemEntity: LevelSystemEntity = levelSystem.toLevelSystemEntity();
-				console.warn(`Level system already exists for user ${owner} with this ID: ${existingLevelResult.rows[0].id}`);
+				console.warn(`Level system already exists for user ${owner} with this ID: ${existingLevelResult.id}`);
 				return levelSystemEntity;
 				// return makeLevelSystemObject(levelSystemEntity); 
 			}
 			
 			const result = await query<LevelSystemEntity>(
-				'INSERT INTO levels (id, owner, owner_type, level, current_xp, growth_rate) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-				[levelSystem.getLevelSystemId(), owner, ownerType, levelSystem.getLevel(), levelSystem.getCurrentExp(), levelSystem.getGrowthRate()]
+				'INSERT INTO levels (id, owner_uuid, owner_uid, owner_type, level, current_xp, growth_rate) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+				[levelSystem.getLevelSystemId(), ownerUUID, ownerUID, ownerType, levelSystem.getLevel(), levelSystem.getCurrentExp(), levelSystem.getGrowthRate()]
 				);
 
 			// Check if result is valid

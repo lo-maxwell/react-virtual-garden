@@ -4,7 +4,7 @@ import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { Store } from "@/models/itemStore/store/Store";
 import User from "@/models/user/User";
 import { NextResponse } from "next/server";
-
+//to be obseleted
 export async function POST(request: Request) {
 	try {
 	  const { plainUserObject, plainInventoryObject, plainStoreObject, plainGardenObject } = await request.json();

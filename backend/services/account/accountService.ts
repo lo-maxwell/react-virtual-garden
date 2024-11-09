@@ -18,6 +18,23 @@ import { PoolClient } from "pg";
 import { transactionWrapper } from "../utility/utility";
 
 /**
+ * Calls createAccountInDatabase with the default user, store, inventory, garden objects.
+ * @returns the result of createAccountInDatabase
+ */
+ export async function createDefaultAccountInDatabase(firebaseUid: string, client?: PoolClient): Promise<string | null> {
+	const defaultUser = User.generateNewUserWithId(firebaseUid);
+	
+	const defaultGarden = Garden.generateDefaultNewGarden();
+	const defaultInventory = Inventory.generateDefaultNewInventory();
+	const defaultStore = Store.generateDefaultNewStore();
+	const createResult = await createAccountInDatabase(defaultUser, defaultInventory, defaultStore, defaultGarden, client);
+	if (!createResult) {
+		throw new Error(`There was an error initializing default objects`);
+	}
+	return defaultUser.getUserId();
+}
+
+/**
  * Begins a transaction if there is not already one. Creates a new row in the users, levels, itemstores, inventoryItems (if there are existing items), garden, plots tables.
  * If the object already exists in the database (with the corresponding id), does nothing.
  * On error, rolls back.

@@ -299,6 +299,20 @@
   * Link firebase auth with database
   * Protect api routes based on login
 
+### Firebase account creation
+
+  * New User
+  * User has an empty User, Garden, Inventory, Store object: Good to go
+  * User has existing User/Garden/Inventory/Store: data migration eventually, right now just a warning that it'll be deleted
+  * User presses register account button
+  * Firebase creates account, returning an auth token
+  * Server verifies auth token (in api layer)
+    * Add reusable middleware to avoid duplicating token verification code in every api route
+  * Server creates database entries with default parameters
+  * Server returns created objects
+  * Firebase links returned role to custom claims
+  * Client loads returned objects into memory and propagates to contexts
+  * TODO: add more auth wrappers around functions (plant, harvest, etc)
 
 
 TODO:

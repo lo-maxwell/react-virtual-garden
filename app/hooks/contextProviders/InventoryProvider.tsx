@@ -16,19 +16,12 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     const [inventory, setInventory] = useState<Inventory | null>(null);
 	const [inventoryForceRefreshKey, setInventoryForceRefreshKey] = useState(0);
 
-
-	function generateDefaultNewInventory(): Inventory {
-		const randomUuid = uuidv4();
-		return new Inventory(randomUuid, "Test User", 100, new ItemList([
-			generateNewPlaceholderInventoryItem('apple seed', 100)]));
-	}
-
 	function setupInventory(): Inventory {
 		let inv = loadInventory();
 		console.log(inv);
 		if (!(inv instanceof Inventory)) {
 		  console.log('inventory not found, setting up');
-		  inv = generateDefaultNewInventory();
+		  inv = Inventory.generateDefaultNewInventory();
 		  saveInventory(inv);
 		}
 		return inv;
@@ -42,7 +35,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
 	
 
 	const resetInventory = () => {
-		const newInventory = generateDefaultNewInventory();
+		const newInventory = Inventory.generateDefaultNewInventory();
 		setInventory(newInventory);
 		saveInventory(newInventory);
 		console.log(newInventory.toPlainObject());

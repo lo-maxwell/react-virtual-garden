@@ -9,7 +9,7 @@ The Virtual Garden is a 2D grid-based farming simulator that allows users to cre
 - **Frontend**: React, TypeScript, Next.js
 - **Backend**: PostgreSQL
 - **Hosting**: Vercel
-- **Authentication**: Firebase Auth (planned)
+- **Authentication**: Firebase Auth
 
 ## Key Features
 

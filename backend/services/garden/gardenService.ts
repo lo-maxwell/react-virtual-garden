@@ -462,70 +462,59 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 
 		//inventory items are added
 		let totalItemsAdded = 0;
-		const promises: Promise<void>[] = []; // Array to hold promises
 
-		harvestItemMap.forEach((quantity, harvestedItemId) => {
+		// Iterate over each entry in the harvestItemMap in sequence
+		// Running this synchronously to avoid race conditions with creating multiple of the same history; 
+		// could be optimized by creating histories first and iterating through those
+		for (const [harvestedItemId, quantity] of Array.from(harvestItemMap.entries())) {
 			const harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate(harvestedItemId);
+
 			if (!harvestedItemTemplate || harvestedItemTemplate.subtype !== ItemSubtypes.HARVESTED.name) {
 				console.warn(`Could not find valid harvestedItem matching identifier ${harvestedItemId}, skipping`);
 				nonCriticalError = true;
-				return; // Skip to the next iteration
+				continue; // Skip to the next iteration
 			}
 
 			const harvestedItem = new HarvestedItem(uuidv4(), harvestedItemTemplate, quantity);
-			
-			// Create a promise for adding the inventory item
-			const addInventoryPromise = inventoryItemRepository.addInventoryItem(inventoryId, harvestedItem, client)
-				.then(result => {
-					if (!result) {
-						console.warn(`Could not add harvested item ${harvestedItem.getInventoryItemId()} to inventory`);
-						nonCriticalError = true;
-					} else {
-						totalItemsAdded += quantity;
-					}
-				});
 
-			promises.push(addInventoryPromise); // Add the promise to the array
+			// Add inventory item synchronously
+			const result = await inventoryItemRepository.addInventoryItem(inventoryId, harvestedItem, client);
+			if (!result) {
+				console.warn(`Could not add harvested item ${harvestedItem.getInventoryItemId()} to inventory`);
+				nonCriticalError = true;
+			} else {
+				totalItemsAdded += quantity;
+			}
 
 			// TODO: Add histories
 			const plotItemTemplate = plotItemMap.get(harvestedItemId);
 			if (!plotItemTemplate) {
 				console.warn(`Could not find plot item for id ${harvestedItemId}`);
 				nonCriticalError = true;
-				return;
+				continue;
 			}
-			
+
 			const itemHistory = new ItemHistory(uuidv4(), plotItemTemplate, quantity);
-			
+
 			const actionCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(plotItemTemplate.subtype, plotItemTemplate.category, 'harvested', 1);
 			if (!actionCategoryHistory) {
 				console.warn(`Error generating actionHistory for id ${harvestedItemId}`);
 				nonCriticalError = true;
-				return;
+				continue;
 			}
 
-			// Create promises for adding item history and action history
-			const addItemHistoryPromise = itemHistoryRepository.addItemHistory(userId, itemHistory, client)
-				.then((result) => {
-					if (!result) {
-						console.log(`Could not add item history for ${harvestedItemId}`);
-					}
-				});
+			// Add item history and action history synchronously
+			const addItemHistoryResult = await itemHistoryRepository.addItemHistory(userId, itemHistory, client);
+			if (!addItemHistoryResult) {
+				console.log(`Could not add item history for ${harvestedItemId}`);
+			}
 
-			const addActionHistoryPromise = actionHistoryRepository.addActionHistory(userId, actionCategoryHistory, client)
-				.then((result) => {
-					if (!result) {
-						console.log(`Could not add action history for ${harvestedItemId}`);
-					}
-				});
+			const addActionHistoryResult = await actionHistoryRepository.addActionHistory(userId, actionCategoryHistory, client);
+			if (!addActionHistoryResult) {
+				console.log(`Could not add action history for ${harvestedItemId}`);
+			}
+		}
 
-			// Push the promises to the array
-			promises.push(addItemHistoryPromise);
-			promises.push(addActionHistoryPromise);
-		});
-
-		// Wait for all promises to resolve
-		await Promise.all(promises);
 
 		//histories are updated
 		const harvestAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(ItemSubtypes.PLANT.name, 'all', 'harvested', totalItemsAdded);

@@ -22,7 +22,7 @@ export interface UserEntity {
 }
 
 class User {
-	private userId: string;
+	private userId: string; //Linked to firebase, creating a new account will set this up manually
 	private username: string;
 	private icon: string; //indexes into a list of icons by name
 	private level: LevelSystem;
@@ -30,7 +30,6 @@ class User {
 	private actionHistory: ActionHistoryList;
 	private toolbox: Toolbox;
 
-	//TODO: New Users should get a random UUID as their userId
 	constructor(userId: string, username: string, icon: string, level: LevelSystem = new LevelSystem(uuidv4()), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList(), toolbox: Toolbox = new Toolbox()) {
 		this.userId = userId;
 		this.username = username;
@@ -66,7 +65,7 @@ class User {
 			
 		} catch (err) {
 			console.error('Error creating User from plainObject:', err);
-            return new User("99999999-9999-9999-9999-999999999999", "Error User", "error");
+            return new User("999999999999999999999999999", "Error User", "error");
 		}
 	}
 
@@ -80,6 +79,24 @@ class User {
 			actionHistory: this.actionHistory.toPlainObject(),
 			toolbox: this.toolbox.toPlainObject(),
 		};
+	}
+
+	static generateLocalUid(length: number = 28): string {
+		const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		let uid = '';
+		for (let i = 0; i < length; i++) {
+			uid += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
+		return uid;
+	}
+
+	static generateDefaultNewUser(): User {
+		const randomUid = User.generateLocalUid();
+		return this.generateNewUserWithId(randomUid);
+	}
+
+	static generateNewUserWithId(firebaseUid: string): User {
+		return new User(firebaseUid, 'Test User', 'apple');
 	}
 
 	getUserId(): string {

@@ -13,6 +13,7 @@ import { useUser } from "../contexts/UserContext";
 import { Garden } from "@/models/garden/Garden";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import User from "@/models/user/User";
+import { makeApiRequest } from "@/utils/api/api";
 
 //contains static onclick functions for plot components
 export const usePlotActions = () => {
@@ -61,17 +62,8 @@ export const usePlotActions = () => {
 			};
 
 			try {
-				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/plant`, {
-					method: 'PATCH',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(data),
-				});
-				if (!response.ok) {
-					throw new Error('Failed to plant seed');
-				}
-				const result = await response.json();
+				const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/plant`;
+				const result = await makeApiRequest('PATCH', apiRoute, data, true);
 				console.log('Successfully planted seed:', result);
 				return {success: true, displayIcon: plot.getItem().itemData.icon};
 			} catch (error) {
@@ -131,17 +123,8 @@ export const usePlotActions = () => {
 			};
 
 			try {
-				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/place`, {
-					method: 'PATCH',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(data),
-				});
-				if (!response.ok) {
-					throw new Error('Failed to place decoration');
-				}
-				const result = await response.json();
+				const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/place`;
+				const result = await makeApiRequest('PATCH', apiRoute, data, true);
 				console.log('Successfully placed decoration:', result);
 				return {success: true, displayIcon: plot.getItem().itemData.icon};
 			} catch (error) {
@@ -209,17 +192,8 @@ export const usePlotActions = () => {
 				instantHarvestKey: instantGrow ? 'mangomangobear' : '' // Works in dev environment only
 			}
 			try {
-				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/harvest`, {
-					method: 'PATCH',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(data),
-				});
-				if (!response.ok) {
-					throw new Error('Failed to harvest plant');
-				}
-				const result: InventoryItemEntity = await response.json();
+				const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/harvest`;
+				const result: InventoryItemEntity = await makeApiRequest('PATCH', apiRoute, data, true);
 
 				const itemTemplate = placeholderItemTemplates.getInventoryTemplate(result.identifier);
 				if (!itemTemplate) {
@@ -292,18 +266,9 @@ export const usePlotActions = () => {
 				replacementItem: null, // Replace with ground as default
 			}
 			try {
-				const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/pickup`, {
-					method: 'PATCH',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(data),
-				});
-				if (!response.ok) {
-					throw new Error('Failed to pickup decoration');
-				}
-				const result: InventoryItemEntity = await response.json();
-
+				const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/pickup`;
+				const result: InventoryItemEntity = await makeApiRequest('PATCH', apiRoute, data, true);
+				
 				const itemTemplate = placeholderItemTemplates.getInventoryTemplate(result.identifier);
 				if (!itemTemplate) {
 					throw new Error(`Error parsing item template`);

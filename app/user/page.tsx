@@ -19,6 +19,7 @@ import { saveStore } from "@/utils/localStorage/store";
 import { useAccount } from "../hooks/contexts/AccountContext";
 import { useEffect, useState } from "react";
 import { env } from "process";
+import { makeApiRequest } from "@/utils/api/api";
 
 const UserPage = () => {
   
@@ -118,6 +119,10 @@ const UserPage = () => {
         saveGarden(Garden.fromPlainObject(result.plainGardenObject));
         saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
         saveStore(Store.fromPlainObject(result.plainStoreObject));
+        Object.assign(user, Inventory.fromPlainObject(result.plainUserObject));
+        Object.assign(garden, Inventory.fromPlainObject(result.plainGardenObject));
+        Object.assign(inventory, Inventory.fromPlainObject(result.plainInventoryObject));
+        Object.assign(store, Inventory.fromPlainObject(result.plainStoreObject));
       } catch (error) {
         console.error(error);
       }
@@ -136,22 +141,8 @@ const UserPage = () => {
           userId: user.getUserId(),
           newIcon: icon.getName()
         }
-        // Making the PATCH request to your API endpoint
-        const response = await fetch(`/api/user/${user.getUserId()}/icon`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data), // Send the new icon data in the request body
-        });
-  
-        // Check if the response is successful
-        if (!response.ok) {
-          throw new Error('Failed to post new icon for user');
-        }
-  
-        // Parsing the response data
-        const result = await response.json();
+        const apiRoute = `/api/user/${user.getUserId()}/icon`;
+        const result = await makeApiRequest('PATCH', apiRoute, data, true);
         console.log('Successfully posted:', result);
       } catch (error) {
         console.error(error);
@@ -172,22 +163,8 @@ const UserPage = () => {
           userId: user.getUserId(),
           newUsername: username
         }
-        // Making the PATCH request to your API endpoint
-        const response = await fetch(`/api/user/${user.getUserId()}/username`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data), // Send the new username data in the request body
-        });
-  
-        // Check if the response is successful
-        if (!response.ok) {
-          throw new Error('Failed to post new username for user');
-        }
-  
-        // Parsing the response data
-        const result = await response.json();
+        const apiRoute = `/api/user/${user.getUserId()}/username`;
+        const result = await makeApiRequest('PATCH', apiRoute, data, true);
         console.log('Successfully posted:', result);
       } catch (error) {
         console.error(error);
