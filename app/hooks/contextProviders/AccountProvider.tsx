@@ -44,31 +44,31 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		return !current;
 	}
 
-	// useEffect(() => {
-	// 	const fetchTestKey = async () => {
-	// 		try {
-	// 			const response = await fetch('/api/test', {
-	// 				method: 'GET',
-	// 				headers: {
-	// 					'Content-Type': 'application/json',
-	// 				}
-	// 			});
+	useEffect(() => {
+		const fetchTestKey = async () => {
+			try {
+				const response = await fetch('/api/test', {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+					}
+				});
 
-	// 			if (!response.ok) {
-	// 				throw new Error('Failed to fetch test key');
-	// 			}
+				if (!response.ok) {
+					throw new Error('Failed to fetch test key');
+				}
 
-	// 			const result = await response.json();
-	// 			console.log('Successfully fetched test key:', result);
+				const result = await response.json();
+				// console.log('Successfully fetched test key:', result);
 
-	// 			setEnvironmentTestKey(result);
-	// 		} catch (error) {
-	// 			console.error(error);
-	// 		}
-	// 	};
+				setEnvironmentTestKey(result);
+			} catch (error) {
+				console.error(error);
+			}
+		};
 
-	// 	fetchTestKey();
-	// }, []);
+		fetchTestKey();
+	}, []);
 
     return (
         <AccountContext.Provider value={{ account: account!, cloudSave: cloudSave, toggleCloudSave, environmentTestKey}}>

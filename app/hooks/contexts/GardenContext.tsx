@@ -11,6 +11,7 @@ interface GardenContextType {
     toggleInstantGrow: () => void;
     gardenForceRefreshKey: number;
     updateGardenForceRefreshKey: () => void;
+    reloadGarden: () => void;
     // Add any other actions or state you need
 }
 

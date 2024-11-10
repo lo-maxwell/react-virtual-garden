@@ -67,13 +67,11 @@ export async function syncStoreAndInventory (user: User, store: Store, inventory
         const storeApiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/get`;
         const storeResult = await makeApiRequest('GET', storeApiRoute, {}, true);
 		saveStore(Store.fromPlainObject(storeResult));
-		Object.assign(store, Store.fromPlainObject(storeResult));
 
 		// Sync inventory data
         const inventoryApiRoute = `/api/user/${user.getUserId()}/inventory/${inventory.getInventoryId()}/get`;
         const inventoryResult = await makeApiRequest('GET', inventoryApiRoute, {}, true);
 		saveInventory(Inventory.fromPlainObject(inventoryResult));
-		Object.assign(inventory, Inventory.fromPlainObject(inventoryResult));
         return true;
       } catch (error) {
         console.error(error);

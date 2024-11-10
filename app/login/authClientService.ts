@@ -1,8 +1,6 @@
 // authClientService.ts
-import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { makeApiRequest } from "@/utils/api/api";
 import { auth } from "@/utils/firebase/firebaseConfig";
-import { saveInventory } from "@/utils/localStorage/inventory";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, UserCredential, GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, getIdTokenResult } from "firebase/auth";
 
 

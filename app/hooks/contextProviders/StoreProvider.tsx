@@ -149,8 +149,13 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		saveStore(newStore);
 	}
 
+	const reloadStore = () => {
+		const initialStore = setupStore();
+		setStore(initialStore);
+	}
+
     return (
-        <StoreContext.Provider value={{ store: store!, resetStore, updateRestockTimer }}>
+        <StoreContext.Provider value={{ store: store!, resetStore, updateRestockTimer, reloadStore }}>
             {children}
         </StoreContext.Provider>
     );

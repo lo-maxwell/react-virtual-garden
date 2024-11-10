@@ -15,16 +15,18 @@ import { useUser } from '../hooks/contexts/UserContext';
 import { useInventory } from '../hooks/contexts/InventoryContext';
 import { useGarden } from '../hooks/contexts/GardenContext';
 import { useStore } from '../hooks/contexts/StoreContext';
+import { useAccount } from '../hooks/contexts/AccountContext';
 
 const AuthComponent: React.FC = () => {
     const { firebaseUser, loading, logout } = useAuth(); // Access user and loading state
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [message, setMessage] = useState<string>('');
-    const { user } = useUser();
-    const { inventory } = useInventory();
-    const { store } = useStore();
-    const { garden } = useGarden();
+    const { user, reloadUser } = useUser();
+    const { inventory, reloadInventory } = useInventory();
+    const { store, reloadStore } = useStore();
+    const { garden, reloadGarden } = useGarden();
+    const { account, cloudSave, toggleCloudSave } = useAccount();
 
     const syncAccountObjects = async () => {
         const result = await fetchAccountObjects();
@@ -38,10 +40,10 @@ const AuthComponent: React.FC = () => {
         saveGarden(Garden.fromPlainObject(result.plainGardenObject));
         saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
         saveStore(Store.fromPlainObject(result.plainStoreObject));
-        Object.assign(user, Inventory.fromPlainObject(result.plainUserObject));
-        Object.assign(garden, Inventory.fromPlainObject(result.plainGardenObject));
-        Object.assign(inventory, Inventory.fromPlainObject(result.plainInventoryObject));
-        Object.assign(store, Inventory.fromPlainObject(result.plainStoreObject));
+        reloadUser();
+        reloadGarden();
+        reloadInventory();
+        reloadStore();
     }
 
     const handleRegister = async () => {
@@ -50,6 +52,7 @@ const AuthComponent: React.FC = () => {
             setMessage(`User registered: ${userCredential.user.email}`);
             console.log(userCredential);
             syncAccountObjects();
+            if (!cloudSave) toggleCloudSave();
         } catch (error) {
             setMessage("Registration failed. Please try again.");
         }
@@ -60,6 +63,7 @@ const AuthComponent: React.FC = () => {
             const userCredential = await loginUser(email, password);
             setMessage(`User logged in: ${userCredential.user.email}`);
             syncAccountObjects();
+            if (!cloudSave) toggleCloudSave();
         } catch (error) {
             setMessage("Login failed. Please check your credentials.");
         }
@@ -69,6 +73,7 @@ const AuthComponent: React.FC = () => {
         try {
             await logout();
             setMessage("User logged out successfully.");
+            if (cloudSave) toggleCloudSave();
         } catch (error) {
             setMessage("Logout failed. Please try again.");
         }
@@ -79,6 +84,7 @@ const AuthComponent: React.FC = () => {
             const userCredential = await loginWithGoogle();
             setMessage(`User logged in with Google: ${userCredential.user.email}`);
             syncAccountObjects();
+            if (!cloudSave) toggleCloudSave();
         } catch (error) {
             setMessage("Google login failed. Please try again.");
         }

@@ -21,12 +21,12 @@ import { useAccount } from "@/app/hooks/contexts/AccountContext";
 
 
 const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshKey}: {costMultiplier: number, forceRefreshKey: number, setForceRefreshKey: React.Dispatch<React.SetStateAction<number>>}) => {
-	const { inventory, updateInventoryForceRefreshKey } = useInventory();
+	const { inventory, updateInventoryForceRefreshKey, reloadInventory } = useInventory();
     const { selectedItem, toggleSelectedItem, owner, setOwner } = useSelectedItem();
 	const defaultTradeWindowMessage = 'Trade Window';
 	const [quantity, setQuantity] = useState(1);
 	const [tradeWindowMessage, setTradeWindowMessage] = useState(defaultTradeWindowMessage);
-	const { store, updateRestockTimer } = useStore();
+	const { store, updateRestockTimer, reloadStore } = useStore();
 	const { user } = useUser();
 	const { account, cloudSave } = useAccount();
 
@@ -131,6 +131,8 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 				const apiResult = await buyItemAPI(user, store, selectedItem, quantity, inventory);
 				if (!apiResult) {
 					syncStoreAndInventory(user, store, inventory);
+					reloadStore();
+					reloadInventory();
 					// TODO: force a refresh
 					setTradeWindowMessage(`There was an error purchasing the item! Please refresh the page!`);
 					setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1);
@@ -156,6 +158,8 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 				const apiResult = await sellItemAPI(user, store, selectedItem, quantity, inventory);
 				if (!apiResult) {
 					syncStoreAndInventory(user, store, inventory);
+					reloadStore();
+					reloadInventory();
 					setTradeWindowMessage(`There was an error selling the item! Please refresh the page!`);
 					setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1);
 					// return;

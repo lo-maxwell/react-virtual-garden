@@ -62,8 +62,15 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 		console.log(newUser.toPlainObject());
 	}
 
+	const reloadUser = () => {
+		const user = setupUser();
+		setUser(user);
+		setUsername(user.getUsername());
+		setIcon(user.getIcon());
+	}
+
     return (
-        <UserContext.Provider value={{ user: user!, username: username!, handleChangeUsername, icon: icon!, handleChangeIcon, resetUser }}>
+        <UserContext.Provider value={{ user: user!, username: username!, handleChangeUsername, icon: icon!, handleChangeIcon, resetUser, reloadUser }}>
             {children}
         </UserContext.Provider>
     );

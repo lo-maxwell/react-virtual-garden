@@ -45,8 +45,13 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
 		setInventoryForceRefreshKey((inventoryForceRefreshKey) => inventoryForceRefreshKey + 1);
 	}
 
+	const reloadInventory = () => {
+		const initialInventory = setupInventory();
+		setInventory(initialInventory);
+	}
+
     return (
-        <InventoryContext.Provider value={{ inventory: inventory!, resetInventory, inventoryForceRefreshKey, updateInventoryForceRefreshKey }}>
+        <InventoryContext.Provider value={{ inventory: inventory!, resetInventory, inventoryForceRefreshKey, updateInventoryForceRefreshKey, reloadInventory }}>
             {children}
         </InventoryContext.Provider>
     );

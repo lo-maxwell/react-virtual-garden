@@ -122,19 +122,16 @@ export async function syncUserGardenInventory(user: User, garden: Garden, invent
     const userApiRoute = `/api/user/${user.getUserId()}/get`;
     const userResult = await makeApiRequest('GET', userApiRoute, {}, true);
     saveUser(User.fromPlainObject(userResult));
-    Object.assign(user, User.fromPlainObject(userResult));
 
     // Sync garden data
     const gardenApiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/get`;
     const gardenResult = await makeApiRequest('GET', gardenApiRoute, {}, true);
     saveGarden(Garden.fromPlainObject(gardenResult));
-    Object.assign(garden, Garden.fromPlainObject(gardenResult));
 
     // Sync inventory data
     const inventoryApiRoute = `/api/user/${user.getUserId()}/inventory/${inventory.getInventoryId()}/get`;
     const inventoryResult = await makeApiRequest('GET', inventoryApiRoute, {}, true);
     saveInventory(Inventory.fromPlainObject(inventoryResult));
-    Object.assign(inventory, Inventory.fromPlainObject(inventoryResult));
     return true;
   } catch (error) {
     console.error(error);

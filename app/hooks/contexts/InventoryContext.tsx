@@ -7,6 +7,7 @@ interface InventoryContextType {
     resetInventory: () => void;
     inventoryForceRefreshKey: number;
     updateInventoryForceRefreshKey: () => void;
+    reloadInventory: () => void;
     // Add any other actions or state you need
 }
 

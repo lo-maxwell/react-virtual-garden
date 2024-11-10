@@ -312,7 +312,8 @@
   * Server returns created objects
   * Firebase links returned role to custom claims
   * Client loads returned objects into memory and propagates to contexts
-  * TODO: add more auth wrappers around functions (plant, harvest, etc)
+  * Added auth wrappers around most api calls
+  * On login, loads the user's garden from database
 
 
 TODO:

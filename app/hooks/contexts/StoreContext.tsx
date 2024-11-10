@@ -7,6 +7,7 @@ interface StoreContextType {
     store: Store;
     resetStore: () => void;
     updateRestockTimer: () => void;
+    reloadStore: () => void;
     // Add any other actions or state you need
 }
 

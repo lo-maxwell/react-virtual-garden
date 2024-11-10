@@ -52,6 +52,11 @@ export const GardenProvider = ({ children }: GardenProviderProps) => {
 		setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 	}
 
+	const reloadGarden = () => {
+		const garden = setupGarden();
+		setGarden(garden);
+	}
+
     return (
         <GardenContext.Provider value={
 			{ garden: garden!, 
@@ -61,7 +66,8 @@ export const GardenProvider = ({ children }: GardenProviderProps) => {
 			instantGrow, 
 			toggleInstantGrow,
 			gardenForceRefreshKey,
-			updateGardenForceRefreshKey  }}>
+			updateGardenForceRefreshKey,
+			reloadGarden  }}>
             {children}
         </GardenContext.Provider>
     );

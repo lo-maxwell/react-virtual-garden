@@ -24,10 +24,10 @@ import { makeApiRequest } from "@/utils/api/api";
 const UserPage = () => {
   
   const  RenderUser = () => {
-    const {user, username, handleChangeUsername, icon, handleChangeIcon} = useUser();
-    const { inventory } = useInventory();
-    const { store } = useStore();
-    const { garden } = useGarden();
+    const {user, username, handleChangeUsername, icon, handleChangeIcon, reloadUser} = useUser();
+    const { inventory, reloadInventory } = useInventory();
+    const { store, reloadStore } = useStore();
+    const { garden, reloadGarden } = useGarden();
     const { account, cloudSave, toggleCloudSave, environmentTestKey } = useAccount();
 
     if (!user || !account) {
@@ -119,10 +119,10 @@ const UserPage = () => {
         saveGarden(Garden.fromPlainObject(result.plainGardenObject));
         saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
         saveStore(Store.fromPlainObject(result.plainStoreObject));
-        Object.assign(user, Inventory.fromPlainObject(result.plainUserObject));
-        Object.assign(garden, Inventory.fromPlainObject(result.plainGardenObject));
-        Object.assign(inventory, Inventory.fromPlainObject(result.plainInventoryObject));
-        Object.assign(store, Inventory.fromPlainObject(result.plainStoreObject));
+        reloadUser();
+        reloadGarden();
+        reloadInventory();
+        reloadStore();
       } catch (error) {
         console.error(error);
       }

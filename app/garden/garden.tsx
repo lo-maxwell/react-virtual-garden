@@ -17,9 +17,9 @@ import { saveInventory } from "@/utils/localStorage/inventory";
 import { useAccount } from "../hooks/contexts/AccountContext";
 
 const GardenComponent = () => {
-	const { inventory } = useInventory();
-	const { garden, gardenMessage, setGardenMessage, instantGrow, toggleInstantGrow } = useGarden();
-	const { user } = useUser();
+	const { inventory, reloadInventory } = useInventory();
+	const { garden, gardenMessage, setGardenMessage, instantGrow, toggleInstantGrow, reloadGarden } = useGarden();
+	const { user, reloadUser } = useUser();
 	const {selectedItem, toggleSelectedItem} = useSelectedItem();
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
@@ -123,6 +123,9 @@ const GardenComponent = () => {
 		const apiResult = await plantAllAPI(plantedPlotIds, inventory, selectedItem, user, garden);
 		if (!apiResult) {
 			await syncUserGardenInventory(user, garden, inventory);
+			reloadUser();
+			reloadGarden();
+			reloadInventory();
 			setGardenMessage(`There was an error planting 1 or more seeds! Please refresh the page!`);
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			// return;
@@ -160,6 +163,9 @@ const GardenComponent = () => {
 		const apiResult = await harvestAllAPI(harvestedPlotIds, inventory, user, garden, instantGrow);
 		if (!apiResult) {
 			await syncUserGardenInventory(user, garden, inventory);
+			reloadUser();
+			reloadGarden();
+			reloadInventory();
 			setGardenMessage(`There was an error harvesting 1 or more plants! Please refresh the page!`);
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			
