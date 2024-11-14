@@ -22,7 +22,7 @@ interface StoreProviderProps {
 export const StoreProvider = ({ children }: StoreProviderProps) => {
     const [store, setStore] = useState<Store | null>(null);
 	const { user } = useUser();
-	const { account, cloudSave } = useAccount();
+	const { account, guestMode } = useAccount();
 
 	function setupStore(): Store {
 		let store = loadStore();
@@ -71,7 +71,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		const apiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/get`;
 		const result = await makeApiRequest('GET', apiRoute, {}, true);
 		saveStore(Store.fromPlainObject(result));
-		Object.assign(store, Store.fromPlainObject(result));
+		reloadStore();
         return true;
       } catch (error) {
         console.error(error);
@@ -85,7 +85,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		const localResult = restockStoreLocal();
 		if (localResult) {
 			// Terminate early before api call
-			if (!cloudSave) {
+			if (guestMode) {
 				return "SUCCESS";
 			}
 

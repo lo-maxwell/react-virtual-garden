@@ -25,7 +25,7 @@ const GardenComponent = () => {
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
 	const [showExpansionOptions, setShowExpansionOptions] = useState(false);
 	const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
-	const { account, cloudSave } = useAccount();
+	const { account, guestMode } = useAccount();
 
 	const [currentTime, setCurrentTime] = useState(Date.now());
 	// const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
@@ -114,7 +114,7 @@ const GardenComponent = () => {
 		}
 		
 		// Terminate early before api call
-		if (!cloudSave || plantedPlotIds.length <= 0 || numPlanted <= 0) {
+		if (guestMode || plantedPlotIds.length <= 0 || numPlanted <= 0) {
 			return;
 		}
 
@@ -155,7 +155,7 @@ const GardenComponent = () => {
 		setGardenMessage(`Harvested ${numHarvested} plants.`);
 
 		// Terminate early before api call
-		if (!cloudSave || harvestedPlotIds.length <= 0 || numHarvested <= 0) {
+		if (guestMode || harvestedPlotIds.length <= 0 || numHarvested <= 0) {
 			return;
 		}
 
@@ -182,7 +182,7 @@ const GardenComponent = () => {
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			
 			// Terminate early before api call
-			if (!cloudSave) {
+			if (guestMode) {
 				return;
 			}
 
@@ -205,7 +205,7 @@ const GardenComponent = () => {
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 
 			// Terminate early before api call
-			if (!cloudSave) {
+			if (guestMode) {
 				return;
 			}
 			
@@ -227,7 +227,7 @@ const GardenComponent = () => {
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			
 			// Terminate early before api call
-			if (!cloudSave) {
+			if (guestMode) {
 				return;
 			}
 		
@@ -249,7 +249,7 @@ const GardenComponent = () => {
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 		
 			// Terminate early before api call
-			if (!cloudSave) {
+			if (guestMode) {
 				return;
 			}
 

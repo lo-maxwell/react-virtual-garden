@@ -26,7 +26,7 @@ const AuthComponent: React.FC = () => {
     const { inventory, reloadInventory } = useInventory();
     const { store, reloadStore } = useStore();
     const { garden, reloadGarden } = useGarden();
-    const { account, cloudSave, toggleCloudSave } = useAccount();
+    const { account, guestMode, setGuestMode } = useAccount();
 
     const syncAccountObjects = async () => {
         const result = await fetchAccountObjects();
@@ -50,9 +50,7 @@ const AuthComponent: React.FC = () => {
         try {
             const userCredential = await registerUser(email, password);
             setMessage(`User registered: ${userCredential.user.email}`);
-            console.log(userCredential);
             syncAccountObjects();
-            if (!cloudSave) toggleCloudSave();
         } catch (error) {
             setMessage("Registration failed. Please try again.");
         }
@@ -63,7 +61,7 @@ const AuthComponent: React.FC = () => {
             const userCredential = await loginUser(email, password);
             setMessage(`User logged in: ${userCredential.user.email}`);
             syncAccountObjects();
-            if (!cloudSave) toggleCloudSave();
+            setGuestMode(false);
         } catch (error) {
             setMessage("Login failed. Please check your credentials.");
         }
@@ -73,7 +71,7 @@ const AuthComponent: React.FC = () => {
         try {
             await logout();
             setMessage("User logged out successfully.");
-            if (cloudSave) toggleCloudSave();
+            setGuestMode(false);
         } catch (error) {
             setMessage("Logout failed. Please try again.");
         }
@@ -84,7 +82,7 @@ const AuthComponent: React.FC = () => {
             const userCredential = await loginWithGoogle();
             setMessage(`User logged in with Google: ${userCredential.user.email}`);
             syncAccountObjects();
-            if (!cloudSave) toggleCloudSave();
+            setGuestMode(false);
         } catch (error) {
             setMessage("Google login failed. Please try again.");
         }
@@ -92,6 +90,10 @@ const AuthComponent: React.FC = () => {
 
     const printCustomClaims = async () => {
         await getUserCustomClaims();
+    }
+
+    const enterGuestMode = () => {
+        setGuestMode(true);
     }
 
     if (loading) {
@@ -136,6 +138,9 @@ const AuthComponent: React.FC = () => {
                         </button>
                         <button onClick={handleGoogleLogin} className="bg-yellow-500 text-white p-2 rounded w-full mb-2 hover:bg-yellow-600">
                             Login with Google
+                        </button>
+                        <button onClick={enterGuestMode} className="bg-red-500 text-white p-2 rounded w-full hover:bg-red-600">
+                            {`Guest Mode is currently ${guestMode ? 'on' : 'off'}`}
                         </button>
                     </>
                 )}

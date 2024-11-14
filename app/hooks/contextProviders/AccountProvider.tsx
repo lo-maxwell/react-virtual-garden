@@ -11,7 +11,7 @@ interface AccountProviderProps {
 
 export const AccountProvider = ({ children }: AccountProviderProps) => {
     const [account, setAccount] = useState<Account | null>(null);
-	const [cloudSave, setCloudSave] = useState<boolean>(false);
+	const [guestMode, setGuestMode] = useState<boolean>(false);
 	const [environmentTestKey, setEnvironmentTestKey] = useState<string>('');
 
 	function generateDefaultNewAccount(): Account {
@@ -23,7 +23,7 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		console.log(tempAccount);
 		if (!(tempAccount instanceof Account)) {
 		  console.log('account not found, setting up');
-		  tempAccount = generateDefaultNewAccount();
+		  tempAccount = generateDefaultNewAccount();  
 		  saveAccount(tempAccount);
 		}
 		return tempAccount;
@@ -32,46 +32,50 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 	useEffect(() => {
 		const account = setupAccount();
 		setAccount(account);
-		setCloudSave(account.cloudSave);
+		setGuestMode(account.guestMode);
 	}, []);
 
-	function toggleCloudSave(): boolean {
-		if (!account) return false;
-		const current = cloudSave;
-		setCloudSave((cloudSave) => !cloudSave);
-		account.cloudSave = !current;
-		saveAccount(account);
-		return !current;
+	function setGuestModeHandler(value: boolean): void {
+		setGuestMode(value);
+		if (account) {
+			account.guestMode = value;
+			saveAccount(account);
+		}
+	}
+
+	const fetchEnvironmentTestKey = async () => {
+		try {
+			const response = await fetch('/api/test', {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				}
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to fetch test key');
+			}
+
+			const result = await response.json();
+			// console.log('Successfully fetched test key:', result);
+			return result;
+		} catch (error) {
+			console.error(error);
+		}
 	}
 
 	useEffect(() => {
-		const fetchTestKey = async () => {
-			try {
-				const response = await fetch('/api/test', {
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json',
-					}
-				});
-
-				if (!response.ok) {
-					throw new Error('Failed to fetch test key');
-				}
-
-				const result = await response.json();
-				// console.log('Successfully fetched test key:', result);
-
-				setEnvironmentTestKey(result);
-			} catch (error) {
-				console.error(error);
-			}
+		const updateTestKey = async () => {
+			const testKey = await fetchEnvironmentTestKey();
+			setEnvironmentTestKey(testKey);
 		};
 
-		fetchTestKey();
+		updateTestKey();
 	}, []);
 
+
     return (
-        <AccountContext.Provider value={{ account: account!, cloudSave: cloudSave, toggleCloudSave, environmentTestKey}}>
+        <AccountContext.Provider value={{ account: account!, guestMode: guestMode, setGuestMode: setGuestModeHandler, fetchEnvironmentTestKey}}>
             {children}
         </AccountContext.Provider>
     );

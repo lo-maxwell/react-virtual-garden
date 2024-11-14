@@ -28,7 +28,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 	const [tradeWindowMessage, setTradeWindowMessage] = useState(defaultTradeWindowMessage);
 	const { store, updateRestockTimer, reloadStore } = useStore();
 	const { user } = useUser();
-	const { account, cloudSave } = useAccount();
+	const { account, guestMode } = useAccount();
 
 	const resetSelected = () => {
 		setTradeWindowMessage(defaultTradeWindowMessage);
@@ -122,7 +122,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 				toggleSelectedItem(null);
 
 				// Terminate early before api call
-				if (!cloudSave) {
+				if (guestMode) {
 					updateRestockTimer();
 					saveStore(store);
 					return;
@@ -149,7 +149,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 				toggleSelectedItem(null);
 
 				// Terminate early before api call
-				if (!cloudSave) {
+				if (guestMode) {
 					updateRestockTimer();
 					saveStore(store);
 					return;

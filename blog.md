@@ -314,9 +314,23 @@
   * Client loads returned objects into memory and propagates to contexts
   * Added auth wrappers around most api calls
   * On login, loads the user's garden from database
+  * On logout, unloads the garden ?
+    * Garden/store/user shouldn't be visible while logged out anyways, it should redirect to login
+    * Unless in guest mode
 
 
 TODO:
+
+User page no longer allows create/save/fetch, we automatically create on account register with firebase,
+save whenever an action is performed, fetch on login; add a debug force fetch option
+
+Top right icon for user + username, clicking on it gives log out option
+
+On garden page, user and inventory can be expanded/hidden
+
+Design home page and login page
+
+Admin panel
 
 Validate garden bounds for plant/harvest
 

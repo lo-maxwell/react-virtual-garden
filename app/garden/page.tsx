@@ -6,13 +6,25 @@ import { useGarden } from "@/app/hooks/contexts/GardenContext";
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import InventoryComponent from "@/components/inventory/inventory";
 import { useUser } from "@/app/hooks/contexts/UserContext";
+import { useAuth } from "../hooks/contexts/AuthContext";
+import { useAccount } from "../hooks/contexts/AccountContext";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const GardenPage = () => {
+  const { firebaseUser } = useAuth();
+  const { guestMode } = useAccount();
   const { user } = useUser();
   const { garden, gardenForceRefreshKey } = useGarden();
   const { inventory, inventoryForceRefreshKey } = useInventory();
-
   const {selectedItem, toggleSelectedItem} = useSelectedItem();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!firebaseUser && !guestMode) {
+      router.push('/login');
+    }
+  }, [firebaseUser, guestMode, router]);
 
   const RenderUser = () => {
     if (!user) return <div>Loading User...</div>;

@@ -27,7 +27,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 	PlotComponent.displayName = "Plot";
 	const [displayIcon, setDisplayIcon] = useState(plot.getItem().itemData.icon);
 	const [forceRefreshKey, setForceRefreshKey] = useState(0);
-	const { account, cloudSave } = useAccount();
+	const { account, guestMode } = useAccount();
 	const { user, reloadUser } = useUser();
 	const { garden, reloadGarden } = useGarden();
 	const { inventory, reloadInventory } = useInventory();
@@ -106,7 +106,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 		}
 		
 		// Terminate early before api call
-		if (!cloudSave) {
+		if (guestMode) {
 			return;
 		}
 

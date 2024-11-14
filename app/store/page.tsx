@@ -9,14 +9,26 @@ import { useStore } from "@/app/hooks/contexts/StoreContext";
 import { useInventory } from "@/app/hooks/contexts/InventoryContext";
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import InventoryComponent from "@/components/inventory/inventory";
+import { useAuth } from "../hooks/contexts/AuthContext";
+import { useAccount } from "../hooks/contexts/AccountContext";
+import { useRouter } from "next/navigation";
 
 const StorePage = () => {
   const RenderStore = () => {
+    const { firebaseUser } = useAuth();
+    const { guestMode } = useAccount();
     const {store} = useStore();
     const { inventory } = useInventory();
     const {selectedItem, toggleSelectedItem, owner, setOwner} = useSelectedItem();
     // forceRefreshKey is supposed to help with resyncing store/inventory, but it doesn't work right now
     const [forceRefreshKey, setForceRefreshKey] = useState(0);
+    const router = useRouter();
+
+    useEffect(() => {
+      if (!firebaseUser && !guestMode) {
+        router.push('/login');
+      }
+    }, [firebaseUser, guestMode, router]);
 
     const inventorySetSelected = (arg: InventoryItem | null) => {
       setOwner(inventory);
