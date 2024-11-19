@@ -2,15 +2,20 @@
 import { useAccount } from "@/app/hooks/contexts/AccountContext";
 import { useAuth } from "@/app/hooks/contexts/AuthContext";
 import Link from "@/node_modules/next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ProfileDisplay from "./profileDisplay";
 import ProfileMenu from "./profileMenu";
+import useClickOutside from "@/app/hooks/common/useClickOutside";
 
 export default function Header () {
 	const linkStyle = `text-gray-800`
 	const [isOpen, setIsOpen] = useState(false);
 	const { firebaseUser } = useAuth();
 	const { guestMode } = useAccount();
+
+	const menuRef = useRef<HTMLDivElement>(null);
+	const buttonRef = useRef<HTMLButtonElement>(null);
+	useClickOutside([menuRef, buttonRef], () => setIsOpen(false));
   
 	const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -28,7 +33,7 @@ export default function Header () {
 			<>
 			  {sharedLinks}
 			  {guestMode && <Link href="/login" className={linkStyle}>Login</Link>}
-			  <button onClick={toggleMenu} className="text-black">
+			  <button ref={buttonRef} onClick={toggleMenu} className="text-black">
 				<ProfileDisplay isOpen={isOpen} />
 			  </button>
 			</>
@@ -51,7 +56,7 @@ export default function Header () {
 					<Link href="/" className={linkStyle}>Home</Link>
 					{renderLinkOptions()}
 				</div>
-				<ProfileMenu isOpen={isOpen} toggleMenu={toggleMenu}/>
+				<ProfileMenu menuRef={menuRef} isOpen={isOpen} toggleMenu={toggleMenu}/>
 			</div>
 		  </nav>
 		</header>
