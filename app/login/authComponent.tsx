@@ -1,5 +1,5 @@
 // AuthComponent.tsx
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
  // Import the AuthContext
 import { registerUser, loginUser, logoutUser, loginWithGoogle, getUserCustomClaims, fetchAccountObjects } from './authClientService';
 import { useAuth } from '../hooks/contexts/AuthContext';
@@ -22,10 +22,10 @@ const AuthComponent: React.FC = () => {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [message, setMessage] = useState<string>('');
-    const { user, reloadUser } = useUser();
-    const { inventory, reloadInventory } = useInventory();
-    const { store, reloadStore } = useStore();
-    const { garden, reloadGarden } = useGarden();
+    const { user, reloadUser, resetUser } = useUser();
+    const { inventory, reloadInventory, resetInventory } = useInventory();
+    const { store, reloadStore, resetStore } = useStore();
+    const { garden, reloadGarden, resetGarden } = useGarden();
     const { account, guestMode, setGuestMode } = useAccount();
 
     const syncAccountObjects = async () => {
@@ -47,16 +47,19 @@ const AuthComponent: React.FC = () => {
     }
 
     const handleRegister = async () => {
+        setMessage(``);
         try {
             const userCredential = await registerUser(email, password);
             setMessage(`User registered: ${userCredential.user.email}`);
             syncAccountObjects();
+            setGuestMode(false);
         } catch (error) {
             setMessage("Registration failed. Please try again.");
         }
     };
 
     const handleLogin = async () => {
+        setMessage(``);
         try {
             const userCredential = await loginUser(email, password);
             setMessage(`User logged in: ${userCredential.user.email}`);
@@ -68,6 +71,7 @@ const AuthComponent: React.FC = () => {
     };
 
     const handleLogout = async () => {
+        setMessage(``);
         try {
             await logout();
             setMessage("User logged out successfully.");
@@ -78,6 +82,7 @@ const AuthComponent: React.FC = () => {
     };
 
     const handleGoogleLogin = async () => {
+        setMessage(``);
         try {
             const userCredential = await loginWithGoogle();
             setMessage(`User logged in with Google: ${userCredential.user.email}`);
@@ -93,7 +98,16 @@ const AuthComponent: React.FC = () => {
     }
 
     const enterGuestMode = () => {
+        if (guestMode) {
+            setMessage("You are already in guest mode. Data will be deleted upon registration or login.");
+            return;
+        }
+        resetUser();
+        resetGarden();
+        resetStore();
+        resetInventory();
         setGuestMode(true);
+        setMessage("Entered guest mode. Data will be deleted upon registration or login.");
     }
 
     if (loading) {

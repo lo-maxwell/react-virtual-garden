@@ -22,6 +22,7 @@ import { env } from "process";
 import { makeApiRequest } from "@/utils/api/api";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../hooks/contexts/AuthContext";
+import RedirectingMessage from "@/components/errorPages/redirectingMessage";
 
 const UserPage = () => {
   
@@ -33,12 +34,25 @@ const UserPage = () => {
     const { garden, reloadGarden } = useGarden();
     const { account, guestMode, setGuestMode, fetchEnvironmentTestKey } = useAccount();
     const router = useRouter();
+    const [isRedirecting, setIsRedirecting] = useState(false);
 
     useEffect(() => {
       if (!firebaseUser && !guestMode) {
-        router.push('/login');
+        setIsRedirecting(true); // Trigger the redirecting state
+  
+        // Delay the redirect by 2 seconds (adjust the time as needed)
+        const timer = setTimeout(() => {
+          router.push('/login');
+        }, 2000); // 2 seconds delay before redirecting
+  
+        return () => clearTimeout(timer); // Cleanup the timer if the component is unmounted or the condition changes
       }
     }, [firebaseUser, guestMode, router]);
+  
+    // Show the redirecting message if needed
+      if ((!firebaseUser && !guestMode) || isRedirecting) {
+        return <RedirectingMessage targetPage="login page"/>;
+      }
 
     if (!user || !account) {
       return <></>;

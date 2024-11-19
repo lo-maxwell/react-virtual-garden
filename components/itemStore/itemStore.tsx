@@ -4,7 +4,7 @@ import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { Store } from "@/models/itemStore/store/Store";
 import { useState } from "react";
 import InventoryItemComponent from "../inventory/inventoryItem";
-import DropdownComponent from "../lists/DropdownComponent";
+import DropdownMenu from "../lists/DropdownMenu";
 
 const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultiplier, maxHeightPercentage}: {itemStore: Store | Inventory, onInventoryItemClickFunction: (arg: any) => void, costMultiplier: number, maxHeightPercentage: number}) => {
 	const [subtypeFilter, setSubtypeFilter] = useState<ItemSubtype | null>(null);
@@ -53,7 +53,7 @@ const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultip
 		}
 
 		return (<>
-		<DropdownComponent
+		<DropdownMenu
             label="Filter by Type"
             options={subtypes}
             selectedValue={subtypeFilter}
@@ -74,7 +74,7 @@ const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultip
 		}
 
 		return (<>
-		<DropdownComponent
+		<DropdownMenu
             label="Filter by Category"
             options={categories}
             selectedValue={categoryFilter}

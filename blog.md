@@ -318,8 +318,24 @@
     * Garden/store/user shouldn't be visible while logged out anyways, it should redirect to login
     * Unless in guest mode
 
+### UI changes
+
+  * Updated header
+  * Account icon and dropdown menu
+  * Updated description on login screen
+
 
 TODO:
+
+Action items:
+1. Make the redirect delayed and make it sit on a screen that says redirect to login page (may be changed in the future)
+2. Fix the header and hide irrelevant buttons and make it cleaner and use less space 
+3. Icon on message on top right for login/logout
+4. UI indication that guest mode is on (in the header)
+5. The login screen should be clear that logging in will disable guest mode through a popup window
+6. Message for guest mode can not be disabled until logged in 
+7. Popup for guest mode that says it is a new garden 
+8. In the case when a user logs in then logs out then clicks guest mode. Guest mode should display fresh garden/inventory instead of previous user stuff. 
 
 User page no longer allows create/save/fetch, we automatically create on account register with firebase,
 save whenever an action is performed, fetch on login; add a debug force fetch option

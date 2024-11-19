@@ -12,6 +12,7 @@ import InventoryComponent from "@/components/inventory/inventory";
 import { useAuth } from "../hooks/contexts/AuthContext";
 import { useAccount } from "../hooks/contexts/AccountContext";
 import { useRouter } from "next/navigation";
+import RedirectingMessage from "@/components/errorPages/redirectingMessage";
 
 const StorePage = () => {
   const RenderStore = () => {
@@ -23,12 +24,25 @@ const StorePage = () => {
     // forceRefreshKey is supposed to help with resyncing store/inventory, but it doesn't work right now
     const [forceRefreshKey, setForceRefreshKey] = useState(0);
     const router = useRouter();
+    const [isRedirecting, setIsRedirecting] = useState(false);
 
     useEffect(() => {
       if (!firebaseUser && !guestMode) {
-        router.push('/login');
+        setIsRedirecting(true); // Trigger the redirecting state
+  
+        // Delay the redirect by 2 seconds (adjust the time as needed)
+        const timer = setTimeout(() => {
+          router.push('/login');
+        }, 2000); // 2 seconds delay before redirecting
+  
+        return () => clearTimeout(timer); // Cleanup the timer if the component is unmounted or the condition changes
       }
     }, [firebaseUser, guestMode, router]);
+  
+    // Show the redirecting message if needed
+    if ((!firebaseUser && !guestMode) || isRedirecting) {
+      return <RedirectingMessage targetPage="login page"/>;
+    }
 
     const inventorySetSelected = (arg: InventoryItem | null) => {
       setOwner(inventory);

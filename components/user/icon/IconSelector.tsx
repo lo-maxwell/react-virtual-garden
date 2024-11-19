@@ -3,7 +3,7 @@ import { placeholderItemTemplates } from '@/models/items/templates/models/Placeh
 import Icon from '@/models/user/icons/Icon';
 import { iconFactory } from '@/models/user/icons/IconRepository';
 import React, { useState } from 'react';
-import DropdownComponent from '../../lists/DropdownComponent';
+import DropdownMenu from '../../lists/DropdownMenu';
 import { PopupWindow } from '../../window/popupWindow';
 import IconButton from './IconButton';
 
@@ -31,7 +31,7 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
 		}
 
 		return (<>
-            <DropdownComponent
+            <DropdownMenu
                 label="Filter by Category"
                 options={categories}
                 selectedValue={categoryFilter}

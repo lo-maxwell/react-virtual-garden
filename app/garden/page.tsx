@@ -10,6 +10,7 @@ import { useAuth } from "../hooks/contexts/AuthContext";
 import { useAccount } from "../hooks/contexts/AccountContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import RedirectingMessage from "@/components/errorPages/redirectingMessage";
 
 const GardenPage = () => {
   const { firebaseUser } = useAuth();
@@ -19,12 +20,30 @@ const GardenPage = () => {
   const { inventory, inventoryForceRefreshKey } = useInventory();
   const {selectedItem, toggleSelectedItem} = useSelectedItem();
   const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
     if (!firebaseUser && !guestMode) {
-      router.push('/login');
+      setIsRedirecting(true); // Trigger the redirecting state
+
+      // Delay the redirect by 2 seconds (adjust the time as needed)
+      const timer = setTimeout(() => {
+        router.push('/login');
+      }, 2000); // 2 seconds delay before redirecting
+
+      return () => clearTimeout(timer); // Cleanup the timer if the component is unmounted or the condition changes
     }
   }, [firebaseUser, guestMode, router]);
+
+  // Show the redirecting message if needed
+  if ((!firebaseUser && !guestMode) || isRedirecting) {
+    return (<>
+      <div className="w-full px-4 py-4 bg-reno-sand-200 text-black"> 
+        <RedirectingMessage targetPage="login page"/>
+      </div>
+      </>
+    );
+  }
 
   const RenderUser = () => {
     if (!user) return <div>Loading User...</div>;
