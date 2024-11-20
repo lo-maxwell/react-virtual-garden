@@ -99,7 +99,7 @@ const AuthComponent: React.FC = () => {
 
     const enterGuestMode = () => {
         if (guestMode) {
-            setMessage("You are already in guest mode. Data will be deleted upon registration or login.");
+            setMessage("You are already in guest mode. Local data will be deleted upon registration or login.");
             return;
         }
         resetUser();
@@ -107,7 +107,7 @@ const AuthComponent: React.FC = () => {
         resetStore();
         resetInventory();
         setGuestMode(true);
-        setMessage("Entered guest mode. Data will be deleted upon registration or login.");
+        setMessage("Entered guest mode. Local data will be deleted upon registration or login.");
     }
 
     if (loading) {

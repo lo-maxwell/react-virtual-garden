@@ -36,12 +36,26 @@ const StorePage = () => {
         }, 2000); // 2 seconds delay before redirecting
   
         return () => clearTimeout(timer); // Cleanup the timer if the component is unmounted or the condition changes
+      } else {
+        setIsRedirecting(false);
       }
     }, [firebaseUser, guestMode, router]);
   
     // Show the redirecting message if needed
-    if ((!firebaseUser && !guestMode) || isRedirecting) {
-      return <RedirectingMessage targetPage="login page"/>;
+    if (!firebaseUser && !guestMode) {
+      let redirectDivElement;
+      if (isRedirecting) {
+        redirectDivElement = <RedirectingMessage targetPage="login page"/>;
+      } else {
+        redirectDivElement = <div>{`Fetching user data...`}</div>;
+      }
+
+      return (<>
+        <div className="w-full px-4 py-4 bg-reno-sand-200 text-black"> 
+            {redirectDivElement}
+        </div>
+        </>
+      );
     }
 
     const inventorySetSelected = (arg: InventoryItem | null) => {
