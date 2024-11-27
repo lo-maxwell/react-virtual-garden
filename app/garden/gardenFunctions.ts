@@ -3,6 +3,8 @@ import { Garden } from "@/models/garden/Garden";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import User from "@/models/user/User";
+import { makeApiRequest } from "@/utils/api/api";
+import { auth } from "@/utils/firebase/firebaseConfig";
 import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { saveUser } from "@/utils/localStorage/user";
@@ -41,30 +43,14 @@ export function removeColumnLocal(garden: Garden) {
 
 
 export async function addRowAPI(garden: Garden, user: User) {
+  const data = {
+    axis: 'row',
+    expand: true
+  }
+  const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`;
   try {
-
-    const data = {
-      axis: 'row',
-      expand: true
-    }
-    // Making the PATCH request to your API endpoint
-    const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data), // Send the data in the request body
-    });
-
-    // Check if the response is successful
-    if (!response.ok) {
-      throw new Error('Failed to add row');
-    }
-
-    // Parsing the response data
-    const result = await response.json();
-    console.log('Successfully added row:', result);
-    return true;
+    const result = await makeApiRequest('PATCH', apiRoute, data, true);
+    return result;
   } catch (error) {
     console.error(error);
     return false;
@@ -72,29 +58,14 @@ export async function addRowAPI(garden: Garden, user: User) {
 }
 
 export async function addColumnAPI(garden: Garden, user: User) {
+  const data = {
+    axis: 'column',
+    expand: true
+  }
+  const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`;
   try {
-    const data = {
-      axis: 'column',
-      expand: true
-    }
-    // Making the PATCH request to your API endpoint
-    const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data), // Send the data in the request body
-    });
-
-    // Check if the response is successful
-    if (!response.ok) {
-      throw new Error('Failed to add column');
-    }
-
-    // Parsing the response data
-    const result = await response.json();
-    console.log('Successfully added column:', result);
-    return true;
+    const result = await makeApiRequest('PATCH', apiRoute, data, true);
+    return result;
   } catch (error) {
     console.error(error);
     return false;
@@ -102,29 +73,14 @@ export async function addColumnAPI(garden: Garden, user: User) {
 }
 
 export async function removeRowAPI(garden: Garden, user: User) {
+  const data = {
+    axis: 'row',
+    expand: false
+  }
+  const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`;
   try {
-    const data = {
-      axis: 'row',
-      expand: false
-    }
-    // Making the PATCH request to your API endpoint
-    const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data), // Send the data in the request body
-    });
-
-    // Check if the response is successful
-    if (!response.ok) {
-      throw new Error('Failed to remove row');
-    }
-
-    // Parsing the response data
-    const result = await response.json();
-    console.log('Successfully removed row:', result);
-    return true;
+    const result = await makeApiRequest('PATCH', apiRoute, data, true);
+    return result;
   } catch (error) {
     console.error(error);
     return false;
@@ -132,29 +88,14 @@ export async function removeRowAPI(garden: Garden, user: User) {
 }
 
 export async function removeColumnAPI(garden: Garden, user: User) {
+  const data = {
+    axis: 'column',
+    expand: false
+  }
+  const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`;
   try {
-    const data = {
-      axis: 'column',
-      expand: false
-    }
-    // Making the PATCH request to your API endpoint
-    const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data), // Send the data in the request body
-    });
-
-    // Check if the response is successful
-    if (!response.ok) {
-      throw new Error('Failed to remove column');
-    }
-
-    // Parsing the response data
-    const result = await response.json();
-    console.log('Successfully removed column:', result);
-    return true;
+    const result = await makeApiRequest('PATCH', apiRoute, data, true);
+    return result;
   } catch (error) {
     console.error(error);
     return false;
@@ -162,22 +103,9 @@ export async function removeColumnAPI(garden: Garden, user: User) {
 }
 
 export async function syncGardenSize(garden: Garden, user: User): Promise<boolean> {
+  const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/size`;
   try {
-    // Making the GET request to your API endpoint
-    const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/size`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-
-    // Check if the response is successful
-    if (!response.ok) {
-      throw new Error('Failed to fetch garden size');
-    }
-
-    // Parsing the response data
-    const result = await response.json();
+    const result = await makeApiRequest('GET', apiRoute, {}, true);
     garden.setGardenSize(result.rows, result.columns);
     return true;
   } catch (error) {
@@ -186,49 +114,24 @@ export async function syncGardenSize(garden: Garden, user: User): Promise<boolea
   }
 }
 
+//TODO: Bundle this into 1 api call
 export async function syncUserGardenInventory(user: User, garden: Garden, inventory: Inventory): Promise<boolean> {
+  
   try {
     // Sync user data
-    const userResponse = await fetch(`/api/user/${user.getUserId()}/get`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    if (!userResponse.ok) {
-      throw new Error('Failed to fetch user');
-    }
-    const userResult = await userResponse.json();
+    const userApiRoute = `/api/user/${user.getUserId()}/get`;
+    const userResult = await makeApiRequest('GET', userApiRoute, {}, true);
     saveUser(User.fromPlainObject(userResult));
-    Object.assign(user, User.fromPlainObject(userResult));
 
     // Sync garden data
-    const gardenResponse = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/get`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    if (!gardenResponse.ok) {
-      throw new Error('Failed to fetch garden');
-    }
-    const gardenResult = await gardenResponse.json();
+    const gardenApiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/get`;
+    const gardenResult = await makeApiRequest('GET', gardenApiRoute, {}, true);
     saveGarden(Garden.fromPlainObject(gardenResult));
-    Object.assign(garden, Garden.fromPlainObject(gardenResult));
 
     // Sync inventory data
-    const inventoryResponse = await fetch(`/api/user/${user.getUserId()}/inventory/${inventory.getInventoryId()}/get`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    if (!inventoryResponse.ok) {
-      throw new Error('Failed to fetch inventory');
-    }
-    const inventoryResult = await inventoryResponse.json();
+    const inventoryApiRoute = `/api/user/${user.getUserId()}/inventory/${inventory.getInventoryId()}/get`;
+    const inventoryResult = await makeApiRequest('GET', inventoryApiRoute, {}, true);
     saveInventory(Inventory.fromPlainObject(inventoryResult));
-    Object.assign(inventory, Inventory.fromPlainObject(inventoryResult));
     return true;
   } catch (error) {
     console.error(error);
@@ -244,17 +147,8 @@ export async function plantAllAPI(plantedPlotIds: string[], inventory: Inventory
   };
 
   try {
-    const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plantAll`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to plant all seeds');
-    }
-    const result = await response.json();
+    const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plantAll`;
+    const result = await makeApiRequest('PATCH', apiRoute, data, true);
     console.log('Successfully planted all seeds:', result);
     return result;
   } catch (error) {
@@ -273,17 +167,8 @@ export async function harvestAllAPI(harvestedPlotIds: string[], inventory: Inven
   };
 
   try {
-    const response = await fetch(`/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/harvestAll`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to harvest all seeds');
-    }
-    const result = await response.json();
+    const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/harvestAll`;
+    const result = await makeApiRequest('PATCH', apiRoute, data, true);
     console.log('Successfully harvested all seeds:', result);
     return result;
   } catch (error) {

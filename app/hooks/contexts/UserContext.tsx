@@ -10,6 +10,7 @@ interface UserContextType {
     icon: string;
     handleChangeIcon: (newIcon: Icon) => void;
     resetUser: () => void;
+    reloadUser: () => void;
     // Add any other actions or state you need
 }
 

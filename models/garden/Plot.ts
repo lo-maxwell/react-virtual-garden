@@ -361,7 +361,7 @@ export class Plot {
 		response.payload = {
 			originalItem: originalItem,
 			replacedItem: this.item,
-			newTemplate: useItemResponse!.payload.newTemplate
+			newTemplate: useItemResponse?.payload.newTemplate
 		}
 
 		return response;

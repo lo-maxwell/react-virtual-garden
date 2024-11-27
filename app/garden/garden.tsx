@@ -17,15 +17,15 @@ import { saveInventory } from "@/utils/localStorage/inventory";
 import { useAccount } from "../hooks/contexts/AccountContext";
 
 const GardenComponent = () => {
-	const { inventory } = useInventory();
-	const { garden, gardenMessage, setGardenMessage, instantGrow, toggleInstantGrow } = useGarden();
-	const { user } = useUser();
+	const { inventory, reloadInventory } = useInventory();
+	const { garden, gardenMessage, setGardenMessage, instantGrow, toggleInstantGrow, reloadGarden } = useGarden();
+	const { user, reloadUser } = useUser();
 	const {selectedItem, toggleSelectedItem} = useSelectedItem();
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
 	const [showExpansionOptions, setShowExpansionOptions] = useState(false);
 	const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
-	const { account, cloudSave } = useAccount();
+	const { account, guestMode } = useAccount();
 
 	const [currentTime, setCurrentTime] = useState(Date.now());
 	// const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
@@ -114,7 +114,7 @@ const GardenComponent = () => {
 		}
 		
 		// Terminate early before api call
-		if (!cloudSave) {
+		if (guestMode || plantedPlotIds.length <= 0 || numPlanted <= 0) {
 			return;
 		}
 
@@ -123,6 +123,9 @@ const GardenComponent = () => {
 		const apiResult = await plantAllAPI(plantedPlotIds, inventory, selectedItem, user, garden);
 		if (!apiResult) {
 			await syncUserGardenInventory(user, garden, inventory);
+			reloadUser();
+			reloadGarden();
+			reloadInventory();
 			setGardenMessage(`There was an error planting 1 or more seeds! Please refresh the page!`);
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			// return;
@@ -152,7 +155,7 @@ const GardenComponent = () => {
 		setGardenMessage(`Harvested ${numHarvested} plants.`);
 
 		// Terminate early before api call
-		if (!cloudSave) {
+		if (guestMode || harvestedPlotIds.length <= 0 || numHarvested <= 0) {
 			return;
 		}
 
@@ -160,6 +163,9 @@ const GardenComponent = () => {
 		const apiResult = await harvestAllAPI(harvestedPlotIds, inventory, user, garden, instantGrow);
 		if (!apiResult) {
 			await syncUserGardenInventory(user, garden, inventory);
+			reloadUser();
+			reloadGarden();
+			reloadInventory();
 			setGardenMessage(`There was an error harvesting 1 or more plants! Please refresh the page!`);
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			
@@ -176,7 +182,7 @@ const GardenComponent = () => {
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			
 			// Terminate early before api call
-			if (!cloudSave) {
+			if (guestMode) {
 				return;
 			}
 
@@ -199,7 +205,7 @@ const GardenComponent = () => {
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 
 			// Terminate early before api call
-			if (!cloudSave) {
+			if (guestMode) {
 				return;
 			}
 			
@@ -221,7 +227,7 @@ const GardenComponent = () => {
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			
 			// Terminate early before api call
-			if (!cloudSave) {
+			if (guestMode) {
 				return;
 			}
 		
@@ -243,7 +249,7 @@ const GardenComponent = () => {
 			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 		
 			// Terminate early before api call
-			if (!cloudSave) {
+			if (guestMode) {
 				return;
 			}
 

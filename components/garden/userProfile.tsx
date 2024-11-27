@@ -24,18 +24,20 @@ const UserProfileComponent = () => {
 	}
 
 	const handleDebugOptionEnable = () => {
-		setShowDebugOptions((showDebugOptions) => showDebugOptions + 1);
+		if (process.env.NEXT_PUBLIC_DEVELOPER_OPTIONS === "true") {
+			setShowDebugOptions((showDebugOptions) => showDebugOptions + 1);
+		}
 	}
 
 	return <>
 	<div className="flex flex-row items-center justify-center">
 		<button onClick={handleDebugOptionEnable}>
-			<IconDisplay icon={user.getIcon()} borderColor={`coffee-700`} size={"text-4xl"}/>
+			<IconDisplay icon={user.getIcon()} bgColor={`gray-300`} borderColor={`coffee-700`} textSize={"text-4xl"} elementSize={"12"}/>
 		</button>
 		<span className={`ml-4 ${getUsernameFontSize()} ${colors.user.usernameTextColor}`}>{user.getUsername()}</span>
 	</div>
 	<div className="mx-4 my-4"><LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} /></div>
-	<div className={`${showDebugOptions >= 1 ? `` : `hidden`}`}>
+	<div className={`${showDebugOptions >= 3 ? `` : `hidden`}`}>
 		<GardenDebugOptions/>
 	</div>
 	</>

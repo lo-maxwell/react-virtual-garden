@@ -86,6 +86,11 @@ export class Garden {
 		};
 	} 
 
+	static generateDefaultNewGarden(): Garden {
+		const randomUuid = uuidv4();
+		return new Garden(randomUuid, User.getDefaultUserName());
+	}
+
 	/**
 	 * @returns the gardenId
 	 */

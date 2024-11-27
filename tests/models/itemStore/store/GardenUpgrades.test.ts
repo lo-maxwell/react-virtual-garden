@@ -23,7 +23,7 @@ beforeEach(() => {
 	const testItemList2 = new ItemList([item4]);
 	testInventory = new Inventory(uuidv4(), "Test User", 1000, testItemList2);
 	testGarden = new Garden(uuidv4(), "Test User", 6, 6, Garden.generateEmptyPlots(6, 6));
-	testUser = new User(uuidv4(), "test user", "test", new LevelSystem(uuidv4()));
+	testUser = new User(User.generateLocalUid(), "test user", "test", new LevelSystem(uuidv4()));
 	testUser.addExp(10000000);
 });
 

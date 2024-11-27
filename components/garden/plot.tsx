@@ -27,10 +27,10 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 	PlotComponent.displayName = "Plot";
 	const [displayIcon, setDisplayIcon] = useState(plot.getItem().itemData.icon);
 	const [forceRefreshKey, setForceRefreshKey] = useState(0);
-	const { account, cloudSave } = useAccount();
-	const { user } = useUser();
-	const { garden } = useGarden();
-	const { inventory } = useInventory();
+	const { account, guestMode } = useAccount();
+	const { user, reloadUser } = useUser();
+	const { garden, reloadGarden } = useGarden();
+	const { inventory, reloadInventory } = useInventory();
 
 	const getColor = () => {
 		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name) {
@@ -106,7 +106,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 		}
 		
 		// Terminate early before api call
-		if (!cloudSave) {
+		if (guestMode) {
 			return;
 		}
 
@@ -118,6 +118,9 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 			// setDisplayIcon(apiResult.displayIcon);
 			// TODO: sync plot function?
 			await syncUserGardenInventory(user, garden, inventory);
+			reloadUser();
+			reloadGarden();
+			reloadInventory();
 			setDisplayIcon(plot.getItem().itemData.icon);
 			setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1); //we force a refresh to clear statuses
 		}

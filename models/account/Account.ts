@@ -1,33 +1,28 @@
 export class Account {
 
-	cloudSave: boolean;
+	guestMode: boolean;
 
-	constructor(cloudSave: boolean) {
-		this.cloudSave = cloudSave;
+	constructor(guestMode: boolean) {
+		this.guestMode = guestMode;
 	}
 
 	static fromPlainObject(plainObject: any) {
-		try {
-            // Validate plainObject structure
-            if (!plainObject || typeof plainObject !== 'object') {
-                throw new Error('Invalid plainObject structure for Account');
-            }
-			const { cloudSave } = plainObject;
-			// Perform additional type checks if necessary
-			if (typeof cloudSave !== 'boolean') {
-				throw new Error('Invalid cloudSave property in plainObject for Account');
-			}
-			return new Account(cloudSave);
-			
-		} catch (err) {
-			console.error('Error creating Account from plainObject:', err);
-            return new Account(false);
+		// Validate plainObject structure
+		if (!plainObject || typeof plainObject !== 'object') {
+			throw new Error('Invalid plainObject structure for Account');
 		}
+		const { guestMode } = plainObject;
+		// Perform additional type checks if necessary
+		if (typeof guestMode !== 'boolean') {
+			throw new Error('Invalid guestMode property in plainObject for Account');
+		}
+		return new Account(guestMode);
+			
 	}
 
 	toPlainObject(): any {
 		return {
-			cloudSave: this.cloudSave
+			guestMode: this.guestMode
 		};
 	}
 

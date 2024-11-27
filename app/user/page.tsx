@@ -17,17 +17,57 @@ import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { saveStore } from "@/utils/localStorage/store";
 import { useAccount } from "../hooks/contexts/AccountContext";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { env } from "process";
+import { makeApiRequest } from "@/utils/api/api";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../hooks/contexts/AuthContext";
+import RedirectingMessage from "@/components/errorPages/redirectingMessage";
 
 const UserPage = () => {
   
   const  RenderUser = () => {
-    const {user, username, handleChangeUsername, icon, handleChangeIcon} = useUser();
-    const { inventory } = useInventory();
-    const { store } = useStore();
-    const { garden } = useGarden();
-    const { account, cloudSave, toggleCloudSave, environmentTestKey } = useAccount();
+    const { firebaseUser } = useAuth();
+    const {user, username, handleChangeUsername, icon, handleChangeIcon, reloadUser} = useUser();
+    const { inventory, reloadInventory } = useInventory();
+    const { store, reloadStore } = useStore();
+    const { garden, reloadGarden } = useGarden();
+    const { account, guestMode, setGuestMode, environmentTestKey } = useAccount();
+    const router = useRouter();
+    const [isRedirecting, setIsRedirecting] = useState(false);
+
+    
+    useEffect(() => {
+      if (!firebaseUser && !guestMode) {
+        setIsRedirecting(true); // Trigger the redirecting state
+
+        // Delay the redirect by 2 seconds (adjust the time as needed)
+        const timer = setTimeout(() => {
+          router.push('/login');
+        }, 2000); // 2 seconds delay before redirecting
+
+        return () => clearTimeout(timer); // Cleanup the timer if the component is unmounted or the condition changes
+      } else {
+        setIsRedirecting(false);
+      }
+    }, [firebaseUser, guestMode, router]);
+
+    // Show the redirecting message if needed
+    if (!firebaseUser && !guestMode) {
+      let redirectDivElement;
+      if (isRedirecting) {
+        redirectDivElement = <RedirectingMessage targetPage="login page"/>;
+      } else {
+        redirectDivElement = <div>{`Fetching user data...`}</div>;
+      }
+
+      return (<>
+        <div className="w-full px-4 py-4 bg-reno-sand-200 text-black"> 
+            {redirectDivElement}
+        </div>
+        </>
+      );
+    }
 
     if (!user || !account) {
       return <></>;
@@ -118,6 +158,10 @@ const UserPage = () => {
         saveGarden(Garden.fromPlainObject(result.plainGardenObject));
         saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
         saveStore(Store.fromPlainObject(result.plainStoreObject));
+        reloadUser();
+        reloadGarden();
+        reloadInventory();
+        reloadStore();
       } catch (error) {
         console.error(error);
       }
@@ -127,7 +171,7 @@ const UserPage = () => {
       handleChangeIcon(icon);
 
       // Terminate early before api call
-      if (!cloudSave) {
+      if (guestMode) {
         return;
       }
 
@@ -136,22 +180,8 @@ const UserPage = () => {
           userId: user.getUserId(),
           newIcon: icon.getName()
         }
-        // Making the PATCH request to your API endpoint
-        const response = await fetch(`/api/user/${user.getUserId()}/icon`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data), // Send the new icon data in the request body
-        });
-  
-        // Check if the response is successful
-        if (!response.ok) {
-          throw new Error('Failed to post new icon for user');
-        }
-  
-        // Parsing the response data
-        const result = await response.json();
+        const apiRoute = `/api/user/${user.getUserId()}/icon`;
+        const result = await makeApiRequest('PATCH', apiRoute, data, true);
         console.log('Successfully posted:', result);
       } catch (error) {
         console.error(error);
@@ -163,7 +193,7 @@ const UserPage = () => {
       handleChangeUsername(username);
 
       // Terminate early before api call
-      if (!cloudSave) {
+      if (guestMode) {
         return;
       }
 
@@ -172,22 +202,8 @@ const UserPage = () => {
           userId: user.getUserId(),
           newUsername: username
         }
-        // Making the PATCH request to your API endpoint
-        const response = await fetch(`/api/user/${user.getUserId()}/username`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data), // Send the new username data in the request body
-        });
-  
-        // Check if the response is successful
-        if (!response.ok) {
-          throw new Error('Failed to post new username for user');
-        }
-  
-        // Parsing the response data
-        const result = await response.json();
+        const apiRoute = `/api/user/${user.getUserId()}/username`;
+        const result = await makeApiRequest('PATCH', apiRoute, data, true);
         console.log('Successfully posted:', result);
       } catch (error) {
         console.error(error);
@@ -195,11 +211,9 @@ const UserPage = () => {
       return;
     }
 
-    const handleToggleCloudSaveButton = () => {
-      toggleCloudSave();
-    }
-
     function renderAccountManagementButtons() {
+      // const environmentTestKey = await fetchEnvironmentTestKey();
+
       if (!environmentTestKey) {
         return (
           <>
@@ -212,12 +226,15 @@ const UserPage = () => {
       if (environmentTestKey === 'this is the local environment' || environmentTestKey === 'this is the dev environment') {
         return (
           <>
-            <div><button onClick={handleCreateAccountButton}> Create user in Database </button></div>
-            <div><button onClick={handleSaveAccountButton}> Save user to Database </button></div>
-            <div><button onClick={handleFetchAccountButton}> Fetch user from Database </button></div>
-            <div><button onClick={handleToggleCloudSaveButton}> {`Toggle Cloud Saving ${cloudSave ? '(Currently on)' : '(Currently off)'}`} </button></div>
+          <div>Environment test key successfully returned.</div>
           </>
-        );
+          // <>
+          //   <div><button onClick={handleCreateAccountButton}> Create user in Database </button></div>
+          //   <div><button onClick={handleSaveAccountButton}> Save user to Database </button></div>
+          //   <div><button onClick={handleFetchAccountButton}> Fetch user from Database </button></div>
+          //   <div><button onClick={handleToggleGuestModeButton}> {`Toggle Cloud Saving ${guestMode ? '(Currently on)' : '(Currently off)'}`} </button></div>
+          // </>
+           );
       } else if (environmentTestKey === 'this is the prod environment') {
         return (<></>);
       } else {
@@ -240,8 +257,10 @@ const UserPage = () => {
             <div className="mx-4 my-4">
               <LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} />
             </div>
-            <div>Friends List goes here!</div>
-            {renderAccountManagementButtons()}
+            <div>{`The friends list will go here, once it's ready!`}</div>
+            <Suspense fallback={<div>Loading...</div>}>
+              {renderAccountManagementButtons()}
+            </Suspense>
             </div>
 
           <div className={`w-2/3`}>

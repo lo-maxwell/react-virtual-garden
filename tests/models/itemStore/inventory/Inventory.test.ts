@@ -4,6 +4,7 @@ import { generateNewPlaceholderInventoryItem} from "@/models/items/PlaceholderIt
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { v4 as uuidv4 } from 'uuid';
+import User from "@/models/user/User";
 
 
 let testInventory: Inventory;
@@ -13,7 +14,7 @@ beforeEach(() => {
 	const item2 = generateNewPlaceholderInventoryItem("banana seed", 2);
 	const item3 = generateNewPlaceholderInventoryItem("coconut seed", 3);
 	const testItemList = new ItemList([item1, item2, item3]);
-	testInventory = new Inventory(uuidv4(), "Test User", 100, testItemList);
+	testInventory = new Inventory(uuidv4(), User.getDefaultUserName(), 100, testItemList);
 });
 
 test('Should Initialize Default Inventory Object', () => {
@@ -123,18 +124,18 @@ test('Should Not Trash Nonexistent Item From Inventory', () => {
 test('Should Buy Item', () => {
 	const response = testInventory.buyItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!, 1, 1);
 	expect(response.isSuccessful()).toBe(true);
-	expect(response.payload.finalGold).toBe(100 - placeholderItemTemplates.getInventoryItemTemplateByName('apple')!.getPrice(1));
+	expect(response.payload.finalGold).toBe(100 - (placeholderItemTemplates.getInventoryItemTemplateByName('apple')?.getPrice(1) || 999));
 	expect(response.payload.purchasedItem.quantity).toBe(1);
 	expect(testInventory.size()).toBe(4);
 	expect(testInventory.contains(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!).payload).toBe(true);
 	const response2 = testInventory.buyItem(generateNewPlaceholderInventoryItem("apple", 1), 1, 1);
 	expect(response2.isSuccessful()).toBe(true);
-	expect(response2.payload.finalGold).toBe(100 - 2 * placeholderItemTemplates.getInventoryItemTemplateByName('apple')!.getPrice(1));
+	expect(response2.payload.finalGold).toBe(100 - 2 * (placeholderItemTemplates.getInventoryItemTemplateByName('apple')?.getPrice(1) || 999));
 	expect(response.payload.purchasedItem.quantity).toBe(2);
 	expect(testInventory.size()).toBe(4);
 	expect(testInventory.contains(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!).payload).toBe(true);
 	expect(testInventory.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!).payload.quantity).toBe(2);
-	expect(testInventory.getGold()).toBe(100 - 2 * placeholderItemTemplates.getInventoryItemTemplateByName('apple')!.getPrice(1));
+	expect(testInventory.getGold()).toBe(100 - 2 * (placeholderItemTemplates.getInventoryItemTemplateByName('apple')?.getPrice(1) || 999));
 })
 
 test('Should Not Buy Expensive Item', () => {
@@ -156,26 +157,26 @@ test('Should Not Buy Invalid Item', () => {
 test('Should Sell Item', () => {
 	const response = testInventory.sellItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!, 1, 1);
 	expect(response.isSuccessful()).toBe(true);
-	expect(response.payload.finalGold).toBe(100 + placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!.getPrice(1));
+	expect(response.payload.finalGold).toBe(100 + (placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')?.getPrice(1) || 999));
 	expect(response.payload.remainingItem.quantity).toBe(0);
 	//Does not delete the item from the inventory
 	expect(testInventory.size()).toBe(3);
 	expect(testInventory.contains(placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!).payload).toBe(false);
 	const response2 = testInventory.sellItem(generateNewPlaceholderInventoryItem("banana seed", 1), 2, 1);
 	expect(response2.isSuccessful()).toBe(true);
-	expect(response2.payload.finalGold).toBe(100 + placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!.getPrice(1) + 2 * generateNewPlaceholderInventoryItem("banana seed", 1).itemData.getPrice(1));
+	expect(response2.payload.finalGold).toBe(100 + (placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')?.getPrice(1) || 999) + 2 * generateNewPlaceholderInventoryItem("banana seed", 1).itemData.getPrice(1));
 	expect(response2.payload.remainingItem.quantity).toBe(1);
 	expect(testInventory.size()).toBe(3);
 	expect(testInventory.contains(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!).payload).toBe(true);
 	expect(testInventory.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('banana seed')!).payload.quantity).toBe(1);
 	const response3 = testInventory.sellItem(placeholderItemTemplates.getInventoryItemTemplateByName('coconut seed')!, 0.5, 2);
 	expect(response3.isSuccessful()).toBe(true);
-	expect(response3.payload.finalGold).toBe(100 + placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!.getPrice(1) + 2 * generateNewPlaceholderInventoryItem("banana seed", 1).itemData.getPrice(1) + 2 * generateNewPlaceholderInventoryItem("coconut seed", 1).itemData.getPrice(0.5));
+	expect(response3.payload.finalGold).toBe(100 + (placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')?.getPrice(1) || 999) + 2 * generateNewPlaceholderInventoryItem("banana seed", 1).itemData.getPrice(1) + 2 * generateNewPlaceholderInventoryItem("coconut seed", 1).itemData.getPrice(0.5));
 	expect(response3.payload.remainingItem.quantity).toBe(1);
 	expect(testInventory.size()).toBe(3);
 	expect(testInventory.contains(placeholderItemTemplates.getInventoryItemTemplateByName('coconut seed')!).payload).toBe(true);
 	expect(testInventory.getItem(placeholderItemTemplates.getInventoryItemTemplateByName('coconut seed')!).payload.quantity).toBe(1);
-	expect(testInventory.getGold()).toBe(100 + placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')!.getPrice(1) + 2 * generateNewPlaceholderInventoryItem("banana seed", 1).itemData.getPrice(1) + 2 * generateNewPlaceholderInventoryItem("coconut seed", 1).itemData.getPrice(0.5));
+	expect(testInventory.getGold()).toBe(100 + (placeholderItemTemplates.getInventoryItemTemplateByName('apple seed')?.getPrice(1) || 999) + 2 * generateNewPlaceholderInventoryItem("banana seed", 1).itemData.getPrice(1) + 2 * generateNewPlaceholderInventoryItem("coconut seed", 1).itemData.getPrice(0.5));
 })
 
 test('Should Not Sell Nonexistent Item', () => {

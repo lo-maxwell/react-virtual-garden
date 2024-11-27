@@ -48,3 +48,20 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 	// Call transactionWrapper with inner function and description
 	return transactionWrapper(innerFunction, 'fetchUserFromDatabase', client);
 }
+
+/**
+ * @returns boolean
+ */
+export async function userIdExistsInDatabase(userId: string, client?: PoolClient): Promise<boolean> {
+	const innerFunction = async (client: PoolClient) => {
+		//Create user
+		const userResult = await userRepository.getUserEntityById(userId);
+		// Check if result is valid
+		if (!userResult) {
+			return false;
+		}
+		return true;
+	}
+	// Call transactionWrapper with inner function and description
+	return transactionWrapper(innerFunction, 'userIdExistsInDatabase', client);
+}

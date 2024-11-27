@@ -8,7 +8,7 @@ interface DropdownProps<T> {
     renderOptionLabel: (option: T) => string; // Function to convert option to string for display
 }
 
-const DropdownComponent = <T,>({
+const DropdownMenu = <T,>({
     label,
     options,
     selectedValue,
@@ -40,4 +40,4 @@ const DropdownComponent = <T,>({
     );
 };
 
-export default DropdownComponent;
+export default DropdownMenu;

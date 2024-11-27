@@ -42,7 +42,7 @@ BEGIN
         WHERE table_schema = 'public' AND table_name = 'users'
     ) THEN
 		CREATE TABLE IF NOT EXISTS users (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			id VARCHAR(28) PRIMARY KEY,  -- No default
 			username VARCHAR(255) NOT NULL, -- Username (string)
 			password_hash TEXT NOT NULL,    -- Password hash (string)
 			password_salt TEXT NOT NULL,    -- Password salt (string)
@@ -66,7 +66,7 @@ BEGIN
     ) THEN
 		CREATE TABLE IF NOT EXISTS inventories (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
-			owner UUID NOT NULL,         -- User ID (foreign key from the 'users' table)
+			owner VARCHAR(28) NOT NULL,         -- User ID (foreign key from the 'users' table)
 			gold INTEGER NOT NULL CHECK (gold >= 0),       -- Inventory's gold
 			FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
 		);
@@ -87,7 +87,7 @@ BEGIN
     ) THEN
 		CREATE TABLE IF NOT EXISTS stores (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
-			owner UUID NOT NULL,         -- User ID (foreign key from the 'users' table)
+			owner VARCHAR(28) NOT NULL,         -- User ID (foreign key from the 'users' table)
 			identifier INTEGER NOT NULL DEFAULT 0, -- Indexes into list of possible stores for data fields
 			last_restock_time_ms BIGINT NOT NULL DEFAULT 0, -- Last restock in milliseconds since epoch time
 			FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
@@ -109,13 +109,22 @@ BEGIN
     ) THEN
 		CREATE TABLE IF NOT EXISTS levels (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
-			owner UUID NOT NULL,               -- User ID (foreign key from the 'users' table)
+			owner_uuid UUID,                      -- Stores owner if UUID (e.g., for gardens or inventories)
+			owner_uid VARCHAR(128),               -- Stores Firebase UID if user is the owner
 			owner_type VARCHAR(50) NOT NULL,   -- Type of owner (ie. user, garden)
 			level INTEGER NOT NULL DEFAULT 1 CHECK (level >= 0),     -- Level (integer, defaulting to 1)
 			current_xp INTEGER NOT NULL DEFAULT 0 CHECK (current_xp >= 0), -- Current XP (integer, defaulting to 0)
 			growth_rate FLOAT NOT NULL DEFAULT 1.0, -- Growth rate (float, defaulting to 1.0)
-			UNIQUE (owner, owner_type)
+			CHECK (owner_uuid IS NOT NULL OR owner_uid IS NOT NULL), -- Ensure one owner field is filled
+    		CHECK (owner_uuid IS NULL OR owner_uid IS NULL)          -- Ensure only one owner field is filled
 		);
+		-- Partial unique index for UUID-based owners
+		CREATE UNIQUE INDEX levels_owner_uuid_unique ON levels (owner_uuid, owner_type)
+		WHERE owner_uuid IS NOT NULL;
+
+		-- Partial unique index for UID-based owners
+		CREATE UNIQUE INDEX levels_owner_uid_unique ON levels (owner_uid, owner_type)
+		WHERE owner_uid IS NOT NULL;
 		table_created := TRUE;
 	END IF;
 END $$;
@@ -180,7 +189,7 @@ BEGIN
     ) THEN
 		CREATE TABLE IF NOT EXISTS gardens (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
-			owner UUID NOT NULL,         -- User ID (foreign key from the 'users' table)
+			owner VARCHAR(28) NOT NULL,         -- User ID (foreign key from the 'users' table)
 			rows INTEGER NOT NULL CHECK (rows >= 1),            -- Number of rows in garden
 			columns INTEGER NOT NULL CHECK (columns >= 1),         -- Number of columns in garden
 			FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
@@ -251,7 +260,7 @@ BEGIN
     ) THEN
 		CREATE TABLE IF NOT EXISTS action_histories (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
-			owner UUID NOT NULL,            -- User Id (foreign key from the 'users' table)
+			owner VARCHAR(28) NOT NULL,            -- User Id (foreign key from the 'users' table)
 			identifier VARCHAR(255) NOT NULL,      -- Indexes into actionhistories data, ie. "plant:all:harvested"
 			quantity INTEGER NOT NULL CHECK (quantity >= 0), -- Number this history tracks
 			FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table
@@ -274,7 +283,7 @@ BEGIN
     ) THEN
 		CREATE TABLE IF NOT EXISTS item_histories (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
-			owner UUID NOT NULL,            -- User Id (foreign key from the 'users' table)
+			owner VARCHAR(28) NOT NULL,            -- User Id (foreign key from the 'users' table)
 			identifier CHAR(13) NOT NULL,      -- item template reference
 			quantity INTEGER NOT NULL CHECK (quantity >= 0), -- Number this history tracks
 			FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table

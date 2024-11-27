@@ -285,9 +285,69 @@
 
 ### Added cloud save enable/disable button (currently disabled for production)
 
+## Day 31
+
+### Firebase auth
+
+  * Setup firebase project and enable auth
+  * Register this webapp to firebase project
+  * npm install firebase
+  * Create auth context and wrap content in it
+  * Implement sign in and sign out buttons
+  * Protect certain pages when not signed in 
+  * Display user data
+  * Link firebase auth with database
+  * Protect api routes based on login
+
+### Firebase account creation
+
+  * New User
+  * User has an empty User, Garden, Inventory, Store object: Good to go
+  * User has existing User/Garden/Inventory/Store: data migration eventually, right now just a warning that it'll be deleted
+  * User presses register account button
+  * Firebase creates account, returning an auth token
+  * Server verifies auth token (in api layer)
+    * Add reusable middleware to avoid duplicating token verification code in every api route
+  * Server creates database entries with default parameters
+  * Server returns created objects
+  * Firebase links returned role to custom claims
+  * Client loads returned objects into memory and propagates to contexts
+  * Added auth wrappers around most api calls
+  * On login, loads the user's garden from database
+  * On logout, unloads the garden ?
+    * Garden/store/user shouldn't be visible while logged out anyways, it should redirect to login
+    * Unless in guest mode
+
+### UI changes
+
+  * Updated header
+  * Account icon and dropdown menu
+  * Updated description on login screen
+  * Added react-redux to track item quantities for instant updating when planting/harvesting/buying/selling
 
 
 TODO:
+
+Action items:
+1. Make the redirect delayed and make it sit on a screen that says redirect to login page (may be changed in the future)
+2. Fix the header and hide irrelevant buttons and make it cleaner and use less space 
+3. Icon on message on top right for login/logout
+4. UI indication that guest mode is on (in the header)
+5. The login screen should be clear that logging in will disable guest mode through a popup window
+6. Message for guest mode can not be disabled until logged in 
+7. Popup for guest mode that says it is a new garden 
+8. In the case when a user logs in then logs out then clicks guest mode. Guest mode should display fresh garden/inventory instead of previous user stuff. 
+
+User page no longer allows create/save/fetch, we automatically create on account register with firebase,
+save whenever an action is performed, fetch on login; add a debug force fetch option
+
+Top right icon for user + username, clicking on it gives log out option
+
+On garden page, user and inventory can be expanded/hidden
+
+Design home page and login page
+
+Admin panel
 
 Validate garden bounds for plant/harvest
 
@@ -334,6 +394,9 @@ New user -> backend sets up user, garden, inventory, store, etc. (choose uuids h
 Old user -> backend checks for current id -> grab data from database based on current id -> push to backend model
 
 
+UI Bugs
+Increasing the size of a tooltip while it is hovered does not change its position; this can cause issues where the tooltip goes off the screen or interferes with the mouse pointer, ie. when a plot goes from planted item to empty/displaying the harvested item vs planted. 
+
 Stretch Goals
 Instead of expanding row/col, have the user add 1 plot at a time
 This is a design flaw, not a coding one -- right now supports exponential growth when it should be linear, also easier to make iterative progress
@@ -344,3 +407,10 @@ Small, medium, large stores with different restock intervals and stock limits
 Item metadata migration tool
 Dev/Prod external dbs, and dev/prod branches
 Garden Stock Market - buying/selling pressure, variable costs, options and futures
+
+Crop rotation thoughts
+Garden has Fertility, Structure, Biodiversity quantities. 
+Fertility - Soil nutrient levels, determines crop yields and quality rating
+Structure - Soil physical health, determines grow speed and natural disaster resistance
+Biodiversity - Soil biological health, determines xp earned and pest resistance
+Growing certain crops increases/decreases these respectively

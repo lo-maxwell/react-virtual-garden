@@ -4,8 +4,8 @@ import { createContext, useContext } from "react";
 // Define your context type
 interface AccountContextType {
     account: Account;
-    cloudSave: boolean;
-    toggleCloudSave: () => boolean;
+    guestMode: boolean;
+    setGuestMode: (arg: boolean) => void;
     environmentTestKey: string;
     // Add any other actions or state you need
 }

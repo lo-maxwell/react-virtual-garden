@@ -9,6 +9,7 @@ import { stocklistFactory } from '@/models/itemStore/store/StocklistFactory';
 import { Store } from '@/models/itemStore/store/Store';
 import { storeFactory } from '@/models/itemStore/store/StoreFactory';
 import User from '@/models/user/User';
+import { makeApiRequest } from '@/utils/api/api';
 import { loadStore, saveStore } from '@/utils/localStorage/store';
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,39 +22,14 @@ interface StoreProviderProps {
 export const StoreProvider = ({ children }: StoreProviderProps) => {
     const [store, setStore] = useState<Store | null>(null);
 	const { user } = useUser();
-	const { account, cloudSave } = useAccount();
- 
-	function generateInitialStore() {
-		const randomUuid = uuidv4();
-		function generateItems() { 
-			return stocklistFactory.getStocklistInterfaceById("0")?.items;
-		}
-		const storeIdentifier = 0;
-		const storeInterface = storeFactory.getStoreInterfaceById(storeIdentifier);
-		let storeName = "Default Store";
-		let buyMultiplier = 2;
-		let sellMultiplier = 1;
-		let upgradeMultiplier = 1;
-		let restockTime = Date.now();
-		let restockInterval = 300000;
-		if (storeInterface) {
-			storeName = storeInterface.name;
-			buyMultiplier = storeInterface.buyMultiplier;
-			sellMultiplier = storeInterface.sellMultiplier;
-			upgradeMultiplier = storeInterface.upgradeMultiplier;
-			restockInterval = storeInterface.restockInterval;
-		}
-		const initialStore = new Store(randomUuid, storeIdentifier, storeName, buyMultiplier, sellMultiplier, upgradeMultiplier, new ItemList(), generateItems(), restockTime, restockInterval);
-		initialStore.restockStore();
-		return initialStore;
-	}
+	const { account, guestMode } = useAccount();
 
 	function setupStore(): Store {
 		let store = loadStore();
 		console.log(store);
 		if (!(store instanceof Store)) {
 		  console.log('store not found, setting up');
-		  store = generateInitialStore();
+		  store = Store.generateDefaultNewStore();
 		//   store.restockStore();
 		}
 		updateRestockTimer();
@@ -79,24 +55,9 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 	async function restockStoreAPI () {
 		if (!store) return false;
 		try {
-			const data = {
-			}
-			// Making the PATCH request to your API endpoint
-			const response = await fetch(`/api/user/${`TODO: REPLACE VALUE`}/store/${store.getStoreId()}/restock`, {
-			  method: 'PATCH',
-			  headers: {
-				'Content-Type': 'application/json',
-			  },
-			  body: JSON.stringify(data), // Send the data in the request body
-			});
-	  
-			// Check if the response is successful
-			if (!response.ok) {
-			  throw new Error('Failed to restock store');
-			}
-	  
-			// Parsing the response data
-			const result = await response.json();
+			const data = {}
+			const apiRoute = `/api/user/${`TODO: REPLACE VALUE`}/store/${store.getStoreId()}/restock`;
+			const result = await makeApiRequest('PATCH', apiRoute, data, true);
 			console.log('Successfully restocked store:', result);
 			if (result === false) return "NOT TIME";
 		  } catch (error) {
@@ -107,19 +68,10 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 
 	async function syncStore (user: User, store: Store) {
 	try {
-        // Sync store data
-        const storeResponse = await fetch(`/api/user/${user.getUserId()}/store/${store.getStoreId()}/get`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-        if (!storeResponse.ok) {
-          throw new Error('Failed to fetch store');
-        }
-        const storeResult = await storeResponse.json();
-		saveStore(Store.fromPlainObject(storeResult));
-		Object.assign(store, Store.fromPlainObject(storeResult));
+		const apiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/get`;
+		const result = await makeApiRequest('GET', apiRoute, {}, true);
+		saveStore(Store.fromPlainObject(result));
+		reloadStore();
         return true;
       } catch (error) {
         console.error(error);
@@ -133,7 +85,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		const localResult = restockStoreLocal();
 		if (localResult) {
 			// Terminate early before api call
-			if (!cloudSave) {
+			if (guestMode) {
 				return "SUCCESS";
 			}
 
@@ -192,13 +144,18 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 	  }, [updateRestockTimer]);
 
 	const resetStore = () => {
-		const newStore = generateInitialStore();
+		const newStore = Store.generateDefaultNewStore();
 		setStore(newStore);
 		saveStore(newStore);
 	}
 
+	const reloadStore = () => {
+		const initialStore = setupStore();
+		setStore(initialStore);
+	}
+
     return (
-        <StoreContext.Provider value={{ store: store!, resetStore, updateRestockTimer }}>
+        <StoreContext.Provider value={{ store: store!, resetStore, updateRestockTimer, reloadStore }}>
             {children}
         </StoreContext.Provider>
     );

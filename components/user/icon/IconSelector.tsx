@@ -3,7 +3,7 @@ import { placeholderItemTemplates } from '@/models/items/templates/models/Placeh
 import Icon from '@/models/user/icons/Icon';
 import { iconFactory } from '@/models/user/icons/IconRepository';
 import React, { useState } from 'react';
-import DropdownComponent from '../../lists/DropdownComponent';
+import DropdownMenu from '../../lists/DropdownMenu';
 import { PopupWindow } from '../../window/popupWindow';
 import IconButton from './IconButton';
 
@@ -31,7 +31,7 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
 		}
 
 		return (<>
-            <DropdownComponent
+            <DropdownMenu
                 label="Filter by Category"
                 options={categories}
                 selectedValue={categoryFilter}
@@ -77,7 +77,7 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
             {chunkedIcons.map((iconGroup, index) => (
             <div key={index} className="flex flex-row mx-4 my-4"> {/* Flexbox for horizontal alignment */}
               {iconGroup.map((iconOption) => (
-                <IconButton key={iconOption.getName()} icon={iconOption.getName()} onClickFunction={() => onIconClick(iconOption)} borderColor={`coffee-700`} size={"text-8xl"}/>
+                <IconButton key={iconOption.getName()} icon={iconOption.getName()} onClickFunction={() => onIconClick(iconOption)} bgColor={`gray-300`} borderColor={`coffee-700`} textSize={"text-8xl"} elementSize={"100"}/>
               ))}
             </div>
           ))}
@@ -87,8 +87,7 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
     
 	return (
         <span className="icon-selector">
-            <IconButton icon={iconIndex} onClickFunction={showAllIconsWindow} borderColor={`coffee-700`} size={"text-4xl"}/>
-            {/* <button onClick={showAllIconsWindow} className="px-1 py-1 border border-2 border-coffee-700 align-text-bottom text-center bg-gray-300 min-w-12 min-h-12 text-3xl text-purple-600 font-semibold rounded-lg" >{iconFactory.getIconByName(iconIndex)}</button> */}
+            <IconButton icon={iconIndex} onClickFunction={showAllIconsWindow} bgColor={`gray-300`} borderColor={`coffee-700`} textSize={"text-4xl"} elementSize={"12"}/>
             <PopupWindow showWindow={showAllIcons} setShowWindow={setShowAllIcons}>
                 <div className="w-max bg-reno-sand-200 text-black p-8 rounded-lg shadow-md justify-between items-center">
                     <div className="text-2xl text-semibold"> Select a new icon: </div>

@@ -46,7 +46,7 @@ test('Should Initialize Default Garden Object', () => {
 	expect(newGarden.getPlots()[0].length).toBe(Garden.getStartingCols());
 	expect(newGarden.getPlots()[0][0].getItem().itemData.name).toBe("ground");
 	expect(newGarden.getPlots()[Garden.getStartingRows() - 1][Garden.getStartingCols() - 1].getItem().itemData.name).toBe("ground");
-	expect(newGarden.getPlotByRowAndColumn(1,1)!.getItem().itemData.name).toBe("ground");
+	expect(newGarden.getPlotByRowAndColumn(1,1)?.getItem().itemData.name).toBe("ground");
 	expect(newGarden.size()).toBe(Garden.getStartingRows() * Garden.getStartingCols());
 });
 
@@ -60,7 +60,7 @@ test('Should Initialize Specified Garden Object', () => {
 	expect(newGarden.getPlots()[0].length).toBe(15);
 	expect(newGarden.getPlots()[0][0].getItem().itemData.name).toBe("ground");
 	expect(newGarden.getPlots()[14][14].getItem().itemData.name).toBe("ground");
-	expect(newGarden.getPlotByRowAndColumn(1,1)!.getItem().itemData.name).toBe("ground");
+	expect(newGarden.getPlotByRowAndColumn(1,1)?.getItem().itemData.name).toBe("ground");
 });
 
 test('Garden Generates Empty Plot', () => {
@@ -77,7 +77,7 @@ test('Should Extend Garden Size', () => {
 	newGarden.addRow(testUser);
 	newGarden.addRow(testUser);
 	newGarden.addColumn(testUser);
-	expect(newGarden.getPlotByRowAndColumn(1,1)!.getItem().itemData.name).toBe("ground");
+	expect(newGarden.getPlotByRowAndColumn(1,1)?.getItem().itemData.name).toBe("ground");
 	expect(newGarden.getRows()).toBe(Garden.getStartingRows() + 2);
 	expect(newGarden.getCols()).toBe(Garden.getStartingCols() + 1);
 	expect(newGarden.getPlots()[0][0].getItem().itemData.name).toBe("ground");
@@ -92,7 +92,7 @@ test('Should Not Extend Garden Size If Low Level', () => {
 	newGarden.addRow(testUser);
 	newGarden.addRow(testUser);
 	newGarden.addColumn(testUser);
-	expect(newGarden.getPlotByRowAndColumn(1,1)!.getItem().itemData.name).toBe("ground");
+	expect(newGarden.getPlotByRowAndColumn(1,1)?.getItem().itemData.name).toBe("ground");
 	expect(newGarden.getRows()).toBe(Garden.getStartingRows());
 	expect(newGarden.getCols()).toBe(Garden.getStartingCols());
 	expect(newGarden.getPlots()[0][0].getItem().itemData.name).toBe("ground");
@@ -105,7 +105,7 @@ test('Should Shrink Garden Size', () => {
 	newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("apple", "newItem"));
 	newGarden.setGardenSize(5,5);
 	expect(newGarden.getPlots()[1][1].getItem().itemData.name).toBe("apple");
-	expect(newGarden.getPlotByRowAndColumn(1,1)!.getItem().itemData.name).toBe("apple");
+	expect(newGarden.getPlotByRowAndColumn(1,1)?.getItem().itemData.name).toBe("apple");
 	expect(newGarden.getRows()).toBe(5);
 	expect(newGarden.getCols()).toBe(5);
 	expect(newGarden.getPlots()[0][0].getItem().itemData.name).toBe("ground");

@@ -1,34 +1,33 @@
 'use client'
 import PlusSquareFilled from "@/components/icons/buttons/plus-square-filled";
-import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { Store } from "@/models/itemStore/store/Store";
 import { useCallback, useEffect, useState } from "react";
 import MinusSquareFilled from "@/components/icons/buttons/minus-square-filled";
 import TradeWindowItemComponent from "./tradeWindowItem";
 import { saveStore } from "@/utils/localStorage/store";
-import { saveInventory } from "@/utils/localStorage/inventory";
 import TrashCanFilled from "@/components/icons/buttons/trash-can-filled";
 import ChangeQuantityButton from "../changeQuantityButton";
 import { useStore } from "@/app/hooks/contexts/StoreContext";
 import { useInventory } from "@/app/hooks/contexts/InventoryContext";
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
-import { InventoryTransactionResponse } from "@/models/itemStore/inventory/InventoryTransactionResponse";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { buyItemAPI, buyItemLocal, sellItemAPI, sellItemLocal, syncStoreAndInventory } from "./tradeWindowFunctions";
 import { useUser } from "@/app/hooks/contexts/UserContext";
 import { useAccount } from "@/app/hooks/contexts/AccountContext";
+import { useDispatch } from "react-redux";
+import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
 
 
 const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshKey}: {costMultiplier: number, forceRefreshKey: number, setForceRefreshKey: React.Dispatch<React.SetStateAction<number>>}) => {
-	const { inventory, updateInventoryForceRefreshKey } = useInventory();
-    const { selectedItem, toggleSelectedItem, owner, setOwner } = useSelectedItem();
+	const { inventory, reloadInventory } = useInventory();
+    const { selectedItem, toggleSelectedItem, owner } = useSelectedItem();
 	const defaultTradeWindowMessage = 'Trade Window';
 	const [quantity, setQuantity] = useState(1);
 	const [tradeWindowMessage, setTradeWindowMessage] = useState(defaultTradeWindowMessage);
-	const { store, updateRestockTimer } = useStore();
+	const { store, updateRestockTimer, reloadStore } = useStore();
 	const { user } = useUser();
-	const { account, cloudSave } = useAccount();
+	const { account, guestMode } = useAccount();
+	const dispatch = useDispatch();
 
 	const resetSelected = () => {
 		setTradeWindowMessage(defaultTradeWindowMessage);
@@ -117,12 +116,23 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 				return;
 			}
 			const localResult = buyItemLocal(store, selectedItem, quantity, inventory);
-			if (localResult) {
+			const updatedItem = inventory.getItem(selectedItem.itemData);
+			if (localResult && updatedItem.isSuccessful()) {
 				setTradeWindowMessage('Purchase Successful!');
 				toggleSelectedItem(null);
+				
+				// Update redux store
+				dispatch(setItemQuantity({ 
+					inventoryItemId: selectedItem.getInventoryItemId(), 
+					quantity: selectedItem.getQuantity()
+				}));
+				dispatch(setItemQuantity({ 
+					inventoryItemId: updatedItem.payload.getInventoryItemId(), 
+					quantity: updatedItem.payload.getQuantity()
+				}));
 
 				// Terminate early before api call
-				if (!cloudSave) {
+				if (guestMode) {
 					updateRestockTimer();
 					saveStore(store);
 					return;
@@ -131,6 +141,8 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 				const apiResult = await buyItemAPI(user, store, selectedItem, quantity, inventory);
 				if (!apiResult) {
 					syncStoreAndInventory(user, store, inventory);
+					reloadStore();
+					reloadInventory();
 					// TODO: force a refresh
 					setTradeWindowMessage(`There was an error purchasing the item! Please refresh the page!`);
 					setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1);
@@ -142,12 +154,23 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 			}
 		} else if (owner instanceof Inventory) {
 			const localResult = sellItemLocal(store, selectedItem, quantity, inventory);
-			if (localResult) {
+			const updatedItem = store.getItem(selectedItem.itemData);
+			if (localResult && updatedItem.isSuccessful()) {
 				setTradeWindowMessage('Sale Successful!');
 				toggleSelectedItem(null);
+				
+				// Update redux store
+				dispatch(setItemQuantity({ 
+					inventoryItemId: selectedItem.getInventoryItemId(), 
+					quantity: selectedItem.getQuantity()
+				}));
+				dispatch(setItemQuantity({ 
+					inventoryItemId: updatedItem.payload.getInventoryItemId(), 
+					quantity: updatedItem.payload.getQuantity()
+				}));
 
 				// Terminate early before api call
-				if (!cloudSave) {
+				if (guestMode) {
 					updateRestockTimer();
 					saveStore(store);
 					return;
@@ -156,6 +179,8 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 				const apiResult = await sellItemAPI(user, store, selectedItem, quantity, inventory);
 				if (!apiResult) {
 					syncStoreAndInventory(user, store, inventory);
+					reloadStore();
+					reloadInventory();
 					setTradeWindowMessage(`There was an error selling the item! Please refresh the page!`);
 					setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1);
 					// return;

@@ -1,11 +1,11 @@
 import { MouseEventHandler } from "react";
 import IconDisplay from "./IconDisplay";
 
-const IconButton = ({icon, onClickFunction, borderColor, size}: {icon: string, onClickFunction: MouseEventHandler<HTMLButtonElement>, borderColor: string, size: string}) => {
+const IconButton = ({icon, onClickFunction, bgColor, borderColor, textSize, elementSize}: {icon: string, onClickFunction: MouseEventHandler<HTMLButtonElement>, bgColor: string, borderColor: string, textSize: string, elementSize: string}) => {
 	
 	return (
 	<button onClick={onClickFunction} className={`mx-2`}>
-		<IconDisplay icon={icon} borderColor={borderColor} size={size}/>
+		<IconDisplay icon={icon} bgColor={bgColor} borderColor={borderColor} textSize={textSize} elementSize={elementSize}/>
 	</button>
 	);
 

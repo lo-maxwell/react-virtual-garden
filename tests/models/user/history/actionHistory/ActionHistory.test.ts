@@ -59,7 +59,7 @@ test('Should Not Combine ActionHistory With Invalid Quantity', () => {
 test('Should Create ActionHistory Object From PlainObject', () => {
 	const newActionHistory1 = actionHistoryFactory.createActionHistoryByName("Total Plants Harvested", 1);
 	newActionHistory1?.setQuantity(10);
-	const serializedHistory = JSON.stringify(newActionHistory1!.toPlainObject());
+	const serializedHistory = JSON.stringify(newActionHistory1?.toPlainObject());
 	const history = ActionHistory.fromPlainObject(JSON.parse(serializedHistory));
 	expect(history).toBeTruthy();
 	expect(history?.getName()).toBe("Total Plants Harvested");
@@ -69,7 +69,7 @@ test('Should Create ActionHistory Object From PlainObject', () => {
 test('Should Create ActionHistory Object From PlainObject With Missing Data', () => {
 	const newActionHistory1 = new ActionHistory(uuidv4(), "Total Plants Harvested", "The number of plants harvested by this user", "missing identifier", 1);
 	newActionHistory1?.setQuantity(10);
-	const serializedHistory = JSON.stringify(newActionHistory1!.toPlainObject());
+	const serializedHistory = JSON.stringify(newActionHistory1?.toPlainObject());
 	const history = ActionHistory.fromPlainObject(JSON.parse(serializedHistory));
 	expect(history).toBeTruthy();
 	expect(history?.getName()).toBe("Total Plants Harvested");
@@ -78,7 +78,7 @@ test('Should Create ActionHistory Object From PlainObject With Missing Data', ()
 
 	const newActionHistory2 = new ActionHistory(uuidv4(), "missing name", "missing description", "plant:all:harvested", 1);
 	newActionHistory2?.setQuantity(10);
-	const serializedHistory2 = JSON.stringify(newActionHistory2!.toPlainObject());
+	const serializedHistory2 = JSON.stringify(newActionHistory2?.toPlainObject());
 	const history2 = ActionHistory.fromPlainObject(JSON.parse(serializedHistory2));
 	expect(history2).toBeTruthy();
 	expect(history2?.getName()).toBe("Total Plants Harvested");
@@ -89,7 +89,7 @@ test('Should Create ActionHistory Object From PlainObject With Missing Data', ()
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 	const newActionHistory3 = new ActionHistory(uuidv4(), "missing name", "missing description", "missing identifier", 1);
 	newActionHistory3?.setQuantity(10);
-	const serializedHistory3 = JSON.stringify(newActionHistory3!.toPlainObject());
+	const serializedHistory3 = JSON.stringify(newActionHistory3?.toPlainObject());
 	const history3 = ActionHistory.fromPlainObject(JSON.parse(serializedHistory3));
 	expect(history3).toBeTruthy();
 	expect(history3?.getName()).toBe("missing name");

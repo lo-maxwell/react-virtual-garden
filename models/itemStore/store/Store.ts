@@ -132,6 +132,31 @@ export class Store extends ItemStore {
 		};
 	} 
 
+	static generateDefaultNewStore(): Store {
+		const randomUuid = uuidv4();
+		function generateItems() { 
+			return stocklistFactory.getStocklistInterfaceById("0")?.items;
+		}
+		const storeIdentifier = 1;
+		const storeInterface = storeFactory.getStoreInterfaceById(storeIdentifier);
+		let storeName = "Default Store";
+		let buyMultiplier = 2;
+		let sellMultiplier = 1;
+		let upgradeMultiplier = 1;
+		let restockTime = Date.now();
+		let restockInterval = 300000;
+		if (storeInterface) {
+			storeName = storeInterface.name;
+			buyMultiplier = storeInterface.buyMultiplier;
+			sellMultiplier = storeInterface.sellMultiplier;
+			upgradeMultiplier = storeInterface.upgradeMultiplier;
+			restockInterval = storeInterface.restockInterval;
+		}
+		const initialStore = new Store(randomUuid, storeIdentifier, storeName, buyMultiplier, sellMultiplier, upgradeMultiplier, new ItemList(), generateItems(), restockTime, restockInterval);
+		initialStore.restockStore();
+		return initialStore;
+	}
+
 	/**
 	 * @returns the store id for database access
 	 */
