@@ -50,6 +50,7 @@ const AuthComponent: React.FC = () => {
     const handleRegister = async () => {
         if (allowFirebase !== 'this is the local environment') {
             setMessage(`Error: Firebase registration is disabled at this time. Please use guest mode instead.`);
+            return;
         }
         setMessage(``);
         try {
@@ -65,6 +66,7 @@ const AuthComponent: React.FC = () => {
     const handleLogin = async () => {
         if (allowFirebase !== 'this is the local environment') {
             setMessage(`Error: Firebase login is disabled at this time. Please use guest mode instead.`);
+            return;
         }
         setMessage(``);
         try {
@@ -91,6 +93,7 @@ const AuthComponent: React.FC = () => {
     const handleGoogleLogin = async () => {
         if (allowFirebase !== 'this is the local environment') {
             setMessage(`Error: Firebase login is disabled at this time. Please use guest mode instead.`);
+            return;
         }
         setMessage(``);
         try {
