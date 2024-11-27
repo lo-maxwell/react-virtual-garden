@@ -35,6 +35,13 @@ const HomePage = () => {
         <p className="inline-block">Go to User Page</p>
         </Link>
       </div>
+      <div className="mx-4">
+        <Link
+          href={"/login"}
+        >
+        <p className="inline-block">Go to Login Page</p>
+        </Link>
+      </div>
       </div>
     </>
   );

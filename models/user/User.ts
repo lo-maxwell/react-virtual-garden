@@ -96,7 +96,11 @@ class User {
 	}
 
 	static generateNewUserWithId(firebaseUid: string): User {
-		return new User(firebaseUid, 'Test User', 'apple');
+		return new User(firebaseUid, this.getDefaultUserName(), 'apple');
+	}
+
+	static getDefaultUserName(): string {
+		return "Unknown Farmer";
 	}
 
 	getUserId(): string {
