@@ -211,7 +211,7 @@ const UserPage = () => {
       return;
     }
 
-    async function renderAccountManagementButtons() {
+    function renderAccountManagementButtons() {
       // const environmentTestKey = await fetchEnvironmentTestKey();
 
       if (!environmentTestKey) {
@@ -258,7 +258,7 @@ const UserPage = () => {
               <LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} />
             </div>
             <div>{`The friends list will go here, once it's ready!`}</div>
-            <Suspense fallback={<div></div>}>
+            <Suspense fallback={<div>Loading...</div>}>
               {renderAccountManagementButtons()}
             </Suspense>
             </div>
