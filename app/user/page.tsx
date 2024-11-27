@@ -257,7 +257,7 @@ const UserPage = () => {
             <div className="mx-4 my-4">
               <LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} />
             </div>
-            <div>The friends list will go here, once it's ready!</div>
+            <div>{`The friends list will go here, once it's ready!`}</div>
             <Suspense fallback={<div></div>}>
               {renderAccountManagementButtons()}
             </Suspense>
