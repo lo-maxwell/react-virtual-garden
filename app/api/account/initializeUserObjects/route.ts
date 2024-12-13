@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 		const { } = await request.json();
 		const result = await createDefaultAccountInDatabase(firebaseUid);
 		await setDefaultCustomClaims(firebaseUid);
-	
+		
 		return NextResponse.json({ message: 'Successfully created new user objects' }, { status: 200 });
 		// return NextResponse.json(result, {status: 201});
 	} catch (error) {

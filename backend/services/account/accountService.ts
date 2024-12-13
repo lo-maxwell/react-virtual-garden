@@ -22,12 +22,15 @@ import { transactionWrapper } from "../utility/utility";
  * @returns the result of createAccountInDatabase
  */
  export async function createDefaultAccountInDatabase(firebaseUid: string, client?: PoolClient): Promise<string | null> {
+	console.log('creating default user');
 	const defaultUser = User.generateNewUserWithId(firebaseUid);
-	
+	console.log('creating default garden');
 	const defaultGarden = Garden.generateDefaultNewGarden();
 	const defaultInventory = Inventory.generateDefaultNewInventory();
 	const defaultStore = Store.generateDefaultNewStore();
+	console.log('creating account in database');
 	const createResult = await createAccountInDatabase(defaultUser, defaultInventory, defaultStore, defaultGarden, client);
+	console.log('finished creating account');
 	if (!createResult) {
 		throw new Error(`There was an error initializing default objects`);
 	}

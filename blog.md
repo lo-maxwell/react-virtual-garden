@@ -325,6 +325,31 @@
   * Updated description on login screen
   * Added react-redux to track item quantities for instant updating when planting/harvesting/buying/selling
 
+## Day 32
+
+### AWS Database setup - In progress
+  * Create aws rds instance
+  * Configure security/allowed routes with EC2
+  * Get connection details (endpoint, port, username/password, database name)
+  * Update environment variables with connection details
+  * Connect to rds with psql and setup admin rights/owners
+  * Consider adding custom initialization script to set up tables
+  * Test locally
+  * Redeploy app
+
+## Created private rds
+  * Created prod and dev databases
+  * Created prod_admin and dev_admin users with full permissions
+  * Setup initial tables
+  * Created security groups to disallow incoming traffic except from bastion host
+
+## Created bastion host
+  * Created ec2 instance to act as an ssh tunnel
+  * Created security group to only allow incoming traffic from my local ip
+  * Allows outgoing traffic to internal ecosystem, aka the private rds
+  * Run ssh command in terminal to enable port forwarding from localhost to rds
+  * Now able to connect to rds with pgadmin, psql, or environment variables in webapp
+
 
 TODO:
 
