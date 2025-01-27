@@ -19,7 +19,7 @@ const cloud_pool = new Pool({
 	  }
   });
 
-export const pool = cloud_pool;
+export const pool = local_pool;
 
 export const query = <T extends QueryResultRow>(text: string, params: any[]): Promise<QueryResult<T>> => {
 	return pool.query<T>(text, params);
