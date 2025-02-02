@@ -363,6 +363,7 @@
 
 ### UI QOL Changes
   * Force Refresh Saved Data button
+    * Disabled clicking button while syncing in progress, and gave indication that function is running
     * Needs to give some progress/success/failure indication, maybe make a notification system?
 
 

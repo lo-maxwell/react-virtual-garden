@@ -8,7 +8,7 @@ import { saveGarden } from '@/utils/localStorage/garden';
 import { saveInventory } from '@/utils/localStorage/inventory';
 import { saveStore } from '@/utils/localStorage/store';
 import { saveUser } from '@/utils/localStorage/user';
-import React from 'react';
+import React, { useState } from 'react';
 import { useAccount } from '../hooks/contexts/AccountContext';
 import { useGarden } from '../hooks/contexts/GardenContext';
 import { useInventory } from '../hooks/contexts/InventoryContext';
@@ -23,8 +23,10 @@ const LoginPage: React.FC = () => {
     const { store, reloadStore, resetStore } = useStore();
     const { garden, reloadGarden, resetGarden } = useGarden();
     const { account, guestMode, setGuestMode } = useAccount();
+	const [syncing, setSyncing] = useState(false);
 
     const syncAccountObjects = async () => {
+		setSyncing(true);
         const result = await fetchAccountObjects();
         console.log('result:');
         console.log(result);
@@ -41,12 +43,23 @@ const LoginPage: React.FC = () => {
         reloadGarden();
         reloadInventory();
         reloadStore();
+		setTimeout(() => {
+			setSyncing(false);
+		}, 1000);
     }
+
+	function getSyncAccountObjectsButtonText () {
+		if (syncing) {
+			return "Account syncing in progress..."
+		} else {
+			return "Force Sync Account"
+		}
+	}
   
   return (<>
       <div className="flex flex-1 flex-col bg-reno-sand-200 text-black"> 
         <div className="mx-4">This is the settings page.</div>
-		<button onClick={syncAccountObjects} className="block w-full text-left py-2 px-4 hover:bg-[#d0cecc] whitespace-nowrap">Force Sync Account</button>
+		<button onClick={syncAccountObjects} disabled={syncing} className="block w-full text-left py-2 px-4 hover:bg-[#d0cecc] whitespace-nowrap">{getSyncAccountObjectsButtonText()}</button>
       </div>
     </>
   );
