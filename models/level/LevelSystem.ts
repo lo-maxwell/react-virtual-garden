@@ -2,8 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export interface LevelSystemEntity {
 	id: string;
-	level: number;
-	current_xp: number;
+	total_xp: number;
 	growth_rate: number;
 }
 
@@ -26,6 +25,11 @@ class LevelSystem {
 		this.currentExp = currentExp;
 		this.expToLevelUp = LevelSystem.calculateExpToLevelUp(startingLevel, growthRate);
 		this.growthRate = growthRate;
+		//TODO: Test this, should auto level to the right numbers
+		while(this.expToLevelUp < this.currentExp) {
+			this.currentExp -= this.expToLevelUp;
+			this.levelUp();
+		}
 	}
 
 	static fromPlainObject(plainObject: any): LevelSystem {
@@ -79,8 +83,7 @@ class LevelSystem {
 	toLevelSystemEntity(): LevelSystemEntity {
 		return {
 			id: this.getLevelSystemId(),
-			level: this.getLevel(),
-			current_xp: this.getCurrentExp(),
+			total_xp: LevelSystem.getTotalExpForLevel(this.getLevel(), this.getGrowthRate()) + this.getCurrentExp(),
 			growth_rate: this.getGrowthRate()
 		}
 	}
@@ -152,6 +155,18 @@ class LevelSystem {
 		const sum = (n / 2) * (firstTerm + lastTerm);
 		return Math.floor(sum);
 	  }
+	
+	static getLevelForTotalExp(totalExp: number, growthRate: number): number {
+		if (totalExp <= 0) return 1;
+		let requiredExp = 0;
+		let level = 1;
+		while (requiredExp < totalExp) {
+			requiredExp += LevelSystem.calculateExpToLevelUp(level, growthRate);
+			if (requiredExp > totalExp) break;
+			level += 1;
+		}
+		return level;
+	}
 }
 
 export default LevelSystem;

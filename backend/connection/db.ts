@@ -19,7 +19,7 @@ const cloud_pool = new Pool({
 	  }
   });
 
-export const pool = cloud_pool;
+export const pool = (process.env.USE_DATABASE == 'LOCAL') ? local_pool : cloud_pool;
 
 export const query = <T extends QueryResultRow>(text: string, params: any[]): Promise<QueryResult<T>> => {
 	return pool.query<T>(text, params);

@@ -3,16 +3,25 @@ import { transactionWrapper } from "@/backend/services/utility/utility";
 import { PlacedItemEntity, PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
+import { assert } from "console";
 import { PoolClient } from "pg";
 import { v4 as uuidv4 } from 'uuid';
 
 class PlacedItemRepository {
 
-	makePlacedItemObject(placedItemEntity: PlacedItemEntity): PlacedItem {
-		if (!placedItemEntity || (typeof placedItemEntity.identifier !== 'string' || (typeof placedItemEntity.status !== 'string'))) {
+	/**
+	 * Ensures that the object is of type PlacedItemEntity, ie. that it contains an id, owner, identifier, and status field
+	 */
+	 validatePlacedItemEntity(placedItemEntity: any): boolean {
+		if (!placedItemEntity || (typeof placedItemEntity.id !== 'string') || (typeof placedItemEntity.owner !== 'string') || (typeof placedItemEntity.identifier !== 'string' || (typeof placedItemEntity.status !== 'string'))) {
 			console.error(placedItemEntity);
 			throw new Error(`Invalid types while creating PlacedItem from PlacedItemEntity`);
 		}
+		return true;
+	}
+
+	makePlacedItemObject(placedItemEntity: PlacedItemEntity): PlacedItem {
+		assert(this.validatePlacedItemEntity(placedItemEntity));
 
 		const itemData = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier);
 		if (!itemData) {

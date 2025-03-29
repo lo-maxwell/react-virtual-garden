@@ -180,6 +180,7 @@ import { transactionWrapper } from "../utility/utility";
 		// Wait for all promises to resolve
 		await Promise.allSettled(allPromises);
 
+		console.log('finished creating account in database');
 		return true;
 	};
 
@@ -342,7 +343,7 @@ import { transactionWrapper } from "../utility/utility";
 
 		// Wait for all promises to resolve
 		await Promise.allSettled(allPromises);
-
+		console.log('finished saving account to database');
 		return true;
 	}
 
@@ -389,7 +390,8 @@ export interface AccountObjects {
 		if (!inventoryResult) {
 			throw new Error(`Could not find the inventory for userId ${userId}`);
 		}
-		const inventoryInstance = await inventoryRepository.makeInventoryObject(inventoryResult);
+		const inventoryItemList = await inventoryRepository.getInventoryItems(inventoryResult.id);
+		const inventoryInstance = await inventoryRepository.makeInventoryObject(inventoryResult, inventoryItemList);
 
 		//Create store
 		const storeResult = await storeRepository.getStoreByOwnerId(userId);
@@ -397,8 +399,8 @@ export interface AccountObjects {
 		if (!storeResult) {
 			throw new Error(`Could not find the store for userId ${userId}`);
 		}
-		const storeInstance = await storeRepository.makeStoreObject(storeResult);
-
+		const storeItemList = await storeRepository.getStoreItems(storeResult.id);
+		const storeInstance = await storeRepository.makeStoreObject(storeResult, storeItemList);
 		const returnObject = {
 			plainUserObject: userInstance.toPlainObject(),
 			plainGardenObject: gardenInstance.toPlainObject(),

@@ -350,8 +350,41 @@
   * Run ssh command in terminal to enable port forwarding from localhost to rds
   * Now able to connect to rds with pgadmin, psql, or environment variables in webapp
 
+### Create Lambda + API Gateway - On Hold
+  * Lambda function that exposes http/rest endpoints, accessible by frontend
+  * Has access to private vpc, allowing querying of rds
+  * Frontend sends http request that triggers lambda function, which performs database queries and returns json data
+  * Secure gateway using api keys, iam roles, or oauth, and ssl/tls encryption
+  * Flow: user presses button on frontend -> frontend sends request to backend -> backend authenticates with firebase -> backend sends request to api gateway (containing api key on server side) -> api gateway calls lambda function -> return json data to frontend
+  * To consider: separate api keys per user, which would allow deactivation/rate limiting per user
+
+### Currently investigating aws lambda...
+  * Use xmin for concurrency
+  * Client -> api route -> service function -> lambda call to fetch data from db -> data processing -> lambda call to update db -> return result to client
+  * Right now each service function has 2 lambdas, consider code reuse
+  * TODO: Give nextjs a specific iam role with only invokeLambda permissions
+
+## Day 33
+
+### UI QOL Changes
+  * Force Refresh Saved Data button
+    * Disabled clicking button while syncing in progress, and gave indication that function is running
+    * Needs to give some progress/success/failure indication, maybe make a notification system?
+
+
 
 TODO:
+
+Create Plots when expanding garden
+Verify that makePlotObject works with only lambda calls
+Itemlist is not updating properly again when buying/selling items
+XP is not updating properly when harvesting plants
+Check syncing with redux when buying/restocking
+Check restock timer when loading in
+
+Username cannot include special characters, must be alphanumeric or whitespace (esp no *, %, \ to prevent sql problems)
+
+"Force refresh saved data" button with 5 second cd
 
 Action items:
 1. Make the redirect delayed and make it sit on a screen that says redirect to login page (may be changed in the future)

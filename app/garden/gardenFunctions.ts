@@ -169,7 +169,7 @@ export async function harvestAllAPI(harvestedPlotIds: string[], inventory: Inven
   try {
     const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/harvestAll`;
     const result = await makeApiRequest('PATCH', apiRoute, data, true);
-    console.log('Successfully harvested all seeds:', result);
+    console.log('Successfully harvested all plants:', result);
     return result;
   } catch (error) {
     console.error(error);

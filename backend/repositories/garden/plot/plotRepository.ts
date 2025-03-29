@@ -1,6 +1,6 @@
 import { pool, query } from "@/backend/connection/db";
 import { Garden } from "@/models/garden/Garden";
-import { ExtendedPlotEntity, Plot, PlotEntity } from "@/models/garden/Plot";
+import { Plot, PlotEntity } from "@/models/garden/Plot";
 import { EmptyItem } from "@/models/items/placedItems/EmptyItem";
 import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { Plant } from "@/models/items/placedItems/Plant";
@@ -9,20 +9,28 @@ import { placeholderItemTemplates } from "@/models/items/templates/models/Placeh
 import { PoolClient } from "pg";
 import placedItemRepository from "../../items/placedItem/placedItemRepository";
 import { transactionWrapper } from "@/backend/services/utility/utility";
+import assert from "assert";
 
 class PlotRepository {
+	/**
+		 * Ensures that the object is of type PlotEntity, ie. that it contains an id, owner, row index, column index, plant time, uses remaining, and random seed field
+		 */
+	validatePlotEntity(plotEntity: any): boolean {
+		if (!plotEntity || (typeof plotEntity.id !== 'string') || (typeof plotEntity.owner !== 'string') || (typeof plotEntity.row_index !== 'number') || (typeof plotEntity.col_index !== 'number') || (typeof plotEntity.plant_time !== 'string') || (typeof plotEntity.uses_remaining !== 'number')  || (typeof plotEntity.random_seed !== 'number')) {
+			console.error(plotEntity);
+			throw new Error(`Invalid types while creating Plot from PlotEntity`);
+		}
+		return true;
+	}
 
 	/**
 	 * Turns a plotEntity into a Plot object.
-	 * @extendedPlotEntity - the plot entity
+	 * @plotEntity - the plot entity
 	 */
-	async makePlotObject(extendedPlotEntity: ExtendedPlotEntity): Promise<Plot> {
-		if (!extendedPlotEntity || (typeof extendedPlotEntity.id !== 'string') || (typeof extendedPlotEntity.plant_time !== 'string') || (typeof extendedPlotEntity.uses_remaining !== 'number')  || (typeof extendedPlotEntity.random_seed !== 'number')) {
-			console.error(extendedPlotEntity);
-			throw new Error(`Invalid types while creating Plot from PlotEntity`);
-		}
+	async makePlotObject(plotEntity: PlotEntity): Promise<Plot> {
+		assert(this.validatePlotEntity(plotEntity));
 
-		let itemEntity = await placedItemRepository.getPlacedItemByPlotId(extendedPlotEntity.id);
+		let itemEntity = await placedItemRepository.getPlacedItemByPlotId(plotEntity.id);
 		let item: PlacedItem;
 		if (!itemEntity) {
 			item = generateNewPlaceholderPlacedItem('ground', '');
@@ -30,8 +38,8 @@ class PlotRepository {
 			item = placedItemRepository.makePlacedItemObject(itemEntity);
 		}
 
-		const instance = new Plot(extendedPlotEntity.id, item, extendedPlotEntity.plant_time, extendedPlotEntity.uses_remaining);
-		instance.setRandomSeed(extendedPlotEntity.random_seed);
+		const instance = new Plot(plotEntity.id, item, plotEntity.plant_time, plotEntity.uses_remaining);
+		instance.setRandomSeed(plotEntity.random_seed);
 		return instance;
 	}
 
@@ -48,8 +56,8 @@ class PlotRepository {
 	 * Given its id, returns the row data of a plot from the database.
 	 * @id the id of the plot in the database
 	 */
-	async getPlotById(id: string): Promise<ExtendedPlotEntity | null> {
-		const result = await query<ExtendedPlotEntity>('SELECT id, row_index, col_index, plant_time, uses_remaining, random_seed FROM plots WHERE id = $1', [id]);
+	async getPlotById(id: string): Promise<PlotEntity | null> {
+		const result = await query<PlotEntity>('SELECT id, owner, row_index, col_index, plant_time, uses_remaining, random_seed FROM plots WHERE id = $1', [id]);
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
@@ -62,7 +70,7 @@ class PlotRepository {
 	 * Given an array of ids, returns the row data of plots matching an id from the database.
 	 * @ids the ids of the plots in the database
 	 */
-	async getPlotsByIds(ids: string[]): Promise<ExtendedPlotEntity[]> {
+	async getPlotsByIds(ids: string[]): Promise<PlotEntity[]> {
 		if (ids.length === 0) {
 			return []; // Return null if no IDs are provided
 		}
@@ -71,7 +79,7 @@ class PlotRepository {
 		const placeholders = ids.map((_, index) => `$${index + 1}`).join(', ');
 		const queryText = `SELECT id, owner, row_index, col_index, plant_time, uses_remaining, random_seed FROM plots WHERE id IN (${placeholders})`;
 
-		const result = await query<ExtendedPlotEntity>(queryText, ids);
+		const result = await query<PlotEntity>(queryText, ids);
 		
 		// If no rows are returned, return an empty array instead of null
 		return result.rows.length > 0 ? result.rows : [];
@@ -83,8 +91,8 @@ class PlotRepository {
 	 * @rowIndex the row index, 0 indexed
 	 * @colIndex the column index, 0 indexed
 	 */
-	async getPlotByGardenId(gardenId: string, rowIndex: number, columnIndex: number): Promise<ExtendedPlotEntity | null> {
-		const result = await query<ExtendedPlotEntity>(
+	async getPlotByGardenId(gardenId: string, rowIndex: number, columnIndex: number): Promise<PlotEntity | null> {
+		const result = await query<PlotEntity>(
 			'SELECT id, owner, row_index, col_index, plant_time, uses_remaining, random_seed FROM plots WHERE owner = $1 AND row_index = $2 AND col_index = $3',
 			[gardenId, rowIndex, columnIndex]
 			);
@@ -104,15 +112,15 @@ class PlotRepository {
 	 * @columnIndex the column index
 	 * @plot the plot used to create this object, defaults to ground
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
-	 * @returns an ExtendedPlotEntity with the corresponding data if success, null if failure (or throws error)
+	 * @returns an PlotEntity with the corresponding data if success, null if failure (or throws error)
 	 */
-	async createPlot(ownerId: string, rowIndex: number, columnIndex: number, plot?: Plot, client?: PoolClient): Promise<ExtendedPlotEntity> {
-		const innerFunction = async (client: PoolClient): Promise<ExtendedPlotEntity> => {
+	async createPlot(ownerId: string, rowIndex: number, columnIndex: number, plot?: Plot, client?: PoolClient): Promise<PlotEntity> {
+		const innerFunction = async (client: PoolClient): Promise<PlotEntity> => {
 			if (!plot) {
 				plot = Garden.generateEmptyPlot(rowIndex, columnIndex);
 			}
 
-			const result = await client.query<ExtendedPlotEntity>(
+			const result = await client.query<PlotEntity>(
 				`INSERT INTO plots (id, owner, row_index, col_index, plant_time, uses_remaining) 
 				VALUES ($1, $2, $3, $4, $5, $6) 
 				ON CONFLICT (owner, row_index, col_index) 
@@ -144,15 +152,15 @@ class PlotRepository {
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns a new GardenEntity with the corresponding data if success, null if failure (or throws error)
 	*/
-	async createOrUpdatePlot(gardenId: string, rowIndex: number, columnIndex: number, plot: Plot, client?: PoolClient): Promise<ExtendedPlotEntity> {
-		const innerFunction = async (client: PoolClient): Promise<ExtendedPlotEntity> => {
+	async createOrUpdatePlot(gardenId: string, rowIndex: number, columnIndex: number, plot: Plot, client?: PoolClient): Promise<PlotEntity> {
+		const innerFunction = async (client: PoolClient): Promise<PlotEntity> => {
 			// Check if the plot already exists
 			const existingPlotResult = await client.query<{ id: string }>(
 				'SELECT id FROM plots WHERE id = $1 OR (owner = $2 AND row_index = $3 AND col_index = $4)',
 				[plot.getPlotId(), gardenId, rowIndex, columnIndex]
 			);
 
-			let result: ExtendedPlotEntity;
+			let result: PlotEntity;
 
 			if (existingPlotResult.rows.length > 0) {
 				// Plot already exists
@@ -179,9 +187,9 @@ class PlotRepository {
 	 * @plot the plot to update
 	 * @returns a PlotEntity with the new data on success (or throws error)
 	 */
-	 async updateEntirePlot(plot: Plot, client?: PoolClient): Promise<ExtendedPlotEntity> {
-		const innerFunction = async (client: PoolClient): Promise<ExtendedPlotEntity> => {
-			const plotResult = await client.query<ExtendedPlotEntity>(
+	 async updateEntirePlot(plot: Plot, client?: PoolClient): Promise<PlotEntity> {
+		const innerFunction = async (client: PoolClient): Promise<PlotEntity> => {
+			const plotResult = await client.query<PlotEntity>(
 				'UPDATE plots SET plant_time = $1, uses_remaining = $2 WHERE id = $3 RETURNING *',
 				[plot.getPlantTime(), plot.getUsesRemaining(), plot.getPlotId()]
 			);
@@ -259,13 +267,13 @@ class PlotRepository {
 	 * @newUsesRemaining the new uses remaining
 	 * @returns a PlotEntity with the new data on success (or throws error)
 	 */
-	async setMultiplePlotDetails(ids: string[], newPlantTime: number, newUsesRemaining: number, client?: PoolClient): Promise<{ updatedPlots: ExtendedPlotEntity[], erroredPlots: string[] }> {
-		const innerFunction = async (client: PoolClient): Promise<{ updatedPlots: ExtendedPlotEntity[], erroredPlots: string[] }> => {
-			const updatedPlots: ExtendedPlotEntity[] = [];
+	async setMultiplePlotDetails(ids: string[], newPlantTime: number, newUsesRemaining: number, client?: PoolClient): Promise<{ updatedPlots: PlotEntity[], erroredPlots: string[] }> {
+		const innerFunction = async (client: PoolClient): Promise<{ updatedPlots: PlotEntity[], erroredPlots: string[] }> => {
+			const updatedPlots: PlotEntity[] = [];
 			const erroredPlots: string[] = [];
 
 			// Perform the bulk update
-			const plotResult = await client.query<ExtendedPlotEntity>(
+			const plotResult = await client.query<PlotEntity>(
 				'UPDATE plots SET plant_time = $1, uses_remaining = $2 WHERE id = ANY($3) RETURNING *',
 				[newPlantTime, newUsesRemaining, ids]
 			);
@@ -474,10 +482,10 @@ class PlotRepository {
 	/**
 	 * Updates the plot random seed for multiple plots.
 	 * @plotSeedMap map of plot id -> new random seed value
-	 * @returns an array of ExtendedPlotEntity with the new data on success (or throws error)
+	 * @returns an array of PlotEntity with the new data on success (or throws error)
 	 */
-	async updateMultiplePlotSeed(plotSeedMap: Map<string, number>, client?: PoolClient): Promise<ExtendedPlotEntity[]> {
-		const innerFunction = async (client: PoolClient): Promise<ExtendedPlotEntity[]> => {
+	async updateMultiplePlotSeed(plotSeedMap: Map<string, number>, client?: PoolClient): Promise<PlotEntity[]> {
+		const innerFunction = async (client: PoolClient): Promise<PlotEntity[]> => {
 			if (plotSeedMap.size === 0) {
 				console.warn('No plots to update. plotSeedMap is empty.');
 				return []; // Return an empty array or handle as needed
@@ -509,7 +517,7 @@ class PlotRepository {
 			const params = [...plotIds, ...updatedSeeds];
 
 			// Execute the query
-			const plotResult = await client.query<ExtendedPlotEntity>(sql, params);
+			const plotResult = await client.query<PlotEntity>(sql, params);
 
 			// Check if result is valid
 			if (!plotResult || plotResult.rows.length === 0) {

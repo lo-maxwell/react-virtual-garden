@@ -4,13 +4,21 @@ import { ItemHistoryList } from "@/models/user/history/ItemHistoryList";
 import { query } from "@/backend/connection/db";
 import { PoolClient } from "pg";
 import { transactionWrapper } from "@/backend/services/utility/utility";
+import assert from "assert";
 
 class ItemHistoryRepository {
-
-	async makeItemHistoryObject(itemHistoryEntity: ItemHistoryEntity): Promise<ItemHistory> {
+	/**
+	 * Ensures that the object is of type ItemHistoryEntity, ie. that it contains an id, owner, identifier, and quantity
+	 */
+	 validateItemHistoryEntity(itemHistoryEntity: any): boolean {
 		if (!itemHistoryEntity || (typeof itemHistoryEntity.id !== 'string') || (typeof itemHistoryEntity.owner !== 'string') || (typeof itemHistoryEntity.identifier !== 'string') || (typeof itemHistoryEntity.quantity !== 'number')) {
 			throw new Error(`Invalid types while creating ItemHistory from ItemHistoryEntity`);
 		}
+		return true;
+	}
+
+	async makeItemHistoryObject(itemHistoryEntity: ItemHistoryEntity): Promise<ItemHistory> {
+		assert(this.validateItemHistoryEntity(itemHistoryEntity));
 		
 		const itemHistoryTemplate = placeholderItemTemplates.getTemplate(itemHistoryEntity.identifier);
 		if (!itemHistoryTemplate) {

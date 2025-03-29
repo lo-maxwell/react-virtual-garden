@@ -1,19 +1,29 @@
 import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
-import { GardenEntity, Garden, ExtendedGardenEntity, GardenDimensionEntity } from "@/models/garden/Garden";
+import { GardenEntity, Garden } from "@/models/garden/Garden";
 import { Plot } from "@/models/garden/Plot";
+import assert from "assert";
 import { PoolClient } from "pg";
 import plotRepository from "./plot/plotRepository";
 
 class GardenRepository {
+
+	/**
+	 * Ensures that the object is of type GardenEntity, ie. that it contains an id, owner, owner name, row, and column field
+	 */
+	 validateGardenEntity(gardenEntity: any): boolean {
+		if (!gardenEntity || (typeof gardenEntity.owner !== 'string') || (typeof gardenEntity.rows !== 'number') || (typeof gardenEntity.columns !== 'number')) {
+			console.error(gardenEntity);
+			throw new Error(`Invalid types while creating Garden from GardenEntity`);
+		}
+		return true;
+	}
+
 	/**
 	 * Turns a gardenEntity into a Garden object.
 	 */
-	async makeGardenObject(extendedGardenEntity: ExtendedGardenEntity): Promise<Garden> {
-		if (!extendedGardenEntity || (typeof extendedGardenEntity.owner_name !== 'string') || (typeof extendedGardenEntity.owner !== 'string') || (typeof extendedGardenEntity.rows !== 'number') || (typeof extendedGardenEntity.columns !== 'number')) {
-			console.error(extendedGardenEntity);
-			throw new Error(`Invalid types while creating Garden from GardenEntity`);
-		}
+	async makeGardenObject(extendedGardenEntity: GardenEntity): Promise<Garden> {
+		assert(this.validateGardenEntity(extendedGardenEntity));
 
 		async function fetchOrGeneratePlotObjects(rows: number, cols: number): Promise<Plot[][]> {
 			//TODO: Implement this
@@ -28,7 +38,7 @@ class GardenRepository {
 			}
 			initializePlots(rows, cols);
 			
-			const plotPromises: Promise<void>[] = []; // Array to store promises
+			const plotPromises: Promise<void>[] = []; // Array to garden promises
 
 			for (let i = 0; i < rows; i++) {
 				for (let j = 0; j < cols; j++) {
@@ -55,8 +65,8 @@ class GardenRepository {
 		}
 
 		// const plots: Plot[][] = [];
-		const plots = await fetchOrGeneratePlotObjects(extendedGardenEntity.rows, extendedGardenEntity.columns);
-		const instance = new Garden(extendedGardenEntity.id, extendedGardenEntity.owner_name, extendedGardenEntity.rows, extendedGardenEntity.columns, plots);
+		const plots = await fetchOrGeneratePlotObjects(Garden.getMaximumRows(), Garden.getMaximumCols());
+		const instance = new Garden(extendedGardenEntity.id, extendedGardenEntity.rows, extendedGardenEntity.columns, plots);
 
 		return instance;
 	}
@@ -64,11 +74,11 @@ class GardenRepository {
 	/**
 	 * Returns a list of all gardens from the gardens table.
 	 * May throw errors if the query is misshapped.
-	 * @returns ExtendedGardenEntity[]
+	 * @returns GardenEntity[]
 	 */
-	async getAllGardens(): Promise<ExtendedGardenEntity[]> {
-		const result = await query<ExtendedGardenEntity>(
-			'SELECT users.username AS owner_name, gardens.id, gardens.owner, gardens.rows, gardens.columns FROM gardens LEFT JOIN users ON users.id = gardens.owner',
+	async getAllGardens(): Promise<GardenEntity[]> {
+		const result = await query<GardenEntity>(
+			'SELECT gardens.id, gardens.owner, gardens.rows, gardens.columns FROM gardens LEFT JOIN users ON users.id = gardens.owner',
 			[]);
 		if (!result || result.rows.length === 0) return [];
 		return result.rows;
@@ -80,8 +90,8 @@ class GardenRepository {
 	 * Given its id, returns the row data of a garden from the database.
 	 * @id the id of the garden in the database
 	 */
-	async getGardenById(id: string): Promise<ExtendedGardenEntity | null> {
-		const result = await query<ExtendedGardenEntity>('SELECT users.username AS owner_name, gardens.id, gardens.owner, gardens.rows, gardens.columns FROM gardens LEFT JOIN users ON users.id = gardens.owner WHERE gardens.id = $1', [id]);
+	async getGardenById(id: string): Promise<GardenEntity | null> {
+		const result = await query<GardenEntity>('SELECT gardens.id, gardens.owner, gardens.rows, gardens.columns FROM gardens LEFT JOIN users ON users.id = gardens.owner WHERE gardens.id = $1', [id]);
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
@@ -94,8 +104,8 @@ class GardenRepository {
 	 * Given a user id, returns the row data of a garden from the database.
 	 * @userId the id of the user
 	 */
-	async getGardenByOwnerId(userId: string): Promise<ExtendedGardenEntity | null> {
-		const result = await query<ExtendedGardenEntity>('SELECT users.username AS owner_name, gardens.id, gardens.owner, gardens.rows, gardens.columns FROM gardens LEFT JOIN users ON users.id = gardens.owner WHERE gardens.owner = $1', [userId]);
+	async getGardenByOwnerId(userId: string): Promise<GardenEntity | null> {
+		const result = await query<GardenEntity>('SELECT gardens.id, gardens.owner, gardens.rows, gardens.columns FROM gardens LEFT JOIN users ON users.id = gardens.owner WHERE gardens.owner = $1', [userId]);
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
@@ -110,11 +120,11 @@ class GardenRepository {
 	 * @userId the id of the owner (user) of this garden. If the owner cannot be found, fails.
 	 * @garden the garden to pull data from
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
-	 * @returns an ExtendedGardenEntity with the corresponding data if success, null if failure (or throws error)
+	 * @returns an GardenEntity with the corresponding data if success, null if failure (or throws error)
 	 */
-	async createGarden(userId: string, garden: Garden, client?: PoolClient): Promise<ExtendedGardenEntity> {
+	async createGarden(userId: string, garden: Garden, client?: PoolClient): Promise<GardenEntity> {
 		// Define the inner function that handles the core logic inside the transaction
-		const innerFunction = async (client: PoolClient): Promise<ExtendedGardenEntity> => {
+		const innerFunction = async (client: PoolClient): Promise<GardenEntity> => {
 
 			// Check if the garden already exists
 			const existingGardenResult = await client.query<{id: string}>(
@@ -135,8 +145,7 @@ class GardenRepository {
 
 			if (existingGardenResult.rows.length > 0) {
 				// Garden already exists
-				const extendedGardenEntity: ExtendedGardenEntity = {
-					owner_name: username,
+				const extendedGardenEntity: GardenEntity = {
 					id: existingGardenResult.rows[0].id,
 					owner: userId,
 					rows: garden.getRows(),
@@ -160,13 +169,12 @@ class GardenRepository {
 
 			const newGardenId = result.rows[0].id;
 
-			const extendedResult = await query<ExtendedGardenEntity>(
+			const extendedResult = await query<GardenEntity>(
 				`SELECT 
 					gardens.id, 
 					gardens.owner, 
 					gardens.rows, 
-					gardens.columns, 
-					users.username AS owner_name
+					gardens.columns
 				FROM gardens
 				INNER JOIN users ON gardens.owner = users.id
 				WHERE gardens.id = $1`,
@@ -187,9 +195,9 @@ class GardenRepository {
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns a new GardenEntity with the corresponding data if success, null if failure (or throws error)
 	*/
-	async createOrUpdateGarden(userId: string, garden: Garden, client?: PoolClient): Promise<ExtendedGardenEntity> {
+	async createOrUpdateGarden(userId: string, garden: Garden, client?: PoolClient): Promise<GardenEntity> {
 		// Define the inner function that handles the core logic inside the transaction
-		const innerFunction = async (client: PoolClient): Promise<ExtendedGardenEntity> => {
+		const innerFunction = async (client: PoolClient): Promise<GardenEntity> => {
 			// Check if the garden already exists
 			const existingGardenResult = await client.query<{id: string}>(
 				'SELECT id FROM gardens WHERE id = $1',
@@ -227,9 +235,9 @@ class GardenRepository {
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns a GardenEntity with the corresponding data if success, null if failure (or throws error)
 	 */
-	 async updateEntireGarden(garden: Garden, client?: PoolClient): Promise<ExtendedGardenEntity> {
+	 async updateEntireGarden(garden: Garden, client?: PoolClient): Promise<GardenEntity> {
 		// Define the inner function that handles the core logic inside the transaction
-		const innerFunction = async (client: PoolClient): Promise<ExtendedGardenEntity> => {
+		const innerFunction = async (client: PoolClient): Promise<GardenEntity> => {
 			// Check if the garden already exists
 			const existingGardenResult = await client.query<{id: string}>(
 				'SELECT id FROM gardens WHERE id = $1',
@@ -253,13 +261,12 @@ class GardenRepository {
 
 			const newGardenId = result.rows[0].id;
 
-			const extendedResult = await query<ExtendedGardenEntity>(
+			const extendedResult = await query<GardenEntity>(
 				`SELECT 
 					gardens.id, 
 					gardens.owner, 
 					gardens.rows, 
-					gardens.columns, 
-					users.username AS owner_name
+					gardens.columns
 				FROM gardens
 				INNER JOIN users ON gardens.owner = users.id
 				WHERE gardens.id = $1`,

@@ -1,7 +1,7 @@
 import { pool } from "@/backend/connection/db";
 import gardenRepository from "@/backend/repositories/garden/gardenRepository";
 import levelRepository from "@/backend/repositories/level/levelRepository";
-import { Garden } from "@/models/garden/Garden";
+import { Garden, GardenEntity } from "@/models/garden/Garden";
 import { PoolClient } from "pg";
 import { transactionWrapper } from "../utility/utility";
 import plotRepository from "@/backend/repositories/garden/plot/plotRepository";
@@ -23,6 +23,11 @@ import { stringToBigIntNumber } from "@/models/utility/BigInt";
 import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
 import { v4 as uuidv4 } from 'uuid';
 import { PlacedItemTemplate } from "@/models/items/templates/models/PlacedItemTemplate";
+import { invokeLambda, parseRows } from "@/backend/lambda/invokeLambda";
+import assert from "assert";
+import LevelSystem, { LevelSystemEntity } from "@/models/level/LevelSystem";
+
+//TODO: Users can initiate race conditions by fudging the client side and running multiple add/removes, allowing for invalid row/column counts
 
 /**
  * Attempts to add a row (expand the column size) of the garden
@@ -32,45 +37,152 @@ import { PlacedItemTemplate } from "@/models/items/templates/models/PlacedItemTe
  * @returns an object containing the modified level system, plot, and inventoryItem on success (or throws error)
  */
 export async function addGardenRow(userId: string, gardenId: string, client?: PoolClient): Promise<boolean> {
-	// Define the inner function that handles the core logic inside the transaction
-	const innerFunction = async (client: PoolClient): Promise<boolean> => {
-		// Grab all relevant objects concurrently
-		const results = await Promise.allSettled([
-			gardenRepository.getGardenById(gardenId),
-			levelRepository.getLevelSystemByOwnerId(userId, 'user')
-		]);
 
-		// Destructure the results for easier access
-		const [gardenResult, levelSystemResult] = results;
-
-		// Check for errors in each promise and handle accordingly
-		if (gardenResult.status === 'rejected' || gardenResult.value === null) {
-			throw new Error(`Could not find garden matching id ${gardenId}`);
-		}
-		if (gardenResult.value.owner !== userId) {
-			throw new Error(`Garden ${gardenId} is not owned by user ${userId}`);
-		}
-		if (levelSystemResult.status === 'rejected' || levelSystemResult.value === null) {
-			throw new Error(`Could not find levelsystem matching user ${userId}`);
-		}
-
-		// Extract the resolved values
-		const gardenEntity = gardenResult.value;
-		const levelSystemEntity = levelSystemResult.value;
-
-		// Business logic to check if a row can be added
-		if (!Garden.canAddRow(gardenEntity.rows, levelSystemEntity.level)) {
+	function validateCanModifyGarden(gardenEntity: GardenEntity, levelEntity: LevelSystemEntity): boolean {
+		const level = LevelSystem.getLevelForTotalExp(levelEntity.total_xp, levelEntity.growth_rate);
+		if (!Garden.canAddRow(gardenEntity.rows, level)) {
 			throw new Error(`Cannot add row to garden`);
 		}
-		
-		// Update the garden size
-		await gardenRepository.updateGardenSize(gardenId, 1, 0, client);
-
 		return true;
-	};
+	}
 
-	// Call the transactionWrapper with the innerFunction and appropriate arguments
-	return transactionWrapper(innerFunction, 'addGardenRow', client);
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+
+			// 'SELECT id, owner, rows, columns FROM gardens WHERE id = $1 AND owner = $2'
+			// 'SELECT id, level, current_xp, growth_rate FROM levels WHERE owner_uid = $1 AND owner_type = user'
+			// May need modification if we expand/shrink based on garden level instead of owner level
+			const fetch_payload = {
+				"queries": [
+					{
+						"tableName": "gardens",
+						"returnColumns": [
+							"id",
+							"owner",
+							"rows",
+							"columns"
+						],
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": gardenId
+							},
+							"owner": {
+								"operator": "=",
+								"value": userId
+							}
+						},
+						"limit": 1
+					},
+					{
+						"tableName": "levels",
+						"returnColumns": [
+							"id",
+							"total_xp",
+							"growth_rate"
+						],
+						"conditions": {
+							"owner_uid": {
+								"operator": "=",
+								"value": userId
+							},
+							"owner_type": {
+								"operator": "=",
+								"value": "user"
+							}
+						},
+						"limit": 1
+					}
+				]
+			  }
+			const fetchQueryResult = await invokeLambda('garden-select', fetch_payload);
+			if (!fetchQueryResult) {
+				throw new Error(`Failed to return value from lambda`);
+			}
+			const gardenEntity = parseRows<GardenEntity[]>(fetchQueryResult[0])[0];
+			assert(gardenRepository.validateGardenEntity(gardenEntity));
+			const levelSystemEntity = parseRows<LevelSystemEntity[]>(fetchQueryResult[1])[0];
+			assert(levelRepository.validateLevelSystemEntity(levelSystemEntity));
+
+			//Check that we can add rows
+			assert(validateCanModifyGarden(gardenEntity, levelSystemEntity));
+
+			// 'UPDATE gardens SET rows = rows + 1 WHERE id = $1 AND owner = $2'
+			const update_payload = {
+				"queries": [
+					{
+						"tableName": "gardens",
+						"values": {
+							"rows": {
+								"operator": "+",
+								"value": 1
+							  }
+						},
+						"returnColumns": [
+							"id"
+						],
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": gardenId
+							},
+							"owner": {
+								"operator": "=",
+								"value": userId
+							}
+						}
+					}
+				]
+			  }
+			const updateQueryResult = await invokeLambda('garden-update', update_payload);
+			if (!updateQueryResult) {
+				throw new Error(`Failed to update from lambda`);
+			}
+			return true;
+		} catch (error) {
+			console.error('Error adding garden row from Lambda:', error);
+			throw error;
+		}
+	} else {
+
+		// Define the inner function that handles the core logic inside the transaction
+		const innerFunction = async (client: PoolClient): Promise<boolean> => {
+			// Grab all relevant objects concurrently
+			const results = await Promise.allSettled([
+				gardenRepository.getGardenById(gardenId),
+				levelRepository.getLevelSystemByOwnerId(userId, 'user')
+			]);
+
+			// Destructure the results for easier access
+			const [gardenResult, levelSystemResult] = results;
+
+			// Check for errors in each promise and handle accordingly
+			if (gardenResult.status === 'rejected' || gardenResult.value === null) {
+				throw new Error(`Could not find garden matching id ${gardenId}`);
+			}
+			if (gardenResult.value.owner !== userId) {
+				throw new Error(`Garden ${gardenId} is not owned by user ${userId}`);
+			}
+			if (levelSystemResult.status === 'rejected' || levelSystemResult.value === null) {
+				throw new Error(`Could not find levelsystem matching user ${userId}`);
+			}
+
+			// Extract the resolved values
+			const gardenEntity = gardenResult.value;
+			const levelSystemEntity = levelSystemResult.value;
+
+			//Check that we can add rows
+			assert(validateCanModifyGarden(gardenEntity, levelSystemEntity));
+			
+			// Update the garden size
+			await gardenRepository.updateGardenSize(gardenId, 1, 0, client);
+
+			return true;
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'addGardenRow', client);
+	}
 }
 
 
@@ -82,40 +194,126 @@ export async function addGardenRow(userId: string, gardenId: string, client?: Po
  * @returns an object containing the modified level system, plot, and inventoryItem on success (or throws error)
  */
 export async function removeGardenRow(userId: string, gardenId: string, client?: PoolClient): Promise<boolean> {
-	// Define the inner function that handles the core logic inside the transaction
-	const innerFunction = async (client: PoolClient): Promise<boolean> => {
-		// Grab all relevant objects concurrently
-		const results = await Promise.allSettled([
-			gardenRepository.getGardenById(gardenId)
-		]);
-
-		// Destructure the results for easier access
-		const [gardenResult] = results;
-
-		// Check for errors in each promise and handle accordingly
-		if (gardenResult.status === 'rejected' || gardenResult.value === null) {
-			throw new Error(`Could not find garden matching id ${gardenId}`);
-		}
-		if (gardenResult.value.owner !== userId) {
-			throw new Error(`Garden ${gardenId} is not owned by user ${userId}`);
-		}
-
-		// Extract the resolved values
-		const gardenEntity = gardenResult.value;
-
-		// Business logic to check if a row can be removed
+	
+	function validateCanModifyGarden(gardenEntity: GardenEntity): boolean {
 		if (!Garden.canRemoveRow(gardenEntity.rows)) {
-			throw new Error(`Cannot remove row from garden`);
+			throw new Error(`Cannot add row to garden`);
 		}
-		
-		// Update the garden size
-		await gardenRepository.updateGardenSize(gardenId, -1, 0, client);
-
 		return true;
-	};
+	}
 
-	// Call the transactionWrapper with the innerFunction and appropriate arguments
-	return transactionWrapper(innerFunction, 'RemoveGardenRow', client);
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+			//Doesn't need level fetch for removing
+
+			// 'SELECT id, owner, rows, columns FROM gardens WHERE id = $1 AND owner = $2'
+			// May need modification if we expand/shrink based on garden level instead of owner level
+			const fetch_payload = {
+				"queries": [
+					{
+						"tableName": "gardens",
+						"returnColumns": [
+							"id",
+							"owner",
+							"rows",
+							"columns"
+						],
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": gardenId
+							},
+							"owner": {
+								"operator": "=",
+								"value": userId
+							}
+						},
+						"limit": 1
+					}
+				]
+			  }
+			const fetchQueryResult = await invokeLambda('garden-select', fetch_payload);
+			if (!fetchQueryResult) {
+				throw new Error(`Failed to return value from lambda`);
+			}
+			const gardenEntity = parseRows<GardenEntity[]>(fetchQueryResult)[0];
+			assert(gardenRepository.validateGardenEntity(gardenEntity));
+
+			//Check that we can add rows
+			assert(validateCanModifyGarden(gardenEntity));
+
+			// 'UPDATE gardens SET rows = rows - 1 WHERE id = $1 AND owner = $2'
+			const update_payload = {
+				"queries": [
+					{
+						"tableName": "gardens",
+						"values": {
+							"rows": {
+								"operator": "-",
+								"value": 1
+							  }
+						},
+						"returnColumns": [
+							"id"
+						],
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": gardenId
+							},
+							"owner": {
+								"operator": "=",
+								"value": userId
+							}
+						}
+					}
+				]
+			  }
+			const updateQueryResult = await invokeLambda('garden-update', update_payload);
+			if (!updateQueryResult) {
+				throw new Error(`Failed to update from lambda`);
+			}
+			return true;
+		} catch (error) {
+			console.error('Error removing garden row from Lambda:', error);
+			throw error;
+		}
+	} else {
+		// Define the inner function that handles the core logic inside the transaction
+		const innerFunction = async (client: PoolClient): Promise<boolean> => {
+			// Grab all relevant objects concurrently
+			const results = await Promise.allSettled([
+				gardenRepository.getGardenById(gardenId)
+			]);
+
+			// Destructure the results for easier access
+			const [gardenResult] = results;
+
+			// Check for errors in each promise and handle accordingly
+			if (gardenResult.status === 'rejected' || gardenResult.value === null) {
+				throw new Error(`Could not find garden matching id ${gardenId}`);
+			}
+			if (gardenResult.value.owner !== userId) {
+				throw new Error(`Garden ${gardenId} is not owned by user ${userId}`);
+			}
+
+			// Extract the resolved values
+			const gardenEntity = gardenResult.value;
+
+			// Business logic to check if a row can be removed
+			if (!Garden.canRemoveRow(gardenEntity.rows)) {
+				throw new Error(`Cannot remove row from garden`);
+			}
+			
+			// Update the garden size
+			await gardenRepository.updateGardenSize(gardenId, -1, 0, client);
+
+			return true;
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'RemoveGardenRow', client);
+	}
 }
 
 /**
@@ -126,45 +324,151 @@ export async function removeGardenRow(userId: string, gardenId: string, client?:
  * @returns an object containing the modified level system, plot, and inventoryItem on success (or throws error)
  */
 export async function addGardenColumn(userId: string, gardenId: string, client?: PoolClient): Promise<boolean> {
-	// Define the inner function that handles the core logic inside the transaction
-	const innerFunction = async (client: PoolClient): Promise<boolean> => {
-		// Grab all relevant objects concurrently
-		const results = await Promise.allSettled([
-			gardenRepository.getGardenById(gardenId),
-			levelRepository.getLevelSystemByOwnerId(userId, 'user')
-		]);
 
-		// Destructure the results for easier access
-		const [gardenResult, levelSystemResult] = results;
-
-		// Check for errors in each promise and handle accordingly
-		if (gardenResult.status === 'rejected' || gardenResult.value === null) {
-			throw new Error(`Could not find garden matching id ${gardenId}`);
-		}
-		if (gardenResult.value.owner !== userId) {
-			throw new Error(`Garden ${gardenId} is not owned by user ${userId}`);
-		}
-		if (levelSystemResult.status === 'rejected' || levelSystemResult.value === null) {
-			throw new Error(`Could not find levelsystem matching user ${userId}`);
-		}
-
-		// Extract the resolved values
-		const gardenEntity = gardenResult.value;
-		const levelSystemEntity = levelSystemResult.value;
-
-		// Business logic to check if a column can be added
-		if (!Garden.canAddColumn(gardenEntity.columns, levelSystemEntity.level)) {
+	function validateCanModifyGarden(gardenEntity: GardenEntity, levelEntity: LevelSystemEntity): boolean {
+		const level = LevelSystem.getLevelForTotalExp(levelEntity.total_xp, levelEntity.growth_rate);
+		if (!Garden.canAddColumn(gardenEntity.columns, level)) {
 			throw new Error(`Cannot add column to garden`);
 		}
-		
-		// Update the garden size
-		await gardenRepository.updateGardenSize(gardenId, 0, 1, client);
-
 		return true;
-	};
+	}
 
-	// Call the transactionWrapper with the innerFunction and appropriate arguments
-	return transactionWrapper(innerFunction, 'addGardenColumn', client);
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+
+			// 'SELECT id, owner, rows, columns FROM gardens WHERE id = $1 AND owner = $2'
+			// 'SELECT id, level, current_xp, growth_rate FROM levels WHERE owner_uid = $1 AND owner_type = user'
+			// May need modification if we expand/shrink based on garden level instead of owner level
+			const fetch_payload = {
+				"queries": [
+					{
+						"tableName": "gardens",
+						"returnColumns": [
+							"id",
+							"owner",
+							"rows",
+							"columns"
+						],
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": gardenId
+							},
+							"owner": {
+								"operator": "=",
+								"value": userId
+							}
+						},
+						"limit": 1
+					},
+					{
+						"tableName": "levels",
+						"returnColumns": [
+							"id",
+							"total_xp",
+							"growth_rate"
+						],
+						"conditions": {
+							"owner_uid": {
+								"operator": "=",
+								"value": userId
+							},
+							"owner_type": {
+								"operator": "=",
+								"value": "user"
+							}
+						},
+						"limit": 1
+					}
+				]
+			  }
+			const fetchQueryResult = await invokeLambda('garden-select', fetch_payload);
+			if (!fetchQueryResult) {
+				throw new Error(`Failed to return value from lambda`);
+			}
+			const gardenEntity = parseRows<GardenEntity[]>(fetchQueryResult[0])[0];
+			assert(gardenRepository.validateGardenEntity(gardenEntity));
+			const levelSystemEntity = parseRows<LevelSystemEntity[]>(fetchQueryResult[1])[0];
+			assert(levelRepository.validateLevelSystemEntity(levelSystemEntity));
+
+			//Check that we can add rows
+			assert(validateCanModifyGarden(gardenEntity, levelSystemEntity));
+
+			// 'UPDATE gardens SET columns = columns + 1 WHERE id = $1 AND owner = $2'
+			const update_payload = {
+				"queries": [
+					{
+						"tableName": "gardens",
+						"values": {
+							"columns": {
+								"operator": "+",
+								"value": 1
+							  }
+						},
+						"returnColumns": [
+							"id"
+						],
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": gardenId
+							},
+							"owner": {
+								"operator": "=",
+								"value": userId
+							}
+						}
+					}
+				]
+			  }
+			const updateQueryResult = await invokeLambda('garden-update', update_payload);
+			if (!updateQueryResult) {
+				throw new Error(`Failed to update from lambda`);
+			}
+			return true;
+		} catch (error) {
+			console.error('Error adding garden row from Lambda:', error);
+			throw error;
+		}
+	} else {
+		// Define the inner function that handles the core logic inside the transaction
+		const innerFunction = async (client: PoolClient): Promise<boolean> => {
+			// Grab all relevant objects concurrently
+			const results = await Promise.allSettled([
+				gardenRepository.getGardenById(gardenId),
+				levelRepository.getLevelSystemByOwnerId(userId, 'user')
+			]);
+
+			// Destructure the results for easier access
+			const [gardenResult, levelSystemResult] = results;
+
+			// Check for errors in each promise and handle accordingly
+			if (gardenResult.status === 'rejected' || gardenResult.value === null) {
+				throw new Error(`Could not find garden matching id ${gardenId}`);
+			}
+			if (gardenResult.value.owner !== userId) {
+				throw new Error(`Garden ${gardenId} is not owned by user ${userId}`);
+			}
+			if (levelSystemResult.status === 'rejected' || levelSystemResult.value === null) {
+				throw new Error(`Could not find levelsystem matching user ${userId}`);
+			}
+
+			// Extract the resolved values
+			const gardenEntity = gardenResult.value;
+			const levelSystemEntity = levelSystemResult.value;
+
+			// Business logic to check if a column can be added
+			assert(validateCanModifyGarden(gardenEntity, levelSystemEntity));
+			
+			// Update the garden size
+			await gardenRepository.updateGardenSize(gardenId, 0, 1, client);
+
+			return true;
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'addGardenColumn', client);
+	}
 }
 
 /**
@@ -175,53 +479,177 @@ export async function addGardenColumn(userId: string, gardenId: string, client?:
  * @returns an object containing the modified level system, plot, and inventoryItem on success (or throws error)
  */
 export async function removeGardenColumn(userId: string, gardenId: string, client?: PoolClient): Promise<boolean> {
-	// Define the inner function that handles the core logic inside the transaction
-	const innerFunction = async (client: PoolClient): Promise<boolean> => {
-		// Grab all relevant objects concurrently
-		const results = await Promise.allSettled([
-			gardenRepository.getGardenById(gardenId)
-		]);
-
-		// Destructure the results for easier access
-		const [gardenResult] = results;
-
-		// Check for errors in each promise and handle accordingly
-		if (gardenResult.status === 'rejected' || gardenResult.value === null) {
-			throw new Error(`Could not find garden matching id ${gardenId}`);
-		}
-		if (gardenResult.value.owner !== userId) {
-			throw new Error(`Garden ${gardenId} is not owned by user ${userId}`);
-		}
-
-		// Extract the resolved values
-		const gardenEntity = gardenResult.value;
-
-		// Business logic to check if a column can be removed
+	function validateCanModifyGarden(gardenEntity: GardenEntity): boolean {
 		if (!Garden.canRemoveColumn(gardenEntity.columns)) {
-			throw new Error(`Cannot remove column from garden`);
+			throw new Error(`Cannot add row to garden`);
 		}
-		
-		// Update the garden size
-		await gardenRepository.updateGardenSize(gardenId, 0, -1, client);
-
 		return true;
-	};
+	}
 
-	// Call the transactionWrapper with the innerFunction and appropriate arguments
-	return transactionWrapper(innerFunction, 'RemoveGardenColumn', client);
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+			//Doesn't need level fetch for removing
+
+			// 'SELECT id, owner, rows, columns FROM gardens WHERE id = $1 AND owner = $2'
+			// May need modification if we expand/shrink based on garden level instead of owner level
+			const fetch_payload = {
+				"queries": [
+					{
+						"tableName": "gardens",
+						"returnColumns": [
+							"id",
+							"owner",
+							"rows",
+							"columns"
+						],
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": gardenId
+							},
+							"owner": {
+								"operator": "=",
+								"value": userId
+							}
+						},
+						"limit": 1
+					}
+				]
+			  }
+			const fetchQueryResult = await invokeLambda('garden-select', fetch_payload);
+			if (!fetchQueryResult) {
+				throw new Error(`Failed to return value from lambda`);
+			}
+			const gardenEntity = parseRows<GardenEntity[]>(fetchQueryResult)[0];
+			assert(gardenRepository.validateGardenEntity(gardenEntity));
+
+			//Check that we can add rows
+			assert(validateCanModifyGarden(gardenEntity));
+
+			// 'UPDATE gardens SET columns = columns - 1 WHERE id = $1 AND owner = $2'
+			const update_payload = {
+				"queries": [
+					{
+						"tableName": "gardens",
+						"values": {
+							"columns": {
+								"operator": "-",
+								"value": 1
+							  }
+						},
+						"returnColumns": [
+							"id"
+						],
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": gardenId
+							},
+							"owner": {
+								"operator": "=",
+								"value": userId
+							}
+						}
+					}
+				]
+			  }
+			const updateQueryResult = await invokeLambda('garden-update', update_payload);
+			if (!updateQueryResult) {
+				throw new Error(`Failed to update from lambda`);
+			}
+			return true;
+		} catch (error) {
+			console.error('Error removing garden row from Lambda:', error);
+			throw error;
+		}
+	} else {
+		// Define the inner function that handles the core logic inside the transaction
+		const innerFunction = async (client: PoolClient): Promise<boolean> => {
+			// Grab all relevant objects concurrently
+			const results = await Promise.allSettled([
+				gardenRepository.getGardenById(gardenId)
+			]);
+
+			// Destructure the results for easier access
+			const [gardenResult] = results;
+
+			// Check for errors in each promise and handle accordingly
+			if (gardenResult.status === 'rejected' || gardenResult.value === null) {
+				throw new Error(`Could not find garden matching id ${gardenId}`);
+			}
+			if (gardenResult.value.owner !== userId) {
+				throw new Error(`Garden ${gardenId} is not owned by user ${userId}`);
+			}
+
+			// Extract the resolved values
+			const gardenEntity = gardenResult.value;
+
+			// Business logic to check if a column can be removed
+			if (!Garden.canRemoveColumn(gardenEntity.columns)) {
+				throw new Error(`Cannot remove column from garden`);
+			}
+			
+			// Update the garden size
+			await gardenRepository.updateGardenSize(gardenId, 0, -1, client);
+
+			return true;
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'RemoveGardenColumn', client);
+	}
 }
 
 export async function getGardenSize(userId: string, gardenId: string, client?: PoolClient) {
-	// Define the inner function that handles the core logic inside the transaction
-	const innerFunction = async (client: PoolClient): Promise<{rows: number, columns: number}> => {
-		// Grab all relevant objects concurrently
-		const gardenEntity = await gardenRepository.getGardenById(gardenId);
-		if (!gardenEntity) throw new Error(`Cannot find garden matching id ${gardenId}`);
-		return {rows: gardenEntity.rows, columns: gardenEntity.columns};
-	};
 
-	// Call the transactionWrapper with the innerFunction and appropriate arguments
-	return transactionWrapper(innerFunction, 'GetGardenSize', client);
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+
+			// 'SELECT id, owner, rows, columns FROM gardens WHERE id = $1 AND owner = $2'
+			const payload = {
+				"queries": [
+					{
+						"returnColumns": [
+							"id",
+							"owner",
+							"rows",
+							"columns"
+						],
+						"tableName": "gardens",
+						"conditions": {
+							"id": {
+							"operator": "=",
+							"value": gardenId
+							},
+							"owner": {
+								"operator": "=",
+								"value": userId
+								}
+						},
+						"limit": 1
+					}
+				]
+			  }
+			const queryResult = await invokeLambda('garden-select', payload);
+			const gardenEntity = parseRows<GardenEntity[]>(queryResult)[0];
+			assert(gardenRepository.validateGardenEntity(gardenEntity));
+			return {rows: gardenEntity.rows, columns: gardenEntity.columns};
+		} catch (error) {
+			console.error('Error fetching garden size from Lambda:', error);
+			throw error;
+		}
+	} else {
+		// Define the inner function that handles the core logic inside the transaction
+		const innerFunction = async (client: PoolClient): Promise<{rows: number, columns: number}> => {
+			// Grab all relevant objects concurrently
+			const gardenEntity = await gardenRepository.getGardenById(gardenId);
+			if (!gardenEntity) throw new Error(`Cannot find garden matching id ${gardenId}`);
+			return {rows: gardenEntity.rows, columns: gardenEntity.columns};
+		};
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'GetGardenSize', client);
+	}
 }
 
 

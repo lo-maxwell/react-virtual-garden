@@ -3,16 +3,40 @@ import { transactionWrapper } from "@/backend/services/utility/utility";
 import { InventoryItem, InventoryItemEntity } from "@/models/items/inventoryItems/InventoryItem";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
+import { ItemList } from "@/models/itemStore/ItemList";
+import assert from "assert";
 import { PoolClient } from "pg";
 import { v4 as uuidv4 } from 'uuid';
 
 class InventoryItemRepository {
 
-	makeInventoryItemObject(inventoryItemEntity: InventoryItemEntity): InventoryItem {
-		if (!inventoryItemEntity || (typeof inventoryItemEntity.identifier !== 'string' || (typeof inventoryItemEntity.quantity !== 'number'))) {
+	/**
+	 * Ensures that the object is of type InventoryItemEntity, ie. that it contains an id, owner, identifier, and quantity field
+	 */
+	validateInventoryItemEntity(inventoryItemEntity: any): boolean {
+		if (!inventoryItemEntity || (typeof inventoryItemEntity.id !== 'string') || (typeof inventoryItemEntity.owner !== 'string') || (typeof inventoryItemEntity.identifier !== 'string') || (typeof inventoryItemEntity.quantity !== 'number')) {
 			console.error(inventoryItemEntity);
 			throw new Error(`Invalid types while creating InventoryItem from InventoryItemEntity`);
 		}
+		return true;
+	}
+
+	makeInventoryItemObjectBatch(inventoryItemEntities: InventoryItemEntity[]): ItemList {
+		const items = new ItemList();
+		for (const itemResult of inventoryItemEntities) {
+			try {
+				const item = this.makeInventoryItemObject(itemResult);
+				items.addItem(item, item.getQuantity());
+			} catch (error) {
+				console.error(`Failure while initializing items for inventory from database: `);
+				console.error(error);
+			}
+		}
+		return items;
+	}
+
+	makeInventoryItemObject(inventoryItemEntity: InventoryItemEntity): InventoryItem {
+		assert(this.validateInventoryItemEntity(inventoryItemEntity), 'InventoryItemEntity validation failed');
 
 		const itemData = placeholderItemTemplates.getInventoryTemplate(inventoryItemEntity.identifier);
 		if (!itemData) {
@@ -132,8 +156,11 @@ class InventoryItemRepository {
 	 * @returns a InventoryItemEntity with the corresponding data if success, null if failure (or throws error)
 	 */
 	async addInventoryItem(ownerId: string, inventoryItem: InventoryItem, client?: PoolClient): Promise<InventoryItemEntity> {
-		if (inventoryItem.getQuantity() <= 0) {
+		if (inventoryItem.getQuantity() < 0) {
 			throw new Error(`Cannot add inventory item with quantity ${inventoryItem.getQuantity()}`);
+		}
+		if (inventoryItem.getQuantity() == 0) {
+			console.warn(`Attempted to add inventoryItem with 0 quantity`)
 		}
 		
 		const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {

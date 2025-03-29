@@ -1,0 +1,34 @@
+# More information about the configuration file can be found here:
+# https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html
+version = 0.1
+
+[default.global.parameters]
+stack_name = "rds-sam-app"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.validate.parameters]
+lint = true
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+resolve_s3 = true
+s3_prefix = "rds-sam-app"
+region = "us-west-1"
+parameter_overrides = "DBEndpoint=\"database-1.clmmqim6603p.us-west-1.rds.amazonaws.com\" DBUser=\"dev_admin\" DBPassword=\"NvXT2Ug7&ymEP4%BUq\" DBName=\"virtual_garden_dev\" ExistingSecurityGroup1Id=\"sg-00028284c46fe230b\" ExistingSecurityGroup2Id=\"sg-0f2decc31cf580782\" ExistingSubnetA=\"subnet-06afe358e9bfdd68a\" ExistingSubnetB=\"subnet-094a5fcf8087cdca9\" LambdaExecutionRoleArn=\"arn:aws:iam::850995571379:role/LambdaExecutionRole\""
+image_repositories = []
+
+[default.package.parameters]
+resolve_s3 = true
+
+[default.sync.parameters]
+watch = true
+
+[default.local_start_api.parameters]
+warm_containers = "EAGER"
+
+[default.local_start_lambda.parameters]
+warm_containers = "EAGER"

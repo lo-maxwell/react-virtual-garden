@@ -1,9 +1,11 @@
 import { pool, query } from "@/backend/connection/db";
+import { invokeLambda } from "@/backend/lambda/invokeLambda";
 import Toolbox from "@/models/garden/tools/Toolbox";
 import LevelSystem from "@/models/level/LevelSystem";
 import { ActionHistoryList } from "@/models/user/history/ActionHistoryList";
 import { ItemHistoryList } from "@/models/user/history/ItemHistoryList";
 import User, { UserEntity } from "@/models/user/User";
+import assert from "assert";
 import { PoolClient } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
 import levelRepository from "../level/levelRepository";
@@ -12,10 +14,19 @@ import itemHistoryRepository from "./itemHistoryRepository";
 
 class UserRepository {
 
-	async makeUserObject(userEntity: UserEntity): Promise<User> {
+	/**
+	 * Ensures that the object is of type UserEntity, ie. that it contains an id, username, and icon field
+	 */
+	validateUserEntity(userEntity: any): boolean {
 		if (!userEntity || (typeof userEntity.id !== 'string') || (typeof userEntity.username !== 'string') || (typeof userEntity.icon !== 'string')) {
+			console.error(userEntity);
 			throw new Error(`Invalid types while creating User from UserEntity`);
 		}
+		return true;
+	}
+
+	async makeUserObject(userEntity: UserEntity): Promise<User> {
+		assert(this.validateUserEntity(userEntity), 'UserEntity validation failed');
 		//TODO: Fetches all relevant data from database and uses it to construct user
 
 		// Gather all promises
@@ -58,11 +69,27 @@ class UserRepository {
 
 	async getUserById(id: string): Promise<User | null> {
 		const result = await query<UserEntity>('SELECT * FROM users WHERE id = $1', [id]);
-		// If no rows are returned, return null
-		if (!result || result.rows.length === 0) return null;
-		// Return the first item found
-		const instance = this.makeUserObject(result.rows[0]);
-		return instance;
+        // If no rows are returned, return null
+        if (!result || result.rows.length === 0) return null;
+        // Return the first item found
+        const instance = this.makeUserObject(result.rows[0]);
+        return instance;
+	}
+
+	async getUserByIdWithLambda(id: string): Promise<User | null> {
+		try {
+			// Call Lambda function with userId as payload
+			const result = await invokeLambda<UserEntity>('test-db-lambda', { userId: id });
+			
+			// If no result, return null
+			if (!result) return null;
+			// Transform the data using existing makeUserObject method
+			const instance = this.makeUserObject(result);
+			return instance;
+		} catch (error) {
+			console.error('Error fetching user from Lambda:', error);
+			throw error;
+		}
 	}
 
 	async getUsersByName(searchName: string): Promise<User[]> {
@@ -251,6 +278,20 @@ class UserRepository {
 
 		const updatedRow = userResult.rows[0];
 		return updatedRow;
+	}
+
+	async updateUserIconWithLambda(id: string, newIcon: string): Promise<UserEntity | null> {
+		try {
+			// Call Lambda function with userId as payload
+			const result = await invokeLambda<UserEntity>('SAMFunction3', { userId: id, newIcon: newIcon });
+			
+			// If no result, return null
+			if (!result) return null;
+			return result;
+		} catch (error) {
+			console.error('Error fetching user from Lambda:', error);
+			throw error;
+		}
 	}
 }
 

@@ -218,6 +218,7 @@ export const usePlotActions = () => {
 
 				const itemTemplate = placeholderItemTemplates.getInventoryTemplate(result.identifier);
 				if (!itemTemplate) {
+					console.error(itemTemplate);
 					throw new Error(`Error parsing item template`);
 				}
 				const inventoryItem = inventory.getItem(itemTemplate);

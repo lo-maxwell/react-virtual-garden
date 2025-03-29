@@ -8,23 +8,16 @@ import { GardenTransactionResponse } from "./GardenTransactionResponse";
 import { Plot } from "./Plot";
 import { v4 as uuidv4 } from 'uuid';
 
-export interface GardenDimensionEntity {
+export interface GardenEntity {
+	id: string,
+	owner: string,
 	rows: number,
 	columns: number
 }
 
-export interface GardenEntity extends GardenDimensionEntity {
-	id: string,
-	owner: string
-}
-
-export interface ExtendedGardenEntity extends GardenEntity {
-	owner_name: string;
-}
 
 export class Garden {
 	private gardenId: string;
-	private ownerName: string;
 	private plots: Plot[][];
 	private plotPositions: Map<Plot, [number, number]>;
 	private rows: number;
@@ -32,6 +25,8 @@ export class Garden {
 	
 	static getStartingRows() {return 5;}
 	static getStartingCols() {return 5;}
+	static getMaximumRows() {return 20;}
+	static getMaximumCols() {return 20;}
 
 	private static getGroundTemplate(): PlacedItemTemplate {
 		const template = placeholderItemTemplates.getPlacedItemTemplateByName('ground');
@@ -39,18 +34,19 @@ export class Garden {
 		return template!;
 	}
 
-	constructor(gardenId: string, ownerName: string = "Dummy User", rows: number = Garden.getStartingRows(), cols: number = Garden.getStartingCols(), plots: Plot[][] | null = null) {
+	constructor(gardenId: string, rows: number = Garden.getStartingRows(), cols: number = Garden.getStartingCols(), plots: Plot[][] | null = null) {
 		this.gardenId = gardenId;
-		this.ownerName = ownerName;
+		rows = Math.min(rows, Garden.getMaximumRows());
+		cols = Math.min(cols, Garden.getMaximumCols());
 		this.rows = rows;
 		this.columns = cols;
 		this.plotPositions = new Map();
 		if (plots != null) {
 			this.plots = plots;
 		} else {
-			this.plots = Garden.generateEmptyPlots(rows, cols);
+			this.plots = Garden.generateEmptyPlots(Garden.getMaximumRows(), Garden.getMaximumCols());
 		}
-		this.fillNullWithEmptyPlot(rows, cols);
+		this.fillNullWithEmptyPlot(Garden.getMaximumRows(), Garden.getMaximumCols());
 		this.updatePlotPositions();
 	}
 
@@ -63,12 +59,12 @@ export class Garden {
 
 		if (!Array.isArray(plainPlots)) {
 			//if plots is not the right shape, throw away the entire thing
-			return new Garden(gardenId, ownerName, Garden.getStartingRows(), Garden.getStartingCols(), null);
+			return new Garden(gardenId,  Garden.getStartingRows(), Garden.getStartingCols(), null);
 		}	
 		// Convert plainPlots to Plot[][]
 		const plots = plainPlots.map((row: any[]) => row.map((plot: any) => Plot.fromPlainObject(plot)));
 		
-		const garden = new Garden(gardenId, ownerName, rows, columns, plots);
+		const garden = new Garden(gardenId, rows, columns, plots);
 		garden.updatePlotPositions();
 
 		return garden;
@@ -79,7 +75,6 @@ export class Garden {
 
 		return {
 			gardenId: this.gardenId,
-			ownerName: this.ownerName,
 			plots: this.plots.map(row => row.map(plot => plot.toPlainObject())),
 			rows: this.rows,
 			columns: this.columns
@@ -88,7 +83,7 @@ export class Garden {
 
 	static generateDefaultNewGarden(): Garden {
 		const randomUuid = uuidv4();
-		return new Garden(randomUuid, User.getDefaultUserName());
+		return new Garden(randomUuid);
 	}
 
 	/**
@@ -96,13 +91,6 @@ export class Garden {
 	 */
 	 getGardenId(): string {
 		return this.gardenId;
-	}
-
-	/**
-	 * @returns the ownerName of the owner of the garden.
-	 */
-	 getOwnerName(): string {
-		return this.ownerName;
 	}
 
 	/**
@@ -169,6 +157,7 @@ export class Garden {
 	 * @returns true or false
 	 */
 	static canAddRow(currentRows: number, currentLevel: number) : boolean {
+		if (currentRows >= this.getMaximumRows()) return false;
 		if (currentRows + 1 <= 5 + Math.floor(currentLevel/5)) return true;
 		return false;
 	}
@@ -181,6 +170,7 @@ export class Garden {
 	 * @returns true or false
 	 */
 	static canAddColumn(currentColumns: number, currentLevel: number) : boolean {
+		if (currentColumns >= this.getMaximumCols()) return false;
 		if (currentColumns + 1 <= 5 + Math.floor(currentLevel/5)) return true;
 		return false;
 	}
@@ -249,6 +239,8 @@ export class Garden {
 	 * @cols new number of columns
 	 */
 	setGardenSize(rows: number, cols: number): void {
+		rows = Math.min(rows, Garden.getMaximumRows());
+		cols = Math.min(cols, Garden.getMaximumCols());
 		// Loop through the rows up to the new row count
 		for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
 			// If the row does not exist, create it as an empty array
@@ -284,6 +276,8 @@ export class Garden {
 	 * Replaces all undefined slots in plots with Empty Plots.
 	 */
 	fillNullWithEmptyPlot(rows: number, cols: number): void {
+		rows = Math.min(rows, Garden.getMaximumRows());
+		cols = Math.min(cols, Garden.getMaximumCols());
 		for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
 			if (this.plots[rowIndex] === undefined) {
 				this.plots[rowIndex] = [];

@@ -112,8 +112,7 @@ BEGIN
 			owner_uuid UUID,                      -- Stores owner if UUID (e.g., for gardens or inventories)
 			owner_uid VARCHAR(128),               -- Stores Firebase UID if user is the owner
 			owner_type VARCHAR(50) NOT NULL,   -- Type of owner (ie. user, garden)
-			level INTEGER NOT NULL DEFAULT 1 CHECK (level >= 0),     -- Level (integer, defaulting to 1)
-			current_xp INTEGER NOT NULL DEFAULT 0 CHECK (current_xp >= 0), -- Current XP (integer, defaulting to 0)
+			total_xp INTEGER NOT NULL DEFAULT 0 CHECK (current_xp >= 0), -- Current XP (integer, defaulting to 0)
 			growth_rate FLOAT NOT NULL DEFAULT 1.0, -- Growth rate (float, defaulting to 1.0)
 			CHECK (owner_uuid IS NOT NULL OR owner_uid IS NOT NULL), -- Ensure one owner field is filled
     		CHECK (owner_uuid IS NULL OR owner_uid IS NULL)          -- Ensure only one owner field is filled
@@ -190,8 +189,8 @@ BEGIN
 		CREATE TABLE IF NOT EXISTS gardens (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
 			owner VARCHAR(28) NOT NULL,         -- User ID (foreign key from the 'users' table)
-			rows INTEGER NOT NULL CHECK (rows >= 1),            -- Number of rows in garden
-			columns INTEGER NOT NULL CHECK (columns >= 1),         -- Number of columns in garden
+			rows INTEGER NOT NULL CHECK (rows >= 1 AND rows <= 20),            -- Number of rows in garden (1 to 20)
+			columns INTEGER NOT NULL CHECK (columns >= 1 AND columns <= 20),         -- Number of columns in garden (1 to 20)
 			FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
 		);
 		table_created := TRUE;
@@ -212,8 +211,8 @@ BEGIN
 		CREATE TABLE IF NOT EXISTS plots (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
 			owner UUID NOT NULL,         -- User ID (foreign key from the 'gardens' table)
-			row_index INTEGER NOT NULL CHECK (row_index >= 0),            -- Row index (0 indexed)
-			col_index INTEGER NOT NULL CHECK (col_index >= 0),         -- Column index (0 indexed)
+			row_index INTEGER NOT NULL CHECK (row_index >= 0 AND row_index <= 19),            -- Row index (0 to 19)
+			col_index INTEGER NOT NULL CHECK (col_index >= 0 AND col_index <= 19),         -- Column index (0 to 19)
 			plant_time BIGINT NOT NULL DEFAULT 0,       -- Time planted as ms since epoch time
 			uses_remaining INTEGER NOT NULL DEFAULT 0,  -- Number of uses (usually harvests)
 			random_seed INTEGER NOT NULL DEFAULT (FLOOR(RANDOM() * (2147483647 - 1 + 1))),  -- Random seed between 1 and max_int

@@ -3,14 +3,24 @@ import { transactionWrapper } from "@/backend/services/utility/utility";
 import ActionHistory, { ActionHistoryEntity } from "@/models/user/history/actionHistory/ActionHistory";
 import { actionHistoryMetadataRepository } from "@/models/user/history/actionHistory/ActionHistoryMetadataRepository";
 import { ActionHistoryList } from "@/models/user/history/ActionHistoryList";
+import { assert } from "console";
 import { PoolClient } from 'pg';
 
 class ActionHistoryRepository {
 
-	async makeActionHistoryObject(actionHistoryEntity: ActionHistoryEntity): Promise<ActionHistory> {
+	/**
+	 * Ensures that the object is of type ActionHistoryEntity, ie. that it contains an id, owner, identifier, and quantity
+	 */
+	validateActionHistoryEntity(actionHistoryEntity: any): boolean {
 		if (!actionHistoryEntity || (typeof actionHistoryEntity.id !== 'string') || (typeof actionHistoryEntity.owner !== 'string') || (typeof actionHistoryEntity.identifier !== 'string') || (typeof actionHistoryEntity.quantity !== 'number')) {
+			console.warn(actionHistoryEntity);
 			throw new Error(`Invalid types while creating ActionHistory from ActionHistoryEntity`);
 		}
+		return true;
+	}
+
+	async makeActionHistoryObject(actionHistoryEntity: ActionHistoryEntity): Promise<ActionHistory> {
+		assert(this.validateActionHistoryEntity(actionHistoryEntity));
 		
 		const actionHistoryInterface = actionHistoryMetadataRepository.getActionHistoryInterfaceByIdentifierString(actionHistoryEntity.identifier);
 		if (!actionHistoryInterface) {

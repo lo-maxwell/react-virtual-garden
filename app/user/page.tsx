@@ -225,12 +225,12 @@ const UserPage = () => {
       // Check the value of environmentTestKey and render buttons accordingly
       if (environmentTestKey === 'this is the local environment' || environmentTestKey === 'this is the dev environment') {
         return (
-          <>
-          <div>Environment test key successfully returned.</div>
-          </>
+          // <>
+          // <div>Environment test key successfully returned.</div>
+          // </>
           // <>
           //   <div><button onClick={handleCreateAccountButton}> Create user in Database </button></div>
-          //   <div><button onClick={handleSaveAccountButton}> Save user to Database </button></div>
+            <><div><button onClick={handleSaveAccountButton}> Save user to Database </button></div></>
           //   <div><button onClick={handleFetchAccountButton}> Fetch user from Database </button></div>
           //   <div><button onClick={handleToggleGuestModeButton}> {`Toggle Cloud Saving ${guestMode ? '(Currently on)' : '(Currently off)'}`} </button></div>
           // </>

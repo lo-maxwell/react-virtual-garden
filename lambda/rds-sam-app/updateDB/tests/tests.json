@@ -1,0 +1,31 @@
+{
+    "queries": [
+        {
+            "tableName": "users",
+            "values": {
+                "username": "new_username",
+                "icon": "banana"
+            },
+            "returnColumns": ["id", "username", "icon"],
+            "conditions": {
+                "id": {
+                    "operator": "=",
+                    "value": "h4uFpare3CcqrUZszhvzOLSys7b2"
+                }
+            }
+        },
+        {
+            "tableName": "inventories",
+            "values": {
+                "gold": 150
+            },
+            "returnColumns": ["id", "owner", "gold"],
+            "conditions": {
+                "owner": {
+                    "operator": "=",
+                    "value": "h4uFpare3CcqrUZszhvzOLSys7b2"
+                }
+            }
+        }
+    ]
+}

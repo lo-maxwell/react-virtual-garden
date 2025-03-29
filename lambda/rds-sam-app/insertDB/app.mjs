@@ -1,0 +1,160 @@
+import pg from 'pg';
+const { Pool } = pg;
+
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: 5432, // Adjust if necessary
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+// Define allowed tables and their corresponding columns
+const allowedTables = {
+  action_histories: ['id', 'owner', 'identifier', 'quantity'],
+  gardens: ['id', 'owner', 'rows', 'columns'],
+  icons: ['id', 'name', 'icon'],
+  inventories: ['id', 'owner', 'gold'],
+  inventory_items: ['id', 'owner', 'identifier', 'quantity'],
+  item_histories: ['id', 'owner', 'identifier', 'quantity'],
+  levels: ['id', 'owner_uuid', 'owner_uid', 'owner_type', 'total_xp', 'growth_rate'],
+  placed_items: ['id', 'owner', 'identifier', 'status'],
+  plots: ['id', 'owner', 'row_index', 'col_index', 'plant_time', 'uses_remaining', 'random_seed'],
+  store_items: ['id', 'owner', 'identifier', 'quantity'],
+  stores: ['id', 'owner', 'identifier', 'last_restock_time_ms'],
+  users: ['id', 'username', 'password_hash', 'password_salt', 'icon'], // Disallow password hash/salt select statements?
+  // Add more tables and their columns as needed
+};
+
+export const handler = async (event) => {
+  const { queries } = event; // Updated to accept queries object
+
+  // Validate input
+  if (!Array.isArray(queries) || queries.length === 0) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: 'Invalid queries input' })
+    };
+  }
+
+  const results = []; // Array to hold results from each query
+
+  // Helper function to process a single insert query
+  const processInsertQuery = async (query) => {
+    const { tableName, columnsToWrite, values, conflictColumns, returnColumns } = query;
+
+    // Validate table name
+    if (!allowedTables.hasOwnProperty(tableName)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: `Invalid table name: ${tableName}` })
+      };
+    }
+
+    // Validate columnsToWrite and values
+    if (!Array.isArray(columnsToWrite) || columnsToWrite.length === 0 || !Array.isArray(values) || values.length === 0) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: 'Invalid columns or values for insert' })
+      };
+    }
+
+    // Validate columns to write against allowed list for the specific table
+    for (const column of columnsToWrite) {
+      if (!allowedTables[tableName].includes(column)) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ message: `Invalid column: ${column} for table: ${tableName}` })
+        };
+      }
+    }
+
+    // Validate conflictColumns
+    if (conflictColumns && (!Array.isArray(conflictColumns))) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: 'Invalid conflict columns' })
+      };
+    }
+    if (conflictColumns && conflictColumns.length > 0) {
+      // Validate conflict columns against allowed list for the specific table
+    for (const column of conflictColumns) {
+      if (!allowedTables[tableName].includes(column)) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ message: `Invalid conflict column: ${column} for table: ${tableName}` })
+        };
+      }
+    }
+    }
+
+    // Validate returnColumns
+    if (!Array.isArray(returnColumns) || returnColumns.length === 0) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: 'Invalid return columns' })
+      };
+    }
+
+    // Validate return columns against allowed list for the specific table
+    for (const column of returnColumns) {
+      if (!allowedTables[tableName].includes(column)) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ message: `Invalid return column: ${column} for table: ${tableName}` })
+        };
+      }
+    }
+
+    // Construct the insert query for batch insertion
+    let queryString = `
+      INSERT INTO ${tableName} (${columnsToWrite.join(', ')}) 
+      VALUES ${values.map((_, rowIndex) => `(${columnsToWrite.map((_, colIndex) => `$${rowIndex * columnsToWrite.length + colIndex + 1}`).join(', ')})`).join(', ')}
+    `;
+
+    // Add ON CONFLICT clause if conflictColumns is not empty
+    if (conflictColumns && conflictColumns.length > 0) {
+      queryString += `ON CONFLICT (${conflictColumns.join(', ')}) DO NOTHING `;
+    }
+
+    // Add RETURNING clause
+    queryString += `RETURNING ${returnColumns.join(', ')};`;
+
+    // Flatten the values for parameterized query
+    const queryParams = values.flat();
+
+    try {
+      const result = await pool.query(queryString, queryParams);
+      return { tableName, rows: result.rows }; // Return result for this query
+    } catch (error) {
+      console.error('Error executing insert query:', error);
+      return { 
+        tableName, 
+        error: `Insert query failed: ${error.message}` // Return detailed error message for this query
+      };
+    }
+  };
+
+  // Process each query
+  for (const query of queries) {
+    const result = await processInsertQuery(query);
+    results.push(result); // Always push the result, whether it's a success or an error
+  }
+
+  // Return a single result object if there's only one query
+  if (results.length === 1) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify(results[0]) // Return single result
+    };
+  }
+
+  // Return all results if there are multiple queries
+  return {
+    statusCode: 200,
+    body: JSON.stringify(results) // Return all results
+  };
+};

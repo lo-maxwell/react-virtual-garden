@@ -1,0 +1,54 @@
+{
+	"queries": [
+	  {
+		"returnColumns": [
+		  "id",
+		  "username",
+		  "icon"
+		],
+		"tableName": "users",
+		"conditions": {
+		  "id": {
+			"operator": "=",
+			"value": "h4uFpare3CcqrUZszhvzOLSys7b2"
+		  }
+		},
+		"limit": 10
+	  },
+	  {
+		"returnColumns": [
+		  "id",
+		  "owner",
+		  "gold"
+		],
+		"tableName": "inventories",
+		"conditions": {
+		  "owner": {
+			"operator": "=",
+			"value": "h4uFpare3CcqrUZszhvzOLSys7b2"
+		  }
+		},
+		"limit": 10
+	  },
+	  {
+		"returnColumns": [
+		  "id",
+		  "owner",
+		  "identifier",
+		  "quantity"
+		],
+		"tableName": "inventory_items",
+		"conditions": {
+		  "owner": {
+			"operator": "=",
+			"value": "b92a9fa2-cb50-4826-bb54-a89af434df78"
+		  },
+		  "quantity": {
+			"operator": ">=",
+			"value": 25
+		  }
+		},
+		"limit": 10
+	  }
+	]
+  }
