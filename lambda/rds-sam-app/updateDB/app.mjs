@@ -114,10 +114,10 @@ export const handler = async (event) => {
             }
             // Use the current value in the database for the calculation
             queryParams.push(values[key].value);
-            return `${key} = ${key} ${values[key].operator} $${index + 1}`; // Use parameterized query
+            return `${key} = ${key} ${values[key].operator} $${queryParams.length}`; // Use parameterized query
         } else {
             queryParams.push(values[key]); // Push the value for the column into queryParams
-            return `${key} = $${index + 1}`; // Use parameterized query
+            return `${key} = $${queryParams.length}`; // Use parameterized query
         }
     }).join(', ');
 
@@ -138,8 +138,15 @@ export const handler = async (event) => {
             throw new Error(`Invalid column: ${key} for table: ${tableName}`);
         }
 
-        queryParams.push(value);
-        return `${key} ${operator} $${index + Object.keys(values).length + 1}`; // Use parameterized queries for values
+        if (operator === 'IN') {
+          // Create placeholders for each value in the array
+          const placeholders = value.map((_, idx) => `$${queryParams.length + idx + 1}`).join(', ');
+          queryParams.push(...value); // Add all values to queryParams
+          return `${key} IN (${placeholders})`; // Use the placeholders in the query
+        } else {
+            queryParams.push(value); // Add the single value to queryParams
+            return `${key} ${operator} $${queryParams.length}`; // Use parameterized query for the value
+        }
     });
     queryString += ` WHERE ${conditionStrings.join(' AND ')}`;
 
@@ -162,14 +169,6 @@ export const handler = async (event) => {
   for (const query of queries) {
     const result = await processUpdateQuery(query);
     results.push(result); // Always push the result, whether it's a success or an error
-  }
-
-  // Return a single result object if there's only one query
-  if (results.length === 1) {
-    return {
-      statusCode: 200,
-      body: JSON.stringify(results[0]) // Return single result
-    };
   }
 
   // Return all results if there are multiple queries

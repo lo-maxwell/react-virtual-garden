@@ -82,8 +82,15 @@ export const handler = async (event) => {
             throw new Error(`Invalid column: ${key} for table: ${tableName}`);
         }
 
-        countQueryParams.push(value);
-        return `${key} ${operator} $${index + 1}`; // Use parameterized queries for values
+        if (operator === 'IN') {
+          // Create placeholders for each value in the array
+          const placeholders = value.map((_, idx) => `$${queryParams.length + idx + 1}`).join(', ');
+          queryParams.push(...value); // Add all values to queryParams
+          return `${key} IN (${placeholders})`; // Use the placeholders in the query
+        } else {
+            queryParams.push(value); // Add the single value to queryParams
+            return `${key} ${operator} $${queryParams.length}`; // Use parameterized query for the value
+        }
     });
     countQueryString += ` WHERE ${conditionStrings.join(' AND ')};`; // Add WHERE clause
 
@@ -137,14 +144,6 @@ export const handler = async (event) => {
   for (const query of queries) {
     const result = await processQuery(query);
     results.push(result); // Always push the result, whether it's a success or an error
-  }
-
-  // Return a single result object if there's only one query
-  if (results.length === 1) {
-    return {
-      statusCode: 200,
-      body: JSON.stringify(results[0]) // Return single result
-    };
   }
 
   // Return all results if there are multiple queries

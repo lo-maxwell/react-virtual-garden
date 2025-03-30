@@ -144,14 +144,6 @@ export const handler = async (event) => {
     results.push(result); // Always push the result, whether it's a success or an error
   }
 
-  // Return a single result object if there's only one query
-  if (results.length === 1) {
-    return {
-      statusCode: 200,
-      body: JSON.stringify(results[0]) // Return single result
-    };
-  }
-
   // Return all results if there are multiple queries
   return {
     statusCode: 200,
