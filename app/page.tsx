@@ -57,9 +57,21 @@ const HomePage = () => {
     // console.log('Successfully called lambda function:', result);
     // console.log(Inventory.fromPlainObject(result));
 
+    // const data = {
+    // }
+    // const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/size`;
+    // const result = await makeApiRequest('GET', apiRoute, data, true);
+    // console.log('Successfully called lambda function:', result);
+
+    // const data = {
+    // }
+    // const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${garden.getPlotByRowAndColumn(0,0)?.getPlotId()}/get`;
+    // const result = await makeApiRequest('GET', apiRoute, data, true);
+    // console.log('Successfully called lambda function:', result);
+
     const data = {
     }
-    const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/size`;
+    const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/get`;
     const result = await makeApiRequest('GET', apiRoute, data, true);
     console.log('Successfully called lambda function:', result);
   }

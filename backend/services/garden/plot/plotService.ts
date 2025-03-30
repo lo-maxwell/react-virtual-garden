@@ -1375,11 +1375,7 @@ export async function harvestPlot(gardenId: string, plotId: string, inventoryId:
 				}
 
 				if (!inventoryItemEntity) {
-					if (insertResult.length > 1) {
-						returnItemEntity = (parseRows<InventoryItemEntity[]>(insertResult[insertResult.length - 1]))[0];
-					} else {
-						returnItemEntity = (parseRows<InventoryItemEntity[]>(insertResult))[0];
-					}
+					returnItemEntity = (parseRows<InventoryItemEntity[]>(insertResult[insertResult.length - 1]))[0];
 				}
 			}
 
@@ -1934,7 +1930,7 @@ export async function pickupDecoration(gardenId: string, plotId: string, invento
 			if (!fetchItemQueryResult) {
 				throw new Error(`Failed to return value from lambda`);
 			}
-			const inventoryItemEntityList = parseRows<InventoryItemEntity[]>(fetchItemQueryResult);
+			const inventoryItemEntityList = parseRows<InventoryItemEntity[]>(fetchItemQueryResult[0]);
 			const inventoryItemEntity = (Array.isArray(inventoryItemEntityList) && inventoryItemEntityList.length > 0) ? inventoryItemEntityList[0] : null;
 			if (inventoryItemEntity) assert(inventoryItemRepository.validateInventoryItemEntity(inventoryItemEntity));
 			//Only if the inventoryItem does not exist
@@ -1970,7 +1966,7 @@ export async function pickupDecoration(gardenId: string, plotId: string, invento
 				};
 				const insertInventoryItemResult = await invokeLambda('garden-insert', insert_payload);
 
-				returnItemEntity = parseRows(insertInventoryItemResult)[0];
+				returnItemEntity = parseRows(insertInventoryItemResult[0])[0];
 			}
 
 			// 'UPDATE plots SET plant_time = $1, uses_remaining = $2 WHERE id = $3 AND owner = $4'
@@ -2133,5 +2129,127 @@ export async function pickupDecoration(gardenId: string, plotId: string, invento
 	}
 }
 
+/**
+ * @returns a plot plain object
+ */
+ export async function getPlotFromDatabase(plotId: string, gardenId: string, userId: string, client?: PoolClient): Promise<any> {
+	function validatePlotData(plotEntity: any, gardenEntity: any, placedItemEntity: any): boolean {
+		assert(plotRepository.validatePlotEntity(plotEntity));
+		assert(gardenRepository.validateGardenEntity(gardenEntity));
+		assert(placedItemRepository.validatePlacedItemEntity(placedItemEntity));
 
+		if (placedItemEntity.owner !== plotEntity.id) {
+			throw new Error(`Placed item ${placedItemEntity.id} is not owned by plot ${plotEntity.id}`);
+		}
 
+		if (plotEntity.owner !== gardenEntity.id) {
+			throw new Error(`Plot ${plotEntity.id} is not owned by garden ${gardenEntity.id}`);
+		}
+
+		if (gardenEntity.owner !== userId) {
+			throw new Error(`Garden ${gardenEntity.id} is not owned by user ${userId}`);
+		}
+
+		if (plotEntity.row_index >= gardenEntity.rows || plotEntity.col_index >= gardenEntity.columns) {
+			throw new Error(`Plot ${plotEntity.id} is not within bounds of garden ${gardenId}`);
+		}
+
+		return true;
+	}
+
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+
+			const payload = {
+				"queries": [
+					{
+						"returnColumns": [
+							"id", 
+							"owner", 
+							"row_index", 
+							"col_index", 
+							"plant_time", 
+							"uses_remaining", 
+							"random_seed"
+						],
+						"tableName": "plots",
+						"conditions": {
+							"id": {
+							"operator": "=",
+							"value": plotId
+							},
+							"owner": {
+								"operator": "=",
+								"value": gardenId
+								}
+						},
+						"limit": 1
+					},
+					{
+						"returnColumns": [
+							"id",
+							"owner",
+							"rows",
+							"columns"
+						],
+						"tableName": "gardens",
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": gardenId
+								},
+							"owner": {
+								"operator": "=",
+								"value": userId
+								}
+						},
+						"limit": 1
+					},
+					{
+						"returnColumns": [
+							"id",
+							"owner",
+							"identifier",
+							"status"
+						],
+						"tableName": "placed_items",
+						"conditions": {
+							"owner": {
+								"operator": "=",
+								"value": plotId
+								}
+						},
+						"limit": 1
+					}
+				]
+			  }
+			const queryResult = await invokeLambda('garden-select', payload);
+			const plotEntity = parseRows<PlotEntity[]>(queryResult[0])[0];
+			const gardenEntity = parseRows<GardenEntity[]>(queryResult[1])[0];
+			const placedItemEntity = parseRows<PlacedItemEntity[]>(queryResult[2])[0];
+			assert(validatePlotData(plotEntity, gardenEntity, placedItemEntity));
+
+			const placedItemInstance = placedItemRepository.makePlacedItemObject(placedItemEntity);
+			const plotInstance = plotRepository.makePlotObject(plotEntity, placedItemInstance);
+			return plotInstance.toPlainObject();
+		} catch (error) {
+			console.error('Error fetching plot from Lambda:', error);
+			throw error;
+		}
+	} else {
+		const innerFunction = async (client: PoolClient) => {
+
+			const plotEntity = await plotRepository.getPlotById(plotId);
+			const gardenEntity = await gardenRepository.getGardenById(gardenId);
+			const placedItemEntity = await placedItemRepository.getPlacedItemByPlotId(plotId);
+
+			assert(validatePlotData(plotEntity, gardenEntity, placedItemEntity));
+
+			const placedItemInstance = await plotRepository.getPlacedItem(plotEntity!.id);
+			const plotInstance = plotRepository.makePlotObject(plotEntity!, placedItemInstance);
+			return plotInstance.toPlainObject();
+		}
+		// Call transactionWrapper with inner function and description
+		return transactionWrapper(innerFunction, 'fetchInventoryFromDatabase', client);
+	}
+}

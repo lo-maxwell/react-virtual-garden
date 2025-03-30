@@ -48,7 +48,7 @@ export async function updateUserUsername(userId: string, newUsername: string): P
 				throw new Error(`Could not find user for id ${userId}`);
 			}
 			console.log(userResult);
-			const userEntityResult = parseRows<UserEntity[]>(userResult)[0];
+			const userEntityResult = parseRows<UserEntity[]>(userResult[0])[0];
 			assert(userRepository.validateUserEntity(userEntityResult));
 			return userEntityResult;
 		} catch (error) {
@@ -102,7 +102,7 @@ export async function updateUserUsername(userId: string, newUsername: string): P
 			if (!userResult) {
 				throw new Error(`Could not find user for id ${userId}`);
 			}
-			const userEntityResult = parseRows<UserEntity[]>(userResult)[0];
+			const userEntityResult = parseRows<UserEntity[]>(userResult[0])[0];
 			assert(userRepository.validateUserEntity(userEntityResult));
 			return userEntityResult;
 		} catch (error) {
@@ -146,7 +146,7 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 			if (!userResult) {
 				throw new Error(`Could not find user for id ${userId}`);
 			}
-			const userEntityResult = parseRows<UserEntity[]>(userResult)[0];
+			const userEntityResult = parseRows<UserEntity[]>(userResult[0])[0];
 			assert(userRepository.validateUserEntity(userEntityResult));
 			const userObject = await userRepository.makeUserObject(userEntityResult);
 			return userObject.toPlainObject();
@@ -230,7 +230,7 @@ export async function userIdExistsInDatabase(userId: string, client?: PoolClient
 			if (!userResult) {
 				return false;
 			}
-			const userEntityResult = parseRows<UserEntity[]>(userResult)[0];
+			const userEntityResult = parseRows<UserEntity[]>(userResult[0])[0];
 			assert(userRepository.validateUserEntity(userEntityResult));
 			return true;
 		} catch (error) {

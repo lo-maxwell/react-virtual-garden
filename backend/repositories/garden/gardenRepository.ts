@@ -19,12 +19,7 @@ class GardenRepository {
 		return true;
 	}
 
-	/**
-	 * Turns a gardenEntity into a Garden object.
-	 */
-	async makeGardenObject(extendedGardenEntity: GardenEntity): Promise<Garden> {
-		assert(this.validateGardenEntity(extendedGardenEntity));
-
+	async getPlots(id: string): Promise<Plot[][]> {
 		async function fetchOrGeneratePlotObjects(rows: number, cols: number): Promise<Plot[][]> {
 			//TODO: Implement this
 			const plots: Plot[][] = [];
@@ -42,17 +37,18 @@ class GardenRepository {
 
 			for (let i = 0; i < rows; i++) {
 				for (let j = 0; j < cols; j++) {
-					const plotPromise = plotRepository.getPlotByGardenId(extendedGardenEntity.id, i, j)
+					const plotPromise = plotRepository.getPlotByGardenId(id, i, j)
 						.then(async (plotEntityResult) => {
 							if (!plotEntityResult) {
-								console.warn(`Could not find existing plot for garden id ${extendedGardenEntity.id}, row ${i}, col ${j}`);
+								console.warn(`Could not find existing plot for garden id ${id}, row ${i}, col ${j}`);
 								console.warn(`Making new plot on backend model only (database is not changed)`);
 								const plotInstance = Garden.generateEmptyPlot(i, j);
 								plots[i][j] = plotInstance;
 								return;
 							}
 							// Await `makePlotObject` to ensure it's properly awaited
-							const plotResult = await plotRepository.makePlotObject(plotEntityResult);
+							const placedItemInstance = await plotRepository.getPlacedItem(plotEntityResult.id);
+							const plotResult = plotRepository.makePlotObject(plotEntityResult, placedItemInstance);
 							plots[i][j] = plotResult;
 					})
 					plotPromises.push(plotPromise);
@@ -64,9 +60,17 @@ class GardenRepository {
 			return plots;
 		}
 
-		// const plots: Plot[][] = [];
 		const plots = await fetchOrGeneratePlotObjects(Garden.getMaximumRows(), Garden.getMaximumCols());
-		const instance = new Garden(extendedGardenEntity.id, extendedGardenEntity.rows, extendedGardenEntity.columns, plots);
+		return plots;
+	}
+
+	/**
+	 * Turns a gardenEntity into a Garden object.
+	 */
+	makeGardenObject(gardenEntity: GardenEntity, plots: Plot[][]): Garden {
+		assert(this.validateGardenEntity(gardenEntity));
+
+		const instance = new Garden(gardenEntity.id, gardenEntity.rows, gardenEntity.columns, plots);
 
 		return instance;
 	}

@@ -66,6 +66,7 @@ export async function getInventoryFromDatabase(inventoryId: string, userId: stri
 			}
 			const inventoryEntityResult = parseRows<InventoryEntity[]>(inventoryResult)[0];
 			assert(inventoryRepository.validateInventoryEntity(inventoryEntityResult));
+			console.log(inventoryEntityResult);
 
 			let inventoryItems: ItemList | null;
 			if (!inventoryItemsResult) {

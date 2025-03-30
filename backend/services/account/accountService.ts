@@ -382,7 +382,8 @@ export interface AccountObjects {
 		if (!gardenResult) {
 			throw new Error(`Could not find the garden for userId ${userId}`);
 		}
-		const gardenInstance = await gardenRepository.makeGardenObject(gardenResult);
+		const plots = await gardenRepository.getPlots(gardenResult.id);
+		const gardenInstance = gardenRepository.makeGardenObject(gardenResult, plots);
 
 		//Create inventory
 		const inventoryResult = await inventoryRepository.getInventoryByOwnerId(userId);

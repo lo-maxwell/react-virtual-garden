@@ -23,22 +23,27 @@ class PlotRepository {
 		return true;
 	}
 
-	/**
-	 * Turns a plotEntity into a Plot object.
-	 * @plotEntity - the plot entity
-	 */
-	async makePlotObject(plotEntity: PlotEntity): Promise<Plot> {
-		assert(this.validatePlotEntity(plotEntity));
-
-		let itemEntity = await placedItemRepository.getPlacedItemByPlotId(plotEntity.id);
+	/** Get the placed item attached to the plot at this id, from the attached database. */
+	async getPlacedItem(id: string): Promise<PlacedItem> {
+		let itemEntity = await placedItemRepository.getPlacedItemByPlotId(id);
 		let item: PlacedItem;
 		if (!itemEntity) {
 			item = generateNewPlaceholderPlacedItem('ground', '');
 		} else {
 			item = placedItemRepository.makePlacedItemObject(itemEntity);
 		}
+		return item;
+	}
 
-		const instance = new Plot(plotEntity.id, item, plotEntity.plant_time, plotEntity.uses_remaining);
+	/**
+	 * Turns a plotEntity into a Plot object.
+	 * @plotEntity - the plot entity
+	 * @placedItem - the item in this plot
+	 */
+	makePlotObject(plotEntity: PlotEntity, placedItem: PlacedItem): Plot {
+		assert(this.validatePlotEntity(plotEntity));
+
+		const instance = new Plot(plotEntity.id, placedItem, plotEntity.plant_time, plotEntity.uses_remaining);
 		instance.setRandomSeed(plotEntity.random_seed);
 		return instance;
 	}

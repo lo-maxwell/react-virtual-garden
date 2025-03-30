@@ -1,16 +1,15 @@
-import { plantAll } from "@/backend/services/garden/gardenService";
+import { getPlotFromDatabase } from "@/backend/services/garden/plot/plotService";
 import { verifyToken } from "@/utils/firebase/authUtils";
 import { NextResponse } from "next/server";
 
-export async function PATCH(request: Request, { params }: { params: { userId: string, gardenId: string } }) {
-	const { userId, gardenId } = params;
+export async function GET(request: Request, { params }: { params: { userId: string, gardenId: string, plotId: string } }) {
+	const { userId, gardenId, plotId } = params;
 	try {
-        // TODO: Dependency on gardenId for validation purposes?
 		// Verify the token using Firebase Admin SDK
 		const decodedToken = await verifyToken(request.headers.get('Authorization'));
 		const firebaseUid = decodedToken.uid;  // Extract UID from the decoded token
-	  const { plotIds, inventoryId, inventoryItemIdentifier} = await request.json();
-	  const result = await plantAll(plotIds, inventoryId, inventoryItemIdentifier, gardenId, firebaseUid);
+	//   const {} = await request.json();
+	  const result = await getPlotFromDatabase(plotId, gardenId, firebaseUid);
 	  return NextResponse.json(result, {status: 200});
 	} catch (error) {
 	  return NextResponse.json({ error: (error as Error).message }, { status: 500 });

@@ -64,6 +64,7 @@ export async function restockStore(storeId: string, userId: string, client?: Poo
 		return items;
 	}
 
+	//TODO: Check if we can trim this by fetching items in 1 query
 	if (process.env.USE_DATABASE === 'LAMBDA') {
 		try {
 			//Fetch data
@@ -93,7 +94,7 @@ export async function restockStore(storeId: string, userId: string, client?: Poo
 				]
 			  }
 			const fetchResult = await invokeLambda('garden-select', fetch_payload);
-			const storeEntity = parseRows<StoreEntity[]>(fetchResult)[0];
+			const storeEntity = parseRows<StoreEntity[]>(fetchResult[0])[0];
 
 			assert(storeRepository.validateStoreEntity(storeEntity));
 
@@ -477,7 +478,7 @@ export async function buyItem(storeId: string, userId: string, itemIdentifier: s
 					]
 				};
 				const insertResult = await invokeLambda('garden-insert', insert_payload);
-				returnItem = parseRows<InventoryItemEntity[]>(insertResult)[0];
+				returnItem = parseRows<InventoryItemEntity[]>(insertResult[0])[0];
 			}
 
 			//If the item already exists, as well as updating the store contents and inventory gold
@@ -789,7 +790,7 @@ export async function sellItem(storeId: string, userId: string, itemIdentifier: 
 					]
 				};
 				const insertResult = await invokeLambda('garden-insert', insert_payload);
-				returnItem = parseRows<StoreItemEntity[]>(insertResult)[0];
+				returnItem = parseRows<StoreItemEntity[]>(insertResult[0])[0];
 			}
 
 			//If the item already exists, as well as updating the store contents and inventory gold
