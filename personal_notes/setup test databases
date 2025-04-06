@@ -112,7 +112,7 @@ BEGIN
 			owner_uuid UUID,                      -- Stores owner if UUID (e.g., for gardens or inventories)
 			owner_uid VARCHAR(128),               -- Stores Firebase UID if user is the owner
 			owner_type VARCHAR(50) NOT NULL,   -- Type of owner (ie. user, garden)
-			total_xp INTEGER NOT NULL DEFAULT 0 CHECK (current_xp >= 0), -- Current XP (integer, defaulting to 0)
+			total_xp INTEGER NOT NULL DEFAULT 0 CHECK (total_xp >= 0), -- Total XP (integer, defaulting to 0)
 			growth_rate FLOAT NOT NULL DEFAULT 1.0, -- Growth rate (float, defaulting to 1.0)
 			CHECK (owner_uuid IS NOT NULL OR owner_uid IS NOT NULL), -- Ensure one owner field is filled
     		CHECK (owner_uuid IS NULL OR owner_uid IS NULL)          -- Ensure only one owner field is filled

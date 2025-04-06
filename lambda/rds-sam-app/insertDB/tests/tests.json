@@ -62,3 +62,40 @@
       }
     ]
   }
+
+  {
+    "queries": [
+      {
+        "tableName": "inventories",
+        "columnsToWrite": [
+          "id",
+          "owner",
+          "gold"
+        ],
+        "values": [
+          [
+            "1294eba5-22da-4b7d-8db9-e926a3484a5c",
+            "AAAAAAABBBBBBBCCCCCCCDDDDDDD",
+            0
+          ]
+        ],
+        "conflictColumns": [
+          "id"
+        ],
+        "updateQuery": {
+          "values": {
+            "gold": {
+              "operator": "+",
+              "value": 999
+            }
+          },
+          "conditions": {}
+        },
+        "returnColumns": [
+          "id",
+          "owner",
+          "gold"
+        ]
+      }
+    ]
+  }

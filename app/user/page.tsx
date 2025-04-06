@@ -75,27 +75,15 @@ const UserPage = () => {
 
     const handleCreateAccountButton = async () => {
       try {
-        // Making the POST request to your API endpoint
-        const response = await fetch('/api/account', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            plainUserObject: user.toPlainObject(),
-            plainInventoryObject: inventory.toPlainObject(),
-            plainStoreObject: store.toPlainObject(),
-            plainGardenObject: garden.toPlainObject()
-          }), // Send the new user data in the request body
-        });
-  
-        // Check if the response is successful
-        if (!response.ok) {
-          throw new Error('Failed to post new account');
+        
+        const data = {
+          plainUserObject: user.toPlainObject(),
+          plainInventoryObject: inventory.toPlainObject(),
+          plainStoreObject: store.toPlainObject(),
+          plainGardenObject: garden.toPlainObject()
         }
-  
-        // Parsing the response data
-        const result = await response.json();
+        const apiRoute = `/api/account`;
+        const result = await makeApiRequest('POST', apiRoute, data, true);
         console.log('Successfully posted:', result);
       } catch (error) {
         console.error(error);
@@ -104,27 +92,14 @@ const UserPage = () => {
 
     const handleSaveAccountButton = async () => {
       try {
-        // Making the POST request to your API endpoint
-        const response = await fetch('/api/account', {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            plainUserObject: user.toPlainObject(),
-            plainInventoryObject: inventory.toPlainObject(),
-            plainStoreObject: store.toPlainObject(),
-            plainGardenObject: garden.toPlainObject()
-          }), // Send the new user data in the request body
-        });
-  
-        // Check if the response is successful
-        if (!response.ok) {
-          throw new Error('Failed to update account');
+        const data = {
+          plainUserObject: user.toPlainObject(),
+          plainInventoryObject: inventory.toPlainObject(),
+          plainStoreObject: store.toPlainObject(),
+          plainGardenObject: garden.toPlainObject()
         }
-  
-        // Parsing the response data
-        const result = await response.json();
+        const apiRoute = `/api/account`;
+        const result = await makeApiRequest('PATCH', apiRoute, data, true);
         console.log('Successfully updated:', result);
       } catch (error) {
         console.error(error);
@@ -229,8 +204,8 @@ const UserPage = () => {
           // <div>Environment test key successfully returned.</div>
           // </>
           // <>
-          //   <div><button onClick={handleCreateAccountButton}> Create user in Database </button></div>
-            <><div><button onClick={handleSaveAccountButton}> Save user to Database </button></div></>
+            <><div><button onClick={handleCreateAccountButton}> Create user in Database </button></div>
+            <div><button onClick={handleSaveAccountButton}> Save user to Database </button></div></>
           //   <div><button onClick={handleFetchAccountButton}> Fetch user from Database </button></div>
           //   <div><button onClick={handleToggleGuestModeButton}> {`Toggle Cloud Saving ${guestMode ? '(Currently on)' : '(Currently off)'}`} </button></div>
           // </>

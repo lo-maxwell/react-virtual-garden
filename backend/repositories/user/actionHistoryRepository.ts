@@ -19,7 +19,7 @@ class ActionHistoryRepository {
 		return true;
 	}
 
-	async makeActionHistoryObject(actionHistoryEntity: ActionHistoryEntity): Promise<ActionHistory> {
+	makeActionHistoryObject(actionHistoryEntity: ActionHistoryEntity): ActionHistory {
 		assert(this.validateActionHistoryEntity(actionHistoryEntity));
 		
 		const actionHistoryInterface = actionHistoryMetadataRepository.getActionHistoryInterfaceByIdentifierString(actionHistoryEntity.identifier);
@@ -29,16 +29,14 @@ class ActionHistoryRepository {
 		return new ActionHistory(actionHistoryEntity.id, actionHistoryInterface.name, actionHistoryInterface.description, actionHistoryInterface.identifier, actionHistoryEntity.quantity);
 	}
 
-	async makeActionHistoryListObject(userId: string): Promise<ActionHistoryList> {
-		const histories = await this.getActionHistoriesByUserId(userId);
-		if (!histories) {
-			return new ActionHistoryList();
-		}
+	makeActionHistoryListObject(actionHistories: ActionHistory[]): ActionHistoryList {
+		// const histories = await this.getActionHistoriesByUserId(userId);
+		// if (!histories) {
+		// 	return new ActionHistoryList();
+		// }
 		const result = new ActionHistoryList();
 
-		const promises = histories.map(actionHistory => this.makeActionHistoryObject(actionHistory)); // Collect promises
-		const actionHistories = await Promise.all(promises);
-
+		// const actionHistories = histories.map(actionHistory => this.makeActionHistoryObject(actionHistory)); // Collect promises
 		for (const actionHistory of actionHistories) {
 			result.addActionHistory(actionHistory);
 		}
@@ -56,8 +54,6 @@ class ActionHistoryRepository {
 		const result = await query<ActionHistoryEntity>('SELECT * FROM action_histories', []);
 		if (!result || result.rows.length === 0) return [];
 		return result.rows;
-		// const toReturn: ActionHistory[] = await Promise.all(result.rows.map((row) => this.makeActionHistoryObject(row)));
-		// return toReturn;
 	}
 
 	async getActionHistoryById(id: string): Promise<ActionHistoryEntity | null> {
@@ -66,8 +62,6 @@ class ActionHistoryRepository {
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
 		return result.rows[0];
-		// const instance = this.makeUserObject(result.rows[0]);
-		// return instance;
 	}
 
 	async getActionHistoryByUserAndIdentifier(userId: string, identifier: string): Promise<ActionHistoryEntity | null> {
@@ -76,8 +70,6 @@ class ActionHistoryRepository {
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
 		return result.rows[0];
-		// const instance = this.makeUserObject(result.rows[0]);
-		// return instance;
 	}
 
 	async getActionHistoriesByIdentifier(searchIdentifier: string): Promise<ActionHistoryEntity[]> {
@@ -85,8 +77,6 @@ class ActionHistoryRepository {
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return [];
 		return result.rows;
-		// const toReturn: User[] = await Promise.all(result.rows.map((row) => this.makeUserObject(row)));
-		// return toReturn;
 	}
 
 	async getActionHistoriesByUserId(userId: string): Promise<ActionHistoryEntity[]> {

@@ -118,6 +118,13 @@ class LevelSystem {
 	}
 
 	/**
+	 * @returns the total xp
+	 */
+	getTotalExp(): number {
+		return LevelSystem.getTotalExpForLevel(this.getLevel(), this.getGrowthRate()) + this.getCurrentExp();
+	}
+
+	/**
 	 * @returns the amount of xp needed to level up (total, not considering how much current xp)
 	 */
 	getExpToLevelUp(): number {

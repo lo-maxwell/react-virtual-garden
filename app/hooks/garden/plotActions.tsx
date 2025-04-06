@@ -16,6 +16,7 @@ import User from "@/models/user/User";
 import { useDispatch } from "react-redux";
 import { makeApiRequest } from "@/utils/api/api";
 import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
+import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 
 //contains static onclick functions for plot components
 export const usePlotActions = () => {
@@ -187,8 +188,9 @@ export const usePlotActions = () => {
 			}
 			const xp = plot.getExpValue();
 			const harvestItemResponse = plot.harvestItem(inventory, instantGrow, 1);
-			const pickedItem = harvestItemResponse.payload.pickedItem as PlacedItem;
-			user.updateHarvestHistory(pickedItem);
+			const harvestedItem = harvestItemResponse.payload.newItem as HarvestedItem;
+			const historyResult = user.updateHarvestHistory(harvestedItem, 1);
+			if (!historyResult.isSuccessful()) console.warn(historyResult);
 			user.addExp(xp);			
 			
 			// Update redux store
@@ -270,10 +272,10 @@ export const usePlotActions = () => {
 				return {success: false, displayIcon: originalIcon};
 			}
 			const pickupItemResponse = plot.pickupItem(inventory);
-			const pickedItem = pickupItemResponse.payload.pickedItem as PlacedItem;
-			const xp = plot.getExpValue();
-			user.updateHarvestHistory(pickedItem);
-			user.addExp(xp);		
+			//decorations no longer affect history
+			// const pickedItem = pickupItemResponse.payload.pickedItem as PlacedItem;
+			// const historyResult = user.updateDecorationHistory(pickedItem, 1);
+			// if (!historyResult.isSuccessful()) console.warn(historyResult);
 			
 			// Update redux store
 			dispatch(setItemQuantity({ 

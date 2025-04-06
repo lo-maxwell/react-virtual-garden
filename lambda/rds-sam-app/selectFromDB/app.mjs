@@ -14,23 +14,23 @@ const pool = new Pool({
 
 // Define allowed tables and their corresponding columns
 const allowedTables = {
-  action_histories: ['id', 'owner', 'identifier', 'quantity'],
-  gardens: ['id', 'owner', 'rows', 'columns'],
-  icons: ['id', 'name', 'icon'],
-  inventories: ['id', 'owner', 'gold'],
-  inventory_items: ['id', 'owner', 'identifier', 'quantity'],
-  item_histories: ['id', 'owner', 'identifier', 'quantity'],
-  levels: ['id', 'owner_uuid', 'owner_uid', 'owner_type', 'total_xp', 'growth_rate'],
-  placed_items: ['id', 'owner', 'identifier', 'status'],
-  plots: ['id', 'owner', 'row_index', 'col_index', 'plant_time', 'uses_remaining', 'random_seed'],
-  store_items: ['id', 'owner', 'identifier', 'quantity'],
-  stores: ['id', 'owner', 'identifier', 'last_restock_time_ms'],
-  users: ['id', 'username', 'password_hash', 'password_salt', 'icon'], //Disallow password hash/salt select statements?
+  action_histories: ["id", "owner", "identifier", "quantity"],
+  gardens: ["id", "owner", "rows", "columns"],
+  icons: ["id", "name", "icon"],
+  inventories: ["id", "owner", "gold"],
+  inventory_items: ["id", "owner", "identifier", "quantity"],
+  item_histories: ["id", "owner", "identifier", "quantity"],
+  levels: ["id", "owner_uuid", "owner_uid", "owner_type", "total_xp", "growth_rate"],
+  placed_items: ["id", "owner", "identifier", "status"],
+  plots: ["id", "owner", "row_index", "col_index", "plant_time", "uses_remaining", "random_seed"],
+  store_items: ["id", "owner", "identifier", "quantity"],
+  stores: ["id", "owner", "identifier", "last_restock_time_ms"],
+  users: ["id", "username", "password_hash", "password_salt", "icon"], //Disallow password hash/salt select statements?
   // Add more tables and their columns as needed
 };
 
 // Define allowed operators
-const allowedOperators = ['=', '!=', '>', '<', '>=', '<=', 'LIKE', 'IN'];
+const allowedOperators = ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN"];
 
 export const handler = async (event) => {
   const { queries } = event; // Updated to accept queries object

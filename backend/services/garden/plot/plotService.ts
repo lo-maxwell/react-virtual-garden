@@ -569,132 +569,132 @@ export async function placeDecoration(gardenId: string, plotId: string, inventor
 			//Check that we can place decoration
 			const {blueprintItemTemplate, decorationItemTemplate} = validateCanPlaceDecoration(inventoryItemEntity, inventoryEntity, placedItemEntity, plotEntity, gardenEntity);
 
-			const decorationCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(ItemSubtypes.DECORATION.name, blueprintItemTemplate.category, 'placed', 1); // Updated to 'picked'
-			if (!decorationCategoryHistory) throw new Error(`Could not create action history from identifier category ${blueprintItemTemplate.category}`);
+			// const decorationCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(ItemSubtypes.DECORATION.name, blueprintItemTemplate.category, 'placed', 1); // Updated to 'picked'
+			// if (!decorationCategoryHistory) throw new Error(`Could not create action history from identifier category ${blueprintItemTemplate.category}`);
 			
-			const history_fetch_payload = {
-				"queries": [
-					{
-						"tableName": "action_histories",
-						"returnColumns": [
-							"id", 
-							"owner", 
-							"identifier",
-							"quantity"
-						],
-						"conditions": {
-							"owner": {
-								"operator": "=",
-								"value": userId
-							},
-							"identifier": {
-								"operator": "=",
-								"value": decorationCategoryHistory.getIdentifier()
-							}
-						},
-						"limit": 1
-					},
-					{
-						"tableName": "item_histories",
-						"returnColumns": [
-							"id", 
-							"owner", 
-							"identifier",
-							"quantity"
-						],
-						"conditions": {
-							"owner": {
-								"operator": "=",
-								"value": userId
-							},
-							"identifier": {
-								"operator": "=",
-								"value": blueprintItemTemplate.id
-							}
-						},
-						"limit": 1
-					}
-				]
-			}
+			// const history_fetch_payload = {
+			// 	"queries": [
+			// 		{
+			// 			"tableName": "action_histories",
+			// 			"returnColumns": [
+			// 				"id", 
+			// 				"owner", 
+			// 				"identifier",
+			// 				"quantity"
+			// 			],
+			// 			"conditions": {
+			// 				"owner": {
+			// 					"operator": "=",
+			// 					"value": userId
+			// 				},
+			// 				"identifier": {
+			// 					"operator": "=",
+			// 					"value": decorationCategoryHistory.getIdentifier()
+			// 				}
+			// 			},
+			// 			"limit": 1
+			// 		},
+			// 		{
+			// 			"tableName": "item_histories",
+			// 			"returnColumns": [
+			// 				"id", 
+			// 				"owner", 
+			// 				"identifier",
+			// 				"quantity"
+			// 			],
+			// 			"conditions": {
+			// 				"owner": {
+			// 					"operator": "=",
+			// 					"value": userId
+			// 				},
+			// 				"identifier": {
+			// 					"operator": "=",
+			// 					"value": blueprintItemTemplate.id
+			// 				}
+			// 			},
+			// 			"limit": 1
+			// 		}
+			// 	]
+			// }
 
-			const fetchHistoryQueryResult = await invokeLambda('garden-select', history_fetch_payload);
-			if (!fetchHistoryQueryResult) {
-				throw new Error(`Failed to return value from lambda`);
-			}
-			const actionHistoryEntityList = parseRows<ActionHistoryEntity[]>(fetchHistoryQueryResult[0]);
-			const itemHistoryEntityList = parseRows<ItemHistoryEntity[]>(fetchHistoryQueryResult[1]);
-			const actionHistoryEntity = (Array.isArray(actionHistoryEntityList) && actionHistoryEntityList.length > 0) ? actionHistoryEntityList[0] : null;
-			if (actionHistoryEntity) assert(actionHistoryRepository.validateActionHistoryEntity(actionHistoryEntity));
-			const itemHistoryEntity = (Array.isArray(itemHistoryEntityList) && itemHistoryEntityList.length > 0) ? itemHistoryEntityList[0] : null;
-			if (itemHistoryEntity) assert(itemHistoryRepository.validateItemHistoryEntity(itemHistoryEntity));
+			// const fetchHistoryQueryResult = await invokeLambda('garden-select', history_fetch_payload);
+			// if (!fetchHistoryQueryResult) {
+			// 	throw new Error(`Failed to return value from lambda`);
+			// }
+			// const actionHistoryEntityList = parseRows<ActionHistoryEntity[]>(fetchHistoryQueryResult[0]);
+			// const itemHistoryEntityList = parseRows<ItemHistoryEntity[]>(fetchHistoryQueryResult[1]);
+			// const actionHistoryEntity = (Array.isArray(actionHistoryEntityList) && actionHistoryEntityList.length > 0) ? actionHistoryEntityList[0] : null;
+			// if (actionHistoryEntity) assert(actionHistoryRepository.validateActionHistoryEntity(actionHistoryEntity));
+			// const itemHistoryEntity = (Array.isArray(itemHistoryEntityList) && itemHistoryEntityList.length > 0) ? itemHistoryEntityList[0] : null;
+			// if (itemHistoryEntity) assert(itemHistoryRepository.validateItemHistoryEntity(itemHistoryEntity));
 
-			//Only if the action history does not exist
-			if (!actionHistoryEntity) {
-				const insert_payload = {
-					"queries": [
-						{
-							"tableName": "action_histories",
-							"columnsToWrite": [
-							  "owner",
-							  "identifier",
-							  "quantity"
-							],
-							"values": [
-							  [
-								userId,
-								decorationCategoryHistory.getIdentifier(),
-								1
-							  ]
-							],
-							"conflictColumns": [
-							  "owner",
-							  "identifier"
-							],
-							"returnColumns": [
-							  "id",
-							  "owner",
-							  "identifier",
-							  "quantity"
-							]
-						  }
-					]
-				};
-				const insertActionHistoryResult = await invokeLambda('garden-insert', insert_payload);
-			}
+			// //Only if the action history does not exist
+			// if (!actionHistoryEntity) {
+			// 	const insert_payload = {
+			// 		"queries": [
+			// 			{
+			// 				"tableName": "action_histories",
+			// 				"columnsToWrite": [
+			// 				  "owner",
+			// 				  "identifier",
+			// 				  "quantity"
+			// 				],
+			// 				"values": [
+			// 				  [
+			// 					userId,
+			// 					decorationCategoryHistory.getIdentifier(),
+			// 					1
+			// 				  ]
+			// 				],
+			// 				"conflictColumns": [
+			// 				  "owner",
+			// 				  "identifier"
+			// 				],
+			// 				"returnColumns": [
+			// 				  "id",
+			// 				  "owner",
+			// 				  "identifier",
+			// 				  "quantity"
+			// 				]
+			// 			  }
+			// 		]
+			// 	};
+			// 	const insertActionHistoryResult = await invokeLambda('garden-insert', insert_payload);
+			// }
 
-			//Only if the item history does not exist
-			if (!itemHistoryEntity) {
-				const insert_payload = {
-					"queries": [
-						{
-							"tableName": "item_histories",
-							"columnsToWrite": [
-							  "owner",
-							  "identifier",
-							  "quantity"
-							],
-							"values": [
-							  [
-								userId,
-								blueprintItemTemplate.id,
-								1
-							  ]
-							],
-							"conflictColumns": [
-							  "owner",
-							  "identifier"
-							],
-							"returnColumns": [
-							  "id",
-							  "owner",
-							  "identifier",
-							  "quantity"
-							]
-						  }
-					]
-				};
-				const insertItemHistoryResult = await invokeLambda('garden-insert', insert_payload);
-			}
+			// //Only if the item history does not exist
+			// if (!itemHistoryEntity) {
+			// 	const insert_payload = {
+			// 		"queries": [
+			// 			{
+			// 				"tableName": "item_histories",
+			// 				"columnsToWrite": [
+			// 				  "owner",
+			// 				  "identifier",
+			// 				  "quantity"
+			// 				],
+			// 				"values": [
+			// 				  [
+			// 					userId,
+			// 					blueprintItemTemplate.id,
+			// 					1
+			// 				  ]
+			// 				],
+			// 				"conflictColumns": [
+			// 				  "owner",
+			// 				  "identifier"
+			// 				],
+			// 				"returnColumns": [
+			// 				  "id",
+			// 				  "owner",
+			// 				  "identifier",
+			// 				  "quantity"
+			// 				]
+			// 			  }
+			// 		]
+			// 	};
+			// 	const insertItemHistoryResult = await invokeLambda('garden-insert', insert_payload);
+			// }
 
 			// 'UPDATE plots SET plant_time = $1, uses_remaining = $2 WHERE id = $3 AND owner = $4'
 			// 'UPDATE placed_items SET identifier = $1, status = $2 WHERE id = $3 AND owner = $4'
@@ -770,69 +770,69 @@ export async function placeDecoration(gardenId: string, plotId: string, inventor
 				]
 			  }
 
-			if (actionHistoryEntity) {
-				update_payload.queries.push({
-					"tableName": "action_histories",
-					"values": {
-						"quantity": {
-							"operator": "+",
-							"value": 1
-						  }
-					},
-					"returnColumns": [
-						"id",
-						"owner",
-						"identifier",
-						"quantity"
-					],
-					"conditions": {
-						"id": {
-							"operator": "=",
-							"value": actionHistoryEntity.id
-						},
-						"owner": {
-							"operator": "=",
-							"value": userId
-						},
-						"identifier": {
-							"operator": "=",
-							"value": actionHistoryEntity.identifier
-						}
-					}
-				})
-			}
+			// if (actionHistoryEntity) {
+			// 	update_payload.queries.push({
+			// 		"tableName": "action_histories",
+			// 		"values": {
+			// 			"quantity": {
+			// 				"operator": "+",
+			// 				"value": 1
+			// 			  }
+			// 		},
+			// 		"returnColumns": [
+			// 			"id",
+			// 			"owner",
+			// 			"identifier",
+			// 			"quantity"
+			// 		],
+			// 		"conditions": {
+			// 			"id": {
+			// 				"operator": "=",
+			// 				"value": actionHistoryEntity.id
+			// 			},
+			// 			"owner": {
+			// 				"operator": "=",
+			// 				"value": userId
+			// 			},
+			// 			"identifier": {
+			// 				"operator": "=",
+			// 				"value": actionHistoryEntity.identifier
+			// 			}
+			// 		}
+			// 	})
+			// }
 
-			if (itemHistoryEntity) {
-				update_payload.queries.push({
-					"tableName": "item_histories",
-					"values": {
-						"quantity": {
-							"operator": "+",
-							"value": 1
-						  }
-					},
-					"returnColumns": [
-						"id",
-						"owner",
-						"identifier",
-						"quantity"
-					],
-					"conditions": {
-						"id": {
-							"operator": "=",
-							"value": itemHistoryEntity.id
-						},
-						"owner": {
-							"operator": "=",
-							"value": userId
-						},
-						"identifier": {
-							"operator": "=",
-							"value": itemHistoryEntity.identifier
-						}
-					}
-				})
-			}
+			// if (itemHistoryEntity) {
+			// 	update_payload.queries.push({
+			// 		"tableName": "item_histories",
+			// 		"values": {
+			// 			"quantity": {
+			// 				"operator": "+",
+			// 				"value": 1
+			// 			  }
+			// 		},
+			// 		"returnColumns": [
+			// 			"id",
+			// 			"owner",
+			// 			"identifier",
+			// 			"quantity"
+			// 		],
+			// 		"conditions": {
+			// 			"id": {
+			// 				"operator": "=",
+			// 				"value": itemHistoryEntity.id
+			// 			},
+			// 			"owner": {
+			// 				"operator": "=",
+			// 				"value": userId
+			// 			},
+			// 			"identifier": {
+			// 				"operator": "=",
+			// 				"value": itemHistoryEntity.identifier
+			// 			}
+			// 		}
+			// 	})
+			// }
 			
 
 			const updateQueryResult = await invokeLambda('garden-update', update_payload);
@@ -894,24 +894,24 @@ export async function placeDecoration(gardenId: string, plotId: string, inventor
 			await plotRepository.setPlotDetails(plotId, currentTime, 0, client);
 			await placedItemRepository.replacePlacedItemByPlotId(plotId, decorationItemTemplate.id, '', client);
 
-			//histories are updated
-			//action histories
-			//decoration: all		
-			//decoration: category
-			// decorations don't have an all category right now
-			// const decorationAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(blueprintItemTemplate.subtype, 'all', 'placed', 1); // Updated to 'picked'
-			// if (!decorationAllHistory) throw new Error(`Could not create action history from identifier category all`);
-			const decorationCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(ItemSubtypes.DECORATION.name, blueprintItemTemplate.category, 'placed', 1); // Updated to 'picked'
-			if (!decorationCategoryHistory) throw new Error(`Could not create action history from identifier category ${blueprintItemTemplate.category}`);
+			//no longer updating history for decorations
+			// //action histories
+			// //decoration: all		
+			// //decoration: category
+			// // decorations don't have an all category right now
+			// // const decorationAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(blueprintItemTemplate.subtype, 'all', 'placed', 1); // Updated to 'picked'
+			// // if (!decorationAllHistory) throw new Error(`Could not create action history from identifier category all`);
+			// const decorationCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(ItemSubtypes.DECORATION.name, blueprintItemTemplate.category, 'placed', 1); // Updated to 'picked'
+			// if (!decorationCategoryHistory) throw new Error(`Could not create action history from identifier category ${blueprintItemTemplate.category}`);
 			
-			// await actionHistoryRepository.addActionHistory(userId, decorationAllHistory, client);
+			// // await actionHistoryRepository.addActionHistory(userId, decorationAllHistory, client);
 			
-			await actionHistoryRepository.addActionHistory(userId, decorationCategoryHistory, client);
+			// await actionHistoryRepository.addActionHistory(userId, decorationCategoryHistory, client);
 		
-			//specific item history
-			const itemHistory = new ItemHistory(uuidv4(), blueprintItemTemplate, 1);
+			// //specific item history
+			// const itemHistory = new ItemHistory(uuidv4(), blueprintItemTemplate, 1);
 			
-			await itemHistoryRepository.addItemHistory(userId, itemHistory, client);	
+			// await itemHistoryRepository.addItemHistory(userId, itemHistory, client);	
 			
 			return true;
 		} 
@@ -1714,7 +1714,7 @@ export async function harvestPlot(gardenId: string, plotId: string, inventoryId:
 			await actionHistoryRepository.addActionHistory(userId, harvestCategoryHistory, client);
 		
 			//specific item history
-			const itemHistory = new ItemHistory(uuidv4(), plantItemTemplate, 1);
+			const itemHistory = new ItemHistory(uuidv4(), harvestedItemTemplate, 1);
 			await itemHistoryRepository.addItemHistory(userId, itemHistory, client);	
 			
 			//Needs to return the created histories as well (?)

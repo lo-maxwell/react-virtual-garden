@@ -17,7 +17,7 @@ class ItemHistoryRepository {
 		return true;
 	}
 
-	async makeItemHistoryObject(itemHistoryEntity: ItemHistoryEntity): Promise<ItemHistory> {
+	makeItemHistoryObject(itemHistoryEntity: ItemHistoryEntity): ItemHistory {
 		assert(this.validateItemHistoryEntity(itemHistoryEntity));
 		
 		const itemHistoryTemplate = placeholderItemTemplates.getTemplate(itemHistoryEntity.identifier);
@@ -27,15 +27,15 @@ class ItemHistoryRepository {
 		return new ItemHistory(itemHistoryEntity.id, itemHistoryTemplate, itemHistoryEntity.quantity);
 	}
 
-	async makeItemHistoryListObject(userId: string): Promise<ItemHistoryList> {
-		const histories = await this.getItemHistoriesByUserId(userId);
-		if (!histories) {
-			return new ItemHistoryList();
-		}
+	makeItemHistoryListObject(itemHistories: ItemHistory[]): ItemHistoryList {
+		// const histories = await this.getItemHistoriesByUserId(userId);
+		// if (!histories) {
+		// 	return new ItemHistoryList();
+		// }
 		const result = new ItemHistoryList();
 
-		const promises = histories.map(itemHistory => this.makeItemHistoryObject(itemHistory)); // Collect promises
-		const itemHistories = await Promise.all(promises);
+		// const promises = histories.map(itemHistory => this.makeItemHistoryObject(itemHistory)); // Collect promises
+		// const itemHistories = await Promise.all(promises);
 
 		for (const itemHistory of itemHistories) {
 			result.addItemHistory(itemHistory);

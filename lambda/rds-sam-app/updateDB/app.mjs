@@ -12,100 +12,33 @@ const pool = new Pool({
   }
 });
 
+
 // Define allowed tables and their corresponding columns
 const allowedTables = {
-  action_histories: ['id', 'owner', 'identifier', 'quantity'],
-  gardens: ['id', 'owner', 'rows', 'columns'],
-  icons: ['id', 'name', 'icon'],
-  inventories: ['id', 'owner', 'gold'],
-  inventory_items: ['id', 'owner', 'identifier', 'quantity'],
-  item_histories: ['id', 'owner', 'identifier', 'quantity'],
-  levels: ['id', 'owner_uuid', 'owner_uid', 'owner_type', 'total_xp', 'growth_rate'],
-  placed_items: ['id', 'owner', 'identifier', 'status'],
-  plots: ['id', 'owner', 'row_index', 'col_index', 'plant_time', 'uses_remaining', 'random_seed'],
-  store_items: ['id', 'owner', 'identifier', 'quantity'],
-  stores: ['id', 'owner', 'identifier', 'last_restock_time_ms'],
-  users: ['id', 'username', 'password_hash', 'password_salt', 'icon'], // Disallow password hash/salt select statements?
+  action_histories: ["id", "owner", "identifier", "quantity"],
+  gardens: ["id", "owner", "rows", "columns"],
+  icons: ["id", "name", "icon"],
+  inventories: ["id", "owner", "gold"],
+  inventory_items: ["id", "owner", "identifier", "quantity"],
+  item_histories: ["id", "owner", "identifier", "quantity"],
+  levels: ["id", "owner_uuid", "owner_uid", "owner_type", "total_xp", "growth_rate"],
+  placed_items: ["id", "owner", "identifier", "status"],
+  plots: ["id", "owner", "row_index", "col_index", "plant_time", "uses_remaining", "random_seed"],
+  store_items: ["id", "owner", "identifier", "quantity"],
+  stores: ["id", "owner", "identifier", "last_restock_time_ms"],
+  users: ["id", "username", "password_hash", "password_salt", "icon"], //Disallow password hash/salt select statements?
   // Add more tables and their columns as needed
 };
 
 // Define allowed operators
-const allowedOperators = ['=', '!=', '>', '<', '>=', '<=', 'LIKE', 'IN', '+', '-', '*', '/'];
+const allowedOperators = ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN", "+", "-", "*", "/"];
 
-export const handler = async (event) => {
-  const { queries } = event; // Updated to accept queries object
-
-  // Validate input
-  if (!Array.isArray(queries) || queries.length === 0) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: 'Invalid queries input' })
-    };
-  }
-
-  const results = []; // Array to hold results from each query
-
-  // Helper function to process a single update query
-  const processUpdateQuery = async (query) => {
-    const { tableName, values, returnColumns, conditions } = query;
-
-    // Validate table name
-    if (!allowedTables.hasOwnProperty(tableName)) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: `Invalid table name: ${tableName}` })
-      };
-    }
-
-    // Validate values
-    if (typeof values !== 'object' || Object.keys(values).length === 0) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'Invalid values for update' })
-      };
-    }
-
-    // Validate returnColumns
-    if (!Array.isArray(returnColumns) || returnColumns.length === 0) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'Invalid return columns' })
-      };
-    }
-
-    // Validate return columns against allowed list for the specific table
-    for (const column of returnColumns) {
-      if (!allowedTables[tableName].includes(column)) {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({ message: `Invalid return column: ${column} for table: ${tableName}` })
-        };
-      }
-    }
-
-    // Validate values keys against allowed columns for the specific table
-    for (const key of Object.keys(values)) {
-      if (!allowedTables[tableName].includes(key)) {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({ message: `Invalid update column: ${key} for table: ${tableName}` })
-        };
-      }
-    }
-
-    // Validate conditions
-    if (!conditions || Object.keys(conditions).length === 0) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ message: 'At least one condition is required for the update' })
-        };
-    }
-
-    // Initialize the queryParams array
+// Function to construct the update query string and parameters
+const constructUpdateQuery = (tableName, values, conditions, returnColumns) => {
     const queryParams = [];
 
     // Construct the set clause and populate queryParams with values
-    const setClause = Object.keys(values).map((key, index) => {
+    const setClause = Object.keys(values).map((key) => {
         // Check if the value is an object with an operator
         if (typeof values[key] === 'object' && values[key].operator) {
             // Validate operator
@@ -125,7 +58,7 @@ export const handler = async (event) => {
     let queryString = `UPDATE ${tableName} SET ${setClause}`; // Initial query string
 
     // Add conditions if provided
-    const conditionStrings = Object.keys(conditions).map((key, index) => {
+    const conditionStrings = Object.keys(conditions).map((key) => {
         const { operator, value } = conditions[key]; // Extract operator and value from the condition object
         
         // Validate operator
@@ -139,10 +72,10 @@ export const handler = async (event) => {
         }
 
         if (operator === 'IN') {
-          // Create placeholders for each value in the array
-          const placeholders = value.map((_, idx) => `$${queryParams.length + idx + 1}`).join(', ');
-          queryParams.push(...value); // Add all values to queryParams
-          return `${key} IN (${placeholders})`; // Use the placeholders in the query
+            // Create placeholders for each value in the array
+            const placeholders = value.map((_, idx) => `$${queryParams.length + idx + 1}`).join(', ');
+            queryParams.push(...value); // Add all values to queryParams
+            return `${key} IN (${placeholders})`; // Use the placeholders in the query
         } else {
             queryParams.push(value); // Add the single value to queryParams
             return `${key} ${operator} $${queryParams.length}`; // Use parameterized query for the value
@@ -152,16 +85,90 @@ export const handler = async (event) => {
 
     queryString += ` RETURNING ${returnColumns.join(', ')};`; // Append RETURNING clause
 
+    return { queryString, queryParams };
+};
+
+export const handler = async (event) => {
+  const { queries } = event; // Updated to accept queries object
+
+  // Validate input
+  if (!Array.isArray(queries) || queries.length === 0) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: 'Invalid queries input' })
+    };
+  }
+
+  const results = []; // Array to hold results from each query
+
+  // Update the processUpdateQuery function to use constructUpdateQuery
+  const processUpdateQuery = async (query) => {
+    const { tableName, values, returnColumns, conditions } = query;
+
+    // Validate table name
+    if (!allowedTables.hasOwnProperty(tableName)) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ message: `Invalid table name: ${tableName}` })
+        };
+    }
+
+    // Validate values
+    if (typeof values !== 'object' || Object.keys(values).length === 0) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ message: 'Invalid values for update' })
+        };
+    }
+
+    // Validate returnColumns
+    if (!Array.isArray(returnColumns) || returnColumns.length === 0) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ message: 'Invalid return columns' })
+        };
+    }
+
+    // Validate return columns against allowed list for the specific table
+    for (const column of returnColumns) {
+        if (!allowedTables[tableName].includes(column)) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: `Invalid return column: ${column} for table: ${tableName}` })
+            };
+        }
+    }
+
+    // Validate values keys against allowed columns for the specific table
+    for (const key of Object.keys(values)) {
+        if (!allowedTables[tableName].includes(key)) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: `Invalid update column: ${key} for table: ${tableName}` })
+            };
+        }
+    }
+
+    // Validate conditions
+    if (!conditions || Object.keys(conditions).length === 0) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ message: 'At least one condition is required for the update' })
+        };
+    }
+
+    // Use the new function to construct the query
+    const { queryString, queryParams } = constructUpdateQuery(tableName, values, conditions, returnColumns);
 
     try {
-      const result = await pool.query(queryString, queryParams);
-      return { tableName, rows: result.rows }; // Return result for this query
+        const result = await pool.query(queryString, queryParams);
+        return { tableName, rows: result.rows }; // Return result for this query
     } catch (error) {
-      console.error('Error executing update query:', error);
-      return { 
-        tableName, 
-        error: `Update query failed: ${error.message}` // Return detailed error message for this query
-      };
+        console.error('Error executing update query:', error);
+        return { 
+            tableName, 
+            error: `Update query failed: ${error.message}` // Return detailed error message for this query
+        };
     }
   };
 

@@ -26,6 +26,11 @@ class ActionHistoryFactory {
 		}
 	}
 
+	createHistoryIdentifier(subtype: string, category: string, action: string): string {
+		const identifierString = `${subtype.toLowerCase()}:${category.toLowerCase()}:${action.toLowerCase()}`;
+		return identifierString;
+	}
+
 	/**
 	 * 
 	 * @subtype plant, decoration, etc
@@ -34,7 +39,7 @@ class ActionHistoryFactory {
 	 * @returns the created actionHistory object or null
 	 */
 	createActionHistoryByIdentifiers(subtype: string, category: string, action: string, quantity: number): ActionHistory | null {
-		const identifierString = `${subtype.toLowerCase()}:${category.toLowerCase()}:${action.toLowerCase()}`;
+		const identifierString = this.createHistoryIdentifier(subtype, category, action);
 		return this.createActionHistoryByIdentifierString(identifierString, quantity);
 	}
 

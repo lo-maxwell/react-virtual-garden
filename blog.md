@@ -375,16 +375,16 @@
 
 TODO:
 
-Create Plots when expanding garden
-Verify that makePlotObject works with only lambda calls
 Itemlist is not updating properly again when buying/selling items
-XP is not updating properly when harvesting plants
+XP is not updating properly when harvesting plants <--------------
 Check syncing with redux when buying/restocking
 Check restock timer when loading in
 
 Username cannot include special characters, must be alphanumeric or whitespace (esp no *, %, \ to prevent sql problems)
 
 "Force refresh saved data" button with 5 second cd
+
+Actionhistories should be harvested:category:harvested? (instead of plant: category)
 
 Action items:
 1. Make the redirect delayed and make it sit on a screen that says redirect to login page (may be changed in the future)

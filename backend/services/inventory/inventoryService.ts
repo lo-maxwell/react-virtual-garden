@@ -3,11 +3,133 @@ import { invokeLambda, parseRows } from "@/backend/lambda/invokeLambda";
 import inventoryItemRepository from "@/backend/repositories/items/inventoryItem/inventoryItemRepository";
 import inventoryRepository from "@/backend/repositories/itemStore/inventory/inventoryRepository";
 import { InventoryItemEntity } from "@/models/items/inventoryItems/InventoryItem";
-import { InventoryEntity } from "@/models/itemStore/inventory/Inventory";
+import { Inventory, InventoryEntity } from "@/models/itemStore/inventory/Inventory";
 import { ItemList } from "@/models/itemStore/ItemList";
 import assert from "assert";
 import { PoolClient } from "pg";
 import { transactionWrapper } from "../utility/utility";
+
+/**
+ * Inserts a inventory into the database. Does nothing if a inventory with the same id/owner userId already exists.
+ * @param inventory
+ * @param userId
+ * @param client
+ */
+ export async function createInventoryInDatabase(inventory: Inventory, userId: string, client?: PoolClient): Promise<boolean> {
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+			const inventoryItemList = inventory.getAllItems();
+
+			const payload = {
+				"queries": [
+					{
+						"tableName": "inventories",
+						"columnsToWrite": [
+							"id", 
+							"owner", 
+							"gold"
+						],
+						"values": [
+							[
+								inventory.getInventoryId(),
+								userId,
+								inventory.getGold()
+							  ]
+						],
+						"conflictColumns": [
+							"id"
+						],
+						"returnColumns": [
+							"id"
+						]
+					}
+				]
+			};
+			const insert_item_values: any = [];
+			inventoryItemList.forEach((item) => {
+				const toInsert = [
+					item.getInventoryItemId(),
+					inventory.getInventoryId(),
+					item.itemData.id,
+					item.getQuantity()
+				]
+				insert_item_values.push(toInsert);
+			})
+			if (insert_item_values.length > 0) {
+				const inventoryItemInsertQuery = {
+					"tableName": "inventory_items",
+					"columnsToWrite": [
+						"id", "owner", "identifier", "quantity"
+					],
+					"values": insert_item_values,
+					"conflictColumns": [
+						"owner",
+						"identifier"
+					],
+					"returnColumns": [
+						"id"
+					]
+				};
+				payload.queries.push(inventoryItemInsertQuery);
+			}
+
+			const insertResult = await invokeLambda('garden-insert', payload);
+			// Check if result is valid
+			if (!insertResult) {
+				throw new Error(`Error executing creation of inventory ${inventory.getInventoryId()}`);
+			}
+			const inventoryResult = parseRows<string[]>(insertResult[0]);
+			const inventoryItemResult = insert_item_values.length > 0 ? parseRows<string[]>(insertResult[1]) : [];
+
+			// Check for discrepancies
+			if (inventoryResult.length !== 1) {
+				console.warn(`Expected 1 inventory to be created, but got ${inventoryResult.length}`);
+			}
+			if (inventoryItemResult.length !== insert_item_values.length) {
+				console.warn(`Expected ${insert_item_values.length} inventory item ids to be returned, but got ${inventoryItemResult.length}`);
+			}
+			return true;
+		} catch (error) {
+			console.error('Error creating inventory from Lambda:', error);
+			throw error;
+		}
+	} else {
+		// Array to store all promises
+		const allPromises: Promise<void>[] = [];
+		// Create inventory and inventory items concurrently
+		const inventoryResultPromise = inventoryRepository.createInventory(userId, inventory, client)
+			.then(async (inventoryResult) => {
+				if (!inventoryResult) {
+					throw new Error('There was an error creating the inventory');
+				}
+
+				// Create inventory items
+				const inventoryItemPromises: Promise<void>[] = [];
+				const inventoryItems = inventory.getAllItems();
+				inventoryItems.forEach((item) => {
+					const inventoryItemPromise = inventoryItemRepository.createInventoryItem(inventory.getInventoryId(), item, client)
+						.then((inventoryItemResult) => {
+							if (!inventoryItemResult) {
+								throw new Error(`Error creating inventory item for item ${item.itemData.id}`);
+							}
+						});
+					inventoryItemPromises.push(inventoryItemPromise);
+				});
+
+				await Promise.allSettled(inventoryItemPromises);
+			})
+			.catch((error) => {
+				console.error('Error creating inventory or inventory items:', error);
+			});
+
+		allPromises.push(inventoryResultPromise);
+
+		// Wait for all promises to resolve
+		await Promise.allSettled(allPromises);
+
+		return true;
+	}
+}
 
 /**
  * @returns an inventory plain object
@@ -66,7 +188,6 @@ export async function getInventoryFromDatabase(inventoryId: string, userId: stri
 			}
 			const inventoryEntityResult = parseRows<InventoryEntity[]>(inventoryResult)[0];
 			assert(inventoryRepository.validateInventoryEntity(inventoryEntityResult));
-			console.log(inventoryEntityResult);
 
 			let inventoryItems: ItemList | null;
 			if (!inventoryItemsResult) {

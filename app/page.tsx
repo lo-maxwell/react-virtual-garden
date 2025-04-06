@@ -22,13 +22,11 @@ const HomePage = () => {
   }, [router]);
 
   async function testAWSLambda () {
-    // const data = {
-    //   newIcon: "onion"
-    // }
-    // const apiRoute = `/api/user/${user.getUserId()}/updateIconWithLambda`;
-    // const apiRoute = `/api/user/${user.getUserId()}/get`;
-    // const result = await makeApiRequest('GET', apiRoute, data, true);
-    // console.log('Successfully called lambda function:', result);
+    const data = {
+    }
+    const apiRoute = `/api/user/${user.getUserId()}/get`;
+    const result = await makeApiRequest('GET', apiRoute, data, true);
+    console.log('Successfully called lambda function:', result);
 
     // const data = {
     //   newUsername: "onion farmer"
@@ -69,11 +67,11 @@ const HomePage = () => {
     // const result = await makeApiRequest('GET', apiRoute, data, true);
     // console.log('Successfully called lambda function:', result);
 
-    const data = {
-    }
-    const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/get`;
-    const result = await makeApiRequest('GET', apiRoute, data, true);
-    console.log('Successfully called lambda function:', result);
+    // const data = {
+    // }
+    // const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/get`;
+    // const result = await makeApiRequest('GET', apiRoute, data, true);
+    // console.log('Successfully called lambda function:', result);
   }
 
   return (

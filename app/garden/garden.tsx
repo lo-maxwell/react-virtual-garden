@@ -11,7 +11,7 @@ import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import { useUser } from "@/app/hooks/contexts/UserContext";
 import GardenExpansionTooltip from "./gardenExpansionTooltip";
 import { Garden } from "@/models/garden/Garden";
-import { addColumnAPI, addColumnLocal, addRowAPI, addRowLocal, harvestAllAPI, plantAllAPI, removeColumnAPI, removeColumnLocal, removeRowAPI, removeRowLocal, syncGardenSize, syncUserGardenInventory } from "./gardenFunctions";
+import { addColumnAPI, addColumnLocal, addRowAPI, addRowLocal, harvestAllAPI, pickupAllAPI, plantAllAPI, removeColumnAPI, removeColumnLocal, removeRowAPI, removeRowLocal, syncGardenSize, syncUserGardenInventory } from "./gardenFunctions";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { useAccount } from "../hooks/contexts/AccountContext";
@@ -172,6 +172,44 @@ const GardenComponent = () => {
 		}
 	}
 
+	const pickupAll = async () => {
+		const pickupPlotIds: string[] = [];
+		let numDecorations = 0;
+
+		plotRefs.current.forEach(row => {
+			row.forEach(plotRef => {
+			  if (plotRef && plotRef.plot.getItemSubtype() === ItemSubtypes.DECORATION.name) {
+				const pickupDecorationAction = clickDecoration(plotRef.plot).uiHelper;
+					// Performs local update
+					const harvestPlantResult = pickupDecorationAction();
+					if (harvestPlantResult.success) {
+						numDecorations++;
+						pickupPlotIds.push(plotRef.plot.getPlotId());
+						plotRef.refresh();
+					}
+			  }
+			});
+		  });
+
+		setGardenMessage(`Picked up ${numDecorations} decorations.`);
+
+		// Terminate early before api call
+		if (guestMode || pickupPlotIds.length <= 0 || numDecorations <= 0) {
+			return;
+		}
+
+		//api call
+		const apiResult = await pickupAllAPI(pickupPlotIds, inventory, user, garden);
+		if (!apiResult) {
+			await syncUserGardenInventory(user, garden, inventory);
+			reloadUser();
+			reloadGarden();
+			reloadInventory();
+			setGardenMessage(`There was an error picking up 1 or more decorations! Please refresh the page!`);
+			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+		}
+	}
+
 
 	async function addColumn() {
 		if (!garden || !user) {
@@ -290,6 +328,7 @@ const GardenComponent = () => {
 			<div>
 				<button onClick={plantAll} className={`bg-gray-300 px-4 py-1 mx-1 my-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`} data-testid="plant-all">Plant All</button>
 				<button onClick={harvestAll} className={`bg-gray-300 px-4 py-1 mx-1 my-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`} data-testid="harvest-all">Harvest All</button>
+				<button onClick={pickupAll} className={`bg-gray-300 px-4 py-1 mx-1 my-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`} data-testid="harvest-all">Remove Decorations</button>
 			</div>
 			<button onClick={handleGardenExpansionDisplay} className={`bg-gray-300 px-4 py-1 mx-1 my-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}>{`${!showExpansionOptions ? `Show` : `Hide`} Garden Expansion Options`}</button>
 			<div className={`${showExpansionOptions ? `` : `hidden`} flex flex-row`}>
