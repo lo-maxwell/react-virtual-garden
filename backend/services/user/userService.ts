@@ -3,6 +3,7 @@ import levelRepository from "@/backend/repositories/level/levelRepository";
 import actionHistoryRepository from "@/backend/repositories/user/actionHistoryRepository";
 import itemHistoryRepository from "@/backend/repositories/user/itemHistoryRepository";
 import userRepository from "@/backend/repositories/user/userRepository";
+import HistoryComponent from "@/components/user/history/History";
 import LevelSystem, { LevelSystemEntity } from "@/models/level/LevelSystem";
 import { ActionHistoryEntity } from "@/models/user/history/actionHistory/ActionHistory";
 import { ItemHistoryEntity } from "@/models/user/history/itemHistory/ItemHistory";
@@ -198,6 +199,235 @@ import { transactionWrapper } from "../utility/utility";
 			const result = await itemHistoryRepository.createItemHistory(elem, user.getUserId(), client);
 			if (!result) {
 				throw new Error(`Error creating item history for user ${user.getUserId()}`);
+			}
+		});
+		allPromises.push(...itemHistoryPromises);
+
+		// Wait for all promises to resolve
+		await Promise.allSettled(allPromises);
+
+		return true;
+	}
+}
+
+/**
+ * Updates the user in the database, or creates new entries if they do not exist
+ * @param user
+ * @param userId
+ * @param client
+ */
+ export async function upsertUserInDatabase(user: User, userId: string, client?: PoolClient): Promise<boolean> {
+	if (user.getUserId() !== userId) {
+		console.warn(`UserIds do not match between passed object and firebase. Consider updating the userId to use firebase uid.`);
+	}
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+			const levelInstance = user.getLevelSystem();
+			const actionHistoryInstance = user.getActionHistory();
+			const itemHistoryInstance = user.getItemHistory();
+
+			const payload = {
+				"queries": [
+					{
+						"tableName": "users",
+						"columnsToWrite": [
+							"id", 
+							"username", 
+							"password_hash", 
+							"password_salt", 
+							"icon"
+						],
+						"values": [
+							[
+								userId,
+								user.getUsername(),
+								"DEFAULT_PASSWORD_HASH",
+								"DEFAULT_PASSWORD_SALT",
+								user.getIcon()
+							  ]
+						],
+						"conflictColumns": [
+							"id"
+						],
+						"updateQuery": {
+							"values": {
+								"username": user.getUsername(),
+								"password_hash": "DEFAULT_PASSWORD_HASH",
+								"password_salt": "DEFAULT_PASSWORD_SALT",
+								"icon": user.getIcon()
+							},
+							"conditions": {}
+						},
+						"returnColumns": [
+							"id"
+						]
+					},
+					{
+						"tableName": "levels",
+						"columnsToWrite": [
+							"id", 
+							"owner_uuid", 
+							"owner_uid", 
+							"owner_type", 
+							"total_xp", 
+							"growth_rate"
+						],
+						"values": [
+							[
+								levelInstance.getLevelSystemId(),
+								null,
+								userId,
+								"user",
+								levelInstance.getTotalExp(),
+								levelInstance.getGrowthRate()
+							  ]
+						],
+						"conflictColumns": [
+							"owner_type",
+							"owner_uid"
+						],
+						"updateQuery": {
+							"values": {
+								"total_xp": levelInstance.getTotalExp(),
+								"growth_rate": levelInstance.getGrowthRate()
+							},
+							"conditions": {}
+						},
+						"conflictIndex": "owner_uid",
+						"returnColumns": [
+							"id"
+						]
+					}
+				]
+			};
+			const insert_action_history_values: any = [];
+			actionHistoryInstance.getAllHistories().forEach((history) => {
+				const toInsert = [
+					history.getActionHistoryId(),
+					userId,
+					history.getIdentifier(),
+					history.getQuantity()
+					]
+				insert_action_history_values.push(toInsert);
+			})
+			if (insert_action_history_values.length > 0) {
+				const actionHistoryInsertQuery: any = {
+					"tableName": "action_histories",
+					"columnsToWrite": [
+						"id", "owner", "identifier", "quantity"
+					],
+					"values": insert_action_history_values,
+					"conflictColumns": [
+						"owner",
+						"identifier"
+					],
+					"updateQuery": {
+						"values": {
+							"quantity": {
+								"excluded": true
+							}
+						},
+						"conditions": {}
+					},
+					"returnColumns": [
+						"id"
+					]
+				};
+				payload.queries.push(actionHistoryInsertQuery);
+			}
+			const insert_item_history_values: any = [];
+			itemHistoryInstance.getAllHistories().forEach((history) => {
+				const toInsert = [
+					history.getItemHistoryId(),
+					userId,
+					history.getItemData().id,
+					history.getQuantity()
+					]
+				insert_item_history_values.push(toInsert);
+			})
+			if (insert_item_history_values.length > 0) {
+				const itemHistoryInsertQuery: any = {
+					"tableName": "item_histories",
+					"columnsToWrite": [
+						"id", "owner", "identifier", "quantity"
+					],
+					"values": insert_item_history_values,
+					"conflictColumns": [
+						"owner",
+						"identifier"
+					],
+					"updateQuery": {
+						"values": {
+							"quantity": {
+								"excluded": true
+							}
+						},
+						"conditions": {}
+					},
+					"returnColumns": [
+						"id"
+					]
+				};
+				payload.queries.push(itemHistoryInsertQuery);
+			}
+
+			const insertResult = await invokeLambda('garden-insert', payload);
+			// Check if result is valid
+			if (!insertResult) {
+				throw new Error(`Error executing upsert of user ${userId}`);
+			}
+			const userResult = parseRows<string[]>(insertResult[0]);
+			const levelResult = parseRows<string[]>(insertResult[1]);
+			const actionHistoryResult = insert_action_history_values.length > 0 ? parseRows<string[]>(insertResult[2]) : [];
+			const itemHistoryResult = insert_item_history_values.length > 0 ? parseRows<string[]>(insertResult[insertResult.length - 1]) : [];
+
+			// Check for discrepancies
+			if (userResult.length !== 1) {
+				console.warn(`Expected 1 user to be upserted, but got ${userResult.length}`);
+			}
+			if (levelResult.length !== 1) {
+				console.warn(`Expected 1 level to be upserted, but got ${levelResult.length}`);
+			}
+			if (actionHistoryResult.length !== insert_action_history_values.length) {
+				console.warn(`Expected ${insert_action_history_values.length} action history IDs to be returned, but got ${actionHistoryResult.length}`);
+			}
+			if (itemHistoryResult.length !== insert_item_history_values.length) {
+				console.warn(`Expected ${insert_item_history_values.length} item history IDs to be returned, but got ${itemHistoryResult.length}`);
+			}
+			return true;
+		} catch (error) {
+			console.error('Error upserting user from Lambda:', error);
+			throw error;
+		}
+	} else {
+		const userResult = await userRepository.createOrUpdateUser(user, client);
+		if (!userResult) {
+			throw new Error('There was an error upserting the user');
+		}
+
+		//Create level (relies on user)
+		const levelResult = await levelRepository.createOrUpdateLevelSystem(userResult.id, 'user', user.getLevelSystem(), client);
+		if (!levelResult) {
+			throw new Error('There was an error upserting the level system');
+		}
+
+		// Array to store all promises
+		const allPromises: Promise<void>[] = [];
+
+		// Create action histories
+		const actionHistoryPromises: Promise<void>[] = user.getActionHistory().getAllHistories().map(async (elem) => {
+			const result = await actionHistoryRepository.createOrUpdateActionHistory(elem, user.getUserId(), client);
+			if (!result) {
+				throw new Error(`Error upserting action history for user ${user.getUserId()}`);
+			}
+		});
+		allPromises.push(...actionHistoryPromises);
+
+		// Create item histories
+		const itemHistoryPromises: Promise<void>[] = user.getItemHistory().getAllHistories().map(async (elem) => {
+			const result = await itemHistoryRepository.createOrUpdateItemHistory(elem, user.getUserId(), client);
+			if (!result) {
+				throw new Error(`Error upserting item history for user ${user.getUserId()}`);
 			}
 		});
 		allPromises.push(...itemHistoryPromises);

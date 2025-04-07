@@ -374,6 +374,7 @@
 
 
 TODO:
+Lambda should have a single interact with database function which takes in the action type (insert, update, select, delete) and then calls all queries, so we can use a single transaction and make it atomic
 
 Itemlist is not updating properly again when buying/selling items
 XP is not updating properly when harvesting plants <--------------

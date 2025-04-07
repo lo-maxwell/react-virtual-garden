@@ -215,6 +215,238 @@ export async function createGardenInDatabase(garden: Garden, userId: string, cli
 	}
 }
 
+
+/**
+ * Updates a garden in the database, or creates a new entry if it does not exist.
+ * @param garden
+ * @param userId
+ * @param client
+ */
+ export async function upsertGardenInDatabase(garden: Garden, userId: string, client?: PoolClient): Promise<boolean> {
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+			const flatPlotList = garden.getAllPlots().flat(); // Flattening the 2D array to a 1D array
+			const flatPlacedItemMap: Record<string, PlacedItem> = flatPlotList.reduce((acc: any, plot) => {
+				const placedItem = plot.getItem(); // Assuming getPlacedItem() returns a PlacedItem
+				if (placedItem) {
+					acc[plot.getPlotId()] = placedItem; // Map plot.id to the corresponding placed item
+				}
+				return acc;
+			}, {});
+
+			const payload = {
+				"queries": [
+					{
+						"tableName": "gardens",
+						"columnsToWrite": [
+							"id", 
+							"owner", 
+							"rows", 
+							"columns"
+						],
+						"values": [
+							[
+								garden.getGardenId(),
+								userId,
+								garden.getRows(),
+								garden.getCols()
+							  ]
+						],
+						"conflictColumns": [
+							"id"
+						],
+						"updateQuery": {
+							"values": {
+								"rows": {
+									"excluded": true
+								},
+								"columns": {
+									"excluded": true
+								}
+							},
+							"conditions": {
+								"owner": {
+									"operator": "=",
+									"value": userId
+								}
+							}
+						},
+						"returnColumns": [
+							"id"
+						]
+					}
+				]
+			};
+			const insert_plot_values: any = [];
+			flatPlotList.forEach((plot) => {
+				const position = garden.getPlotPosition(plot);
+				if (!position) {
+					console.warn(`Plot not found in garden`);
+					return;
+				}
+				const toInsert = [
+					plot.getPlotId(),
+					garden.getGardenId(),
+					position[0],
+					position[1],
+					plot.getPlantTime(),
+					plot.getUsesRemaining(),
+					plot.getRandomSeed()
+				]
+				insert_plot_values.push(toInsert);
+			})
+			if (insert_plot_values.length > 0) {
+				const plotInsertQuery: any = {
+					"tableName": "plots",
+					"columnsToWrite": [
+						"id", "owner", "row_index", "col_index", "plant_time", "uses_remaining", "random_seed"
+					],
+					"values": insert_plot_values,
+					"conflictColumns": [
+						"owner",
+						"row_index",
+						"col_index"
+					],
+					"updateQuery": {
+						"values": {
+							"row_index": {
+								"excluded": true
+							},
+							"col_index": {
+								"excluded": true
+							},
+							"plant_time": {
+								"excluded": true
+							},
+							"uses_remaining": {
+								"excluded": true
+							},
+							"random_seed": {
+								"excluded": true
+							}
+						},
+						"conditions": {
+							"owner": {
+								"operator": "=",
+								"value": garden.getGardenId()
+							}
+						}
+					},
+					"returnColumns": [
+						"id"
+					]
+				};
+				payload.queries.push(plotInsertQuery);
+			}
+			const insert_placed_item_values: any = [];
+			Object.entries(flatPlacedItemMap).forEach(([key, placedItem]) => {
+				const toInsert = [
+					placedItem.getPlacedItemId(),
+					key,
+					placedItem.itemData.id,
+					placedItem.getStatus()
+				]
+				insert_placed_item_values.push(toInsert);
+			})
+			if (insert_placed_item_values.length > 0) {
+				const placedItemInsertQuery: any = {
+					"tableName": "placed_items",
+					"columnsToWrite": [
+						"id", "owner", "identifier", "status"
+					],
+					"values": insert_placed_item_values,
+					"conflictColumns": [
+						"owner"
+					],
+					"updateQuery": {
+						"values": {
+							"identifier": {
+								"excluded": true
+							},
+							"status": {
+								"excluded": true
+							}
+						},
+						"conditions": {
+						}
+					},
+					"returnColumns": [
+						"id"
+					]
+				};
+				payload.queries.push(placedItemInsertQuery);
+			}
+
+			const insertResult = await invokeLambda('garden-insert', payload);
+			// Check if result is valid
+			if (!insertResult) {
+				throw new Error(`Error executing upsert of garden ${garden.getGardenId()}`);
+			}
+			const gardenResult = parseRows<string[]>(insertResult[0]);
+			const plotResult = insert_plot_values.length > 0 ? parseRows<string[]>(insertResult[1]) : [];
+			const placedItemResult = insert_placed_item_values.length > 0 ? parseRows<string[]>(insertResult[insertResult.length - 1]) : [];
+
+			// Check for discrepancies
+			if (gardenResult.length !== 1) {
+				console.warn(`Expected 1 garden to be upserted, but got ${gardenResult.length}`);
+			}
+			if (plotResult.length !== insert_plot_values.length) {
+				console.warn(`Expected ${insert_plot_values.length} plot IDs to be returned, but got ${plotResult.length}`);
+			}
+			if (placedItemResult.length !== insert_placed_item_values.length) {
+				console.warn(`Expected ${insert_placed_item_values.length} placed item IDs to be returned, but got ${placedItemResult.length}`);
+			}
+			return true;
+		} catch (error) {
+			console.error('Error upserting garden from Lambda:', error);
+			throw error;
+		}
+	} else {
+		//Create garden
+		const gardenResult = await gardenRepository.createOrUpdateGarden(userId, garden, client);
+		if (!gardenResult) {
+			throw new Error('There was an error upserting the garden');
+		}
+
+		const allPromises: Promise<void>[] = [];
+
+		// Create plots and placed items concurrently
+		for (let i = 0; i < garden.getAllPlots().length; i++) {
+			for (let j = 0; j < garden.getAllPlots()[0].length; j++) {
+				const plot = (garden.getAllPlots())[i][j].clone();
+				if (!plot) {
+					throw new Error(`Could not find plot at row ${i}, col ${j}`);
+				}
+
+				// Chain plot creation with placed item creation
+				const plotAndPlacedItemPromise = plotRepository
+					.createPlot(gardenResult.id, i, j, plot, client)
+					.then((plotResult) => {
+						if (!plotResult) {
+							throw new Error(`Error upserting plot at row ${i}, col ${j}`);
+						}
+
+						// Immediately create placed item after the plot is created
+						const item = plot.getItem();
+						if (!item) {
+							return; // No item to place, so skip
+						}
+
+						return placedItemRepository.createOrUpdatePlacedItem(plotResult.id, item, client).then(() => {});
+					})
+					.catch((error) => {
+						console.error(`Error processing plot or placed item at row ${i}, col ${j}:`, error);
+					});
+
+				allPromises.push(plotAndPlacedItemPromise);
+			}
+		}
+
+		await Promise.allSettled(allPromises);
+		return true;
+	}
+}
+
 /**
  * Attempts to add a row (expand the column size) of the garden
  * @userId the id of the owner of the garden, used for checking level

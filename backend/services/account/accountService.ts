@@ -16,10 +16,10 @@ import { Inventory, InventoryEntity } from "@/models/itemStore/inventory/Invento
 import { Store, StoreEntity } from "@/models/itemStore/store/Store";
 import User from "@/models/user/User";
 import { PoolClient } from "pg";
-import { createGardenInDatabase, getGardenFromDatabase } from "../garden/gardenService";
-import { createInventoryInDatabase, getInventoryFromDatabase } from "../inventory/inventoryService";
-import { createStoreInDatabase, getStoreFromDatabase } from "../store/storeService";
-import { createUserInDatabase, getUserFromDatabase } from "../user/userService";
+import { createGardenInDatabase, getGardenFromDatabase, upsertGardenInDatabase } from "../garden/gardenService";
+import { createInventoryInDatabase, getInventoryFromDatabase, upsertInventoryInDatabase } from "../inventory/inventoryService";
+import { createStoreInDatabase, getStoreFromDatabase, upsertStoreInDatabase } from "../store/storeService";
+import { createUserInDatabase, getUserFromDatabase, upsertUserInDatabase } from "../user/userService";
 import { transactionWrapper } from "../utility/utility";
 
 //Does not need lambda specific
@@ -62,7 +62,6 @@ import { transactionWrapper } from "../utility/utility";
 	return userResult && gardenResult && inventoryResult && storeResult;
 }
 
-//TODO: Use insert ON CONFLICT to createOrUpdate
 /**
  * Begins a transaction if there is not already one. Updates the users, levels, itemstores, inventoryItems (if there are existing items), garden, plots tables.
  * If the object does not already exist with a suitable id, does nothing.
@@ -77,152 +76,12 @@ import { transactionWrapper } from "../utility/utility";
  */
  export async function saveAccountToDatabase(userId: string, user: User, inventory: Inventory, store: Store, garden: Garden, client?: PoolClient): Promise<boolean | null> {
 	//TODO: Make this atomic
-	//Right now create and save are 2 different things, so we can create but not save
-	// await createAccountInDatabase(userId, user, inventory, store, garden, client);
+	const userResult = await upsertUserInDatabase(user, userId, client);
+	const gardenResult = await upsertGardenInDatabase(garden, userId, client);
+	const inventoryResult = await upsertInventoryInDatabase(inventory, userId, client);
+	const storeResult = await upsertStoreInDatabase(store, userId, client);
 
-	const innerFunction = async (client: PoolClient) => {
-		
-		// //Create user
-		const userResult = await userRepository.createOrUpdateUser(user, client);
-		// Check if result is valid
-		if (!userResult) {
-			throw new Error('There was an error updating the user');
-		}
-		
-		//Create level (relies on user)
-		const levelResult = await levelRepository.createOrUpdateLevelSystem(user.getUserId(), 'user', user.getLevelSystem(), client);
-		// Check if result is valid
-		if (!levelResult) {
-			throw new Error('There was an error updating the level system');
-		}
-
-		//Create garden
-		const gardenResult = await gardenRepository.createOrUpdateGarden(user.getUserId(), garden, client);
-		// Check if result is valid
-		if (!gardenResult) {
-			throw new Error('There was an error updating the garden');
-		}
-
-		// Array to store all promises
-		const allPromises: Promise<void>[] = [];
-
-		// Save action histories
-		const actionHistoryPromises: Promise<void>[] = user.getActionHistory().getAllHistories().map(async (elem) => {
-			const result = await actionHistoryRepository.createOrUpdateActionHistory(elem, user.getUserId(), client);
-			if (!result) {
-				throw new Error(`Error saving action history for user ${user.getUserId()}`);
-			}
-		});
-		allPromises.push(...actionHistoryPromises);
-
-		// Save item histories
-		const itemHistoryPromises: Promise<void>[] = user.getItemHistory().getAllHistories().map(async (elem) => {
-			const result = await itemHistoryRepository.createOrUpdateItemHistory(elem, user.getUserId(), client);
-			if (!result) {
-				throw new Error(`Error saving item history for user ${user.getUserId()}`);
-			}
-		});
-		allPromises.push(...itemHistoryPromises);
-
-		// Create plots and placed items concurrently
-		for (let i = 0; i < garden.getAllPlots().length; i++) {
-			for (let j = 0; j < garden.getAllPlots()[0].length; j++) {
-				const plot = (garden.getAllPlots())[i][j].clone();
-				if (!plot) {
-					throw new Error(`Could not find plot at row ${i}, col ${j}`);
-				}
-
-				// Chain plot creation with placed item creation
-				const plotAndPlacedItemPromise = plotRepository
-					.createOrUpdatePlot(gardenResult.id, i, j, plot, client)
-					.then((plotResult) => {
-						if (!plotResult) {
-							throw new Error(`Error updating plot at row ${i}, col ${j}`);
-						}
-
-						// Immediately create placed item after the plot is created
-						const item = plot.getItem();
-						if (!item) {
-							return; // No item to place, so skip
-						}
-
-						// Explicitly return void, since we no longer need this
-						return placedItemRepository.createOrUpdatePlacedItem(plotResult.id, item, client).then(() => {});
-					})
-					.catch((error) => {
-						console.error(`Error processing plot or placed item at row ${i}, col ${j}:`, error);
-					});
-
-				allPromises.push(plotAndPlacedItemPromise);
-			}
-		}
-
-		// Create inventory and inventory items concurrently
-		const inventoryResultPromise = inventoryRepository.createOrUpdateInventory(userResult.id, inventory, client)
-			.then(async (inventoryResult) => {
-				if (!inventoryResult) {
-					throw new Error('There was an error updating the inventory');
-				}
-
-				// Create inventory items
-				const inventoryItemPromises: Promise<void>[] = [];
-				const inventoryItems = inventory.getAllItems();
-				inventoryItems.forEach((item) => {
-					const inventoryItemPromise = inventoryItemRepository.createOrUpdateInventoryItem(inventory.getInventoryId(), item, client)
-						.then((inventoryItemResult) => {
-							if (!inventoryItemResult) {
-								throw new Error(`Error updating inventory item for item ${item.itemData.id}`);
-							}
-						});
-					inventoryItemPromises.push(inventoryItemPromise);
-				});
-
-				// Wait for all inventory item promises to resolve
-				await Promise.allSettled(inventoryItemPromises); // Explicitly return void
-			})
-			.catch((error) => {
-				console.error('Error updating inventory or inventory items:', error);
-			});
-
-		allPromises.push(inventoryResultPromise);
-
-		// Create store and store items concurrently
-		const storeResultPromise = storeRepository.createOrUpdateStore(userResult.id, store, client)
-			.then(async (storeResult) => {
-				if (!storeResult) {
-					throw new Error('There was an error updating the store');
-				}
-
-				// Create store items
-				const storeItemPromises: Promise<void>[] = [];
-				const storeItems = store.getAllItems();
-				storeItems.forEach((item) => {
-					const storeItemPromise = storeItemRepository.createOrUpdateStoreItem(store.getStoreId(), item, client)
-						.then((storeItemResult) => {
-							if (!storeItemResult) {
-								throw new Error(`Error updating store item for item ${item.itemData.id}`);
-							}
-						});
-					storeItemPromises.push(storeItemPromise);
-				});
-
-				// Wait for all store item promises to resolve
-				await Promise.allSettled(storeItemPromises); // Explicitly return void
-			})
-			.catch((error) => {
-				console.error('Error updating store or store items:', error);
-			});
-
-		allPromises.push(storeResultPromise);
-
-		// Wait for all promises to resolve
-		await Promise.allSettled(allPromises);
-		console.log('finished saving account to database');
-		return true;
-	}
-
-	// Call transactionWrapper with inner function and description
-	return transactionWrapper(innerFunction, 'updateAccountInDatabase', client);
+	return userResult && gardenResult && inventoryResult && storeResult;
 }
 
 export interface AccountObjects {

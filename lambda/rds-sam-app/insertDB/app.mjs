@@ -30,7 +30,7 @@ const allowedTables = {
 };
 
 // Define allowed operators
-const allowedUpdateOperators = ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN", "+", "-", "*", "/"];
+const allowedUpdateOperators = ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN", "+", "-", "*", "/", "EXCLUDED"];
 
 
 // Function to construct the update query string and parameters
@@ -40,17 +40,23 @@ const constructUpdateQuery = (tableName, values, conditions, numExistingParams) 
   // Construct the set clause and populate queryParams with values
   const setClause = Object.keys(values).map((key) => {
       // Check if the value is an object with an operator
-      if (typeof values[key] === 'object' && values[key].operator) {
-          // Validate operator
-          if (!allowedUpdateOperators.includes(values[key].operator)) {
-              throw new Error(`Invalid operator: ${values[key].operator}`);
-          }
-          // Use the current value in the database for the calculation
-          queryParams.push(values[key].value);
-          return `${key} =  ${tableName}.${key} ${values[key].operator} $${queryParams.length + numExistingParams}`; // Use parameterized query
+      if (typeof values[key] === 'object' && values[key].operator && values[key].excluded === true) {
+        if (!allowedUpdateOperators.includes(values[key].operator)) {
+          throw new Error(`Invalid operator: ${values[key].operator}`);
+        }
+        queryParams.push(values[key].value);
+        return `${key} = EXCLUDED.${key} ${values[key].operator} $${queryParams.length + numExistingParams}`;
+      } else if (typeof values[key] === 'object' && values[key].operator) {
+        if (!allowedUpdateOperators.includes(values[key].operator)) {
+          throw new Error(`Invalid operator: ${values[key].operator}`);
+        }
+        queryParams.push(values[key].value);
+        return `${key} = ${tableName}.${key} ${values[key].operator} $${queryParams.length + numExistingParams}`; // Use parameterized query
+      } else if (values[key].excluded === true) {
+        return `${key} = EXCLUDED.${key}`;
       } else {
-          queryParams.push(values[key]); // Push the value for the column into queryParams
-          return `${key} = $${queryParams.length + numExistingParams}`; // Use parameterized query
+        queryParams.push(values[key]); // Push the value for the column into queryParams
+        return `${key} = $${queryParams.length + numExistingParams}`; // Use parameterized query
       }
   }).join(', ');
 

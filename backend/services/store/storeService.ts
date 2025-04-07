@@ -141,6 +141,151 @@ import { InventoryEntity } from "@/models/itemStore/inventory/Inventory";
 	}
 }
 
+
+/**
+ * Updates a store into the database, or creates a new entry if it does not exist
+ * @param store
+ * @param userId
+ * @param client
+ */
+ export async function upsertStoreInDatabase(store: Store, userId: string, client?: PoolClient): Promise<boolean> {
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+			const storeItemList = store.getAllItems();
+
+			const payload = {
+				"queries": [
+					{
+						"tableName": "stores",
+						"columnsToWrite": [
+							"id", "owner", "identifier", "last_restock_time_ms"
+						],
+						"values": [
+							[
+								store.getStoreId(),
+								userId,
+								store.getStoreIdentifier(),
+								store.getRestockTime()
+							  ]
+						],
+						"conflictColumns": [
+							"id"
+						],
+						"updateQuery": {
+							"values": {
+								"identifier": store.getStoreIdentifier(),
+								"last_restock_time_ms": store.getRestockTime()
+							},
+							"conditions": {
+								"owner": {
+									"operator": "=",
+									"value": userId
+								}
+							}
+						},
+						"returnColumns": [
+							"id"
+						]
+					}
+				]
+			};
+			const insert_item_values: any = [];
+			storeItemList.forEach((item) => {
+				const toInsert = [
+					item.getInventoryItemId(),
+					store.getStoreId(),
+					item.itemData.id,
+					item.getQuantity()
+				]
+				insert_item_values.push(toInsert);
+			})
+			if (insert_item_values.length > 0) {
+				const storeItemInsertQuery: any = {
+					"tableName": "store_items",
+					"columnsToWrite": [
+						"id", "owner", "identifier", "quantity"
+					],
+					"values": insert_item_values,
+					"conflictColumns": [
+						"owner",
+						"identifier"
+					],
+					"updateQuery": {
+						"values": {
+							"identifier": {
+								"excluded": true
+							},
+							"quantity": {
+								"excluded": true
+							}
+						},
+						"conditions": {}
+					},
+					"returnColumns": [
+						"id"
+					]
+				};
+				payload.queries.push(storeItemInsertQuery);
+			}
+
+			const insertResult = await invokeLambda('garden-insert', payload);
+			// Check if result is valid
+			if (!insertResult) {
+				throw new Error(`Error executing upsert of store ${store.getStoreId()}`);
+			}
+			const storeResult = parseRows<string[]>(insertResult[0]);
+			const storeItemResult = insert_item_values.length > 0 ? parseRows<string[]>(insertResult[1]) : [];
+
+			// Check for discrepancies
+			if (storeResult.length !== 1) {
+				console.warn(`Expected 1 store to be upserted, but got ${storeResult.length}`);
+			}
+			if (storeItemResult.length !== insert_item_values.length) {
+				console.warn(`Expected ${insert_item_values.length} store item ids to be returned, but got ${storeItemResult.length}`);
+			}
+			return true;
+		} catch (error) {
+			console.error('Error upserting store from Lambda:', error);
+			throw error;
+		}
+	} else {
+		// Array to store all promises
+		const allPromises: Promise<void>[] = [];
+
+		// Create store and store items concurrently
+		const storeResultPromise = storeRepository.createOrUpdateStore(userId, store, client)
+			.then(async (storeResult) => {
+				if (!storeResult) {
+					throw new Error('There was an error creating the store');
+				}
+
+				// Create store items
+				const storeItemPromises: Promise<void>[] = [];
+				const storeItems = store.getAllItems();
+				storeItems.forEach((item) => {
+					const storeItemPromise = storeItemRepository.createOrUpdateStoreItem(store.getStoreId(), item, client)
+						.then((storeItemResult) => {
+							if (!storeItemResult) {
+								throw new Error(`Error creating store item for item ${item.itemData.id}`);
+							}
+						});
+					storeItemPromises.push(storeItemPromise);
+				});
+
+				await Promise.allSettled(storeItemPromises);
+			})
+			.catch((error) => {
+				console.error('Error creating store or store items:', error);
+			});
+
+		allPromises.push(storeResultPromise);
+		// Wait for all promises to resolve
+		await Promise.allSettled(allPromises);
+
+		return true;
+	}
+}
+
 //TODO: Make this validate userId/owner ??
 export async function restockStore(storeId: string, userId: string, client?: PoolClient): Promise<boolean> {
 	//might want to fudge the timer a bit to allow for clock discrepancies, ie 1 second
