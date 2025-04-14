@@ -12,9 +12,9 @@ import { useUser } from "@/app/hooks/contexts/UserContext";
 import GardenExpansionTooltip from "./gardenExpansionTooltip";
 import { Garden } from "@/models/garden/Garden";
 import { addColumnAPI, addColumnLocal, addRowAPI, addRowLocal, harvestAllAPI, pickupAllAPI, plantAllAPI, removeColumnAPI, removeColumnLocal, removeRowAPI, removeRowLocal, syncGardenSize, syncUserGardenInventory } from "./gardenFunctions";
-import { Inventory } from "@/models/itemStore/inventory/Inventory";
-import { saveInventory } from "@/utils/localStorage/inventory";
 import { useAccount } from "../hooks/contexts/AccountContext";
+import { useDispatch } from "react-redux";
+import { setAllLevelSystemValues } from "@/store/slices/userLevelSystemSlice";
 
 const GardenComponent = () => {
 	const { inventory, reloadInventory } = useInventory();
@@ -26,6 +26,7 @@ const GardenComponent = () => {
 	const [showExpansionOptions, setShowExpansionOptions] = useState(false);
 	const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
 	const { account, guestMode } = useAccount();
+	const dispatch = useDispatch();
 
 	const [currentTime, setCurrentTime] = useState(Date.now());
 	// const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
@@ -112,25 +113,28 @@ const GardenComponent = () => {
 				}
 			}
 		}
-		
-		// Terminate early before api call
-		if (guestMode || plantedPlotIds.length <= 0 || numPlanted <= 0) {
+
+		//Did not plant, terminate early
+		if (plantedPlotIds.length <= 0 && numPlanted <= 0) {
 			return;
 		}
-
-		//api call
-		setGardenMessage(`Planted ${numPlanted} ${getItemResponse.payload.itemData.name}.`);
-		const apiResult = await plantAllAPI(plantedPlotIds, inventory, selectedItem, user, garden);
-		if (!apiResult) {
-			await syncUserGardenInventory(user, garden, inventory);
-			reloadUser();
-			reloadGarden();
-			reloadInventory();
-			setGardenMessage(`There was an error planting 1 or more seeds! Please refresh the page!`);
-			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
-			// return;
-		}
 		
+		// Terminate early before api call
+		if (!guestMode) {
+			//api call
+			setGardenMessage(`Planted ${numPlanted} ${getItemResponse.payload.itemData.name}.`);
+			const apiResult = await plantAllAPI(plantedPlotIds, inventory, selectedItem, user, garden);
+			if (!apiResult) {
+				await syncUserGardenInventory(user, garden, inventory);
+				reloadUser();
+				reloadGarden();
+				reloadInventory();
+				setGardenMessage(`There was an error planting 1 or more seeds! Please refresh the page!`);
+				setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+				// return;
+			}
+		}
+		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
 	}
 
 	const harvestAll = async () => {
@@ -154,22 +158,27 @@ const GardenComponent = () => {
 
 		setGardenMessage(`Harvested ${numHarvested} plants.`);
 
-		// Terminate early before api call
-		if (guestMode || harvestedPlotIds.length <= 0 || numHarvested <= 0) {
+		//Did not plant, terminate early
+		if (harvestedPlotIds.length <= 0 && numHarvested <= 0) {
 			return;
 		}
 
-		//api call
-		const apiResult = await harvestAllAPI(harvestedPlotIds, inventory, user, garden, instantGrow);
-		if (!apiResult) {
-			await syncUserGardenInventory(user, garden, inventory);
-			reloadUser();
-			reloadGarden();
-			reloadInventory();
-			setGardenMessage(`There was an error harvesting 1 or more plants! Please refresh the page!`);
-			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
-			
+		// Terminate early before api call
+		if (!guestMode) {
+			//api call
+			const apiResult = await harvestAllAPI(harvestedPlotIds, inventory, user, garden, instantGrow);
+			if (!apiResult) {
+				await syncUserGardenInventory(user, garden, inventory);
+				reloadUser();
+				reloadGarden();
+				reloadInventory();
+				setGardenMessage(`There was an error harvesting 1 or more plants! Please refresh the page!`);
+				setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+				
+			}
 		}
+		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
+
 	}
 
 	const pickupAll = async () => {
@@ -193,21 +202,24 @@ const GardenComponent = () => {
 
 		setGardenMessage(`Picked up ${numDecorations} decorations.`);
 
-		// Terminate early before api call
-		if (guestMode || pickupPlotIds.length <= 0 || numDecorations <= 0) {
+		if (pickupPlotIds.length <= 0 || numDecorations <= 0) {
 			return;
 		}
 
-		//api call
-		const apiResult = await pickupAllAPI(pickupPlotIds, inventory, user, garden);
-		if (!apiResult) {
-			await syncUserGardenInventory(user, garden, inventory);
-			reloadUser();
-			reloadGarden();
-			reloadInventory();
-			setGardenMessage(`There was an error picking up 1 or more decorations! Please refresh the page!`);
-			setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+		// Terminate early before api call
+		if (!guestMode) {
+			//api call
+			const apiResult = await pickupAllAPI(pickupPlotIds, inventory, user, garden);
+			if (!apiResult) {
+				await syncUserGardenInventory(user, garden, inventory);
+				reloadUser();
+				reloadGarden();
+				reloadInventory();
+				setGardenMessage(`There was an error picking up 1 or more decorations! Please refresh the page!`);
+				setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+			}
 		}
+
 	}
 
 
@@ -231,7 +243,8 @@ const GardenComponent = () => {
 				// removeColumnLocal(garden);
 			}
 		}
-		
+		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
+
 	}
 
 	async function addRow() {
