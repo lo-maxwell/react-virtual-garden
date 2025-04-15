@@ -1,3 +1,17 @@
+
+DELETE FROM placed_items;
+DELETE FROM action_histories;
+DELETE FROM item_histories;
+DELETE FROM icons;
+DELETE FROM inventory_items;
+DELETE FROM store_items;
+DELETE FROM inventories;
+DELETE FROM stores;
+DELETE FROM levels;
+DELETE FROM plots;
+DELETE FROM gardens;
+DELETE FROM users;
+
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS icons CASCADE;
 DROP TABLE IF EXISTS inventories CASCADE;
