@@ -21,6 +21,5 @@ export async function checkRateLimit(ip: string, buffer: number) {
 
 	// Update the stored timestamps
 	rateLimit.set(ip, updatedTimestamps);
-    console.log('updated rate limiter map for ip ' + ip);
 	return true; // Within limit
 }
