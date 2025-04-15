@@ -1,6 +1,8 @@
 import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
+import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { InventoryItem, InventoryItemEntity } from "@/models/items/inventoryItems/InventoryItem";
+import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
 import { ItemList } from "@/models/itemStore/ItemList";
@@ -40,13 +42,15 @@ class InventoryItemRepository {
 
 		const itemData = placeholderItemTemplates.getInventoryTemplate(inventoryItemEntity.identifier);
 		if (!itemData) {
-			throw new Error(`Could not find inventoryItem matching id ${inventoryItemEntity.identifier}`)
+			console.warn(`Could not find inventoryItem matching id ${inventoryItemEntity.identifier}`)
+			return new HarvestedItem(inventoryItemEntity.id, HarvestedItemTemplate.getErrorTemplate(), 0);
 		}
 		const itemClass = getItemClassFromSubtype(itemData);
 
 		const instance = new itemClass(inventoryItemEntity.id, itemData, inventoryItemEntity.quantity);
 		if (!(instance instanceof InventoryItem)) {
-			throw new Error(`Attempted to create non InventoryItem for id ${inventoryItemEntity.identifier}`);
+			console.warn(`Attempted to create non InventoryItem for id ${inventoryItemEntity.identifier}`);
+			return new HarvestedItem(inventoryItemEntity.id, HarvestedItemTemplate.getErrorTemplate(), 0);
 		}
 		return instance;
 	}

@@ -1,6 +1,8 @@
 import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
+import { EmptyItem } from "@/models/items/placedItems/EmptyItem";
 import { PlacedItemEntity, PlacedItem } from "@/models/items/placedItems/PlacedItem";
+import { EmptyItemTemplate } from "@/models/items/templates/models/EmptyItemTemplate";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
 import { assert } from "console";
@@ -25,13 +27,15 @@ class PlacedItemRepository {
 
 		const itemData = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier);
 		if (!itemData) {
-			throw new Error(`Could not find placedItem matching id ${placedItemEntity.identifier}`)
+			console.warn(`Could not find placedItem matching id ${placedItemEntity.identifier}`)
+			return new EmptyItem(placedItemEntity.id, EmptyItemTemplate.getErrorTemplate(), 'CRITICAL ERROR');
 		}
 		const itemClass = getItemClassFromSubtype(itemData);
 
 		const instance = new itemClass(placedItemEntity.id, itemData, placedItemEntity.status);
 		if (!(instance instanceof PlacedItem)) {
-			throw new Error(`Attempted to create non PlacedItem for id ${placedItemEntity.identifier}`);
+			console.warn(`Attempted to create non PlacedItem for id ${placedItemEntity.identifier}`);
+			return new EmptyItem(placedItemEntity.id, EmptyItemTemplate.getErrorTemplate(), 'CRITICAL ERROR');
 		}
 		return instance;
 	}

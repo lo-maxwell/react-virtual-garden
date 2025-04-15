@@ -482,7 +482,6 @@ export async function updateUserUsername(userId: string, newUsername: string): P
 			if (!userResult) {
 				throw new Error(`Could not find user for id ${userId}`);
 			}
-			console.log(userResult);
 			const userEntityResult = parseRows<UserEntity[]>(userResult[0])[0];
 			assert(userRepository.validateUserEntity(userEntityResult));
 			return userEntityResult;
