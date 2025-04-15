@@ -34,8 +34,8 @@ const LoginPage: React.FC = () => {
         console.log('result:');
         console.log(result);
         if (!result) {
-            console.error(`Could not find result of fetchAccountObjects!`);
-			return;
+          console.error(`Could not find result of fetchAccountObjects!`);
+			    return;
         }
 
         saveUser(User.fromPlainObject(result.plainUserObject));

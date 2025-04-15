@@ -103,6 +103,7 @@ export const fetchAccountObjects = async () => {
     try {
         const apiRoute = `/api/auth/getAccountObjects`;
         const result = await makeApiRequest('GET', apiRoute, {}, true);
+        console.log(result);
         return result;
     } catch (error) {
         console.error("Error calling API to fetch objects:", error);

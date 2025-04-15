@@ -16,12 +16,16 @@ import { useInventory } from '../hooks/contexts/InventoryContext';
 import { useGarden } from '../hooks/contexts/GardenContext';
 import { useStore } from '../hooks/contexts/StoreContext';
 import { useAccount } from '../hooks/contexts/AccountContext';
+import AuthLogoutComponent from './authLogoutComponent';
+import AuthLoginComponent from './authLoginComponent';
+import AuthCreateAccountComponent from './authCreateAccountComponent';
 
 const AuthComponent: React.FC = () => {
     const { firebaseUser, loading, logout } = useAuth(); // Access user and loading state
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [message, setMessage] = useState<string>('');
+    const [displayLogin, setDisplayLogin] = useState<boolean>(true);
     const { user, reloadUser, resetUser } = useUser();
     const { inventory, reloadInventory, resetInventory } = useInventory();
     const { store, reloadStore, resetStore } = useStore();
@@ -123,6 +127,14 @@ const AuthComponent: React.FC = () => {
         setMessage("Entered guest mode. Local data will be deleted upon registration or login.");
     }
 
+    const toggleDisplayLogin = (newValue: boolean | null = null) => {
+        if (typeof newValue == "boolean" && displayLogin !== newValue) {
+            setDisplayLogin(newValue);
+        } else {
+            setDisplayLogin(displayLogin => !displayLogin);
+        }
+    }
+
     if (loading) {
         return <p>Loading...</p>; // Show a loading message while checking auth state
     }
@@ -132,43 +144,30 @@ const AuthComponent: React.FC = () => {
             <div className="bg-white p-8 rounded-lg shadow-md w-96">
                 <h2 className="text-2xl font-bold mb-4 text-center">Sign in to Virtual Garden</h2>
                 {firebaseUser ? (
-                    <div>
-                        <p className="text-center">Welcome, {firebaseUser.email}</p> {/* Display user's email */}
-                        <button onClick={handleLogout} className="bg-red-500 text-white p-2 rounded w-full hover:bg-red-600">
-                            Logout
-                        </button>
-                    </div>
+                    <AuthLogoutComponent></AuthLogoutComponent>
                 ) : (
                     <>
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="border border-gray-300 p-2 mb-4 w-full rounded"
-                        />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="border border-gray-300 p-2 mb-4 w-full rounded"
-                        />
-                        <button onClick={handleRegister} className="bg-blue-500 text-white p-2 rounded w-full mb-2 hover:bg-blue-600">
-                            Register
-                        </button>
-                        <button onClick={handleLogin} className="bg-green-500 text-white p-2 rounded w-full mb-2 hover:bg-green-600">
+                    <div className="flex justify-center space-x-4 mb-2"> {/* Added mb-2 for vertical gap */}
+                        <button 
+                            onClick={() => toggleDisplayLogin(true)} 
+                            className={`w-32 px-4 py-2 rounded border border-gray-400 ${displayLogin ? 'bg-green-500 text-white cursor-default' : 'bg-white'}`} // Tailwind classes for styling
+                        >
                             Login
                         </button>
-                        <button onClick={handleGoogleLogin} className="bg-yellow-500 text-white p-2 rounded w-full mb-2 hover:bg-yellow-600">
-                            Login with Google
+                        <button 
+                            onClick={() => toggleDisplayLogin(false)} 
+                            className={`w-32 px-4 py-2 rounded border border-gray-400 ${!displayLogin ? 'bg-blue-500 text-white cursor-default' : 'bg-white'}`} // Tailwind classes for styling
+                        >
+                            Register
                         </button>
-                        <button onClick={enterGuestMode} className="bg-red-500 text-white p-2 rounded w-full hover:bg-red-600">
-                            {guestMode ? 'Guest Mode is currently On' : 'Enter as Guest'}
-                        </button>
+                    </div>
+                    {displayLogin ? (
+                        <AuthLoginComponent></AuthLoginComponent>
+                    ) : (
+                        <AuthCreateAccountComponent></AuthCreateAccountComponent>
+                    )}
                     </>
                 )}
-                {message && <p className="mt-4 text-center text-red-500">{message}</p>}
             </div>
         </div>
     );
