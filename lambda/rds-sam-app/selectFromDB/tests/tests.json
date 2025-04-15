@@ -10,7 +10,7 @@
 		"conditions": {
 		  "id": {
 			"operator": "=",
-			"value": "h4uFpare3CcqrUZszhvzOLSys7b2"
+			"value": "WCUPrS1UUOR7dlEZNhjJVHajsvG2"
 		  }
 		},
 		"limit": 10
@@ -25,7 +25,7 @@
 		"conditions": {
 		  "owner": {
 			"operator": "=",
-			"value": "h4uFpare3CcqrUZszhvzOLSys7b2"
+			"value": "WCUPrS1UUOR7dlEZNhjJVHajsvG2"
 		  }
 		},
 		"limit": 10
@@ -41,7 +41,7 @@
 		"conditions": {
 		  "owner": {
 			"operator": "=",
-			"value": "b92a9fa2-cb50-4826-bb54-a89af434df78"
+			"value": "113e603e-be15-4c3c-a4db-f96ea74e02ca"
 		  },
 		  "quantity": {
 			"operator": ">=",

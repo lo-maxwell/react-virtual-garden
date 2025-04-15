@@ -10,7 +10,7 @@
             "conditions": {
                 "id": {
                     "operator": "=",
-                    "value": "h4uFpare3CcqrUZszhvzOLSys7b2"
+                    "value": "WCUPrS1UUOR7dlEZNhjJVHajsvG2"
                 }
             }
         },
@@ -23,7 +23,25 @@
             "conditions": {
                 "owner": {
                     "operator": "=",
-                    "value": "h4uFpare3CcqrUZszhvzOLSys7b2"
+                    "value": "WCUPrS1UUOR7dlEZNhjJVHajsvG2"
+                }
+            }
+        }
+    ]
+}
+
+{
+    "queries": [
+        {
+            "tableName": "inventory_items",
+            "values": {
+                "quantity": 999
+            },
+            "returnColumns": ["id", "owner", "identifier", "quantity"],
+            "conditions": {
+                "owner": {
+                    "operator": "=",
+                    "value": "113e603e-be15-4c3c-a4db-f96ea74e02ca"
                 }
             }
         }

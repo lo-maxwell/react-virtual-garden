@@ -30,7 +30,7 @@ const allowedTables = {
 };
 
 // Define allowed operators
-const allowedUpdateOperators = ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN", "+", "-", "*", "/", "EXCLUDED"];
+const allowedUpdateOperators = ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN", "+", "-", "*", "/"];
 
 
 // Function to construct the update query string and parameters
