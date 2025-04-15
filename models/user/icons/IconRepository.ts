@@ -9,7 +9,6 @@ class IconFactory {
 	}
 
 	loadItems() {
-		// console.log(iconData);
 		// Example to load PlacedItems > Plants
 		this.Icons['Plants'] = iconData.Icons.Plants.map((iconObject: any) =>
 		  {return new Icon(iconObject.name, iconObject.icon);}
@@ -20,7 +19,6 @@ class IconFactory {
 		// this.Icons['Error'] = iconData.Icons.Error.map((iconObject: any) =>
 		//   {return new Icon(iconObject.name, iconObject.icon);}
 		// );
-		// console.log(this.Icons);
 	  }
 
 	getIconCategories() {
