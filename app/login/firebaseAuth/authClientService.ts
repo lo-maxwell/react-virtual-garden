@@ -1,7 +1,7 @@
 // authClientService.ts
 import { makeApiRequest } from "@/utils/api/api";
 import { auth } from "@/utils/firebase/firebaseConfig";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, UserCredential, GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, getIdTokenResult } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, UserCredential, GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo, getIdTokenResult, sendPasswordResetEmail, confirmPasswordReset } from "firebase/auth";
 
 
 export const registerUser = async (email: string, password: string): Promise<UserCredential> => {
@@ -39,7 +39,6 @@ export const logoutUser = async (): Promise<void> => {
     }
     try {
         await signOut(auth);
-        console.log("User signed out successfully.");
     } catch (error) {
         console.error("Error signing out:", error);
         throw error; // Rethrow the error for handling in the UI
@@ -65,6 +64,32 @@ export const loginWithGoogle = async (): Promise<UserCredential> => {
         throw error; // Rethrow the error for handling in the UI
     }
 };
+
+export const sendResetPassword = async (email: string): Promise<void> => {
+    if (!auth) {
+        throw new Error("Firebase auth is not initialized.");
+    }
+    
+    try {
+        await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+        console.error("Error sending password reset email:", error);
+        throw error; // Rethrow the error for handling in the UI
+    }
+}
+
+export const resetPasswordFromCode = async (resetToken: string, newPassword: string): Promise<void> => {
+    if (!auth) {
+        throw new Error("Firebase auth is not initialized.");
+    }
+    
+    try {
+        await confirmPasswordReset(auth, resetToken, newPassword);
+    } catch (error) {
+        console.error("Error resetting password:", error);
+        throw error; // Rethrow the error for handling in the UI
+    }
+}
 
 const createDefaultNewAccount = async (idToken: string): Promise<string> => {
     try {

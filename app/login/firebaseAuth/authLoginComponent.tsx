@@ -1,8 +1,7 @@
 // AuthLoginComponent.tsx
 import React, { useContext, useEffect, useState } from 'react';
  // Import the AuthContext
-import { registerUser, loginUser, logoutUser, loginWithGoogle, getUserCustomClaims, fetchAccountObjects } from './authClientService';
-import { useAuth } from '../hooks/contexts/AuthContext';
+import { registerUser, loginUser, logoutUser, loginWithGoogle, getUserCustomClaims, fetchAccountObjects, sendResetPassword } from './authClientService';
 import { Garden } from '@/models/garden/Garden';
 import { Inventory } from '@/models/itemStore/inventory/Inventory';
 import { Store } from '@/models/itemStore/store/Store';
@@ -11,11 +10,11 @@ import { saveGarden } from '@/utils/localStorage/garden';
 import { saveInventory } from '@/utils/localStorage/inventory';
 import { saveStore } from '@/utils/localStorage/store';
 import { saveUser } from '@/utils/localStorage/user';
-import { useUser } from '../hooks/contexts/UserContext';
-import { useInventory } from '../hooks/contexts/InventoryContext';
-import { useGarden } from '../hooks/contexts/GardenContext';
-import { useStore } from '../hooks/contexts/StoreContext';
-import { useAccount } from '../hooks/contexts/AccountContext';
+import { useAccount } from '@/app/hooks/contexts/AccountContext';
+import { useGarden } from '@/app/hooks/contexts/GardenContext';
+import { useInventory } from '@/app/hooks/contexts/InventoryContext';
+import { useUser } from '@/app/hooks/contexts/UserContext';
+import { useStore } from '@/app/hooks/contexts/StoreContext';
 
 const AuthLoginComponent: React.FC = () => {
     const [email, setEmail] = useState<string>('');
@@ -26,7 +25,8 @@ const AuthLoginComponent: React.FC = () => {
     const { reloadStore, resetStore } = useStore();
     const { reloadGarden, resetGarden } = useGarden();
     const { guestMode, setGuestMode } = useAccount();
-    const allowFirebase = process.env.NEXT_PUBLIC_TEST_ENV_KEY;
+    const [allowPasswordReset, setAllowPasswordReset] = useState<boolean>(true);
+    // const allowFirebase = process.env.NEXT_PUBLIC_TEST_ENV_KEY;
 
     const syncAccountObjects = async () => {
         const result = await fetchAccountObjects();
@@ -45,10 +45,10 @@ const AuthLoginComponent: React.FC = () => {
     }
 
     const handleLogin = async () => {
-        if (allowFirebase !== 'this is the local environment') {
-            setMessage(`Error: Firebase login is disabled at this time. Please use guest mode instead.`);
-            return;
-        }
+        // if (allowFirebase !== 'this is the local environment') {
+        //     setMessage(`Error: Firebase login is disabled at this time. Please use guest mode instead.`);
+        //     return;
+        // }
         setMessage(``);
         try {
             const userCredential = await loginUser(email, password);
@@ -61,10 +61,10 @@ const AuthLoginComponent: React.FC = () => {
     };
 
     const handleGoogleLogin = async () => {
-        if (allowFirebase !== 'this is the local environment') {
-            setMessage(`Error: Firebase login is disabled at this time. Please use guest mode instead.`);
-            return;
-        }
+        // if (allowFirebase !== 'this is the local environment') {
+        //     setMessage(`Error: Firebase login is disabled at this time. Please use guest mode instead.`);
+        //     return;
+        // }
         setMessage(``);
         try {
             const userCredential = await loginWithGoogle();
@@ -75,6 +75,24 @@ const AuthLoginComponent: React.FC = () => {
             setMessage("Google login failed. Please try again.");
         }
     };
+
+	const handleSendPasswordReset = async () => {
+        // if (allowFirebase !== 'this is the local environment') {
+        //     setMessage(`Error: Firebase login is disabled at this time. Please use guest mode instead.`);
+        //     return;
+        // }
+        setMessage(``);
+        try {
+            await sendResetPassword(email);
+            setAllowPasswordReset(false);
+            setTimeout(() => {
+                setAllowPasswordReset(true);
+              }, 10000);              
+            setMessage(`Sent password reset email to ${email}.`)
+        } catch (error) {
+            setMessage("Failed to send password reset email. Please try again.");
+        }
+	}
 
     const enterGuestMode = () => {
         if (guestMode) {
@@ -110,6 +128,13 @@ const AuthLoginComponent: React.FC = () => {
 			</button>
 			<button onClick={handleGoogleLogin} className="bg-yellow-500 text-white p-2 rounded w-full mb-2 hover:bg-yellow-600">
 				Login with Google
+			</button>
+			<button 
+				onClick={handleSendPasswordReset} 
+				disabled={!allowPasswordReset} 
+				className={`bg-orange-500 text-white p-2 rounded w-full mb-2 ${!allowPasswordReset ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-yellow-600'}`}
+			>
+				Forgot Password
 			</button>
 			<button onClick={enterGuestMode} className="bg-red-500 text-white p-2 rounded w-full hover:bg-red-600">
 				{guestMode ? 'Guest Mode is currently On' : 'Enter as Guest'}

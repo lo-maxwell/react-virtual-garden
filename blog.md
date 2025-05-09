@@ -371,9 +371,17 @@
     * Disabled clicking button while syncing in progress, and gave indication that function is running
     * Needs to give some progress/success/failure indication, maybe make a notification system?
 
-
+Guest mode: Should have a level/xp/money etc cap, and some warnings that guest mode is local only; allow users to port their guest mode account into an online account (with the cap)
 
 TODO:
+SQS queue for rate limiting between backend and lambda?
+Fix login screen, allow creation in a different user flow, allow resetting password
+Fix guest mode banners
+Rate limit on aws
+Rate limit on backend api
+
+New password reset landing page
+
 Lambda should have a single interact with database function which takes in the action type (insert, update, select, delete) and then calls all queries, so we can use a single transaction and make it atomic
 
 Itemlist is not updating properly again when buying/selling items

@@ -1,8 +1,10 @@
 // AuthComponent.tsx
-import React, { useContext, useEffect, useState } from 'react';
- // Import the AuthContext
-import { registerUser, loginUser, logoutUser, loginWithGoogle, getUserCustomClaims, fetchAccountObjects } from './authClientService';
-import { useAuth } from '../hooks/contexts/AuthContext';
+import { useAccount } from '@/app/hooks/contexts/AccountContext';
+import { useAuth } from '@/app/hooks/contexts/AuthContext';
+import { useGarden } from '@/app/hooks/contexts/GardenContext';
+import { useInventory } from '@/app/hooks/contexts/InventoryContext';
+import { useStore } from '@/app/hooks/contexts/StoreContext';
+import { useUser } from '@/app/hooks/contexts/UserContext';
 import { Garden } from '@/models/garden/Garden';
 import { Inventory } from '@/models/itemStore/inventory/Inventory';
 import { Store } from '@/models/itemStore/store/Store';
@@ -11,23 +13,22 @@ import { saveGarden } from '@/utils/localStorage/garden';
 import { saveInventory } from '@/utils/localStorage/inventory';
 import { saveStore } from '@/utils/localStorage/store';
 import { saveUser } from '@/utils/localStorage/user';
-import { useUser } from '../hooks/contexts/UserContext';
-import { useInventory } from '../hooks/contexts/InventoryContext';
-import { useGarden } from '../hooks/contexts/GardenContext';
-import { useStore } from '../hooks/contexts/StoreContext';
-import { useAccount } from '../hooks/contexts/AccountContext';
+import React, { useContext, useEffect, useState } from 'react';
+ // Import the AuthContext
+import { registerUser, loginUser, logoutUser, loginWithGoogle, getUserCustomClaims, fetchAccountObjects } from './authClientService';
 
 const AuthCreateAccountComponent: React.FC = () => {
     const { firebaseUser, loading, logout } = useAuth(); // Access user and loading state
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [confirmedPassword, setConfirmedPassword] = useState<string>('');
     const [message, setMessage] = useState<string>('');
     const { user, reloadUser, resetUser } = useUser();
     const { inventory, reloadInventory, resetInventory } = useInventory();
     const { store, reloadStore, resetStore } = useStore();
     const { garden, reloadGarden, resetGarden } = useGarden();
     const { account, guestMode, setGuestMode } = useAccount();
-    const allowFirebase = process.env.NEXT_PUBLIC_TEST_ENV_KEY;
+    // const allowFirebase = process.env.NEXT_PUBLIC_TEST_ENV_KEY;
 
     const syncAccountObjects = async () => {
         const result = await fetchAccountObjects();
@@ -45,12 +46,44 @@ const AuthCreateAccountComponent: React.FC = () => {
         reloadStore();
     }
 
+    // ... existing code ...
     const handleRegister = async () => {
-        if (allowFirebase !== 'this is the local environment') {
-            setMessage(`Error: Firebase registration is disabled at this time. Please use guest mode instead.`);
+        // if (allowFirebase !== 'this is the local environment') {
+        //     setMessage(`Error: Firebase registration is disabled at this time. Please use guest mode instead.`);
+        //     return;
+        // }
+        setMessage(``);
+        if (password !== confirmedPassword) {
+            setMessage("Passwords do not match!");
             return;
         }
-        setMessage(``);
+
+        // Password validation
+        const minLength = 10;
+        const maxLength = 4096;
+        let validationMessages = [];
+
+        if (password.length < minLength) {
+            validationMessages.push(`Password must be at least ${minLength} characters long.`);
+        }
+        if (password.length > maxLength) {
+            validationMessages.push(`Password must be at most ${maxLength} characters long.`);
+        }
+        if (!/[a-z]/.test(password)) {
+            validationMessages.push("Password must contain at least one lowercase letter.");
+        }
+        if (!/[A-Z]/.test(password)) {
+            validationMessages.push("Password must contain at least one uppercase letter.");
+        }
+        if (!/\d/.test(password)) {
+            validationMessages.push("Password must contain at least one number.");
+        }
+
+        if (validationMessages.length > 0) {
+            setMessage(validationMessages.join(" "));
+            return;
+        }
+
         try {
             const userCredential = await registerUser(email, password);
             setMessage(`User registered: ${userCredential.user.email}`);
@@ -62,10 +95,10 @@ const AuthCreateAccountComponent: React.FC = () => {
     };
 
     const handleGoogleLogin = async () => {
-        if (allowFirebase !== 'this is the local environment') {
-            setMessage(`Error: Firebase login is disabled at this time. Please use guest mode instead.`);
-            return;
-        }
+        // if (allowFirebase !== 'this is the local environment') {
+        //     setMessage(`Error: Firebase login is disabled at this time. Please use guest mode instead.`);
+        //     return;
+        // }
         setMessage(``);
         try {
             const userCredential = await loginWithGoogle();
@@ -94,8 +127,15 @@ const AuthCreateAccountComponent: React.FC = () => {
 				onChange={(e) => setPassword((e.target as HTMLInputElement).value)}
 				className="border border-gray-300 p-2 mb-4 w-full rounded"
 			/>
+			<input
+				type="password"
+				placeholder="Confirm Password"
+				value={confirmedPassword}
+				onChange={(e) => setConfirmedPassword((e.target as HTMLInputElement).value)}
+				className="border border-gray-300 p-2 mb-4 w-full rounded"
+			/>
 			<button onClick={handleRegister} className="bg-blue-500 text-white p-2 rounded w-full mb-2 hover:bg-blue-600">
-				Register
+				Create Account
 			</button>
 			<button onClick={handleGoogleLogin} className="bg-yellow-500 text-white p-2 rounded w-full mb-2 hover:bg-yellow-600">
 				Create Account with Google
