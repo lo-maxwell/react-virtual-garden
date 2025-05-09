@@ -14,9 +14,9 @@ import { useGarden } from '../hooks/contexts/GardenContext';
 import { useInventory } from '../hooks/contexts/InventoryContext';
 import { useStore } from '../hooks/contexts/StoreContext';
 import { useUser } from '../hooks/contexts/UserContext';
-import { fetchAccountObjects } from '../login/authClientService';
 import { useDispatch } from 'react-redux';
 import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
+import { fetchAccountObjects } from '../login/firebaseAuth/authClientService';
 
 const LoginPage: React.FC = () => {
 

@@ -14,8 +14,8 @@ import { saveInventory } from '@/utils/localStorage/inventory';
 import { saveStore } from '@/utils/localStorage/store';
 import { saveUser } from '@/utils/localStorage/user';
 import React, { useContext, useEffect, useState } from 'react';
+import { fetchAccountObjects, loginWithGoogle, registerUser } from './authClientService';
  // Import the AuthContext
-import { registerUser, loginUser, logoutUser, loginWithGoogle, getUserCustomClaims, fetchAccountObjects } from './authClientService';
 
 const AuthCreateAccountComponent: React.FC = () => {
     const { firebaseUser, loading, logout } = useAuth(); // Access user and loading state

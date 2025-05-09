@@ -130,7 +130,7 @@ const GardenComponent = () => {
 				reloadGarden();
 				reloadInventory();
 				setGardenMessage(`There was an error planting 1 or more seeds! Please refresh the page!`);
-				setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+				// setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 				// return;
 			}
 		}
@@ -173,7 +173,7 @@ const GardenComponent = () => {
 				reloadGarden();
 				reloadInventory();
 				setGardenMessage(`There was an error harvesting 1 or more plants! Please refresh the page!`);
-				setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+				// setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 				
 			}
 		}
@@ -216,7 +216,7 @@ const GardenComponent = () => {
 				reloadGarden();
 				reloadInventory();
 				setGardenMessage(`There was an error picking up 1 or more decorations! Please refresh the page!`);
-				setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+				// setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			}
 		}
 
