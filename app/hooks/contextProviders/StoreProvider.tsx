@@ -2,17 +2,11 @@
 import { useAccount } from '@/app/hooks/contexts/AccountContext';
 import { StoreContext } from '@/app/hooks/contexts/StoreContext';
 import { useUser } from '@/app/hooks/contexts/UserContext';
-import { generateNewPlaceholderInventoryItem } from '@/models/items/PlaceholderItems';
-import { InventoryTransactionResponse } from '@/models/itemStore/inventory/InventoryTransactionResponse';
-import { ItemList } from '@/models/itemStore/ItemList';
-import { stocklistFactory } from '@/models/itemStore/store/StocklistFactory';
 import { Store } from '@/models/itemStore/store/Store';
-import { storeFactory } from '@/models/itemStore/store/StoreFactory';
 import User from '@/models/user/User';
 import { makeApiRequest } from '@/utils/api/api';
 import { loadStore, saveStore } from '@/utils/localStorage/store';
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
 // Define props for the provider
 interface StoreProviderProps {
