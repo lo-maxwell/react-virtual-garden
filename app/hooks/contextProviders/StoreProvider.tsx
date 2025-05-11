@@ -54,6 +54,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 			const result = await makeApiRequest('PATCH', apiRoute, data, true);
 			console.log('Successfully restocked store:', result);
 			if (result === false) return "NOT TIME";
+			return true;
 		  } catch (error) {
 			console.error(error);
 			return "ERROR";
@@ -88,12 +89,13 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 				syncStore(user, store);
 				return "NOT TIME";
 			}
+			console.log(apiResult);
 		}
 		return "SUCCESS";
     };
 
 	const restockTimeout = useRef<number | null>(null);
-	const updateRestockTimer = useCallback(() => {
+	const updateRestockTimer = useCallback(async () => {
 		if (!store) return;
 		if (restockTimeout.current) return; //do not interrupt existing timeouts
 		const currentTime = Date.now();
@@ -103,7 +105,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 			const newRestockTime = currentTime + store.getRestockInterval();
 			store.setRestockTime(newRestockTime);
 			// Set a new timeout to trigger restock after the interval
-			const remainingTime = newRestockTime - currentTime;
+			const remainingTime = Math.max(1, newRestockTime - currentTime);
 			restockTimeout.current = window.setTimeout(async () => {
 				const restockResult = await restockStore();
 				restockTimeout.current = null;
@@ -112,9 +114,14 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 				}
 				
 			}, remainingTime);
+			
+			// const restockResult = await restockStore();
+			// if (restockResult === "NOT TIME") {
+			// 	updateRestockTimer()
+			// }
 		} else if (store.needsRestock()) {
 			 // Set a timeout for the remaining time until the next restock
-			const remainingTime = store.getRestockTime() - currentTime;
+			const remainingTime = Math.max(1, store.getRestockTime() - currentTime);
 			restockTimeout.current = window.setTimeout(async () => {
 				const restockResult = await restockStore();
 				restockTimeout.current = null;

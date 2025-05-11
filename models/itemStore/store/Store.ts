@@ -8,6 +8,7 @@ import { storeFactory } from "./StoreFactory";
 import { v4 as uuidv4 } from 'uuid';
 import { stocklistFactory } from "./StocklistFactory";
 import { DataRouterContext } from "react-router/dist/lib/context";
+import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 
 export interface StoreEntity {
 	id: string,
@@ -302,10 +303,15 @@ export class Store extends ItemStore {
 			return response;
 		}
 		//add item to inventory and remove gold
-		const buyItemResponse = inventory.buyItem(toBuy, this.buyMultiplier, quantity);
+		const buyItemTemplate = placeholderItemTemplates.getInventoryTemplate(toBuy.itemData.id);
+		if (!buyItemTemplate) {
+			response.addErrorMessage(`Invalid item: cannot find inventoryItem from id ${toBuy.itemData.id}`);
+			return response;
+		}
+		const buyItemResponse = inventory.buyItem(buyItemTemplate, this.buyMultiplier, quantity);
 		if (!buyItemResponse.isSuccessful()) return buyItemResponse;
 		//remove item from store inventory
-		const decreaseStockResponse = this.trashItem(toBuy, quantity);
+		const decreaseStockResponse = this.trashItem(buyItemTemplate, quantity);
 		if (!decreaseStockResponse.isSuccessful()) return decreaseStockResponse;
 		//format payload
 		response.payload = {
@@ -342,10 +348,15 @@ export class Store extends ItemStore {
 			return response;
 		}
 		//remove item from inventory and add gold
-		const sellItemResponse = inventory.sellItem(toSell, this.sellMultiplier, quantity);
+		const sellItemTemplate = placeholderItemTemplates.getInventoryTemplate(toSell.itemData.id);
+		if (!sellItemTemplate) {
+			response.addErrorMessage(`Invalid item: cannot find inventoryItem from id ${toSell.itemData.id}`);
+			return response;
+		}
+		const sellItemResponse = inventory.sellItem(sellItemTemplate, this.sellMultiplier, quantity);
 		if (!sellItemResponse.isSuccessful()) return sellItemResponse;
 		//add item to store inventory
-		const increaseStockResponse = this.addItem(toSell, quantity);
+		const increaseStockResponse = this.addItem(sellItemTemplate, quantity);
 		if (!increaseStockResponse.isSuccessful()) return increaseStockResponse;
 		//format payload
 		response.payload = {
@@ -460,7 +471,7 @@ export class Store extends ItemStore {
 			this.items = new ItemList(currentItems);
 		}
 		if (didAddItem) {
-			// this.restockTime = Date.now() + this.restockInterval;
+			this.restockTime = Date.now() + this.restockInterval;
 		} else {
 			response.addErrorMessage(`Error: Nothing to restock!`);
 		}

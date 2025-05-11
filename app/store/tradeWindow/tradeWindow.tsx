@@ -120,7 +120,8 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 			if (localResult && updatedItem.isSuccessful()) {
 				setTradeWindowMessage('Purchase Successful!');
 				toggleSelectedItem(null);
-				
+				console.log(selectedItem)
+				console.log(updatedItem)
 				// Update redux store
 				dispatch(setItemQuantity({ 
 					inventoryItemId: selectedItem.getInventoryItemId(), 
@@ -158,6 +159,8 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 			if (localResult && updatedItem.isSuccessful()) {
 				setTradeWindowMessage('Sale Successful!');
 				toggleSelectedItem(null);
+				console.log(selectedItem)
+				console.log(updatedItem)
 				
 				// Update redux store
 				dispatch(setItemQuantity({ 
