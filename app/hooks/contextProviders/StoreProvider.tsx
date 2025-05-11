@@ -2,11 +2,15 @@
 import { useAccount } from '@/app/hooks/contexts/AccountContext';
 import { StoreContext } from '@/app/hooks/contexts/StoreContext';
 import { useUser } from '@/app/hooks/contexts/UserContext';
+import { InventoryItem } from '@/models/items/inventoryItems/InventoryItem';
 import { Store } from '@/models/itemStore/store/Store';
 import User from '@/models/user/User';
+import { RootState } from '@/store';
+import { setItemQuantity } from '@/store/slices/inventoryItemSlice';
 import { makeApiRequest } from '@/utils/api/api';
 import { loadStore, saveStore } from '@/utils/localStorage/store';
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 // Define props for the provider
 interface StoreProviderProps {
@@ -81,18 +85,42 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		if (localResult) {
 			// Terminate early before api call
 			if (guestMode) {
+				updateReduxStoreItemsAfterRestock();
 				return "SUCCESS";
 			}
 
 			const apiResult = await restockStoreAPI();
-			if (!apiResult) {
+			if (!apiResult || apiResult == 'NOT TIME' || apiResult == 'ERROR') {
 				syncStore(user, store);
 				return "NOT TIME";
 			}
-			console.log(apiResult);
+			updateReduxStoreItemsAfterRestock();
+			return "SUCCESS";
 		}
-		return "SUCCESS";
+		return "FAILED";
     };
+
+	const dispatch = useDispatch();
+	const inventoryItems = useSelector((state: RootState) => state.inventoryItems);
+
+	const updateReduxStoreItemsAfterRestock = () => {
+		if (!store) return;
+		const items = store.getAllItems();
+		const toUpdate: InventoryItem[] = [];
+		items.forEach((item) => {
+			const quantity = inventoryItems[item.getInventoryItemId()]?.quantity || -1;
+			if (quantity != item.getQuantity()) {
+				toUpdate.push(item);
+			}
+		})
+
+		toUpdate.forEach((item) => {
+			dispatch(setItemQuantity({ 
+				inventoryItemId: item.getInventoryItemId(), 
+				quantity: item.getQuantity()
+			}));
+		})
+	}
 
 	const restockTimeout = useRef<number | null>(null);
 	const updateRestockTimer = useCallback(async () => {
