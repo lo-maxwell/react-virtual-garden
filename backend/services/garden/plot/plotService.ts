@@ -1749,7 +1749,7 @@ export async function pickupDecoration(gardenId: string, plotId: string, invento
 			throw new Error(`Could not find valid decoration matching identifier ${placedItemEntity.identifier}`);
 		}
 
-		const blueprintItemTemplate = placeholderItemTemplates.getInventoryTemplate(plotItemTemplate.transformId);
+		const blueprintItemTemplate = placeholderItemTemplates.getInventoryTemplate(plotItemTemplate.transformId) as BlueprintTemplate;
 		if (!blueprintItemTemplate || blueprintItemTemplate.subtype !== ItemSubtypes.BLUEPRINT.name) {
 			throw new Error(`Could not find valid blueprint matching identifier ${plotItemTemplate.transformId}`);
 		}
