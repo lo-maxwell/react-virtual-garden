@@ -1600,7 +1600,7 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 	}
 
 	function validatePlantItemData(placedItemEntity: PlacedItemEntity): {plantItemTemplate: PlantTemplate, harvestedItemTemplate: HarvestedItemTemplate} | null {
-		const plantItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier);
+		const plantItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier) as PlantTemplate;
 		if (!plantItemTemplate || plantItemTemplate.subtype !== ItemSubtypes.PLANT.name) {
 			console.warn(`Could not find valid plant matching identifier ${placedItemEntity.identifier}`);
 			return null;
