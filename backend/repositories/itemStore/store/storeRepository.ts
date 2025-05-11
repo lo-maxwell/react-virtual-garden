@@ -1,38 +1,40 @@
 import { query, pool } from "@/backend/connection/db";
+import { StoreItemEntity } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemList } from "@/models/itemStore/ItemList";
 import { stocklistFactory } from "@/models/itemStore/store/StocklistFactory";
 import { StoreEntity, Store } from "@/models/itemStore/store/Store";
 import { storeFactory } from "@/models/itemStore/store/StoreFactory";
+import assert from "assert";
 import { PoolClient } from 'pg';
 import storeItemRepository from "../../items/inventoryItem/storeItemRepository";
 
 class StoreRepository {
 
+	/** Gets the inventory items given a store id, from the attached database */
 	async getStoreItems(id: string): Promise<ItemList> {
-		const itemResults = await storeItemRepository.getAllStoreItemsByOwnerId(id);
-		const items = new ItemList();
-		for (const itemResult of itemResults) {
-			try {
-				const item = storeItemRepository.makeStoreItemObject(itemResult);
-				items.addItem(item.itemData, item.getQuantity());
-			} catch (error) {
-				console.error(`Failure while initializing items for store from database: `);
-				console.error(error);
-			}
-		}
+		let itemResults: StoreItemEntity[] = await storeItemRepository.getAllStoreItemsByOwnerId(id);
+		const items = storeItemRepository.makeStoreItemObjectBatch(itemResults);
 		return items;
+	}
+
+	/**
+	 * Ensures that the object is of type StoreEntity, ie. that it contains an id, owner, identifier, and last restock time field
+	 */
+	 validateStoreEntity(storeEntity: any): boolean {
+		if (!storeEntity || (typeof storeEntity.id !== 'string') || (typeof storeEntity.owner !== 'string') || (typeof storeEntity.identifier !== 'number') || (typeof storeEntity.last_restock_time_ms !== 'string')) {
+			console.error(storeEntity);
+			throw new Error(`Invalid types while creating Store`);
+		}
+		return true;
 	}
 
 	/**
 	 * Turns a storeEntity into a Store object.
 	 */
-	async makeStoreObject(storeEntity: StoreEntity): Promise<Store> {
-		if (!storeEntity || (typeof storeEntity.id !== 'string') || (typeof storeEntity.identifier !== 'number') || (typeof storeEntity.last_restock_time_ms !== 'string')) {
-			console.error(storeEntity);
-			throw new Error(`Invalid types while creating Store`);
-		}
+	async makeStoreObject(storeEntity: StoreEntity, itemList: ItemList | null): Promise<Store> {
+		assert(this.validateStoreEntity(storeEntity), 'StoreEntity validation failed');
 		//TODO: Fetches all relevant data from database and uses it to construct user
-		let itemList: ItemList = await this.getStoreItems(storeEntity.id);
+		// let itemList: ItemList = await this.getStoreItems(storeEntity.id);
 		if (!itemList) itemList = new ItemList();
 		const storeData = storeFactory.getStoreInterfaceById(storeEntity.identifier);
 		if (!storeData) {

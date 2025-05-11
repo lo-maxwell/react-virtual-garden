@@ -14,7 +14,9 @@ import { useGarden } from '../hooks/contexts/GardenContext';
 import { useInventory } from '../hooks/contexts/InventoryContext';
 import { useStore } from '../hooks/contexts/StoreContext';
 import { useUser } from '../hooks/contexts/UserContext';
-import { fetchAccountObjects } from '../login/authClientService';
+import { useDispatch } from 'react-redux';
+import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
+import { fetchAccountObjects } from '../login/firebaseAuth/authClientService';
 
 const LoginPage: React.FC = () => {
 
@@ -24,6 +26,7 @@ const LoginPage: React.FC = () => {
     const { garden, reloadGarden, resetGarden } = useGarden();
     const { account, guestMode, setGuestMode } = useAccount();
 	const [syncing, setSyncing] = useState(false);
+	const dispatch = useDispatch();
 
     const syncAccountObjects = async () => {
 		setSyncing(true);
@@ -31,14 +34,23 @@ const LoginPage: React.FC = () => {
         console.log('result:');
         console.log(result);
         if (!result) {
-            console.error(`Could not find result of fetchAccountObjects!`);
-			return;
+          console.error(`Could not find result of fetchAccountObjects!`);
+			    return;
         }
 
         saveUser(User.fromPlainObject(result.plainUserObject));
         saveGarden(Garden.fromPlainObject(result.plainGardenObject));
         saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
         saveStore(Store.fromPlainObject(result.plainStoreObject));
+        
+        const updatedInventory = Inventory.fromPlainObject(result.plainInventoryObject);
+        updatedInventory.getAllItems().forEach(item => {
+            dispatch(setItemQuantity({ 
+                inventoryItemId: item.getInventoryItemId(), 
+                quantity: item.getQuantity()
+            }));
+        });
+
         reloadUser();
         reloadGarden();
         reloadInventory();

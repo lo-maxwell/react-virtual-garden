@@ -4,6 +4,8 @@ import colors from "../colors/colors";
 import GardenDebugOptions from "../developer/GardenDebugOptions";
 import LevelSystemComponent from "../level/LevelSystem";
 import IconDisplay from "../user/icon/IconDisplay";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 
 const UserProfileComponent = () => {
 	const { user } = useUser();
@@ -29,6 +31,17 @@ const UserProfileComponent = () => {
 		}
 	}
 
+	const levelState = useSelector((state: RootState) => state.userLevelSystem[user.getLevelSystem().getLevelSystemId()]);
+	let displayLevel = user.getLevel();
+	let displayCurrentExp = user.getCurrentExp();
+	let displayExpToLevelUp = user.getExpToLevelUp();
+	if (levelState) {
+		displayLevel = levelState.level;
+		displayCurrentExp = levelState.currentExp;
+		displayExpToLevelUp = levelState.expToLevelUp;
+
+	}
+
 	return <>
 	<div className="flex flex-row items-center justify-center">
 		<button onClick={handleDebugOptionEnable}>
@@ -36,7 +49,7 @@ const UserProfileComponent = () => {
 		</button>
 		<span className={`ml-4 ${getUsernameFontSize()} ${colors.user.usernameTextColor}`}>{user.getUsername()}</span>
 	</div>
-	<div className="mx-4 my-4"><LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} /></div>
+	<div className="mx-4 my-4"><LevelSystemComponent level={displayLevel} currentExp={displayCurrentExp} expToLevelUp={displayExpToLevelUp} /></div>
 	<div className={`${showDebugOptions >= 3 ? `` : `hidden`}`}>
 		<GardenDebugOptions/>
 	</div>

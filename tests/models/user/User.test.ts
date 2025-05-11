@@ -1,7 +1,8 @@
 import Toolbox from "@/models/garden/tools/Toolbox";
+import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes, ItemTypes } from "@/models/items/ItemTypes";
 import { Plant } from "@/models/items/placedItems/Plant";
-import { generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";
+import { generateNewPlaceholderInventoryItem, generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
 import LevelSystem from "@/models/level/LevelSystem";
@@ -58,38 +59,38 @@ test('Should Not Create Invalid User Object From PlainObject', () => {
 test('Should Update Harvest History', () => {
 
 	const user = new User('00000000-0000-0000-0000-000000000000', 'test', '', new LevelSystem(uuidv4(), 100), new ItemHistoryList(), new ActionHistoryList(), new Toolbox());
-	const plantItem = generateNewPlaceholderPlacedItem("apple", "");
-	const response = user.updateHarvestHistory(plantItem);
+	const plantItem = generateNewPlaceholderInventoryItem("apple", 1);
+	const response = user.updateHarvestHistory(plantItem, 1);
 	expect(response.isSuccessful()).toBe(true);
 	expect(user.getItemHistory().contains(plantItem).payload).toBe(true);
-	expect(user.getActionHistory().getHistoryByIdentifier(plantItem.itemData.subtype, plantItem.itemData.category, 'harvested').payload?.getQuantity()).toBe(1);
-	expect(user.getActionHistory().getHistoryByIdentifier(plantItem.itemData.subtype, 'all', 'harvested').payload?.getQuantity()).toBe(1);
+	expect(user.getActionHistory().getHistoryByIdentifier(ItemSubtypes.PLANT.name, plantItem.itemData.category, 'harvested').payload?.getQuantity()).toBe(1);
+	expect(user.getActionHistory().getHistoryByIdentifier(ItemSubtypes.PLANT.name, 'all', 'harvested').payload?.getQuantity()).toBe(1);
 	
-	const plantItem2 = generateNewPlaceholderPlacedItem("banana", "");
-	const response2 = user.updateHarvestHistory(plantItem2);
+	const plantItem2 = generateNewPlaceholderInventoryItem("banana", 1);
+	const response2 = user.updateHarvestHistory(plantItem2, 1);
 	expect(response2.isSuccessful()).toBe(true);
 	expect(user.getItemHistory().contains(plantItem2).payload).toBe(true);
-	expect(user.getActionHistory().getHistoryByIdentifier(plantItem2.itemData.subtype, plantItem2.itemData.category, 'harvested').payload?.getQuantity()).toBe(1);
-	expect(user.getActionHistory().getHistoryByIdentifier(plantItem2.itemData.subtype, 'all', 'harvested').payload?.getQuantity()).toBe(2);
+	expect(user.getActionHistory().getHistoryByIdentifier(ItemSubtypes.PLANT.name, plantItem2.itemData.category, 'harvested').payload?.getQuantity()).toBe(1);
+	expect(user.getActionHistory().getHistoryByIdentifier(ItemSubtypes.PLANT.name, 'all', 'harvested').payload?.getQuantity()).toBe(2);
 	
-	const plantItem3 = generateNewPlaceholderPlacedItem("coconut", "");
-	const response3 = user.updateHarvestHistory(plantItem3);
+	const plantItem3 = generateNewPlaceholderInventoryItem("coconut", 1);
+	const response3 = user.updateHarvestHistory(plantItem3, 1);
 	expect(response3.isSuccessful()).toBe(true);
 	expect(user.getItemHistory().contains(plantItem3).payload).toBe(true);
-	expect(user.getActionHistory().getHistoryByIdentifier(plantItem3.itemData.subtype, plantItem3.itemData.category, 'harvested').payload?.getQuantity()).toBe(2);
-	expect(user.getActionHistory().getHistoryByIdentifier(plantItem3.itemData.subtype, 'all', 'harvested').payload?.getQuantity()).toBe(3);
+	expect(user.getActionHistory().getHistoryByIdentifier(ItemSubtypes.PLANT.name, plantItem3.itemData.category, 'harvested').payload?.getQuantity()).toBe(2);
+	expect(user.getActionHistory().getHistoryByIdentifier(ItemSubtypes.PLANT.name, 'all', 'harvested').payload?.getQuantity()).toBe(3);
 	
 })
 
 test('Should Not Update Invalid harvest History', () => {
 	const user = new User('00000000-0000-0000-0000-000000000000', 'test', '', new LevelSystem(uuidv4(), 100), new ItemHistoryList(), new ActionHistoryList(), new Toolbox());
 	const invalidItem = generateNewPlaceholderPlacedItem("bench", "");
-	const response = user.updateHarvestHistory(invalidItem);
+	const response = user.updateHarvestHistory(invalidItem as InventoryItem, 1);
 	expect(response.isSuccessful()).toBe(false);
 
-	const invalidTemplate = new PlantTemplate("invalid id", "invalid name", "", ItemTypes.PLACED.name, ItemSubtypes.PLANT.name, "", "", 100, 0, "", 0, 0, 0, 0);
+	const invalidTemplate = new PlantTemplate("invalid id", "invalid name", "", ItemTypes.PLACED.name, ItemSubtypes.PLANT.name, "", "", 100, 0, "", 0, 0, 0, 0, {});
 	const invalidItem2 = new Plant(uuidv4(), invalidTemplate, "");
-	const response2 = user.updateHarvestHistory(invalidItem2);
+	const response2 = user.updateHarvestHistory(invalidItem2 as InventoryItem, 1);
 	expect(response2.isSuccessful()).toBe(false);
 
 })

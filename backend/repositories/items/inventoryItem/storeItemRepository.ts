@@ -1,27 +1,55 @@
 import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
+import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { InventoryItem, StoreItemEntity } from "@/models/items/inventoryItems/InventoryItem";
+import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
+import { ItemList } from "@/models/itemStore/ItemList";
+import { assert } from "console";
 import { PoolClient } from "pg";
 
 class StoreItemRepository {
 
-	makeStoreItemObject(storeItemEntity: StoreItemEntity): InventoryItem {
-		if (!storeItemEntity || (typeof storeItemEntity.identifier !== 'string' || (typeof storeItemEntity.quantity !== 'number'))) {
+	/**
+	 * Ensures that the object is of type StoreItemEntity, ie. that it contains an id, owner, identifier, and quantity field
+	 */
+	validateStoreItemEntity(storeItemEntity: any): boolean {
+		if (!storeItemEntity || (typeof storeItemEntity.id !== 'string') || (typeof storeItemEntity.owner !== 'string') || (typeof storeItemEntity.identifier !== 'string') || (typeof storeItemEntity.quantity !== 'number')) {
 			console.error(storeItemEntity);
 			throw new Error(`Invalid types while creating StoreItem from StoreItemEntity`);
 		}
+		return true;
+	}
+
+	makeStoreItemObjectBatch(storeItemEntities: StoreItemEntity[]): ItemList {
+		const items = new ItemList();
+		for (const itemResult of storeItemEntities) {
+			try {
+				const item = this.makeStoreItemObject(itemResult);
+				items.addItem(item, item.getQuantity());
+			} catch (error) {
+				console.error(`Failure while initializing items for store from database: `);
+				console.error(error);
+			}
+		}
+		return items;
+	}
+
+	makeStoreItemObject(storeItemEntity: StoreItemEntity): InventoryItem {
+		assert(this.validateStoreItemEntity(storeItemEntity), 'StoreItemEntity validation failed');
 
 		const itemData = placeholderItemTemplates.getInventoryTemplate(storeItemEntity.identifier);
 		if (!itemData) {
-			throw new Error(`Could not find storeItem matching id ${storeItemEntity.identifier}`)
+			console.warn(`Could not find storeItem matching id ${storeItemEntity.identifier}`)
+			return new HarvestedItem(storeItemEntity.id, HarvestedItemTemplate.getErrorTemplate(), 0);
 		}
 		const itemClass = getItemClassFromSubtype(itemData);
 
 		const instance = new itemClass(storeItemEntity.id, itemData, storeItemEntity.quantity);
 		if (!(instance instanceof InventoryItem)) {
-			throw new Error(`Attempted to create non StoreItem for id ${storeItemEntity.identifier}`);
+			console.warn(`Attempted to create non StoreItem for id ${storeItemEntity.identifier}`);
+			return new HarvestedItem(storeItemEntity.id, HarvestedItemTemplate.getErrorTemplate(), 0);
 		}
 		return instance;
 	}

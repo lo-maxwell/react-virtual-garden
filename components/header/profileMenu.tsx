@@ -19,11 +19,11 @@ const ProfileMenu = ({isOpen, toggleMenu, menuRef}: {isOpen: boolean, toggleMenu
 		return <></>;
 	}
 
-	const testClick = () => console.log('test');
-	const redirectToSettings = () => {
-		router.push('/settings');
+	const handleRedirect = () => {
+        router.push('/settings'); // Redirect to /settings
 		toggleMenu();
-	}
+    };
+	
 	const handleLogout = () => {
 		logout();
 		toggleMenu();
@@ -48,7 +48,7 @@ const ProfileMenu = ({isOpen, toggleMenu, menuRef}: {isOpen: boolean, toggleMenu
 		{isOpen && (
 			<div ref={menuRef} className="absolute right-0 top-[70px] mr-2 bg-[#e0dedc] text-black rounded-lg shadow-lg p-2 w-max">
 				<div className="block w-full text-left text-xl py-2 px-4 whitespace-nowrap">{user.getUsername()}</div>
-				<button onClick={redirectToSettings} className="block w-full text-left py-2 px-4 hover:bg-[#d0cecc] whitespace-nowrap">Account Settings</button>
+				<button onClick={handleRedirect} className="block w-full text-left py-2 px-4 hover:bg-[#d0cecc] whitespace-nowrap">Settings</button>
 				{ (guestMode && !firebaseUser &&
 					<button onClick={handleReset} className="block w-full text-left py-2 px-4 hover:bg-[#d0cecc] whitespace-nowrap">{getResetButtonText()}</button>
 				)

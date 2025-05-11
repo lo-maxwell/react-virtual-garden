@@ -1,12 +1,15 @@
 import { pool, query } from "@/backend/connection/db";
-import { Inventory, InventoryEntity } from "@/models/itemStore/inventory/Inventory";
+import { InventoryEntity, Inventory } from "@/models/itemStore/inventory/Inventory";
 import { ItemList } from "@/models/itemStore/ItemList";
+import { stocklistFactory } from "@/models/itemStore/store/StocklistFactory";
+import assert from "assert";
 import { PoolClient } from 'pg';
 import inventoryItemRepository from "../../items/inventoryItem/inventoryItemRepository";
 
 class InventoryRepository {
 
-	private async getInventoryItems(id: string): Promise<ItemList> {
+	/** Gets the inventory items given an inventory id, from the attached database */
+	async getInventoryItems(id: string): Promise<ItemList> {
 		const itemResults = await inventoryItemRepository.getAllInventoryItemsByOwnerId(id);
 		const items = new ItemList();
 		for (const itemResult of itemResults) {
@@ -21,16 +24,21 @@ class InventoryRepository {
 		return items;
 	}
 
-	/**
-	 * Turns an inventoryEntity into an Inventory object.
-	 */
-	async makeInventoryObject(inventoryEntity: InventoryEntity): Promise<Inventory> {
-		if (!inventoryEntity || (typeof inventoryEntity.id !== 'string') || (typeof inventoryEntity.gold !== 'number')) {
+	validateInventoryEntity(inventoryEntity: any): boolean {
+		if (!inventoryEntity || (typeof inventoryEntity.id !== 'string')|| (typeof inventoryEntity.owner !== 'string') || (typeof inventoryEntity.gold !== 'number')) {
 			console.error(inventoryEntity);
 			throw new Error(`Invalid types while creating Inventory`);
 		}
+		return true;
+	}
+
+	/**
+	 * Turns a inventoryEntity into a Inventory object.
+	 */
+	 async makeInventoryObject(inventoryEntity: InventoryEntity, itemList: ItemList | null): Promise<Inventory> {
+		assert(this.validateInventoryEntity(inventoryEntity), 'InventoryEntity validation failed');
 		//TODO: Fetches all relevant data from database and uses it to construct user
-		let itemList: ItemList = await this.getInventoryItems(inventoryEntity.id);
+		// let itemList: ItemList = await this.getInventoryItems(inventoryEntity.id);
 		if (!itemList) itemList = new ItemList();
 		return new Inventory(inventoryEntity.id, '', inventoryEntity.gold, itemList);
 	}

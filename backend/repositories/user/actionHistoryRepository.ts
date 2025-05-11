@@ -3,14 +3,24 @@ import { transactionWrapper } from "@/backend/services/utility/utility";
 import ActionHistory, { ActionHistoryEntity } from "@/models/user/history/actionHistory/ActionHistory";
 import { actionHistoryMetadataRepository } from "@/models/user/history/actionHistory/ActionHistoryMetadataRepository";
 import { ActionHistoryList } from "@/models/user/history/ActionHistoryList";
+import { assert } from "console";
 import { PoolClient } from 'pg';
 
 class ActionHistoryRepository {
 
-	async makeActionHistoryObject(actionHistoryEntity: ActionHistoryEntity): Promise<ActionHistory> {
+	/**
+	 * Ensures that the object is of type ActionHistoryEntity, ie. that it contains an id, owner, identifier, and quantity
+	 */
+	validateActionHistoryEntity(actionHistoryEntity: any): boolean {
 		if (!actionHistoryEntity || (typeof actionHistoryEntity.id !== 'string') || (typeof actionHistoryEntity.owner !== 'string') || (typeof actionHistoryEntity.identifier !== 'string') || (typeof actionHistoryEntity.quantity !== 'number')) {
+			console.warn(actionHistoryEntity);
 			throw new Error(`Invalid types while creating ActionHistory from ActionHistoryEntity`);
 		}
+		return true;
+	}
+
+	makeActionHistoryObject(actionHistoryEntity: ActionHistoryEntity): ActionHistory {
+		assert(this.validateActionHistoryEntity(actionHistoryEntity));
 		
 		const actionHistoryInterface = actionHistoryMetadataRepository.getActionHistoryInterfaceByIdentifierString(actionHistoryEntity.identifier);
 		if (!actionHistoryInterface) {
@@ -19,16 +29,14 @@ class ActionHistoryRepository {
 		return new ActionHistory(actionHistoryEntity.id, actionHistoryInterface.name, actionHistoryInterface.description, actionHistoryInterface.identifier, actionHistoryEntity.quantity);
 	}
 
-	async makeActionHistoryListObject(userId: string): Promise<ActionHistoryList> {
-		const histories = await this.getActionHistoriesByUserId(userId);
-		if (!histories) {
-			return new ActionHistoryList();
-		}
+	makeActionHistoryListObject(actionHistories: ActionHistory[]): ActionHistoryList {
+		// const histories = await this.getActionHistoriesByUserId(userId);
+		// if (!histories) {
+		// 	return new ActionHistoryList();
+		// }
 		const result = new ActionHistoryList();
 
-		const promises = histories.map(actionHistory => this.makeActionHistoryObject(actionHistory)); // Collect promises
-		const actionHistories = await Promise.all(promises);
-
+		// const actionHistories = histories.map(actionHistory => this.makeActionHistoryObject(actionHistory)); // Collect promises
 		for (const actionHistory of actionHistories) {
 			result.addActionHistory(actionHistory);
 		}
@@ -46,8 +54,6 @@ class ActionHistoryRepository {
 		const result = await query<ActionHistoryEntity>('SELECT * FROM action_histories', []);
 		if (!result || result.rows.length === 0) return [];
 		return result.rows;
-		// const toReturn: ActionHistory[] = await Promise.all(result.rows.map((row) => this.makeActionHistoryObject(row)));
-		// return toReturn;
 	}
 
 	async getActionHistoryById(id: string): Promise<ActionHistoryEntity | null> {
@@ -56,8 +62,6 @@ class ActionHistoryRepository {
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
 		return result.rows[0];
-		// const instance = this.makeUserObject(result.rows[0]);
-		// return instance;
 	}
 
 	async getActionHistoryByUserAndIdentifier(userId: string, identifier: string): Promise<ActionHistoryEntity | null> {
@@ -66,8 +70,6 @@ class ActionHistoryRepository {
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
 		return result.rows[0];
-		// const instance = this.makeUserObject(result.rows[0]);
-		// return instance;
 	}
 
 	async getActionHistoriesByIdentifier(searchIdentifier: string): Promise<ActionHistoryEntity[]> {
@@ -75,8 +77,6 @@ class ActionHistoryRepository {
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return [];
 		return result.rows;
-		// const toReturn: User[] = await Promise.all(result.rows.map((row) => this.makeUserObject(row)));
-		// return toReturn;
 	}
 
 	async getActionHistoriesByUserId(userId: string): Promise<ActionHistoryEntity[]> {

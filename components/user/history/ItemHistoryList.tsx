@@ -9,7 +9,7 @@ const ItemHistoryListComponent = ({}) => {
 		return (<>
 			<div>
 			{histories.map((history, index) => {
-				if (history.getItemData().subtype === ItemSubtypes.PLANT.name) {
+				if (history.getItemData().subtype === ItemSubtypes.HARVESTED.name) {
 					return (
 						<div key={history.getItemData().name + index}>
 							{history.getItemData().name} {history.getItemData().icon}: {history.getQuantity()}

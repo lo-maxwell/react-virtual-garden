@@ -32,7 +32,6 @@ class PlaceholderItemTemplates {
 	 * @returns the found ItemTemplate or null
 	 */
 	getInventoryItemTemplateByName(name: string): InventoryItemTemplate | null {
-		// console.log(name);
 		const inventoryItems = Object.values(this.repository.InventoryItems).flat().filter(item => item.name === name);
 		if (inventoryItems.length === 1) return inventoryItems[0];
 		else if (inventoryItems.length === 0) return null;

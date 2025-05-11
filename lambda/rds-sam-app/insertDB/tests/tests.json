@@ -1,0 +1,101 @@
+{
+    "queries": [
+      {
+        "tableName": "inventory_items",
+        "columnsToWrite": [
+          "owner",
+          "identifier",
+          "quantity"
+        ],
+        "values": [
+          [
+            "113e603e-be15-4c3c-a4db-f96ea74e02ca",
+            "1-01-10-03-00",
+            10
+          ],
+          [
+            "113e603e-be15-4c3c-a4db-f96ea74e02ca",
+            "1-01-10-03-10",
+            10
+          ]
+        ],
+        "conflictColumns": [
+          "owner",
+          "identifier"
+        ],
+        "returnColumns": [
+          "id",
+          "owner",
+          "identifier",
+          "quantity"
+        ]
+      },
+      {
+        "tableName": "inventory_items",
+        "columnsToWrite": [
+          "owner",
+          "identifier",
+          "quantity"
+        ],
+        "values": [
+          [
+            "113e603e-be15-4c3c-a4db-f96ea74e02ca",
+            "1-03-10-03-00",
+            10
+          ],
+          [
+            "113e603e-be15-4c3c-a4db-f96ea74e02ca",
+            "1-01-10-03-10",
+            10
+          ]
+        ],
+        "conflictColumns": [
+          "owner",
+          "identifier"
+        ],
+        "returnColumns": [
+          "id",
+          "owner",
+          "identifier",
+          "quantity"
+        ]
+      }
+    ]
+  }
+
+  {
+    "queries": [
+      {
+        "tableName": "inventories",
+        "columnsToWrite": [
+          "id",
+          "owner",
+          "gold"
+        ],
+        "values": [
+          [
+            "1294eba5-22da-4b7d-8db9-e926a3484a5c",
+            "AAAAAAABBBBBBBCCCCCCCDDDDDDD",
+            0
+          ]
+        ],
+        "conflictColumns": [
+          "id"
+        ],
+        "updateQuery": {
+          "values": {
+            "gold": {
+              "operator": "+",
+              "value": 999
+            }
+          },
+          "conditions": {}
+        },
+        "returnColumns": [
+          "id",
+          "owner",
+          "gold"
+        ]
+      }
+    ]
+  }

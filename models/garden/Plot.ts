@@ -15,6 +15,8 @@ import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 import { getTimeString } from "../utility/Time";
 
 export interface PlotEntity {
+	id: string,
+	owner: string,
 	row_index: number,
 	col_index: number,
 	plant_time: string,
@@ -22,12 +24,9 @@ export interface PlotEntity {
 	random_seed: number
 }
 
-export interface ExtendedPlotEntity extends PlotEntity {
-	id: string
-}
 
 export class Plot {
-	static baseShinyChance: number = 0.1;
+	static baseShinyChance: number = 0.0;
 	private plotId: string;
 	private item: PlacedItem;
 	private plantTime: number;
@@ -52,9 +51,11 @@ export class Plot {
 		if (usesRemaining && usesRemaining >= 0) {
 			this.usesRemaining = usesRemaining;
 		} else if (item.itemData.subtype === ItemSubtypes.PLANT.name) {
+			//TODO: IRREVERSIBLE ERROR, CLEAN UP
 			//is a plant
-			const plantTemplate = item.itemData as PlantTemplate;
-			this.usesRemaining = plantTemplate.numHarvests;
+			// const plantTemplate = item.itemData as PlantTemplate;
+			// this.usesRemaining = plantTemplate.numHarvests;
+			this.usesRemaining = 0;
 		} else {
 			//is non plant
 			this.usesRemaining = 0;

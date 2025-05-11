@@ -9,6 +9,8 @@ import { useAccount } from "@/app/hooks/contexts/AccountContext";
 import { syncUserGardenInventory } from "@/app/garden/gardenFunctions";
 import { useInventory } from "@/app/hooks/contexts/InventoryContext";
 import { useUser } from "@/app/hooks/contexts/UserContext";
+import { setAllLevelSystemValues, setCurrentExp, setExpToLevelUp, setUserLevel } from "@/store/slices/userLevelSystemSlice";
+import { useDispatch } from "react-redux";
 
 type PlotComponentProps = {
 	plot: Plot;
@@ -31,6 +33,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 	const { user, reloadUser } = useUser();
 	const { garden, reloadGarden } = useGarden();
 	const { inventory, reloadInventory } = useInventory();
+	const dispatch = useDispatch();
 
 	const getColor = () => {
 		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name) {
@@ -105,25 +108,25 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 			return;
 		}
 		
-		// Terminate early before api call
-		if (guestMode) {
-			return;
+		// Call api if not in guest mode
+		if (!guestMode) {
+			const apiResult = await onPlotClickHelpers.apiHelper();
+			if (apiResult.success) {
+				setDisplayIcon(apiResult.displayIcon);
+			} else {
+				console.warn(`Api call failed`);
+				// setDisplayIcon(apiResult.displayIcon);
+				// TODO: sync plot function?
+				await syncUserGardenInventory(user, garden, inventory);
+				reloadUser();
+				reloadGarden();
+				reloadInventory();
+				setDisplayIcon(plot.getItem().itemData.icon);
+				// setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1); //we force a refresh to clear statuses
+			}
 		}
-
-		const apiResult = await onPlotClickHelpers.apiHelper();
-		if (apiResult.success) {
-			setDisplayIcon(apiResult.displayIcon);
-		} else {
-			console.warn(`Api call failed`);
-			// setDisplayIcon(apiResult.displayIcon);
-			// TODO: sync plot function?
-			await syncUserGardenInventory(user, garden, inventory);
-			reloadUser();
-			reloadGarden();
-			reloadInventory();
-			setDisplayIcon(plot.getItem().itemData.icon);
-			setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1); //we force a refresh to clear statuses
-		}
+		console.log(user.getLevelSystem());
+		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
 	}
 
 

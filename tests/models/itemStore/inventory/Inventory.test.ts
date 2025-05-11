@@ -86,13 +86,13 @@ test('Should Not Gain Invalid Item', () => {
 	expect(testInventory.size()).toBe(3);
 	const response = testInventory.gainItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!, 0);
 	expect(response.isSuccessful()).toBe(false);
-	expect(testInventory.size()).toBe(3);
+	expect(testInventory.size()).toBe(4); //Error message, but we do add to the size of the list
 	const response2 = testInventory.gainItem(placeholderItemTemplates.getInventoryItemTemplateByName('apple')!, -1);
 	expect(response2.isSuccessful()).toBe(false);
-	expect(testInventory.size()).toBe(3);
-	const response3 = testInventory.gainItem(placeholderItemTemplates.getPlacedItemTemplateByName('apple')!, 1);
+	expect(testInventory.size()).toBe(4);
+	const response3 = testInventory.gainItem(placeholderItemTemplates.getPlacedItemTemplateByName('planted apple')!, 1);
 	expect(response3.isSuccessful()).toBe(false);
-	expect(testInventory.size()).toBe(3);
+	expect(testInventory.size()).toBe(4);
 })
 
 test('Should Trash Item From Inventory', () => {

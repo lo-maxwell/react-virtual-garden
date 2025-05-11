@@ -1,0 +1,14 @@
+{
+    "queries": [
+      {
+        "tableName": "inventory_items",
+        "conditions": {
+          "owner": {
+            "operator": "=",
+            "value": "113e603e-be15-4c3c-a4db-f96ea74e02ca"
+          }
+        },
+        "limit": 10
+      }
+    ]
+  }

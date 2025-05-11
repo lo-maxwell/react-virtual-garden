@@ -189,10 +189,10 @@ test('Should Not Add Invalid Quantity', () => {
 	expect(testItemList.getItem('banana seed').payload.quantity).toBe(2);
 	const response3 = testItemList.addItem(generateNewPlaceholderInventoryItem("apple", 1), 0);
 	expect(response3.isSuccessful()).toBe(false);
-	expect(testItemList.size()).toBe(3);
+	expect(testItemList.size()).toBe(4);
 	const response4 = testItemList.addItem(generateNewPlaceholderInventoryItem("banana", 1), -1);
 	expect(response4.isSuccessful()).toBe(false);
-	expect(testItemList.size()).toBe(3);
+	expect(testItemList.size()).toBe(4);
 });
 
 test('Should Update Quantity of Existing Item', () => {

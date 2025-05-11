@@ -358,6 +358,11 @@
   * Flow: user presses button on frontend -> frontend sends request to backend -> backend authenticates with firebase -> backend sends request to api gateway (containing api key on server side) -> api gateway calls lambda function -> return json data to frontend
   * To consider: separate api keys per user, which would allow deactivation/rate limiting per user
 
+### Currently investigating aws lambda...
+  * Use xmin for concurrency
+  * Client -> api route -> service function -> lambda call to fetch data from db -> data processing -> lambda call to update db -> return result to client
+  * Right now each service function has 2 lambdas, consider code reuse
+  * TODO: Give nextjs a specific iam role with only invokeLambda permissions
 
 ## Day 33
 
@@ -366,11 +371,29 @@
     * Disabled clicking button while syncing in progress, and gave indication that function is running
     * Needs to give some progress/success/failure indication, maybe make a notification system?
 
-
+Guest mode: Should have a level/xp/money etc cap, and some warnings that guest mode is local only; allow users to port their guest mode account into an online account (with the cap)
 
 TODO:
+SQS queue for rate limiting between backend and lambda?
+Fix login screen, allow creation in a different user flow, allow resetting password
+Fix guest mode banners
+Rate limit on aws
+Rate limit on backend api
+
+New password reset landing page
+
+Lambda should have a single interact with database function which takes in the action type (insert, update, select, delete) and then calls all queries, so we can use a single transaction and make it atomic
+
+Itemlist is not updating properly again when buying/selling items
+XP is not updating properly when harvesting plants <--------------
+Check syncing with redux when buying/restocking
+Check restock timer when loading in
+
+Username cannot include special characters, must be alphanumeric or whitespace (esp no *, %, \ to prevent sql problems)
 
 "Force refresh saved data" button with 5 second cd
+
+Actionhistories should be harvested:category:harvested? (instead of plant: category)
 
 Action items:
 1. Make the redirect delayed and make it sit on a screen that says redirect to login page (may be changed in the future)

@@ -48,9 +48,9 @@ export class Store extends ItemStore {
 			this.restockTime = lastRestockTimeMsNumber;
 		}
 		this.restockInterval = restockInterval;
-		if (this.restockTime < Date.now()) {
-			this.restockStore();
-		}
+		// if (this.restockTime < Date.now()) {
+		// 	this.restockStore();
+		// }
 	}
 
 	static fromPlainObject(plainObject: any): Store {
