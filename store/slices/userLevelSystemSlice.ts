@@ -44,11 +44,15 @@ const userLevelSystemSlice = createSlice({
         setAllLevelSystemValues(state, action: PayloadAction<{ id: string; level: number; currentExp: number; expToLevelUp: number }>) {
             const { id, level, currentExp, expToLevelUp } = action.payload;
             if (!state[id]) {
-                state[id] = defaultValues; // Initialize if not exists
+                state[id] = { ...defaultValues }; // Initialize if not exists
             }
-            state[id].level = level;
-            state[id].currentExp = currentExp;
-            state[id].expToLevelUp = expToLevelUp;
+            // Create a new object to avoid mutating the existing state directly
+            state[id] = {
+                ...state[id],
+                level,
+                currentExp,
+                expToLevelUp,
+            };
         }
     },
 });
