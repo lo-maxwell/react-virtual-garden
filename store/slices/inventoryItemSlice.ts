@@ -18,7 +18,10 @@ const inventoryItemSlice = createSlice({
             action: PayloadAction<{ inventoryItemId: string; quantity: number }>
         ) => {
             const { inventoryItemId, quantity } = action.payload;
-            state[inventoryItemId] = { quantity };
+            state[inventoryItemId] = {
+                ...state[inventoryItemId],
+                quantity,
+            };
         },
         // Increment quantity
         incrementQuantity: (
@@ -27,7 +30,10 @@ const inventoryItemSlice = createSlice({
         ) => {
             const { inventoryItemId } = action.payload;
             if (state[inventoryItemId]) {
-                state[inventoryItemId].quantity += 1;
+                state[inventoryItemId] = {
+                    ...state[inventoryItemId],
+                    quantity: state[inventoryItemId].quantity + 1,
+                };
             }
         },
         // Decrement quantity
@@ -37,7 +43,10 @@ const inventoryItemSlice = createSlice({
         ) => {
             const { inventoryItemId } = action.payload;
             if (state[inventoryItemId] && state[inventoryItemId].quantity > 0) {
-                state[inventoryItemId].quantity -= 1;
+                state[inventoryItemId] = {
+                    ...state[inventoryItemId],
+                    quantity: state[inventoryItemId].quantity - 1,
+                };
             }
         },
     },
