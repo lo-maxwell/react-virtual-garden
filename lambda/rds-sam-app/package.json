@@ -1,0 +1,18 @@
+{
+  "name": "rds-sam-app",
+  "version": "1.0.0",
+  "description": "This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.13.3"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

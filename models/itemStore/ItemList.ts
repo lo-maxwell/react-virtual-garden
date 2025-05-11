@@ -329,7 +329,10 @@ export class ItemList {
 				return response;
 			}
 			if (quantity === 0) {
-				response.addErrorMessage('Quantity is 0, no item added');
+				response.addErrorMessage('Quantity is 0, added item but with no data');
+				this.items.push(newItem);
+				this.sortItems(this.items);
+				response.payload = newItem;
 				return response;
 			}
 			if (quantity < 0) {

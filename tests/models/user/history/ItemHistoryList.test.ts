@@ -187,7 +187,7 @@ test('Should Add Existing History to ItemHistoryList', () => {
 
 test('Should Not Add Invalid History', () => {
 	testItemHistoryList.addItemHistory(plantHistory);
-	const corruptedTemplate = new PlantTemplate(plantTemplate.id, '', '', 'PlacedItem', 'Decoration', '', '', 1, 1, '', 1, 1, 1, 1);
+	const corruptedTemplate = new PlantTemplate(plantTemplate.id, '', '', 'PlacedItem', 'Decoration', '', '', 1, 1, '', 1, 1, 1, 1, {});
 	const corruptedHistory = new ItemHistory(uuidv4(), corruptedTemplate, 1);
 	const addResponse = testItemHistoryList.addItemHistory(corruptedHistory);
 	expect(addResponse.isSuccessful()).toBe(false);
@@ -209,7 +209,7 @@ test('Should Directly Update History to ItemHistoryList', () => {
 
 test('Should Not Update Invalid History', () => {
 	testItemHistoryList.addItemHistory(plantHistory);
-	const corruptedTemplate = new PlantTemplate(plantTemplate.id, '', '', 'PlacedItem', 'Decoration', '', '', 1, 1, '', 1, 1, 1, 1);
+	const corruptedTemplate = new PlantTemplate(plantTemplate.id, '', '', 'PlacedItem', 'Decoration', '', '', 1, 1, '', 1, 1, 1, 1, {});
 	const corruptedHistory = new ItemHistory(uuidv4(), corruptedTemplate, 1);
 	const updateResponse = testItemHistoryList.updateItemHistory(corruptedHistory);
 	expect(updateResponse.isSuccessful()).toBe(false);

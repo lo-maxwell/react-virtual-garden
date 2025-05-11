@@ -3,7 +3,7 @@ import { PlantTemplate } from "../templates/models/PlantTemplate";
 import { PlacedItem } from "./PlacedItem";
 import { v4 as uuidv4 } from 'uuid';
 
-export class Plant extends PlacedItem{
+export class Plant extends PlacedItem {
 	itemData: PlantTemplate;
 	constructor(placedItemId: string, itemData: PlantTemplate, status: string) {
 		super(placedItemId, itemData, status);

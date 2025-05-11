@@ -9,9 +9,14 @@ import { PoolClient } from "pg";
  */
 export async function transactionWrapper(innerFunction: (client: PoolClient) => Promise<any>, functionDescription: string, client?: PoolClient) {
 	const shouldReleaseClient = !client;
-	if (!client) {
-		client = await pool.connect();
-	}
+	try {
+		if (!client) {
+		  client = await pool.connect();
+		}
+	  } catch (error) {
+		console.error('Error connecting to the database:', error);
+		throw error;
+	  }
 	try {
 		if (shouldReleaseClient) {
 			await client.query('BEGIN'); // Start the transaction

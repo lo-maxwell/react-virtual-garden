@@ -1,18 +1,29 @@
 import { pool, query } from "@/backend/connection/db";
 import LevelSystem, { LevelSystemEntity } from "@/models/level/LevelSystem";
+import assert from "assert";
 import { PoolClient } from 'pg';
 
 class LevelRepository {
 
 	/**
-	 * Turns a levelSystemEntity into a LevelSystem object.
+	 * Ensures that the object is of type LevelSystemEntity, ie. that it contains an id, total_xp, and growth_rate
 	 */
-	makeLevelSystemObject(levelEntity: LevelSystemEntity): LevelSystem {
-		if (!levelEntity || (typeof levelEntity.level !== 'number') || (typeof levelEntity.current_xp !== 'number') || (typeof levelEntity.growth_rate !== 'number')) {
+	 validateLevelSystemEntity(levelEntity: any): boolean {
+		if (!levelEntity || (typeof levelEntity.total_xp !== 'number') || (typeof levelEntity.growth_rate !== 'number')) {
 			console.error(levelEntity);
 			throw new Error(`Invalid types while creating LevelSystem from LevelSystemEntity`);
 		}
-		return new LevelSystem(levelEntity.id, levelEntity.level, levelEntity.current_xp, levelEntity.growth_rate);
+		return true;
+	}
+
+	/**
+	 * Turns a levelSystemEntity into a LevelSystem object.
+	 */
+	makeLevelSystemObject(levelEntity: LevelSystemEntity): LevelSystem {
+		assert(this.validateLevelSystemEntity(levelEntity));
+		let level = LevelSystem.getLevelForTotalExp(levelEntity.total_xp, levelEntity.growth_rate);
+		let current_xp = levelEntity.total_xp - LevelSystem.getTotalExpForLevel(level, levelEntity.growth_rate);
+		return new LevelSystem(levelEntity.id, level, current_xp, levelEntity.growth_rate);
 	}
 
 	/**
@@ -99,8 +110,8 @@ class LevelRepository {
 			}
 			
 			const result = await query<LevelSystemEntity>(
-				'INSERT INTO levels (id, owner_uuid, owner_uid, owner_type, level, current_xp, growth_rate) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-				[levelSystem.getLevelSystemId(), ownerUUID, ownerUID, ownerType, levelSystem.getLevel(), levelSystem.getCurrentExp(), levelSystem.getGrowthRate()]
+				'INSERT INTO levels (id, owner_uuid, owner_uid, owner_type, total_xp, growth_rate) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+				[levelSystem.getLevelSystemId(), ownerUUID, ownerUID, ownerType, LevelSystem.getTotalExpForLevel(levelSystem.getLevel(), levelSystem.getGrowthRate()) + levelSystem.getCurrentExp(), levelSystem.getGrowthRate()]
 				);
 
 			// Check if result is valid
@@ -194,8 +205,8 @@ class LevelRepository {
 	 */
 	 async updateEntireLevelSystem(levelSystem: LevelSystem): Promise<LevelSystemEntity> {
 		const levelSystemResult = await query<LevelSystemEntity>(
-			'UPDATE levels SET level = $1, current_xp = $2, growth_rate = $3 WHERE id = $4 RETURNING id, level, current_xp, growth_rate',
-			[levelSystem.getLevel(), levelSystem.getCurrentExp(), levelSystem.getGrowthRate(), levelSystem.getLevelSystemId()]
+			'UPDATE levels SET total_xp = $1, growth_rate = $2 WHERE id = $3 RETURNING id, total_xp, growth_rate',
+			[LevelSystem.getTotalExpForLevel(levelSystem.getLevel(), levelSystem.getGrowthRate()) + levelSystem.getCurrentExp(), levelSystem.getGrowthRate(), levelSystem.getLevelSystemId()]
 			);
 
 		// Check if result is valid
@@ -224,10 +235,12 @@ class LevelRepository {
 			if (shouldReleaseClient) {
 				await client.query('BEGIN'); // Start the transaction
 			}
+
+			const totalExp = LevelSystem.getTotalExpForLevel(level, growthRate) + currentExp;
 		
 			const levelSystemResult = await client.query<LevelSystemEntity>(
-				'UPDATE levels SET level = $1, current_xp = $2, growth_rate = $3 WHERE id = $4 RETURNING level, current_xp, growth_rate',
-				[level, currentExp, growthRate, id]
+				'UPDATE levels SET total_xp = $1, growth_rate = $2 WHERE id = $3 RETURNING id, total_xp, growth_rate',
+				[totalExp, growthRate, id]
 				);
 
 
@@ -273,7 +286,7 @@ class LevelRepository {
 
 			//Lock the row for update
 			const lockResult = await client.query(
-				'SELECT level, current_xp, growth_rate FROM levels WHERE id = $1 FOR UPDATE',
+				'SELECT total_xp, growth_rate FROM levels WHERE id = $1 FOR UPDATE',
 				[id]
 			);
 
@@ -285,10 +298,11 @@ class LevelRepository {
 			const levelSystemCopy = this.makeLevelSystemObject(lockResult.rows[0]);
 			//Calculate new data after adding xp
 			levelSystemCopy.addExperience(xpAmount);
+			const totalExp = LevelSystem.getTotalExpForLevel(levelSystemCopy.getLevel(), levelSystemCopy.getGrowthRate()) + levelSystemCopy.getCurrentExp()
 		
 			const levelSystemResult = await client.query<LevelSystemEntity>(
-				'UPDATE levels SET level = $1, current_xp = $2 WHERE id = $3 RETURNING level, current_xp, growth_rate',
-				[levelSystemCopy.getLevel(), levelSystemCopy.getCurrentExp(), id]
+				'UPDATE levels SET total_xp = $1 WHERE id = $2 RETURNING total_xp, growth_rate',
+				[totalExp, id]
 				);
 
 

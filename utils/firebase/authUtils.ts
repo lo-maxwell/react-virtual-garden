@@ -13,6 +13,9 @@ export async function verifyToken(authorizationHeader: string | null) {
 	try {
 		return await firebaseAdmin.auth().verifyIdToken(token);
 	} catch (error) {
+		if (!firebaseAdmin) {
+			throw new BadRequestError('Firebase admin is not configured');
+		}
 		throw new BadRequestError('Invalid or expired token');
 	}
 }

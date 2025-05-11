@@ -14,6 +14,7 @@ import { ItemHistoryList } from "./history/ItemHistoryList";
 import Icon from "./icons/Icon";
 import { v4 as uuidv4 } from 'uuid';
 import ItemHistory from "./history/itemHistory/ItemHistory";
+import { InventoryItem } from "../items/inventoryItems/InventoryItem";
 
 export interface UserEntity {
 	id: string;
@@ -30,7 +31,7 @@ class User {
 	private actionHistory: ActionHistoryList;
 	private toolbox: Toolbox;
 
-	constructor(userId: string, username: string, icon: string, level: LevelSystem = new LevelSystem(uuidv4()), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList(), toolbox: Toolbox = new Toolbox()) {
+	constructor(userId: string, username: string, icon: string, level: LevelSystem = User.generateDefaultLevelSystem(), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList(), toolbox: Toolbox = new Toolbox()) {
 		this.userId = userId;
 		this.username = username;
 		this.icon = icon;
@@ -64,6 +65,7 @@ class User {
 			return new User(userId, username, icon, hydratedLevel, hydratedItemHistory, hydratedActionHistory, hydratedToolbox);
 			
 		} catch (err) {
+			console.error(plainObject);
 			console.error('Error creating User from plainObject:', err);
             return new User("999999999999999999999999999", "Error User", "error");
 		}
@@ -88,6 +90,10 @@ class User {
 			uid += chars.charAt(Math.floor(Math.random() * chars.length));
 		}
 		return uid;
+	}
+
+	static generateDefaultLevelSystem(): LevelSystem {
+		return new LevelSystem(uuidv4());
 	}
 
 	static generateDefaultNewUser(): User {
@@ -175,16 +181,16 @@ class User {
 	 * @item the item that was harvested
 	 * @returns Response containing true or an error message on failure
 	 */
-	updateHarvestHistory(plantItem: PlacedItem): BooleanResponse {
+	updateHarvestHistory(harvestedItem: InventoryItem, quantity: number): BooleanResponse {
 		const response = new BooleanResponse();
-		if (plantItem.itemData.subtype !== ItemSubtypes.PLANT.name) {
-			response.addErrorMessage(`Error updating history: attempting to harvest item of type ${plantItem.itemData.subtype}`);
+		if (harvestedItem.itemData.subtype !== ItemSubtypes.HARVESTED.name) {
+			response.addErrorMessage(`Error updating history: attempting to harvest item of type ${harvestedItem.itemData.subtype}`);
 			return response;
 		}
-		const itemHistory = new ItemHistory(uuidv4(), plantItem.itemData, 1);
+		const itemHistory = new ItemHistory(uuidv4(), harvestedItem.itemData, quantity);
 		this.itemHistory.addItemHistory(itemHistory);
-		const harvestAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(plantItem.itemData.subtype, 'all', 'harvested', 1);
-		const harvestCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(plantItem.itemData.subtype, plantItem.itemData.category, 'harvested', 1);
+		const harvestAllHistory = actionHistoryFactory.createActionHistoryByIdentifiers(ItemSubtypes.PLANT.name, 'all', 'harvested', quantity);
+		const harvestCategoryHistory = actionHistoryFactory.createActionHistoryByIdentifiers(ItemSubtypes.PLANT.name, harvestedItem.itemData.category, 'harvested', quantity);
 		if (harvestAllHistory) {
 			this.actionHistory.addActionHistory(harvestAllHistory);
 			response.payload = true;
@@ -197,36 +203,37 @@ class User {
 			this.actionHistory.addActionHistory(harvestCategoryHistory);
 			response.payload = true;
 		} else {
-			response.addErrorMessage(`Error updating history: could not find action history for item ${plantItem.itemData.name}`);
+			response.addErrorMessage(`Error updating history: could not find action history for item ${harvestedItem.itemData.name}`);
 		}
 		
 		return response;
 	}
 
+	//TODO: Fix this, it should be harvestedItem (?)
 	/**
 	 * Updates this user's itemHistory and actionHistory following the placement of a decoration.
 	 * @item the item that was placedharvested
 	 * @returns Response containing true or an error message on failure
 	 */
-	 updateDecorationHistory(decorationItem: PlacedItem): BooleanResponse {
-		const response = new BooleanResponse();
-		if (decorationItem.itemData.subtype !== ItemSubtypes.DECORATION.name) {
-			response.addErrorMessage(`Error updating history: attempting to place item of type ${decorationItem.itemData.subtype}`);
-			return response;
-		}
-		const itemHistory = new ItemHistory(uuidv4(), decorationItem.itemData, 1);
-		this.itemHistory.addItemHistory(itemHistory);
-		const placeDecorationHistory = actionHistoryFactory.createActionHistoryByIdentifiers(decorationItem.itemData.subtype, decorationItem.itemData.category, 'placed', 1);
+	//  updateDecorationHistory(decorationItem: PlacedItem, quantity: number): BooleanResponse {
+	// 	const response = new BooleanResponse();
+	// 	if (decorationItem.itemData.subtype !== ItemSubtypes.DECORATION.name) {
+	// 		response.addErrorMessage(`Error updating history: attempting to place item of type ${decorationItem.itemData.subtype}`);
+	// 		return response;
+	// 	}
+	// 	const itemHistory = new ItemHistory(uuidv4(), decorationItem.itemData, quantity);
+	// 	this.itemHistory.addItemHistory(itemHistory);
+	// 	const placeDecorationHistory = actionHistoryFactory.createActionHistoryByIdentifiers(ItemSubtypes.DECORATION.name, decorationItem.itemData.category, 'placed', quantity);
 
-		if (placeDecorationHistory) {
-			this.actionHistory.addActionHistory(placeDecorationHistory);
-			response.payload = true;
-		} else {
-			response.addErrorMessage(`Error updating history: could not find action history for item ${decorationItem.itemData.name}`);
-		}
+	// 	if (placeDecorationHistory) {
+	// 		this.actionHistory.addActionHistory(placeDecorationHistory);
+	// 		response.payload = true;
+	// 	} else {
+	// 		response.addErrorMessage(`Error updating history: could not find action history for item ${decorationItem.itemData.name}`);
+	// 	}
 		
-		return response;
-	}
+	// 	return response;
+	// }
 
 	isIconUnlocked(iconOption: Icon) {
 		if (iconOption.getName() === 'apple') return true;

@@ -162,6 +162,7 @@ export async function harvestAllAPI(harvestedPlotIds: string[], inventory: Inven
     plotIds: harvestedPlotIds,
     inventoryId: inventory.getInventoryId(), 
     levelSystemId: user.getLevelSystem().getLevelSystemId(), 
+    numHarvests: 1,
     replacementItem: null, 
     instantHarvestKey: instantGrow ? 'mangomangobear' : ''
   };
@@ -169,7 +170,25 @@ export async function harvestAllAPI(harvestedPlotIds: string[], inventory: Inven
   try {
     const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/harvestAll`;
     const result = await makeApiRequest('PATCH', apiRoute, data, true);
-    console.log('Successfully harvested all seeds:', result);
+    console.log('Successfully harvested all plants:', result);
+    return result;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}
+
+export async function pickupAllAPI(pickupPlotIds: string[], inventory: Inventory, user: User, garden: Garden) {
+  const data = {
+    plotIds: pickupPlotIds,
+    inventoryId: inventory.getInventoryId(), 
+    replacementItem: null, 
+  };
+
+  try {
+    const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/pickupAll`;
+    const result = await makeApiRequest('PATCH', apiRoute, data, true);
+    console.log('Successfully picked up all decorations:', result);
     return result;
   } catch (error) {
     console.error(error);

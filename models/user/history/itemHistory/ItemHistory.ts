@@ -9,6 +9,7 @@ export interface ItemHistoryEntity {
 	quantity: number
 }
 
+//Tracks the harvested item, for plants
 class ItemHistory {
 	protected itemHistoryId: string;
 	protected itemData: ItemTemplate;

@@ -11,9 +11,11 @@ export interface PlacedItemDetailsEntity {
 	usesRemaining: number
 }
 
-export interface PlacedItemEntity extends PlacedItemDetailsEntity {
+export interface PlacedItemEntity {
 	id: string,
 	owner: string, //maps to a plot
+	identifier: string, //itemData.id
+	status: string
 }
 
 export abstract class PlacedItem extends Item { 

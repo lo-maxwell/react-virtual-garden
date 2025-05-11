@@ -1,28 +1,41 @@
 import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
+import { EmptyItem } from "@/models/items/placedItems/EmptyItem";
 import { PlacedItemEntity, PlacedItem } from "@/models/items/placedItems/PlacedItem";
+import { EmptyItemTemplate } from "@/models/items/templates/models/EmptyItemTemplate";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
+import { assert } from "console";
 import { PoolClient } from "pg";
 import { v4 as uuidv4 } from 'uuid';
 
 class PlacedItemRepository {
 
-	makePlacedItemObject(placedItemEntity: PlacedItemEntity): PlacedItem {
-		if (!placedItemEntity || (typeof placedItemEntity.identifier !== 'string' || (typeof placedItemEntity.status !== 'string'))) {
+	/**
+	 * Ensures that the object is of type PlacedItemEntity, ie. that it contains an id, owner, identifier, and status field
+	 */
+	 validatePlacedItemEntity(placedItemEntity: any): boolean {
+		if (!placedItemEntity || (typeof placedItemEntity.id !== 'string') || (typeof placedItemEntity.owner !== 'string') || (typeof placedItemEntity.identifier !== 'string' || (typeof placedItemEntity.status !== 'string'))) {
 			console.error(placedItemEntity);
 			throw new Error(`Invalid types while creating PlacedItem from PlacedItemEntity`);
 		}
+		return true;
+	}
+
+	makePlacedItemObject(placedItemEntity: PlacedItemEntity): PlacedItem {
+		assert(this.validatePlacedItemEntity(placedItemEntity));
 
 		const itemData = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier);
 		if (!itemData) {
-			throw new Error(`Could not find placedItem matching id ${placedItemEntity.identifier}`)
+			console.warn(`Could not find placedItem matching id ${placedItemEntity.identifier}`)
+			return new EmptyItem(placedItemEntity.id, EmptyItemTemplate.getErrorTemplate(), 'CRITICAL ERROR');
 		}
 		const itemClass = getItemClassFromSubtype(itemData);
 
 		const instance = new itemClass(placedItemEntity.id, itemData, placedItemEntity.status);
 		if (!(instance instanceof PlacedItem)) {
-			throw new Error(`Attempted to create non PlacedItem for id ${placedItemEntity.identifier}`);
+			console.warn(`Attempted to create non PlacedItem for id ${placedItemEntity.identifier}`);
+			return new EmptyItem(placedItemEntity.id, EmptyItemTemplate.getErrorTemplate(), 'CRITICAL ERROR');
 		}
 		return instance;
 	}

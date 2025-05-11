@@ -325,8 +325,75 @@
   * Updated description on login screen
   * Added react-redux to track item quantities for instant updating when planting/harvesting/buying/selling
 
+## Day 32
+
+### AWS Database setup - In progress
+  * Create aws rds instance
+  * Configure security/allowed routes with EC2
+  * Get connection details (endpoint, port, username/password, database name)
+  * Update environment variables with connection details
+  * Connect to rds with psql and setup admin rights/owners
+  * Consider adding custom initialization script to set up tables
+  * Test locally
+  * Redeploy app
+
+## Created private rds
+  * Created prod and dev databases
+  * Created prod_admin and dev_admin users with full permissions
+  * Setup initial tables
+  * Created security groups to disallow incoming traffic except from bastion host
+
+## Created bastion host
+  * Created ec2 instance to act as an ssh tunnel
+  * Created security group to only allow incoming traffic from my local ip
+  * Allows outgoing traffic to internal ecosystem, aka the private rds
+  * Run ssh command in terminal to enable port forwarding from localhost to rds
+  * Now able to connect to rds with pgadmin, psql, or environment variables in webapp
+
+### Create Lambda + API Gateway - On Hold
+  * Lambda function that exposes http/rest endpoints, accessible by frontend
+  * Has access to private vpc, allowing querying of rds
+  * Frontend sends http request that triggers lambda function, which performs database queries and returns json data
+  * Secure gateway using api keys, iam roles, or oauth, and ssl/tls encryption
+  * Flow: user presses button on frontend -> frontend sends request to backend -> backend authenticates with firebase -> backend sends request to api gateway (containing api key on server side) -> api gateway calls lambda function -> return json data to frontend
+  * To consider: separate api keys per user, which would allow deactivation/rate limiting per user
+
+### Currently investigating aws lambda...
+  * Use xmin for concurrency
+  * Client -> api route -> service function -> lambda call to fetch data from db -> data processing -> lambda call to update db -> return result to client
+  * Right now each service function has 2 lambdas, consider code reuse
+  * TODO: Give nextjs a specific iam role with only invokeLambda permissions
+
+## Day 33
+
+### UI QOL Changes
+  * Force Refresh Saved Data button
+    * Disabled clicking button while syncing in progress, and gave indication that function is running
+    * Needs to give some progress/success/failure indication, maybe make a notification system?
+
+Guest mode: Should have a level/xp/money etc cap, and some warnings that guest mode is local only; allow users to port their guest mode account into an online account (with the cap)
 
 TODO:
+SQS queue for rate limiting between backend and lambda?
+Fix login screen, allow creation in a different user flow, allow resetting password
+Fix guest mode banners
+Rate limit on aws
+Rate limit on backend api
+
+New password reset landing page
+
+Lambda should have a single interact with database function which takes in the action type (insert, update, select, delete) and then calls all queries, so we can use a single transaction and make it atomic
+
+Itemlist is not updating properly again when buying/selling items
+XP is not updating properly when harvesting plants <--------------
+Check syncing with redux when buying/restocking
+Check restock timer when loading in
+
+Username cannot include special characters, must be alphanumeric or whitespace (esp no *, %, \ to prevent sql problems)
+
+"Force refresh saved data" button with 5 second cd
+
+Actionhistories should be harvested:category:harvested? (instead of plant: category)
 
 Action items:
 1. Make the redirect delayed and make it sit on a screen that says redirect to login page (may be changed in the future)

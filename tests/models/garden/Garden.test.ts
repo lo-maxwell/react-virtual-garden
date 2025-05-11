@@ -41,7 +41,6 @@ test('Should Initialize Default Garden Object', () => {
 	expect(newGarden).toBeTruthy();
 	expect(newGarden.getRows()).toBe(Garden.getStartingRows());
 	expect(newGarden.getCols()).toBe(Garden.getStartingCols());
-	expect(newGarden.getOwnerName()).toBe("Dummy User");
 	expect(newGarden.getPlots().length).toBe(Garden.getStartingRows());
 	expect(newGarden.getPlots()[0].length).toBe(Garden.getStartingCols());
 	expect(newGarden.getPlots()[0][0].getItem().itemData.name).toBe("ground");
@@ -51,11 +50,10 @@ test('Should Initialize Default Garden Object', () => {
 });
 
 test('Should Initialize Specified Garden Object', () => {
-	const newGarden = new Garden(uuidv4(), "Test User", 15, 15, Garden.generateEmptyPlots(15, 15));
+	const newGarden = new Garden(uuidv4(), 15, 15, Garden.generateEmptyPlots(15, 15));
 	expect(newGarden).toBeTruthy();
 	expect(newGarden.getRows()).toBe(15);
 	expect(newGarden.getCols()).toBe(15);
-	expect(newGarden.getOwnerName()).toBe("Test User");
 	expect(newGarden.getPlots().length).toBe(15);
 	expect(newGarden.getPlots()[0].length).toBe(15);
 	expect(newGarden.getPlots()[0][0].getItem().itemData.name).toBe("ground");
@@ -99,7 +97,7 @@ test('Should Not Extend Garden Size If Low Level', () => {
 })
 
 test('Should Shrink Garden Size', () => {
-	const newGarden = new Garden(uuidv4(), "Dummy User", Garden.getStartingRows() + 5, Garden.getStartingCols() + 5);
+	const newGarden = new Garden(uuidv4(), Garden.getStartingRows() + 5, Garden.getStartingCols() + 5);
 	expect(newGarden.getRows()).toBe(Garden.getStartingRows() + 5);
 	expect(newGarden.getCols()).toBe(Garden.getStartingCols() + 5);
 	newGarden.setPlotItem(1,1,generateNewPlaceholderPlacedItem("apple", "newItem"));
@@ -259,7 +257,7 @@ test('Should Not Repackage Invalid Plot', () => {
 })
 
 test('Should Fill Null With Empty Plot', () => {
-	const newGarden = new Garden(uuidv4(), "Dummy User", 10, 10, [[new Plot(uuidv4(), generateNewPlaceholderPlacedItem('apple', ''), Date.now())], [], []]);
+	const newGarden = new Garden(uuidv4(), 10, 10, [[new Plot(uuidv4(), generateNewPlaceholderPlacedItem('apple', ''), Date.now())], [], []]);
 	
 	expect(newGarden.getRows()).toBe(10);
 	expect(newGarden.getCols()).toBe(10);
@@ -272,9 +270,8 @@ test('Should Fill Null With Empty Plot', () => {
 
 test('Should Create Garden Object From PlainObject', () => {
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-	const serializedGarden = JSON.stringify((new Garden(uuidv4(), "Test", 10, 10, null)).toPlainObject());
+	const serializedGarden = JSON.stringify((new Garden(uuidv4(), 10, 10, null)).toPlainObject());
 	const garden = Garden.fromPlainObject(JSON.parse(serializedGarden));
-	expect(garden.getOwnerName()).toBe("Test");
 	expect(garden.getRows()).toBe(10);
 	expect(garden.getCols()).toBe(10);
 	expect(garden.size()).toBe(100);
@@ -290,7 +287,7 @@ test('Should Throw Error on Invalid Input to FromPlainObject', () => {
 test('Should Only Reset Corrupted Plot On Load', () => {
 	//Mute console error
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-	const testGarden = new Garden(uuidv4(), 'test', 10, 10, null);
+	const testGarden = new Garden(uuidv4(), 10, 10, null);
 	testGarden.setPlotItem(0, 0, generateNewPlaceholderPlacedItem('error', ''));
 	const serializedGarden = JSON.stringify(testGarden.toPlainObject());
 	const garden = Garden.fromPlainObject(JSON.parse(serializedGarden));
@@ -305,7 +302,7 @@ test('Should Only Reset Corrupted Plot On Load', () => {
 test('Should Reset All Plots On Invalid Format Load', () => {
 	//Mute console error
 	const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-	const testGarden = new Garden(uuidv4(), 'test', 10, 10, null);
+	const testGarden = new Garden(uuidv4(), 10, 10, null);
 	testGarden.setPlotItem(0, 0, generateNewPlaceholderPlacedItem('error', ''));
 	testGarden.setPlotItem(1, 1, generateNewPlaceholderPlacedItem('apple', ''));
 	const serializedGarden = JSON.stringify(testGarden.toPlainObject());
