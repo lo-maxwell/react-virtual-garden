@@ -337,13 +337,13 @@
   * Test locally
   * Redeploy app
 
-## Created private rds
+### Created private rds
   * Created prod and dev databases
   * Created prod_admin and dev_admin users with full permissions
   * Setup initial tables
   * Created security groups to disallow incoming traffic except from bastion host
 
-## Created bastion host
+### Created bastion host
   * Created ec2 instance to act as an ssh tunnel
   * Created security group to only allow incoming traffic from my local ip
   * Allows outgoing traffic to internal ecosystem, aka the private rds

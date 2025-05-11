@@ -9,7 +9,7 @@ import AuthLogoutComponent from './authLogoutComponent';
 const AuthComponent: React.FC = () => {
     const { firebaseUser, loading, logout } = useAuth(); // Access user and loading state
     const [displayLogin, setDisplayLogin] = useState<boolean>(true);
-    const allowFirebase = process.env.NEXT_PUBLIC_TEST_ENV_KEY;
+    // const allowFirebase = process.env.NEXT_PUBLIC_TEST_ENV_KEY;
 
     const toggleDisplayLogin = (newValue: boolean | null = null) => {
         if (typeof newValue == "boolean" && displayLogin !== newValue) {
