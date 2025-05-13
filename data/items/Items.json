@@ -428,7 +428,7 @@
                 "subtype": "Seed",
                 "category": "Onion",
                 "description": "Error",
-                "value": 60,
+                "value": 40,
                 "level": 0,
                 "transformId": "0-02-01-01-00"
             },
@@ -440,7 +440,7 @@
                 "subtype": "Seed",
                 "category": "Onion",
                 "description": "Error",
-                "value": 60,
+                "value": 40,
                 "level": 0,
                 "transformId": "0-02-01-06-00"
             },
@@ -562,7 +562,7 @@
                 "subtype": "HarvestedItem",
                 "category": "Onion",
                 "description": "Error",
-                "value": 135,
+                "value": 100,
                 "level": 0
             },
             {
@@ -573,7 +573,7 @@
                 "subtype": "HarvestedItem",
                 "category": "Onion",
                 "description": "Bronze version of garlic",
-                "value": 270,
+                "value": 200,
                 "level": 0
             },
             {
@@ -584,7 +584,7 @@
                 "subtype": "HarvestedItem",
                 "category": "Onion",
                 "description": "Silver version of garlic",
-                "value": 675,
+                "value": 500,
                 "level": 0
             },
             {
@@ -595,7 +595,7 @@
                 "subtype": "HarvestedItem",
                 "category": "Onion",
                 "description": "Gold version of garlic",
-                "value": 1350,
+                "value": 1000,
                 "level": 0
             },
             {
@@ -606,7 +606,7 @@
                 "subtype": "HarvestedItem",
                 "category": "Onion",
                 "description": "Error",
-                "value": 150,
+                "value": 120,
                 "level": 0
             },
             {
@@ -617,7 +617,7 @@
                 "subtype": "HarvestedItem",
                 "category": "Onion",
                 "description": "Bronze version of onion",
-                "value": 300,
+                "value": 240,
                 "level": 0
             },
             {
@@ -628,7 +628,7 @@
                 "subtype": "HarvestedItem",
                 "category": "Onion",
                 "description": "Silver version of onion",
-                "value": 750,
+                "value": 600,
                 "level": 0
             },
             {
@@ -639,7 +639,7 @@
                 "subtype": "HarvestedItem",
                 "category": "Onion",
                 "description": "Gold version of onion",
-                "value": 1500,
+                "value": 1200,
                 "level": 0
             },
             {

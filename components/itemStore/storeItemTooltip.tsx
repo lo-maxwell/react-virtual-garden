@@ -6,10 +6,11 @@ import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
 import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
+import { Store } from "@/models/itemStore/store/Store";
 import colors from "../colors/colors";
 import Tooltip from "../window/tooltip";
 
-const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, item: InventoryItem}) => {
+const StoreItemTooltip = ({ children, item, store }: { children: React.ReactNode, item: InventoryItem, store: Store}) => {
 
 	const RenderItemTooltipInfo = () => {
 		switch(item.itemData.subtype) {
@@ -49,7 +50,7 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 				</div>
 				<span className="ml-2 flex ">
 					<span className="">💰</span> {/* Gold icon */}
-					{currentItem.itemData.value}
+					{currentItem.itemData.value * store.getBuyMultiplier()}
 				</span>
 			</div>
 			<div className={`${colors.blueprint.categoryTextColor} text-left`}>Seed</div>
@@ -86,7 +87,7 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 				</div>
 				<span className="ml-2 flex ">
 					<span className="">💰</span> {/* Gold icon */}
-					{currentItem.itemData.value}
+					{currentItem.itemData.value * store.getBuyMultiplier()}
 				</span>
 			</div>
 			<div className={`${colors.harvested.categoryTextColor} text-left`}>Harvested</div>
@@ -115,7 +116,7 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 					</div>
 					<span className="ml-2 flex ">
 						<span className="">💰</span> {/* Gold icon */}
-						{currentItem.itemData.value}
+						{currentItem.itemData.value * store.getBuyMultiplier()}
 					</span>
 				</div>
 				<div className={`${colors.blueprint.categoryTextColor} text-left`}>Blueprint</div>
@@ -157,4 +158,4 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 		);
 }
 
-export default InventoryItemTooltip;
+export default StoreItemTooltip;

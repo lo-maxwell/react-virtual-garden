@@ -3,8 +3,9 @@ import { ItemSubtype, ItemSubtypes } from "@/models/items/ItemTypes";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { Store } from "@/models/itemStore/store/Store";
 import { useState } from "react";
-import InventoryItemComponent from "../inventory/inventoryItem";
+import InventoryItemComponent from "./storeItem";
 import DropdownMenu from "../lists/DropdownMenu";
+import StoreItemComponent from "./storeItem";
 
 const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultiplier, maxHeightPercentage}: {itemStore: Store | Inventory, onInventoryItemClickFunction: (arg: any) => void, costMultiplier: number, maxHeightPercentage: number}) => {
 	const [subtypeFilter, setSubtypeFilter] = useState<ItemSubtype | null>(null);
@@ -98,11 +99,19 @@ const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultip
 			if (item.getQuantity() <= 0) {
 				return <div key={itemIndex}></div>;
 			}
-			return (
-				<div key={itemIndex}>
-					<InventoryItemComponent itemStore={itemStore} item={item} onClickFunction={onInventoryItemClickFunction} costMultiplier={costMultiplier} focus={item == selectedItem}></InventoryItemComponent>
-				</div>
-			)
+			if (itemStore instanceof Store) {
+				return (
+					<div key={itemIndex}>
+						<StoreItemComponent itemStore={itemStore} item={item} onClickFunction={onInventoryItemClickFunction} costMultiplier={costMultiplier} focus={item == selectedItem}></StoreItemComponent>
+					</div>
+				)
+			} else {
+				return (
+					<div key={itemIndex}>
+						<InventoryItemComponent itemStore={itemStore} item={item} onClickFunction={onInventoryItemClickFunction} costMultiplier={costMultiplier} focus={item == selectedItem}></InventoryItemComponent>
+					</div>
+				)
+			}
 	})
 	}
 
