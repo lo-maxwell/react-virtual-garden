@@ -10,8 +10,8 @@ import colors from "../colors/colors";
 import StoreItemTooltip from "./storeItemTooltip";
 import ItemComponent from "./../inventory/item";
 
-const StoreItemComponent = ({itemStore, item, onClickFunction, costMultiplier, focus}: {itemStore: Store | Inventory, item: InventoryItem, onClickFunction: (arg: any) => void, costMultiplier: number, focus: boolean}) => {
-	
+const StoreItemComponent = ({itemStore, item, onClickFunction, costMultiplier, focus}: {itemStore: Store, item: InventoryItem, onClickFunction: (arg: any) => void, costMultiplier: number, focus: boolean}) => {
+	console.log(itemStore);
 	const dispatch: AppDispatch = useDispatch();
 
     // Get quantity from Redux state
@@ -34,43 +34,21 @@ const StoreItemComponent = ({itemStore, item, onClickFunction, costMultiplier, f
 	}
 
 	const getTextColor = () => {
-		if (itemStore instanceof Store) {
-			return colors.store.storeDefaultItemTextColor;
-		} else {
-			//itemStore instanceof Inventory
-			return colors.inventory.inventoryDefaultItemTextColor;
-		}
+		return colors.store.storeDefaultItemTextColor;
 	}
 
 	const getPriceColor = () => {
 		if (focus) {
-			if (itemStore instanceof Store) {
-				return '';
-			} else {
-				//itemStore instanceof Inventory
-				return '';
-			}
+			return '';
 		} else {
-			if (itemStore instanceof Store) {
-				if (costMultiplier > 2) {
-					return colors.store.storeHighPrice;
-				} else if (costMultiplier == 2) {
-					return colors.store.storeRegularPrice;
-				} else if (costMultiplier < 2) {
-					return colors.store.storeLowPrice;
-				}
-				return '';
-			} else {
-				//itemStore instanceof Inventory
-				if (costMultiplier > 1) {
-					return colors.inventory.inventoryHighPrice;
-				} else if (costMultiplier == 1) {
-					return colors.inventory.inventoryRegularPrice;
-				} else if (costMultiplier < 1) {
-					return colors.inventory.inventoryLowPrice;
-				}
-				return '';
+			if (costMultiplier > 2) {
+				return colors.store.storeHighPrice;
+			} else if (costMultiplier == 2) {
+				return colors.store.storeRegularPrice;
+			} else if (costMultiplier < 2) {
+				return colors.store.storeLowPrice;
 			}
+			return '';
 		}
 	}
 

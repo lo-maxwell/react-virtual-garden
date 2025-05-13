@@ -12,6 +12,7 @@ import Tooltip from "../window/tooltip";
 
 const StoreItemTooltip = ({ children, item, store }: { children: React.ReactNode, item: InventoryItem, store: Store}) => {
 
+	console.log(store);
 	const RenderItemTooltipInfo = () => {
 		switch(item.itemData.subtype) {
 			case ItemSubtypes.SEED.name:
