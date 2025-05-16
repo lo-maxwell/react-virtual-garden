@@ -1,0 +1,17 @@
+name,description,identifier
+Total Plants Harvested,The number of plants harvested by this user,plant:all:harvested
+Onions Harvested,The number of onions harvested by this user,plant:onion:harvested
+Leafy Greens Harvested,The number of leafy greens harvested by this user,plant:leafy green:harvested
+Nightshades Harvested,The number of nightshades harvested by this user,plant:nightshade:harvested
+Legumes Harvested,The number of legumes harvested by this user,plant:legume:harvested
+Grains Harvested,The number of grains harvested by this user,plant:grain:harvested
+Squashes Harvested,The number of squashes harvested by this user,plant:squash:harvested
+Herbs Harvested,The number of herbs harvested by this user,plant:herb:harvested
+Root Vegetables Harvested,The number of root vegetables harvested by this user,plant:root vegetable:harvested
+Tree Fruit Harvested,The number of tree fruit harvested by this user,plant:tree fruit:harvested
+Tropical Fruit Harvested,The number of tropical fruit harvested by this user,plant:tropical:harvested
+Berries Harvested,The number of berries harvested by this user,plant:berry:harvested
+Citrus Fruit Harvested,The number of citrus fruit harvested by this user,plant:citrus:harvested
+Vine Fruit Harvested,The number of vine fruit harvested by this user,plant:vine fruit:harvested
+Sea Vegetables Harvested,The number of sea vegetables harvested by this user,plant:sea vegetable:harvested
+Decorations Placed,The number of normal decorations placed.,decoration:normal:placed

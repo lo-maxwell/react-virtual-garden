@@ -1,6 +1,6 @@
 import { ItemSubtype, ItemSubtypes, ItemType, ItemTypes } from "../../ItemTypes";
 import { InventoryItemTemplateInterface } from "../interfaces/InventoryItemTemplateInterface";
-import { itemTemplateInterfaceRepository } from "../interfaces/ItemTemplateRepository";
+import { itemTemplateInterfaceRepository } from "../interfaces/ItemTemplateInterfaceRepository";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
 
 export class BlueprintTemplate extends InventoryItemTemplate{

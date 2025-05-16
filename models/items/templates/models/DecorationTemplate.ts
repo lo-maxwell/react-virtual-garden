@@ -1,5 +1,5 @@
 import { ItemSubtype, ItemSubtypes, ItemType, ItemTypes } from "../../ItemTypes";
-import { itemTemplateInterfaceRepository } from "../interfaces/ItemTemplateRepository";
+import { itemTemplateInterfaceRepository } from "../interfaces/ItemTemplateInterfaceRepository";
 import { PlacedItemTemplateInterface } from "../interfaces/PlacedItemTemplateInterface";
 import { PlacedItemTemplate } from "./PlacedItemTemplate";
 

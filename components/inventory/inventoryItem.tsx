@@ -10,7 +10,7 @@ import colors from "../colors/colors";
 import InventoryItemTooltip from "./inventoryItemTooltip";
 import ItemComponent from "./item";
 
-const InventoryItemComponent = ({itemStore, item, onClickFunction, costMultiplier, focus}: {itemStore: Store | Inventory, item: InventoryItem, onClickFunction: (arg: any) => void, costMultiplier: number, focus: boolean}) => {
+const InventoryItemComponent = ({itemStore, item, onClickFunction, costMultiplier, focus}: {itemStore: Inventory, item: InventoryItem, onClickFunction: (arg: any) => void, costMultiplier: number, focus: boolean}) => {
 	
 	const dispatch: AppDispatch = useDispatch();
 
@@ -34,43 +34,24 @@ const InventoryItemComponent = ({itemStore, item, onClickFunction, costMultiplie
 	}
 
 	const getTextColor = () => {
-		if (itemStore instanceof Store) {
-			return colors.store.storeDefaultItemTextColor;
-		} else {
-			//itemStore instanceof Inventory
-			return colors.inventory.inventoryDefaultItemTextColor;
-		}
+		//itemStore instanceof Inventory
+		return colors.inventory.inventoryDefaultItemTextColor;
 	}
 
 	const getPriceColor = () => {
 		if (focus) {
-			if (itemStore instanceof Store) {
-				return '';
-			} else {
-				//itemStore instanceof Inventory
-				return '';
-			}
+			//itemStore instanceof Inventory
+			return '';
 		} else {
-			if (itemStore instanceof Store) {
-				if (costMultiplier > 2) {
-					return colors.store.storeHighPrice;
-				} else if (costMultiplier == 2) {
-					return colors.store.storeRegularPrice;
-				} else if (costMultiplier < 2) {
-					return colors.store.storeLowPrice;
-				}
-				return '';
-			} else {
-				//itemStore instanceof Inventory
-				if (costMultiplier > 1) {
-					return colors.inventory.inventoryHighPrice;
-				} else if (costMultiplier == 1) {
-					return colors.inventory.inventoryRegularPrice;
-				} else if (costMultiplier < 1) {
-					return colors.inventory.inventoryLowPrice;
-				}
-				return '';
+			//itemStore instanceof Inventory
+			if (costMultiplier > 1) {
+				return colors.inventory.inventoryHighPrice;
+			} else if (costMultiplier == 1) {
+				return colors.inventory.inventoryRegularPrice;
+			} else if (costMultiplier < 1) {
+				return colors.inventory.inventoryLowPrice;
 			}
+			return '';
 		}
 	}
 

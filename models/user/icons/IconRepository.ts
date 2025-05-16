@@ -5,10 +5,10 @@ class IconFactory {
 	Icons: Record<string, Icon[]> = {};
 
 	constructor() {
-		this.loadItems();
+		this.loadIcons();
 	}
 
-	loadItems() {
+	loadIcons() {
 		// Example to load PlacedItems > Plants
 		this.Icons['Plants'] = iconData.Icons.Plants.map((iconObject: any) =>
 		  {return new Icon(iconObject.name, iconObject.icon);}

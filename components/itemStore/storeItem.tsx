@@ -11,7 +11,6 @@ import StoreItemTooltip from "./storeItemTooltip";
 import ItemComponent from "./../inventory/item";
 
 const StoreItemComponent = ({itemStore, item, onClickFunction, costMultiplier, focus}: {itemStore: Store, item: InventoryItem, onClickFunction: (arg: any) => void, costMultiplier: number, focus: boolean}) => {
-	console.log(itemStore);
 	const dispatch: AppDispatch = useDispatch();
 
     // Get quantity from Redux state

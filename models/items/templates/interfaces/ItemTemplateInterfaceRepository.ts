@@ -1,7 +1,7 @@
 import itemsData from '@/data/items/Items.json';
-import { BlueprintTemplateInterface } from "../interfaces/BlueprintTemplateInterface";
-import { InventoryItemTemplateInterface } from "../interfaces/InventoryItemTemplateInterface";
-import { PlacedItemTemplateInterface } from "../interfaces/PlacedItemTemplateInterface";
+import { BlueprintTemplateInterface } from "./BlueprintTemplateInterface";
+import { InventoryItemTemplateInterface } from "./InventoryItemTemplateInterface";
+import { PlacedItemTemplateInterface } from "./PlacedItemTemplateInterface";
 import { DecorationTemplateInterface } from './DecorationTemplateInterface';
 import { EmptyItemTemplateInterface } from './EmptyItemTemplateInterface';
 import { HarvestedItemTemplateInterface } from './HarvestedItemTemplateInterface';

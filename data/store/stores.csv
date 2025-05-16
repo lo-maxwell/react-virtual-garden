@@ -1,0 +1,3 @@
+id,name,stocklistId,stocklistName,buyMultiplier,sellMultiplier,upgradeMultiplier,restockInterval
+0,Default Store,0,Default Stocklist,2,1,1,3600000
+1,Test Store,0,Default Stocklist,2,1,1,60000

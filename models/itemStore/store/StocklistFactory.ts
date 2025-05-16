@@ -8,10 +8,10 @@ class StocklistFactory {
 
 	constructor() {
 		this.stocklists = [];
-		this.loadHistory();
+		this.loadStocklists();
 	}
 
-  	loadHistory() {
+  	loadStocklists() {
 		stocklistData.Stocklists.forEach((stocklist: any) => {
 			this.stocklists.push(this.createStocklist(stocklist));
 		})

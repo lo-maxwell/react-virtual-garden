@@ -1,0 +1,44 @@
+id,name,icon,type,subtype,category,description,value,level
+1-03-01-01-00,garlic,🧄,InventoryItem,HarvestedItem,Onion,Error,100,0
+1-03-01-01-01,Bronze garlic,🧄,InventoryItem,HarvestedItem,Onion,Bronze version of garlic,200,0
+1-03-01-01-02,Silver garlic,🧄,InventoryItem,HarvestedItem,Onion,Silver version of garlic,500,0
+1-03-01-01-03,Gold garlic,🧄,InventoryItem,HarvestedItem,Onion,Gold version of garlic,1000,0
+1-03-01-06-00,onion,🧅,InventoryItem,HarvestedItem,Onion,Error,120,0
+1-03-01-06-01,Bronze onion,🧅,InventoryItem,HarvestedItem,Onion,Bronze version of onion,240,0
+1-03-01-06-02,Silver onion,🧅,InventoryItem,HarvestedItem,Onion,Silver version of onion,600,0
+1-03-01-06-03,Gold onion,🧅,InventoryItem,HarvestedItem,Onion,Gold version of onion,1200,0
+1-03-06-04-00,pumpkin,🎃,InventoryItem,HarvestedItem,Squash,Error,240,0
+1-03-06-04-01,Bronze pumpkin,🎃,InventoryItem,HarvestedItem,Squash,Bronze version of pumpkin,480,0
+1-03-06-04-02,Silver pumpkin,🎃,InventoryItem,HarvestedItem,Squash,Silver version of pumpkin,1200,0
+1-03-06-04-03,Gold pumpkin,🎃,InventoryItem,HarvestedItem,Squash,Gold version of pumpkin,2400,0
+1-03-09-01-00,apple,🍎,InventoryItem,HarvestedItem,Tree Fruit,Error,15,0
+1-03-09-01-01,Bronze apple,🍎,InventoryItem,HarvestedItem,Tree Fruit,Bronze version of apple,30,0
+1-03-09-01-02,Silver apple,🍎,InventoryItem,HarvestedItem,Tree Fruit,Silver version of apple,75,0
+1-03-09-01-03,Gold apple,🍎,InventoryItem,HarvestedItem,Tree Fruit,Gold version of apple,150,0
+1-03-09-02-00,cherry,🍒,InventoryItem,HarvestedItem,Tree Fruit,Error,180,0
+1-03-09-02-01,Bronze cherry,🍒,InventoryItem,HarvestedItem,Tree Fruit,Bronze version of cherry,360,0
+1-03-09-02-02,Silver cherry,🍒,InventoryItem,HarvestedItem,Tree Fruit,Silver version of cherry,900,0
+1-03-09-02-03,Gold cherry,🍒,InventoryItem,HarvestedItem,Tree Fruit,Gold version of cherry,1800,0
+1-03-09-03-00,peach,🍑,InventoryItem,HarvestedItem,Tree Fruit,Error,260,0
+1-03-09-03-01,Bronze peach,🍑,InventoryItem,HarvestedItem,Tree Fruit,Bronze version of peach,520,0
+1-03-09-03-02,Silver peach,🍑,InventoryItem,HarvestedItem,Tree Fruit,Silver version of peach,1300,0
+1-03-09-03-03,Gold peach,🍑,InventoryItem,HarvestedItem,Tree Fruit,Gold version of peach,2600,0
+1-03-10-01-00,banana,🍌,InventoryItem,HarvestedItem,Tropical,Error,20,0
+1-03-10-01-01,Bronze banana,🍌,InventoryItem,HarvestedItem,Tropical,Bronze version of banana,40,0
+1-03-10-01-02,Silver banana,🍌,InventoryItem,HarvestedItem,Tropical,Silver version of banana,100,0
+1-03-10-01-03,Gold banana,🍌,InventoryItem,HarvestedItem,Tropical,Gold version of banana,200,0
+1-03-10-02-00,coconut,🥥,InventoryItem,HarvestedItem,Tropical,Error,500,0
+1-03-10-02-01,Bronze coconut,🥥,InventoryItem,HarvestedItem,Tropical,Bronze version of coconut,1000,0
+1-03-10-02-02,Silver coconut,🥥,InventoryItem,HarvestedItem,Tropical,Silver version of coconut,2500,0
+1-03-10-02-03,Gold coconut,🥥,InventoryItem,HarvestedItem,Tropical,Gold version of coconut,5000,0
+1-03-10-03-00,mango,🥭,InventoryItem,HarvestedItem,Tropical,Error,360,0
+1-03-10-03-01,Bronze mango,🥭,InventoryItem,HarvestedItem,Tropical,Bronze version of mango,720,0
+1-03-10-03-11,Bronze magic mango,🥭,InventoryItem,HarvestedItem,Tropical,Bronze version of magic mango,7200,0
+1-03-10-03-02,Silver mango,🥭,InventoryItem,HarvestedItem,Tropical,Silver version of mango,1800,0
+1-03-10-03-12,Silver magic mango,🥭,InventoryItem,HarvestedItem,Tropical,Silver version of magic mango,18000,0
+1-03-10-03-10,magic mango,🥭,InventoryItem,HarvestedItem,Tropical,Error,3600,0
+1-03-10-03-03,Gold mango,🥭,InventoryItem,HarvestedItem,Tropical,Gold version of mango,3600,0
+1-03-99-99-91,Bronze error,❌,InventoryItem,HarvestedItem,Error,Bronze version of error,0,0
+1-03-99-99-92,Silver error,❌,InventoryItem,HarvestedItem,Error,Silver version of error,0,0
+1-03-99-99-93,Gold error,❌,InventoryItem,HarvestedItem,Error,Gold version of error,0,0
+1-03-99-99-99,error,❌,InventoryItem,HarvestedItem,Error,Error,0,0
