@@ -371,6 +371,13 @@
     * Disabled clicking button while syncing in progress, and gave indication that function is running
     * Needs to give some progress/success/failure indication, maybe make a notification system?
 
+## Day 34
+
+### Deployed AWS lambda and cloud saving
+
+### Building infra for easier modification of items
+  * Created some csvs to store item data, might be easier to write a script to parse the csv into json than to parse the csv from client side
+
 Guest mode: Should have a level/xp/money etc cap, and some warnings that guest mode is local only; allow users to port their guest mode account into an online account (with the cap)
 
 TODO:
