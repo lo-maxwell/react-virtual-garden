@@ -1,0 +1,13 @@
+{
+    "Tools": [
+        {
+            "id": "1",
+            "name": "Basic Shovel",
+            "type": "Shovel",
+            "icon": "🪓",
+            "description": "Error",
+            "value": 0,
+            "level": 0
+        }
+    ]
+}

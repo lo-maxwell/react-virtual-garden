@@ -167,4 +167,4 @@ with open(plants_file_path, mode='r', encoding='utf-8') as csv_file:
 with open(json_file_path, mode='w', encoding='utf-8') as json_file:
     json.dump(data, json_file, ensure_ascii=False, indent=4)
 
-print("CSV has been converted to JSON format successfully.")
+print("Item CSV has been converted to JSON format successfully.")

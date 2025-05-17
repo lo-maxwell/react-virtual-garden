@@ -1,5 +1,5 @@
 import { StocklistInterface } from "./StocklistInterface";
-import stocklistData from '@/data/store/Stocklists.json';
+import stocklistData from '@/data/final/Stocklists.json';
 import { ItemList } from "../ItemList";
 import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
 
