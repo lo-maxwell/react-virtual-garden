@@ -54,7 +54,7 @@ const colors = {
 
 	store: {
 		storeDefaultItemTextColor: "text-coffee-800",
-		storeHighPrice: "text-red-900 text-black",
+		storeHighPrice: "text-red-900",
 		storeRegularPrice: "text-coffee-700 font-bold",
 		storeLowPrice: "text-green-300"
 	},
@@ -66,6 +66,10 @@ const colors = {
 		inventoryLowPrice: "text-green-300",
 		inventoryItemBorderColor: "border-apple-600"
 	},
+
+	error: {
+		redErrorText: "text-red-600"
+	}
 	
 }
 

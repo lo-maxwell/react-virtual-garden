@@ -30,7 +30,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		  store = Store.generateDefaultNewStore();
 		//   store.restockStore();
 		}
-		updateRestockTimer();
+		// updateRestockTimer();
 		saveStore(store);
 		return store;
 	  }
@@ -42,12 +42,20 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 	  }, []);
 
 	function restockStoreLocal () {
-		if (!store) return false;
-		if (!store.needsRestock()) return false;
+		if (!store) return "STORE_NOT_FOUND";
+		if (!store.needsRestock()) return "NOT_MISSING_STOCK";
+		const currentTime = Date.now();
+		if (store.getLastRestockTime() + store.getRestockInterval() > currentTime) {
+			return "NOT_TIME";
+		}
 		const response = store.restockStore();
-		if (!response.isSuccessful()) return false;
+
+		if (!response.isSuccessful()) {
+			// response.printErrorMessages();
+			return "FAILED";
+		}
 		saveStore(store);
-		return true;
+		return "SUCCESS";
 	}
 
 	async function restockStoreAPI () {
@@ -79,10 +87,9 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 	}
 	
     const restockStore = async () => {
-		console.log('restocking store');
 		if (!store) return "ERROR";
 		const localResult = restockStoreLocal();
-		if (localResult) {
+		if (localResult === "SUCCESS") {
 			// Terminate early before api call
 			if (guestMode) {
 				updateReduxStoreItemsAfterRestock();
@@ -97,7 +104,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 			updateReduxStoreItemsAfterRestock();
 			return "SUCCESS";
 		}
-		return "FAILED";
+		return localResult;
     };
 
 	const dispatch = useDispatch();
@@ -122,55 +129,55 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		})
 	}
 
-	const restockTimeout = useRef<number | null>(null);
-	const updateRestockTimer = useCallback(async () => {
-		if (!store) return;
-		if (restockTimeout.current) return; //do not interrupt existing timeouts
-		const currentTime = Date.now();
+	// const restockTimeout = useRef<number | null>(null);
+	// const updateRestockTimer = useCallback(async () => {
+	// 	if (!store) return;
+	// 	if (restockTimeout.current) return; //do not interrupt existing timeouts
+	// 	const currentTime = Date.now();
 
-		if (currentTime > store.getRestockTime() && store.needsRestock()) {
-			//Store is waiting for a restock, timer is finished
-			const newRestockTime = currentTime + store.getRestockInterval();
-			store.setRestockTime(newRestockTime);
-			// Set a new timeout to trigger restock after the interval
-			const remainingTime = Math.max(1, newRestockTime - currentTime);
-			restockTimeout.current = window.setTimeout(async () => {
-				const restockResult = await restockStore();
-				restockTimeout.current = null;
-				if (restockResult === "NOT TIME") {
-					updateRestockTimer()
-				}
+	// 	if (currentTime > store.getRestockTime() && store.needsRestock()) {
+	// 		//Store is waiting for a restock, timer is finished
+	// 		const newRestockTime = currentTime + store.getRestockInterval();
+	// 		store.setRestockTime(newRestockTime);
+	// 		// Set a new timeout to trigger restock after the interval
+	// 		const remainingTime = Math.max(1, newRestockTime - currentTime);
+	// 		restockTimeout.current = window.setTimeout(async () => {
+	// 			const restockResult = await restockStore();
+	// 			restockTimeout.current = null;
+	// 			if (restockResult === "NOT TIME") {
+	// 				updateRestockTimer()
+	// 			}
 				
-			}, remainingTime);
+	// 		}, remainingTime);
 			
-			// const restockResult = await restockStore();
-			// if (restockResult === "NOT TIME") {
-			// 	updateRestockTimer()
-			// }
-		} else if (store.needsRestock()) {
-			 // Set a timeout for the remaining time until the next restock
-			const remainingTime = Math.max(1, store.getRestockTime() - currentTime);
-			restockTimeout.current = window.setTimeout(async () => {
-				const restockResult = await restockStore();
-				restockTimeout.current = null;
-				if (restockResult === "NOT TIME") {
-					updateRestockTimer()
-				}
-			}, remainingTime);
-		}
-	}, [store]);
+	// 		// const restockResult = await restockStore();
+	// 		// if (restockResult === "NOT TIME") {
+	// 		// 	updateRestockTimer()
+	// 		// }
+	// 	} else if (store.needsRestock()) {
+	// 		 // Set a timeout for the remaining time until the next restock
+	// 		const remainingTime = Math.max(1, store.getRestockTime() - currentTime);
+	// 		restockTimeout.current = window.setTimeout(async () => {
+	// 			const restockResult = await restockStore();
+	// 			restockTimeout.current = null;
+	// 			if (restockResult === "NOT TIME") {
+	// 				updateRestockTimer()
+	// 			}
+	// 		}, remainingTime);
+	// 	}
+	// }, [store]);
 
-	useEffect(() => {
-		// Start the timer when the component mounts
-		updateRestockTimer();
+	// useEffect(() => {
+	// 	// Start the timer when the component mounts
+	// 	// updateRestockTimer();
 	
-		// Clean up the timer when the component unmounts
-		return () => {
-		  if (restockTimeout.current) {
-			clearTimeout(restockTimeout.current);
-		  }
-		};
-	  }, [updateRestockTimer]);
+	// 	// Clean up the timer when the component unmounts
+	// 	return () => {
+	// 	  if (restockTimeout.current) {
+	// 		clearTimeout(restockTimeout.current);
+	// 	  }
+	// 	};
+	//   }, [updateRestockTimer]);
 
 	const resetStore = () => {
 		const newStore = Store.generateDefaultNewStore();
@@ -184,7 +191,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 	}
 
     return (
-        <StoreContext.Provider value={{ store: store!, resetStore, updateRestockTimer, reloadStore }}>
+        <StoreContext.Provider value={{ store: store!, resetStore, reloadStore, restockStore }}>
             {children}
         </StoreContext.Provider>
     );

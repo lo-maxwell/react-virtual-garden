@@ -124,7 +124,7 @@ class StoreRepository {
 		
 			const result = await query<StoreEntity>(
 				'INSERT INTO stores (id, owner, identifier, last_restock_time_ms) VALUES ($1, $2, $3, $4) RETURNING *',
-				[store.getStoreId(), ownerId, store.getStoreIdentifier(), store.getRestockTime().toString()]
+				[store.getStoreId(), ownerId, store.getStoreIdentifier(), store.getLastRestockTime().toString()]
 				);
 
 			// Check if result is valid

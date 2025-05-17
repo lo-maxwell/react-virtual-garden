@@ -43,7 +43,7 @@ import { InventoryEntity } from "@/models/itemStore/inventory/Inventory";
 								store.getStoreId(),
 								userId,
 								store.getStoreIdentifier(),
-								store.getRestockTime()
+								store.getLastRestockTime()
 							  ]
 						],
 						"conflictColumns": [
@@ -165,7 +165,7 @@ import { InventoryEntity } from "@/models/itemStore/inventory/Inventory";
 								store.getStoreId(),
 								userId,
 								store.getStoreIdentifier(),
-								store.getRestockTime()
+								store.getLastRestockTime()
 							  ]
 						],
 						"conflictColumns": [
@@ -174,7 +174,7 @@ import { InventoryEntity } from "@/models/itemStore/inventory/Inventory";
 						"updateQuery": {
 							"values": {
 								"identifier": store.getStoreIdentifier(),
-								"last_restock_time_ms": store.getRestockTime()
+								"last_restock_time_ms": store.getLastRestockTime()
 							},
 							"conditions": {
 								"owner": {

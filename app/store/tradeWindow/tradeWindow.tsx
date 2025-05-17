@@ -24,7 +24,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 	const defaultTradeWindowMessage = 'Trade Window';
 	const [quantity, setQuantity] = useState(1);
 	const [tradeWindowMessage, setTradeWindowMessage] = useState(defaultTradeWindowMessage);
-	const { store, updateRestockTimer, reloadStore } = useStore();
+	const { store, reloadStore } = useStore();
 	const { user } = useUser();
 	const { account, guestMode } = useAccount();
 	const dispatch = useDispatch();
@@ -134,7 +134,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 
 				// Terminate early before api call
 				if (guestMode) {
-					updateRestockTimer();
+					// updateRestockTimer();
 					saveStore(store);
 					return;
 				}
@@ -174,7 +174,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 
 				// Terminate early before api call
 				if (guestMode) {
-					updateRestockTimer();
+					// updateRestockTimer();
 					saveStore(store);
 					return;
 				}
@@ -196,7 +196,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 			//owner == null, should never occur
 			return;
 		}
-		updateRestockTimer();
+		// updateRestockTimer();
 		saveStore(store);
 	}
 

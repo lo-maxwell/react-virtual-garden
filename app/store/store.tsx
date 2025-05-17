@@ -6,15 +6,19 @@ import { getTimeString } from "@/models/utility/Time";
 
 const StoreComponent = ({onInventoryItemClickFunction, forceRefreshKey}: {onInventoryItemClickFunction: (arg: any) => void, forceRefreshKey: number}) => {
 
-	const {store} = useStore();
+	const {store, restockStore} = useStore();
 
 	const [timeRemaining, setTimeRemaining] = useState<number>(0);
 	const [canRestock, setCanRestock] = useState<boolean>(false);
+	const [errorRestocking, setErrorRestocking] = useState<boolean>(false);
+	const [restockMessage, setRestockMessage] = useState<string>("");
+	
 
 	useEffect(() => {
+		setErrorRestocking(false);
 		const updateTimer = () => {
 			const now = Date.now();
-			const calculatedTimeRemaining = Math.max(0, store.getRestockTime() - now);
+			const calculatedTimeRemaining = Math.max(0, store.getLastRestockTime() + store.getRestockInterval() - now);
 			setTimeRemaining(calculatedTimeRemaining);
 			if (calculatedTimeRemaining == 0) {
 				setCanRestock(true);
@@ -22,7 +26,6 @@ const StoreComponent = ({onInventoryItemClickFunction, forceRefreshKey}: {onInve
 				setCanRestock(false);
 			}
 		};
-
 		// Update timer initially and set interval
 		updateTimer();
 		const intervalId = setInterval(updateTimer, 1000);
@@ -65,10 +68,41 @@ const StoreComponent = ({onInventoryItemClickFunction, forceRefreshKey}: {onInve
 	}
 
 	const getStoreRestockTimeString = () => {
-		const time = Math.ceil(timeRemaining / 1000);
+		const time = Math.ceil(Math.max(timeRemaining, 0) / 1000);
 		const timeString = getTimeString(time);
 		return timeString;
 	}
+
+	let resetMessageTimeout: NodeJS.Timeout | null = null; // Declare a variable to hold the timeout ID
+	const handleRestock = async () => {
+		const restockResult = await restockStore();
+		if (restockResult === "SUCCESS") {
+			setCanRestock(false);
+			const calculatedTimeRemaining = Math.max(0, store.getLastRestockTime() - Date.now());
+			setTimeRemaining(calculatedTimeRemaining);
+			setErrorRestocking(false);
+			setRestockMessage("Successfully restocked!");
+		} else if (restockResult === 'NOT TIME') {
+			setErrorRestocking(true);
+			setRestockMessage("It is not time to restock!");
+			setCanRestock(false);
+			const calculatedTimeRemaining = Math.max(0, store.getLastRestockTime() - Date.now());
+			setTimeRemaining(calculatedTimeRemaining);
+		} else if (restockResult === 'NOT_MISSING_STOCK') {
+			setErrorRestocking(true);
+			setRestockMessage("There is nothing to restock.");
+		} else {
+			setErrorRestocking(true);
+			setRestockMessage("There was an error restocking. Please refresh the page. If this error persists, go to profile -> settings -> force sync account.");
+		}
+		if (resetMessageTimeout) {
+			clearTimeout(resetMessageTimeout);
+		}
+		resetMessageTimeout = setTimeout(() => {
+			setErrorRestocking(false);
+			setRestockMessage("");
+		}, 10000); // Clear message after 10 seconds
+	};
 
 	return (
 		<>
@@ -78,7 +112,14 @@ const StoreComponent = ({onInventoryItemClickFunction, forceRefreshKey}: {onInve
 			<ItemStoreComponent itemStore={store} onInventoryItemClickFunction={onInventoryItemClickFunction} costMultiplier={store.getBuyMultiplier()} maxHeightPercentage={60}/>
 			<div>
 				<div className="mt-2 text-sm text-gray-600">
-					{canRestock ? 'Store is fully stocked' : `Restock in: ${getStoreRestockTimeString()}`}
+					<button 
+						onClick={handleRestock} 
+						disabled={!canRestock} 
+						className={`p-2 rounded ${canRestock ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'}`}
+					>
+						{canRestock ? 'Restock Store' : `Restock available in: ${getStoreRestockTimeString()}`}
+					</button>
+					<div className={`my-2 text-sm ${errorRestocking ? 'text-red-600' : 'text-green-800'}`}>{restockMessage}</div>
 				</div>
 			</div>
 		</div>

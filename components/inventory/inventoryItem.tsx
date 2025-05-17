@@ -39,20 +39,21 @@ const InventoryItemComponent = ({itemStore, item, onClickFunction, costMultiplie
 	}
 
 	const getPriceColor = () => {
-		if (focus) {
-			//itemStore instanceof Inventory
-			return '';
-		} else {
-			//itemStore instanceof Inventory
-			if (costMultiplier > 1) {
-				return colors.inventory.inventoryHighPrice;
-			} else if (costMultiplier == 1) {
-				return colors.inventory.inventoryRegularPrice;
-			} else if (costMultiplier < 1) {
-				return colors.inventory.inventoryLowPrice;
-			}
-			return '';
-		}
+		// if (focus) {
+		// 	//itemStore instanceof Inventory
+		// 	return '';
+		// } else {
+		// 	//itemStore instanceof Inventory
+		// 	if (costMultiplier > 1) {
+		// 		return colors.inventory.inventoryHighPrice;
+		// 	} else if (costMultiplier == 1) {
+		// 		return colors.inventory.inventoryRegularPrice;
+		// 	} else if (costMultiplier < 1) {
+		// 		return colors.inventory.inventoryLowPrice;
+		// 	}
+		// 	return '';
+		// }
+		return '';
 	}
 
 	const getBorderColor = () => {

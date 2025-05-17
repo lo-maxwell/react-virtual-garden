@@ -25,11 +25,11 @@ export class Store extends ItemStore {
 	private sellMultiplier: number;
 	private upgradeMultiplier: number;
 	private stockList: ItemList;
-	private restockTime: number; //TODO: Convert to BigInt
+	private lastRestockTime: number; //TODO: Convert to BigInt
 	private restockInterval: number;
 
 	//TODO: Make this pull from storeRepository
-	constructor(storeId: string, identifier: number, name: string, buyMultiplier: number = 2, sellMultiplier: number = 1, upgradeMultiplier: number = 1, items: ItemList = new ItemList(), stockList: ItemList = new ItemList(), restockTime: number | string = Date.now(), restockInterval: number = 300000) {
+	constructor(storeId: string, identifier: number, name: string, buyMultiplier: number = 2, sellMultiplier: number = 1, upgradeMultiplier: number = 1, items: ItemList = new ItemList(), stockList: ItemList = new ItemList(), lastRestockTime: number | string = Date.now(), restockInterval: number = 300000) {
 		super(items);
 		this.storeId = storeId;
 		this.identifier = identifier;
@@ -38,15 +38,15 @@ export class Store extends ItemStore {
 		this.sellMultiplier = sellMultiplier;
 		this.upgradeMultiplier = upgradeMultiplier;
 		this.stockList = stockList;
-		if (typeof restockTime === 'number') {
-			this.restockTime = restockTime;
+		if (typeof lastRestockTime === 'number') {
+			this.lastRestockTime = lastRestockTime;
 		} else {
-			let convertedRestockTime = BigInt(restockTime);
+			let convertedRestockTime = BigInt(lastRestockTime);
 			const MAX_SAFE_INTEGER = BigInt(Number.MAX_SAFE_INTEGER);
 			const lastRestockTimeMsNumber = convertedRestockTime > MAX_SAFE_INTEGER 
 				? Number.MAX_SAFE_INTEGER 
 				: Number(convertedRestockTime);
-			this.restockTime = lastRestockTimeMsNumber;
+			this.lastRestockTime = lastRestockTimeMsNumber;
 		}
 		this.restockInterval = restockInterval;
 		// if (this.restockTime < Date.now()) {
@@ -129,7 +129,7 @@ export class Store extends ItemStore {
 			storeName: this.storeName,
 			// stockList: this.stockList.toPlainObject(), // We do not save stocklist, it is grabbed from database
 			items: this.items.toPlainObject(), // Convert items to plain object
-			restockTime: this.restockTime,
+			restockTime: this.lastRestockTime,
 		};
 	} 
 
@@ -239,15 +239,15 @@ export class Store extends ItemStore {
 	/**
 	 * @returns the time the store was last restocked
 	 */
-	getRestockTime(): number {
-		return this.restockTime;
+	getLastRestockTime(): number {
+		return this.lastRestockTime;
 	}
 
 	/**
 	 * @restockTime  the time the store was last restocked
 	 */
-	setRestockTime(restockTime: number): void {
-		this.restockTime = restockTime;
+	setLastRestockTime(restockTime: number): void {
+		this.lastRestockTime = restockTime;
 	}
 
 	/**
@@ -415,7 +415,7 @@ export class Store extends ItemStore {
 	}
 
 	/**
-	 * Adds items to the store if their quantity is lower than the quantity in the stockList.
+	 * Adds items to the store if their quantity is lower than the quantity in the stockList. Does not consider restockTime.
 	 * If items are added, updates the restockTime.
 	 * If there is an error in the process, rolls back to original list.
 	 * @stockList the list of items to restock. Defaults to the internal stocklist.
@@ -471,7 +471,7 @@ export class Store extends ItemStore {
 			this.items = new ItemList(currentItems);
 		}
 		if (didAddItem) {
-			this.restockTime = Date.now() + this.restockInterval;
+			this.lastRestockTime = Date.now();
 		} else {
 			response.addErrorMessage(`Error: Nothing to restock!`);
 		}

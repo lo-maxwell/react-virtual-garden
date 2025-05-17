@@ -37,18 +37,19 @@ const StoreItemComponent = ({itemStore, item, onClickFunction, costMultiplier, f
 	}
 
 	const getPriceColor = () => {
-		if (focus) {
-			return '';
-		} else {
-			if (costMultiplier > 2) {
-				return colors.store.storeHighPrice;
-			} else if (costMultiplier == 2) {
-				return colors.store.storeRegularPrice;
-			} else if (costMultiplier < 2) {
-				return colors.store.storeLowPrice;
-			}
-			return '';
-		}
+		// if (focus) {
+		// 	return '';
+		// } else {
+		// 	if (costMultiplier > 2) {
+		// 		return colors.store.storeHighPrice;
+		// 	} else if (costMultiplier == 2) {
+		// 		return colors.store.storeRegularPrice;
+		// 	} else if (costMultiplier < 2) {
+		// 		return colors.store.storeLowPrice;
+		// 	}
+		// 	return '';
+		// }
+		return '';
 	}
 
 	const getBorderColor = () => {

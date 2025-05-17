@@ -1,6 +1,7 @@
 import Toolbox from "@/models/garden/tools/Toolbox";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes, ItemTypes } from "@/models/items/ItemTypes";
+import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { Plant } from "@/models/items/placedItems/Plant";
 import { generateNewPlaceholderInventoryItem, generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";
 import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
@@ -85,12 +86,12 @@ test('Should Update Harvest History', () => {
 test('Should Not Update Invalid harvest History', () => {
 	const user = new User('00000000-0000-0000-0000-000000000000', 'test', '', new LevelSystem(uuidv4(), 100), new ItemHistoryList(), new ActionHistoryList(), new Toolbox());
 	const invalidItem = generateNewPlaceholderPlacedItem("bench", "");
-	const response = user.updateHarvestHistory(invalidItem as InventoryItem, 1);
+	const response = user.updateHarvestHistory(invalidItem as PlacedItem, 1);
 	expect(response.isSuccessful()).toBe(false);
 
 	const invalidTemplate = new PlantTemplate("invalid id", "invalid name", "", ItemTypes.PLACED.name, ItemSubtypes.PLANT.name, "", "", 100, 0, "", 0, 0, 0, 0, {});
 	const invalidItem2 = new Plant(uuidv4(), invalidTemplate, "");
-	const response2 = user.updateHarvestHistory(invalidItem2 as InventoryItem, 1);
+	const response2 = user.updateHarvestHistory(invalidItem2 as PlacedItem, 1);
 	expect(response2.isSuccessful()).toBe(false);
 
 })

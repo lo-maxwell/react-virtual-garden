@@ -6,8 +6,9 @@ import React, { createContext, Dispatch, SetStateAction, useContext, useState } 
 interface StoreContextType {
     store: Store;
     resetStore: () => void;
-    updateRestockTimer: () => void;
+    // updateRestockTimer: () => void;
     reloadStore: () => void;
+    restockStore: () => Promise<string>;
     // Add any other actions or state you need
 }
 
