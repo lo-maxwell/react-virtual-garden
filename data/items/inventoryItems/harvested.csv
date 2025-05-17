@@ -38,6 +38,7 @@ id,name,icon,type,subtype,category,description,value,level
 1-03-10-03-12,Silver magic mango,🥭,InventoryItem,HarvestedItem,Tropical,Silver version of magic mango,18000,0
 1-03-10-03-10,magic mango,🥭,InventoryItem,HarvestedItem,Tropical,Error,3600,0
 1-03-10-03-03,Gold mango,🥭,InventoryItem,HarvestedItem,Tropical,Gold version of mango,3600,0
+1-03-10-03-13,Gold magic mango,🥭,InventoryItem,HarvestedItem,Tropical,Gold version of magic mango,36000,0
 1-03-99-99-91,Bronze error,❌,InventoryItem,HarvestedItem,Error,Bronze version of error,0,0
 1-03-99-99-92,Silver error,❌,InventoryItem,HarvestedItem,Error,Silver version of error,0,0
 1-03-99-99-93,Gold error,❌,InventoryItem,HarvestedItem,Error,Gold version of error,0,0

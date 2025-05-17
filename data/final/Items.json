@@ -1,0 +1,1108 @@
+{
+    "PlacedItems": {
+        "Plants": [
+            {
+                "id": "0-02-01-01-00",
+                "name": "garlic",
+                "icon": "🧄",
+                "type": "PlacedItem",
+                "subtype": "Plant",
+                "category": "Onion",
+                "description": "Error",
+                "value": 15,
+                "level": 0,
+                "transformId": "1-03-01-01-00",
+                "baseExp": 18,
+                "growTime": 900,
+                "repeatedGrowTime": 450,
+                "numHarvests": 1,
+                "transformShinyIds": {
+                    "bronze": {
+                        "id": "1-03-01-01-01",
+                        "probability": 0.6
+                    },
+                    "silver": {
+                        "id": "1-03-01-01-02",
+                        "probability": 0.3
+                    },
+                    "gold": {
+                        "id": "1-03-01-01-03",
+                        "probability": 0.1
+                    }
+                }
+            },
+            {
+                "id": "0-02-01-06-00",
+                "name": "onion",
+                "icon": "🧅",
+                "type": "PlacedItem",
+                "subtype": "Plant",
+                "category": "Onion",
+                "description": "Error",
+                "value": 30,
+                "level": 0,
+                "transformId": "1-03-01-06-00",
+                "baseExp": 9,
+                "growTime": 900,
+                "repeatedGrowTime": 450,
+                "numHarvests": 1,
+                "transformShinyIds": {
+                    "bronze": {
+                        "id": "1-03-01-06-01",
+                        "probability": 0.6
+                    },
+                    "silver": {
+                        "id": "1-03-01-06-02",
+                        "probability": 0.3
+                    },
+                    "gold": {
+                        "id": "1-03-01-06-03",
+                        "probability": 0.1
+                    }
+                }
+            },
+            {
+                "id": "0-02-06-04-00",
+                "name": "pumpkin",
+                "icon": "🎃",
+                "type": "PlacedItem",
+                "subtype": "Plant",
+                "category": "Squash",
+                "description": "Error",
+                "value": 120,
+                "level": 0,
+                "transformId": "1-03-06-04-00",
+                "baseExp": 30,
+                "growTime": 14400,
+                "repeatedGrowTime": 7200,
+                "numHarvests": 1,
+                "transformShinyIds": {
+                    "bronze": {
+                        "id": "1-03-06-04-01",
+                        "probability": 0.6
+                    },
+                    "silver": {
+                        "id": "1-03-06-04-02",
+                        "probability": 0.3
+                    },
+                    "gold": {
+                        "id": "1-03-06-04-03",
+                        "probability": 0.1
+                    }
+                }
+            },
+            {
+                "id": "0-02-09-01-00",
+                "name": "apple",
+                "icon": "🍎",
+                "type": "PlacedItem",
+                "subtype": "Plant",
+                "category": "Tree Fruit",
+                "description": "Error",
+                "value": 5,
+                "level": 0,
+                "transformId": "1-03-09-01-00",
+                "baseExp": 2,
+                "growTime": 10,
+                "repeatedGrowTime": 5,
+                "numHarvests": 1,
+                "transformShinyIds": {
+                    "bronze": {
+                        "id": "1-03-09-01-01",
+                        "probability": 0.6
+                    },
+                    "silver": {
+                        "id": "1-03-09-01-02",
+                        "probability": 0.3
+                    },
+                    "gold": {
+                        "id": "1-03-09-01-03",
+                        "probability": 0.1
+                    }
+                }
+            },
+            {
+                "id": "0-02-09-02-00",
+                "name": "cherry",
+                "icon": "🍒",
+                "type": "PlacedItem",
+                "subtype": "Plant",
+                "category": "Tree Fruit",
+                "description": "Error",
+                "value": 60,
+                "level": 0,
+                "transformId": "1-03-09-02-00",
+                "baseExp": 20,
+                "growTime": 3600,
+                "repeatedGrowTime": 1800,
+                "numHarvests": 1,
+                "transformShinyIds": {
+                    "bronze": {
+                        "id": "1-03-09-02-01",
+                        "probability": 0.6
+                    },
+                    "silver": {
+                        "id": "1-03-09-02-02",
+                        "probability": 0.3
+                    },
+                    "gold": {
+                        "id": "1-03-09-02-03",
+                        "probability": 0.1
+                    }
+                }
+            },
+            {
+                "id": "0-02-09-03-00",
+                "name": "peach",
+                "icon": "🍑",
+                "type": "PlacedItem",
+                "subtype": "Plant",
+                "category": "Tree Fruit",
+                "description": "Error",
+                "value": 80,
+                "level": 0,
+                "transformId": "1-03-09-03-00",
+                "baseExp": 25,
+                "growTime": 7200,
+                "repeatedGrowTime": 3600,
+                "numHarvests": 1,
+                "transformShinyIds": {
+                    "bronze": {
+                        "id": "1-03-09-03-01",
+                        "probability": 0.6
+                    },
+                    "silver": {
+                        "id": "1-03-09-03-02",
+                        "probability": 0.3
+                    },
+                    "gold": {
+                        "id": "1-03-09-03-03",
+                        "probability": 0.1
+                    }
+                }
+            },
+            {
+                "id": "0-02-10-01-00",
+                "name": "banana",
+                "icon": "🍌",
+                "type": "PlacedItem",
+                "subtype": "Plant",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 15,
+                "level": 0,
+                "transformId": "1-03-10-01-00",
+                "baseExp": 4,
+                "growTime": 180,
+                "repeatedGrowTime": 90,
+                "numHarvests": 3,
+                "transformShinyIds": {
+                    "bronze": {
+                        "id": "1-03-10-01-01",
+                        "probability": 0.6
+                    },
+                    "silver": {
+                        "id": "1-03-10-01-02",
+                        "probability": 0.3
+                    },
+                    "gold": {
+                        "id": "1-03-10-01-03",
+                        "probability": 0.1
+                    }
+                }
+            },
+            {
+                "id": "0-02-10-02-00",
+                "name": "coconut",
+                "icon": "🥥",
+                "type": "PlacedItem",
+                "subtype": "Plant",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 200,
+                "level": 0,
+                "transformId": "1-03-10-02-00",
+                "baseExp": 50,
+                "growTime": 21600,
+                "repeatedGrowTime": 10800,
+                "numHarvests": 1,
+                "transformShinyIds": {
+                    "bronze": {
+                        "id": "1-03-10-02-01",
+                        "probability": 0.6
+                    },
+                    "silver": {
+                        "id": "1-03-10-02-02",
+                        "probability": 0.3
+                    },
+                    "gold": {
+                        "id": "1-03-10-02-03",
+                        "probability": 0.1
+                    }
+                }
+            },
+            {
+                "id": "0-02-10-03-00",
+                "name": "mango",
+                "icon": "🥭",
+                "type": "PlacedItem",
+                "subtype": "Plant",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 120,
+                "level": 0,
+                "transformId": "1-03-10-03-00",
+                "baseExp": 30,
+                "growTime": 10800,
+                "repeatedGrowTime": 5400,
+                "numHarvests": 1,
+                "transformShinyIds": {
+                    "bronze": {
+                        "id": "1-03-10-03-01",
+                        "probability": 0.6
+                    },
+                    "silver": {
+                        "id": "1-03-10-03-02",
+                        "probability": 0.3
+                    },
+                    "gold": {
+                        "id": "1-03-10-03-03",
+                        "probability": 0.1
+                    }
+                }
+            },
+            {
+                "id": "0-02-10-03-10",
+                "name": "magic mango",
+                "icon": "🥭",
+                "type": "PlacedItem",
+                "subtype": "Plant",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 1200,
+                "level": 0,
+                "transformId": "1-03-10-03-10",
+                "baseExp": 300,
+                "growTime": 108000,
+                "repeatedGrowTime": 54000,
+                "numHarvests": 10,
+                "transformShinyIds": {
+                    "bronze": {
+                        "id": "1-03-10-03-11",
+                        "probability": 0.6
+                    },
+                    "silver": {
+                        "id": "1-03-10-03-12",
+                        "probability": 0.3
+                    },
+                    "gold": {
+                        "id": "1-03-10-03-13",
+                        "probability": 0.1
+                    }
+                }
+            },
+            {
+                "id": "0-02-99-99-99",
+                "name": "error",
+                "icon": "❌",
+                "type": "PlacedItem",
+                "subtype": "Plant",
+                "category": "Error",
+                "description": "Error",
+                "value": 0,
+                "level": 0,
+                "transformId": "1-03-99-99-99",
+                "baseExp": 0,
+                "growTime": 0,
+                "repeatedGrowTime": 0,
+                "numHarvests": 0,
+                "transformShinyIds": {
+                    "bronze": {
+                        "id": "1-03-99-99-91",
+                        "probability": 0.6
+                    },
+                    "silver": {
+                        "id": "1-03-99-99-92",
+                        "probability": 0.3
+                    },
+                    "gold": {
+                        "id": "1-03-99-99-93",
+                        "probability": 0.1
+                    }
+                }
+            }
+        ],
+        "Decorations": [
+            {
+                "id": "0-04-01-01-00",
+                "name": "bench",
+                "icon": "🪑",
+                "type": "PlacedItem",
+                "subtype": "Decoration",
+                "category": "Normal",
+                "description": "Error",
+                "value": 100,
+                "level": 0,
+                "transformId": "1-05-01-01-00"
+            },
+            {
+                "id": "0-04-01-02-00",
+                "name": "flamingo",
+                "icon": "🦩",
+                "type": "PlacedItem",
+                "subtype": "Decoration",
+                "category": "Normal",
+                "description": "Error",
+                "value": 5000,
+                "level": 0,
+                "transformId": "1-05-01-02-00"
+            },
+            {
+                "id": "0-04-01-03-00",
+                "name": "construction sign",
+                "icon": "🚧",
+                "type": "PlacedItem",
+                "subtype": "Decoration",
+                "category": "Normal",
+                "description": "Error",
+                "value": 25,
+                "level": 0,
+                "transformId": "1-05-01-03-00"
+            },
+            {
+                "id": "0-04-01-04-00",
+                "name": "potted plant",
+                "icon": "🪴",
+                "type": "PlacedItem",
+                "subtype": "Decoration",
+                "category": "Normal",
+                "description": "Error",
+                "value": 100,
+                "level": 0,
+                "transformId": "1-05-01-04-00"
+            },
+            {
+                "id": "0-04-99-99-99",
+                "name": "error",
+                "icon": "❌",
+                "type": "PlacedItem",
+                "subtype": "Decoration",
+                "category": "Error",
+                "description": "Error",
+                "value": 0,
+                "level": 0,
+                "transformId": "1-05-99-99-99"
+            }
+        ],
+        "Ground": [
+            {
+                "id": "0-00-00-00-00",
+                "name": "ground",
+                "icon": "_",
+                "type": "PlacedItem",
+                "subtype": "Ground",
+                "category": "Ground",
+                "description": "Error",
+                "value": 0,
+                "level": 0,
+                "transformId": "0-00-00-00-00"
+            },
+            {
+                "id": "0-00-99-99-99",
+                "name": "error",
+                "icon": "❌",
+                "type": "PlacedItem",
+                "subtype": "Ground",
+                "category": "Error",
+                "description": "Error",
+                "value": 0,
+                "level": 0,
+                "transformId": "0-00-99-99-99"
+            }
+        ]
+    },
+    "InventoryItems": {
+        "Seeds": [
+            {
+                "id": "1-01-01-01-00",
+                "name": "garlic seed",
+                "icon": "🧄",
+                "type": "InventoryItem",
+                "subtype": "Seed",
+                "category": "Onion",
+                "description": "Error",
+                "value": 40,
+                "level": 0,
+                "transformId": "0-02-01-01-00"
+            },
+            {
+                "id": "1-01-01-06-00",
+                "name": "onion seed",
+                "icon": "🧅",
+                "type": "InventoryItem",
+                "subtype": "Seed",
+                "category": "Onion",
+                "description": "Error",
+                "value": 40,
+                "level": 0,
+                "transformId": "0-02-01-06-00"
+            },
+            {
+                "id": "1-01-06-04-00",
+                "name": "pumpkin seed",
+                "icon": "🎃",
+                "type": "InventoryItem",
+                "subtype": "Seed",
+                "category": "Squash",
+                "description": "Error",
+                "value": 60,
+                "level": 0,
+                "transformId": "0-02-06-04-00"
+            },
+            {
+                "id": "1-01-09-01-00",
+                "name": "apple seed",
+                "icon": "🍎",
+                "type": "InventoryItem",
+                "subtype": "Seed",
+                "category": "Tree Fruit",
+                "description": "Error",
+                "value": 5,
+                "level": 0,
+                "transformId": "0-02-09-01-00"
+            },
+            {
+                "id": "1-01-09-02-00",
+                "name": "cherry seed",
+                "icon": "🍒",
+                "type": "InventoryItem",
+                "subtype": "Seed",
+                "category": "Tree Fruit",
+                "description": "Error",
+                "value": 60,
+                "level": 0,
+                "transformId": "0-02-09-02-00"
+            },
+            {
+                "id": "1-01-09-03-00",
+                "name": "peach seed",
+                "icon": "🍑",
+                "type": "InventoryItem",
+                "subtype": "Seed",
+                "category": "Tree Fruit",
+                "description": "Error",
+                "value": 90,
+                "level": 0,
+                "transformId": "0-02-09-03-00"
+            },
+            {
+                "id": "1-01-10-01-00",
+                "name": "banana seed",
+                "icon": "🍌",
+                "type": "InventoryItem",
+                "subtype": "Seed",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 15,
+                "level": 0,
+                "transformId": "0-02-10-01-00"
+            },
+            {
+                "id": "1-01-10-02-00",
+                "name": "coconut seed",
+                "icon": "🥥",
+                "type": "InventoryItem",
+                "subtype": "Seed",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 150,
+                "level": 0,
+                "transformId": "0-02-10-02-00"
+            },
+            {
+                "id": "1-01-10-03-00",
+                "name": "mango seed",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "Seed",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 120,
+                "level": 0,
+                "transformId": "0-02-10-03-00"
+            },
+            {
+                "id": "1-01-10-03-10",
+                "name": "magic mango seed",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "Seed",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 1200,
+                "level": 0,
+                "transformId": "0-02-10-03-10"
+            },
+            {
+                "id": "1-01-99-99-99",
+                "name": "error",
+                "icon": "❌",
+                "type": "InventoryItem",
+                "subtype": "Seed",
+                "category": "Error",
+                "description": "Error",
+                "value": 0,
+                "level": 0,
+                "transformId": "0-02-99-99-99"
+            }
+        ],
+        "HarvestedItems": [
+            {
+                "id": "1-03-01-01-00",
+                "name": "garlic",
+                "icon": "🧄",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Onion",
+                "description": "Error",
+                "value": 100,
+                "level": 0
+            },
+            {
+                "id": "1-03-01-01-01",
+                "name": "Bronze garlic",
+                "icon": "🧄",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Onion",
+                "description": "Bronze version of garlic",
+                "value": 200,
+                "level": 0
+            },
+            {
+                "id": "1-03-01-01-02",
+                "name": "Silver garlic",
+                "icon": "🧄",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Onion",
+                "description": "Silver version of garlic",
+                "value": 500,
+                "level": 0
+            },
+            {
+                "id": "1-03-01-01-03",
+                "name": "Gold garlic",
+                "icon": "🧄",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Onion",
+                "description": "Gold version of garlic",
+                "value": 1000,
+                "level": 0
+            },
+            {
+                "id": "1-03-01-06-00",
+                "name": "onion",
+                "icon": "🧅",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Onion",
+                "description": "Error",
+                "value": 120,
+                "level": 0
+            },
+            {
+                "id": "1-03-01-06-01",
+                "name": "Bronze onion",
+                "icon": "🧅",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Onion",
+                "description": "Bronze version of onion",
+                "value": 240,
+                "level": 0
+            },
+            {
+                "id": "1-03-01-06-02",
+                "name": "Silver onion",
+                "icon": "🧅",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Onion",
+                "description": "Silver version of onion",
+                "value": 600,
+                "level": 0
+            },
+            {
+                "id": "1-03-01-06-03",
+                "name": "Gold onion",
+                "icon": "🧅",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Onion",
+                "description": "Gold version of onion",
+                "value": 1200,
+                "level": 0
+            },
+            {
+                "id": "1-03-06-04-00",
+                "name": "pumpkin",
+                "icon": "🎃",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Squash",
+                "description": "Error",
+                "value": 240,
+                "level": 0
+            },
+            {
+                "id": "1-03-06-04-01",
+                "name": "Bronze pumpkin",
+                "icon": "🎃",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Squash",
+                "description": "Bronze version of pumpkin",
+                "value": 480,
+                "level": 0
+            },
+            {
+                "id": "1-03-06-04-02",
+                "name": "Silver pumpkin",
+                "icon": "🎃",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Squash",
+                "description": "Silver version of pumpkin",
+                "value": 1200,
+                "level": 0
+            },
+            {
+                "id": "1-03-06-04-03",
+                "name": "Gold pumpkin",
+                "icon": "🎃",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Squash",
+                "description": "Gold version of pumpkin",
+                "value": 2400,
+                "level": 0
+            },
+            {
+                "id": "1-03-09-01-00",
+                "name": "apple",
+                "icon": "🍎",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tree Fruit",
+                "description": "Error",
+                "value": 15,
+                "level": 0
+            },
+            {
+                "id": "1-03-09-01-01",
+                "name": "Bronze apple",
+                "icon": "🍎",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tree Fruit",
+                "description": "Bronze version of apple",
+                "value": 30,
+                "level": 0
+            },
+            {
+                "id": "1-03-09-01-02",
+                "name": "Silver apple",
+                "icon": "🍎",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tree Fruit",
+                "description": "Silver version of apple",
+                "value": 75,
+                "level": 0
+            },
+            {
+                "id": "1-03-09-01-03",
+                "name": "Gold apple",
+                "icon": "🍎",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tree Fruit",
+                "description": "Gold version of apple",
+                "value": 150,
+                "level": 0
+            },
+            {
+                "id": "1-03-09-02-00",
+                "name": "cherry",
+                "icon": "🍒",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tree Fruit",
+                "description": "Error",
+                "value": 180,
+                "level": 0
+            },
+            {
+                "id": "1-03-09-02-01",
+                "name": "Bronze cherry",
+                "icon": "🍒",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tree Fruit",
+                "description": "Bronze version of cherry",
+                "value": 360,
+                "level": 0
+            },
+            {
+                "id": "1-03-09-02-02",
+                "name": "Silver cherry",
+                "icon": "🍒",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tree Fruit",
+                "description": "Silver version of cherry",
+                "value": 900,
+                "level": 0
+            },
+            {
+                "id": "1-03-09-02-03",
+                "name": "Gold cherry",
+                "icon": "🍒",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tree Fruit",
+                "description": "Gold version of cherry",
+                "value": 1800,
+                "level": 0
+            },
+            {
+                "id": "1-03-09-03-00",
+                "name": "peach",
+                "icon": "🍑",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tree Fruit",
+                "description": "Error",
+                "value": 260,
+                "level": 0
+            },
+            {
+                "id": "1-03-09-03-01",
+                "name": "Bronze peach",
+                "icon": "🍑",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tree Fruit",
+                "description": "Bronze version of peach",
+                "value": 520,
+                "level": 0
+            },
+            {
+                "id": "1-03-09-03-02",
+                "name": "Silver peach",
+                "icon": "🍑",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tree Fruit",
+                "description": "Silver version of peach",
+                "value": 1300,
+                "level": 0
+            },
+            {
+                "id": "1-03-09-03-03",
+                "name": "Gold peach",
+                "icon": "🍑",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tree Fruit",
+                "description": "Gold version of peach",
+                "value": 2600,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-01-00",
+                "name": "banana",
+                "icon": "🍌",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 20,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-01-01",
+                "name": "Bronze banana",
+                "icon": "🍌",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Bronze version of banana",
+                "value": 40,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-01-02",
+                "name": "Silver banana",
+                "icon": "🍌",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Silver version of banana",
+                "value": 100,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-01-03",
+                "name": "Gold banana",
+                "icon": "🍌",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Gold version of banana",
+                "value": 200,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-02-00",
+                "name": "coconut",
+                "icon": "🥥",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 500,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-02-01",
+                "name": "Bronze coconut",
+                "icon": "🥥",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Bronze version of coconut",
+                "value": 1000,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-02-02",
+                "name": "Silver coconut",
+                "icon": "🥥",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Silver version of coconut",
+                "value": 2500,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-02-03",
+                "name": "Gold coconut",
+                "icon": "🥥",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Gold version of coconut",
+                "value": 5000,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-03-00",
+                "name": "mango",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 360,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-03-01",
+                "name": "Bronze mango",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Bronze version of mango",
+                "value": 720,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-03-11",
+                "name": "Bronze magic mango",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Bronze version of magic mango",
+                "value": 7200,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-03-02",
+                "name": "Silver mango",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Silver version of mango",
+                "value": 1800,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-03-12",
+                "name": "Silver magic mango",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Silver version of magic mango",
+                "value": 18000,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-03-10",
+                "name": "magic mango",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 3600,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-03-03",
+                "name": "Gold mango",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Gold version of mango",
+                "value": 3600,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-03-13",
+                "name": "Gold magic mango",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Gold version of magic mango",
+                "value": 36000,
+                "level": 0
+            },
+            {
+                "id": "1-03-99-99-91",
+                "name": "Bronze error",
+                "icon": "❌",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Error",
+                "description": "Bronze version of error",
+                "value": 0,
+                "level": 0
+            },
+            {
+                "id": "1-03-99-99-92",
+                "name": "Silver error",
+                "icon": "❌",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Error",
+                "description": "Silver version of error",
+                "value": 0,
+                "level": 0
+            },
+            {
+                "id": "1-03-99-99-93",
+                "name": "Gold error",
+                "icon": "❌",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Error",
+                "description": "Gold version of error",
+                "value": 0,
+                "level": 0
+            },
+            {
+                "id": "1-03-99-99-99",
+                "name": "error",
+                "icon": "❌",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Error",
+                "description": "Error",
+                "value": 0,
+                "level": 0
+            }
+        ],
+        "Blueprints": [
+            {
+                "id": "1-05-01-01-00",
+                "name": "bench blueprint",
+                "icon": "📜",
+                "type": "InventoryItem",
+                "subtype": "Blueprint",
+                "category": "Normal",
+                "description": "Error",
+                "value": 100,
+                "level": 0,
+                "transformId": "0-04-01-01-00"
+            },
+            {
+                "id": "1-05-01-02-00",
+                "name": "flamingo blueprint",
+                "icon": "📜",
+                "type": "InventoryItem",
+                "subtype": "Blueprint",
+                "category": "Normal",
+                "description": "Error",
+                "value": 5000,
+                "level": 0,
+                "transformId": "0-04-01-02-00"
+            },
+            {
+                "id": "1-05-01-03-00",
+                "name": "construction sign blueprint",
+                "icon": "📜",
+                "type": "InventoryItem",
+                "subtype": "Blueprint",
+                "category": "Normal",
+                "description": "Error",
+                "value": 25,
+                "level": 0,
+                "transformId": "0-04-01-03-00"
+            },
+            {
+                "id": "1-05-01-04-00",
+                "name": "potted plant blueprint",
+                "icon": "📜",
+                "type": "InventoryItem",
+                "subtype": "Blueprint",
+                "category": "Normal",
+                "description": "Error",
+                "value": 100,
+                "level": 0,
+                "transformId": "0-04-01-04-00"
+            },
+            {
+                "id": "1-05-99-99-99",
+                "name": "error",
+                "icon": "❌",
+                "type": "InventoryItem",
+                "subtype": "Blueprint",
+                "category": "Error",
+                "description": "Error",
+                "value": 0,
+                "level": 0,
+                "transformId": "0-04-99-99-99"
+            }
+        ]
+    }
+}
