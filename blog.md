@@ -381,7 +381,9 @@
 Guest mode: Should have a level/xp/money etc cap, and some warnings that guest mode is local only; allow users to port their guest mode account into an online account (with the cap)
 
 TODO:
+Look into icon unlocks
 Python script to convert csv to json
+Python script to add rows to multiple csvs (add seed, plant, harvested item, shinyItems, or blueprint/decoration)
 Restocking immediately starts the timer, instead of waiting for items to be under stock amount
 SQS queue for rate limiting between backend and lambda?
 Fix login screen, allow creation in a different user flow, allow resetting password

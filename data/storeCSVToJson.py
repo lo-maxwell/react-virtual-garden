@@ -17,7 +17,7 @@ with open(stores_file_path, mode='r', encoding='utf-8') as csv_file:
     # Process each row in the CSV
     for row in csv_reader:
         store = {
-            "id": row["id"],
+            "id": int(row["id"]),
             "name": row["name"],
             "stocklistId": row["stocklistId"],
             "stocklistName": row["stocklistName"],
