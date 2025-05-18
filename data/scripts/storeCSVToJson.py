@@ -1,9 +1,14 @@
 import csv
 import json
+import os  # Ensure this import is at the top of your file
 
-# Define the input and output file paths
-stores_file_path = '../store/stores.csv'
-json_file_path = '../final/temp/Stores.json'
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Define the input and output file paths with absolute paths
+stores_file_path = os.path.join(script_dir, '../store/stores.csv')
+json_file_path = os.path.join(script_dir, '../final/temp/Stores.json')
+
 
 # Initialize the data structure for JSON output
 data = {

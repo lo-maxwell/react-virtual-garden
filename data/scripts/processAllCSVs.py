@@ -7,12 +7,9 @@ def convert_all_csv_to_json():
 
     # Define the scripts with absolute paths
     scripts = [
-        os.path.join(script_dir, "actionHistoryCSVToJson.py"),
-        os.path.join(script_dir, "gardenCSVToJson.py"),
-        os.path.join(script_dir, "iconCSVToJson.py"),
-        os.path.join(script_dir, "itemCSVToJson.py"),
-        os.path.join(script_dir, "stocklistCSVToJson.py"),
-        os.path.join(script_dir, "storeCSVToJson.py")
+        os.path.join(script_dir, "cleanItemCSVs.py"),
+        os.path.join(script_dir, "copyTempToFinal.py"),
+        os.path.join(script_dir, "allCSVToJson.py")
     ]
 
     for script in scripts:

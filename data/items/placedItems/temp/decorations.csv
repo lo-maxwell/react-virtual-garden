@@ -3,4 +3,5 @@ id,name,icon,type,subtype,category,description,value,level,transformId
 0-04-01-02-00,flamingo,🦩,PlacedItem,Decoration,Normal,Error,5000,0,1-05-01-02-00
 0-04-01-03-00,construction sign,🚧,PlacedItem,Decoration,Normal,Error,25,0,1-05-01-03-00
 0-04-01-04-00,potted plant,🪴,PlacedItem,Decoration,Normal,Error,100,0,1-05-01-04-00
+0-04-01-05-00,goose,🪿,PlacedItem,Decoration,Normal,Error,50000,0,1-05-01-05-00
 0-04-99-99-99,error,❌,PlacedItem,Decoration,Error,Error,0,0,1-05-99-99-99

@@ -3,9 +3,12 @@ import pandas as pd
 import json
 
 def clean_item_csvs():
-    # Define the directories
-    inventory_dir = '../items/inventoryItems/temp'
-    placed_dir = '../items/placedItems/temp'
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Define the directories with absolute paths
+    inventory_dir = os.path.join(script_dir, '../items/inventoryItems/temp')
+    placed_dir = os.path.join(script_dir, '../items/placedItems/temp')
+    
     
     # List to keep track of removed rows
     removed_rows = []
@@ -47,6 +50,9 @@ def clean_item_csvs():
     # Print removed rows summary
     for file_path, count in removed_rows:
         print(f"Removed {count} rows from {file_path}")
+    
+    print(f"Cleaning complete, removed {len(removed_rows)} rows in total.")
+
 
 # Call the function
 clean_item_csvs()

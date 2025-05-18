@@ -1,15 +1,19 @@
 import csv
 import json
+import os  # Ensure this import is at the top of your file
 
-# Define the input and output file paths
-blueprint_file_path = '../items/inventoryItems/final/blueprints.csv'
-harvested_file_path = '../items/inventoryItems/final/harvested.csv'
-seeds_file_path = '../items/inventoryItems/final/seeds.csv'
-decorations_file_path = '../items/placedItems/final/decorations.csv'
-ground_file_path = '../items/placedItems/final/ground.csv'
-plants_file_path = '../items/placedItems/final/plants.csv'
-shiny_file_path = '../items/placedItems/final/shinyItemRates.csv'
-json_file_path = '../final/temp/Items.json'
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Define the input and output file paths with absolute paths
+blueprint_file_path = os.path.join(script_dir, '../items/inventoryItems/final/blueprints.csv')
+harvested_file_path = os.path.join(script_dir, '../items/inventoryItems/final/harvested.csv')
+seeds_file_path = os.path.join(script_dir, '../items/inventoryItems/final/seeds.csv')
+decorations_file_path = os.path.join(script_dir, '../items/placedItems/final/decorations.csv')
+ground_file_path = os.path.join(script_dir, '../items/placedItems/final/ground.csv')
+plants_file_path = os.path.join(script_dir, '../items/placedItems/final/plants.csv')
+shiny_file_path = os.path.join(script_dir, '../items/placedItems/final/shinyItemRates.csv')
+json_file_path = os.path.join(script_dir, '../final/temp/Items.json')
 
 # Initialize the data structure for JSON output
 data = {

@@ -1,11 +1,13 @@
 import csv
 import copy
+import os
 
 plantData = {
     "name": "pineapple",
     "icon": "🍍",
     "category": "Tropical",
     "item": "Pineapple",
+    "idSuffix": "00",
     "description": "Error",
     "seedValue": 200,
     "value": 200,
@@ -50,7 +52,9 @@ def categoryToId(category):
         "Sea Vegetable": "14",
         "Error": "99"
     }
-    return category_map.get(category, "99")
+    if category not in category_map:
+        raise ValueError(f"Category '{category}' not found")
+    return category_map[category]
 
 def itemToId(crop, category):
     crop_map = {
@@ -147,7 +151,9 @@ def itemToId(crop, category):
         }
     }
     
-    return crop_map.get(category, {}).get(crop, "00")  # Default to "00" if crop or category not found
+    if category not in crop_map or crop not in crop_map[category]:
+        raise ValueError(f"Crop '{crop}' not found in category '{category}'")
+    return crop_map[category][crop]
 
 
 def generateId(type, subtype, category, item, variant):
@@ -184,26 +190,30 @@ def generateId(type, subtype, category, item, variant):
 
 plantData["type"] = "PlacedItem"
 plantData["subtype"] = "Plant"
-plantData["id"] = generateId(plantData["type"], plantData["subtype"], plantData["category"], plantData["item"], "00")
+plantData["id"] = generateId(plantData["type"], plantData["subtype"], plantData["category"], plantData["item"], plantData["idSuffix"])
 
 seedData = copy.deepcopy(plantData)
 seedData["name"] = plantData["name"] + " seed"
 seedData["type"] = "InventoryItem"
 seedData["subtype"] = "Seed"
-seedData["id"] = generateId(seedData["type"], seedData["subtype"], seedData["category"], seedData["item"], "00")
+seedData["id"] = generateId(seedData["type"], seedData["subtype"], seedData["category"], seedData["item"], seedData["idSuffix"])
 seedData["value"] = plantData["seedValue"]
 
 harvestedData = copy.deepcopy(plantData)
 harvestedData["type"] = "InventoryItem"
 harvestedData["subtype"] = "HarvestedItem"
-harvestedData["id"] = generateId(harvestedData["type"], harvestedData["subtype"], harvestedData["category"], harvestedData["item"], "00")
+harvestedData["id"] = generateId(harvestedData["type"], harvestedData["subtype"], harvestedData["category"], harvestedData["item"], harvestedData["idSuffix"])
 harvestedData["value"] = harvestedData["harvestedValue"]
 
 seedData["transformId"] = plantData["id"]
 plantData["transformId"] = harvestedData["id"]
 
 def addPlantToCSV(plantData):
-    with open('../items/placedItems/temp/plants.csv', mode='a', newline='') as file:
+     # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the absolute path to the decorations.csv file
+    absolute_path = os.path.join(script_dir, '../../items/placedItems/temp/plants.csv')
+    with open(absolute_path, mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([
             plantData["id"],
@@ -223,7 +233,11 @@ def addPlantToCSV(plantData):
         ])
 
 def addSeedToCSV(seedData):
-    with open('../items/inventoryItems/temp/seeds.csv', mode='a', newline='') as file:
+     # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the absolute path to the decorations.csv file
+    absolute_path = os.path.join(script_dir, '../../items/inventoryItems/temp/seeds.csv')
+    with open(absolute_path, mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([
             seedData["id"],
@@ -239,7 +253,11 @@ def addSeedToCSV(seedData):
         ])
 
 def addHarvestedToCSV(harvestedData):
-    with open('../items/inventoryItems/temp/harvested.csv', mode='a', newline='') as file:
+     # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the absolute path to the decorations.csv file
+    absolute_path = os.path.join(script_dir, '../../items/inventoryItems/temp/harvested.csv')
+    with open(absolute_path, mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([
             harvestedData["id"],
@@ -263,7 +281,11 @@ def getShinyValueMultiplier(tier):
     return 1
 
 def addShinyItemRates(plantData):
-    with open('../items/placedItems/temp/shinyItemRates.csv', mode='a', newline='') as file:
+     # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the absolute path to the decorations.csv file
+    absolute_path = os.path.join(script_dir, '../../items/placedItems/temp/shinyItemRates.csv')
+    with open(absolute_path, mode='a', newline='') as file:
         writer = csv.writer(file)
         
         for tier, shiny_info in plantData["shinyIds"].items():

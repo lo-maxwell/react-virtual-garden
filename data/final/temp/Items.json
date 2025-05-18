@@ -412,6 +412,18 @@
                 "transformId": "1-05-01-04-00"
             },
             {
+                "id": "0-04-01-05-00",
+                "name": "goose",
+                "icon": "🪿",
+                "type": "PlacedItem",
+                "subtype": "Decoration",
+                "category": "Normal",
+                "description": "Error",
+                "value": 50000,
+                "level": 0,
+                "transformId": "1-05-01-05-00"
+            },
+            {
                 "id": "0-04-99-99-99",
                 "name": "error",
                 "icon": "❌",
@@ -1176,6 +1188,18 @@
                 "value": 100,
                 "level": 0,
                 "transformId": "0-04-01-04-00"
+            },
+            {
+                "id": "1-05-01-05-00",
+                "name": "goose",
+                "icon": "🪿",
+                "type": "InventoryItem",
+                "subtype": "Blueprint",
+                "category": "Normal",
+                "description": "Error",
+                "value": 50000,
+                "level": 0,
+                "transformId": "0-04-01-05-00"
             },
             {
                 "id": "1-05-99-99-99",

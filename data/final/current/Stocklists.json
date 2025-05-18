@@ -59,6 +59,10 @@
                 {
                     "name": "potted plant blueprint",
                     "quantity": 5
+                },
+                {
+                    "name": "goose blueprint",
+                    "quantity": 2
                 }
             ]
         }

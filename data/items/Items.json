@@ -1084,6 +1084,7 @@
                 "category": "Normal",
                 "description": "Error",
                 "value": 100,
+                "level": 0,
                 "transformId": "0-04-01-04-00"
             },
             {

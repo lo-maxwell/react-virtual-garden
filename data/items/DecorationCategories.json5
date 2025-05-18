@@ -1,7 +1,7 @@
 Decoration: {
 	Normal: {
 		ID: '01',
-		Decorations: ['bench', 'flamingo'],
+		Decorations: ['bench', 'flamingo', 'construction sign', 'potted plant'],
 		//Does not grant stat bonuses
 	},
 	Bountiful: {
