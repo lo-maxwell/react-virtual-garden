@@ -29,6 +29,9 @@ id,name,tier,probability,plantId
 1-03-10-03-11,Bronze magic mango,bronze,0.6,0-02-10-03-10
 1-03-10-03-12,Silver magic mango,silver,0.3,0-02-10-03-10
 1-03-10-03-13,Gold magic mango,gold,0.1,0-02-10-03-10
+1-03-10-05-01,bronze pineapple,bronze,0.6,0-02-10-05-00
+1-03-10-05-02,silver pineapple,silver,0.3,0-02-10-05-00
+1-03-10-05-03,gold pineapple,gold,0.1,0-02-10-05-00
 1-03-99-99-91,Bronze error,bronze,0.6,0-02-99-99-99
 1-03-99-99-92,Silver error,silver,0.3,0-02-99-99-99
 1-03-99-99-93,Gold error,gold,0.1,0-02-99-99-99

@@ -1,4 +1,4 @@
-import itemsData from '@/data/final/Items.json';
+import itemsData from '@/data/final/current/Items.json';
 import { BlueprintTemplateInterface } from "./BlueprintTemplateInterface";
 import { InventoryItemTemplateInterface } from "./InventoryItemTemplateInterface";
 import { PlacedItemTemplateInterface } from "./PlacedItemTemplateInterface";

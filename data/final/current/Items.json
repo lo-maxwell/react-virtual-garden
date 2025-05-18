@@ -302,6 +302,36 @@
                 }
             },
             {
+                "id": "0-02-10-05-00",
+                "name": "pineapple",
+                "icon": "🍍",
+                "type": "PlacedItem",
+                "subtype": "Plant",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 200,
+                "level": 0,
+                "transformId": "1-03-10-05-00",
+                "baseExp": 20,
+                "growTime": 14400,
+                "repeatedGrowTime": 7200,
+                "numHarvests": 3,
+                "transformShinyIds": {
+                    "bronze": {
+                        "id": "1-03-10-05-01",
+                        "probability": 0.6
+                    },
+                    "silver": {
+                        "id": "1-03-10-05-02",
+                        "probability": 0.3
+                    },
+                    "gold": {
+                        "id": "1-03-10-05-03",
+                        "probability": 0.1
+                    }
+                }
+            },
+            {
                 "id": "0-02-99-99-99",
                 "name": "error",
                 "icon": "❌",
@@ -542,6 +572,18 @@
                 "value": 1200,
                 "level": 0,
                 "transformId": "0-02-10-03-10"
+            },
+            {
+                "id": "1-01-10-05-00",
+                "name": "pineapple seed",
+                "icon": "🍍",
+                "type": "InventoryItem",
+                "subtype": "Seed",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 200,
+                "level": 0,
+                "transformId": "0-02-10-05-00"
             },
             {
                 "id": "1-01-99-99-99",
@@ -932,17 +974,6 @@
                 "level": 0
             },
             {
-                "id": "1-03-10-03-11",
-                "name": "Bronze magic mango",
-                "icon": "🥭",
-                "type": "InventoryItem",
-                "subtype": "HarvestedItem",
-                "category": "Tropical",
-                "description": "Bronze version of magic mango",
-                "value": 7200,
-                "level": 0
-            },
-            {
                 "id": "1-03-10-03-02",
                 "name": "Silver mango",
                 "icon": "🥭",
@@ -951,28 +982,6 @@
                 "category": "Tropical",
                 "description": "Silver version of mango",
                 "value": 1800,
-                "level": 0
-            },
-            {
-                "id": "1-03-10-03-12",
-                "name": "Silver magic mango",
-                "icon": "🥭",
-                "type": "InventoryItem",
-                "subtype": "HarvestedItem",
-                "category": "Tropical",
-                "description": "Silver version of magic mango",
-                "value": 18000,
-                "level": 0
-            },
-            {
-                "id": "1-03-10-03-10",
-                "name": "magic mango",
-                "icon": "🥭",
-                "type": "InventoryItem",
-                "subtype": "HarvestedItem",
-                "category": "Tropical",
-                "description": "Error",
-                "value": 3600,
                 "level": 0
             },
             {
@@ -987,6 +996,39 @@
                 "level": 0
             },
             {
+                "id": "1-03-10-03-10",
+                "name": "magic mango",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 3600,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-03-11",
+                "name": "Bronze magic mango",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Bronze version of magic mango",
+                "value": 7200,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-03-12",
+                "name": "Silver magic mango",
+                "icon": "🥭",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Silver version of magic mango",
+                "value": 18000,
+                "level": 0
+            },
+            {
                 "id": "1-03-10-03-13",
                 "name": "Gold magic mango",
                 "icon": "🥭",
@@ -995,6 +1037,50 @@
                 "category": "Tropical",
                 "description": "Gold version of magic mango",
                 "value": 36000,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-05-00",
+                "name": "pineapple",
+                "icon": "🍍",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "Error",
+                "value": 200,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-05-01",
+                "name": "bronze pineapple",
+                "icon": "🍍",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "bronze version of pineapple",
+                "value": 400,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-05-02",
+                "name": "silver pineapple",
+                "icon": "🍍",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "silver version of pineapple",
+                "value": 1000,
+                "level": 0
+            },
+            {
+                "id": "1-03-10-05-03",
+                "name": "gold pineapple",
+                "icon": "🍍",
+                "type": "InventoryItem",
+                "subtype": "HarvestedItem",
+                "category": "Tropical",
+                "description": "gold version of pineapple",
+                "value": 2000,
                 "level": 0
             },
             {

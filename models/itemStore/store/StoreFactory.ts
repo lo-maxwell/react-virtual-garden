@@ -1,4 +1,4 @@
-import storeData from '@/data/final/Stores.json';
+import storeData from '@/data/final/current/Stores.json';
 import { StoreInterface } from "./StoreInterface";
 
 class StoreFactory {

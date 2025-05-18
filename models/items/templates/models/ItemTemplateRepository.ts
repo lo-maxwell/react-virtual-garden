@@ -6,7 +6,7 @@ import { InventoryItemTemplate } from "./InventoryItemTemplate";
 import { PlacedItemTemplate } from "./PlacedItemTemplate";
 import { PlantTemplate } from "./PlantTemplate";
 import { SeedTemplate } from "./SeedTemplate";
-import itemsData from '@/data/final/Items.json';
+import itemsData from '@/data/final/current/Items.json';
 
 export class ItemTemplateRepository {
 	PlacedItems: Record<string, PlacedItemTemplate[]> = {};

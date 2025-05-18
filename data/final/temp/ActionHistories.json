@@ -1,0 +1,84 @@
+{
+    "ActionHistories": [
+        {
+            "name": "Total Plants Harvested",
+            "description": "The number of plants harvested by this user",
+            "identifier": "plant:all:harvested"
+        },
+        {
+            "name": "Onions Harvested",
+            "description": "The number of onions harvested by this user",
+            "identifier": "plant:onion:harvested"
+        },
+        {
+            "name": "Leafy Greens Harvested",
+            "description": "The number of leafy greens harvested by this user",
+            "identifier": "plant:leafy green:harvested"
+        },
+        {
+            "name": "Nightshades Harvested",
+            "description": "The number of nightshades harvested by this user",
+            "identifier": "plant:nightshade:harvested"
+        },
+        {
+            "name": "Legumes Harvested",
+            "description": "The number of legumes harvested by this user",
+            "identifier": "plant:legume:harvested"
+        },
+        {
+            "name": "Grains Harvested",
+            "description": "The number of grains harvested by this user",
+            "identifier": "plant:grain:harvested"
+        },
+        {
+            "name": "Squashes Harvested",
+            "description": "The number of squashes harvested by this user",
+            "identifier": "plant:squash:harvested"
+        },
+        {
+            "name": "Herbs Harvested",
+            "description": "The number of herbs harvested by this user",
+            "identifier": "plant:herb:harvested"
+        },
+        {
+            "name": "Root Vegetables Harvested",
+            "description": "The number of root vegetables harvested by this user",
+            "identifier": "plant:root vegetable:harvested"
+        },
+        {
+            "name": "Tree Fruit Harvested",
+            "description": "The number of tree fruit harvested by this user",
+            "identifier": "plant:tree fruit:harvested"
+        },
+        {
+            "name": "Tropical Fruit Harvested",
+            "description": "The number of tropical fruit harvested by this user",
+            "identifier": "plant:tropical:harvested"
+        },
+        {
+            "name": "Berries Harvested",
+            "description": "The number of berries harvested by this user",
+            "identifier": "plant:berry:harvested"
+        },
+        {
+            "name": "Citrus Fruit Harvested",
+            "description": "The number of citrus fruit harvested by this user",
+            "identifier": "plant:citrus:harvested"
+        },
+        {
+            "name": "Vine Fruit Harvested",
+            "description": "The number of vine fruit harvested by this user",
+            "identifier": "plant:vine fruit:harvested"
+        },
+        {
+            "name": "Sea Vegetables Harvested",
+            "description": "The number of sea vegetables harvested by this user",
+            "identifier": "plant:sea vegetable:harvested"
+        },
+        {
+            "name": "Decorations Placed",
+            "description": "The number of normal decorations placed.",
+            "identifier": "decoration:normal:placed"
+        }
+    ]
+}

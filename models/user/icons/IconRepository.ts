@@ -1,5 +1,5 @@
 import Icon from "./Icon";
-import iconData from "@/data/final/Icons.json";
+import iconData from "@/data/final/current/Icons.json";
 
 class IconFactory {
 	Icons: Record<string, Icon[]> = {};

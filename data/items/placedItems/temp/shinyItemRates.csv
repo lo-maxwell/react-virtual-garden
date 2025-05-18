@@ -1,0 +1,37 @@
+id,name,tier,probability,plantId
+1-03-01-01-01,Bronze garlic,bronze,0.6,0-02-01-01-00
+1-03-01-01-02,Silver garlic,silver,0.3,0-02-01-01-00
+1-03-01-01-03,Gold garlic,gold,0.1,0-02-01-01-00
+1-03-01-06-01,Bronze onion,bronze,0.6,0-02-01-06-00
+1-03-01-06-02,Silver onion,silver,0.3,0-02-01-06-00
+1-03-01-06-03,Gold onion,gold,0.1,0-02-01-06-00
+1-03-06-04-01,Bronze pumpkin,bronze,0.6,0-02-06-04-00
+1-03-06-04-02,Silver pumpkin,silver,0.3,0-02-06-04-00
+1-03-06-04-03,Gold pumpkin,gold,0.1,0-02-06-04-00
+1-03-09-01-01,Bronze apple,bronze,0.6,0-02-09-01-00
+1-03-09-01-02,Silver apple,silver,0.3,0-02-09-01-00
+1-03-09-01-03,Gold apple,gold,0.1,0-02-09-01-00
+1-03-09-02-01,Bronze cherry,bronze,0.6,0-02-09-02-00
+1-03-09-02-02,Silver cherry,silver,0.3,0-02-09-02-00
+1-03-09-02-03,Gold cherry,gold,0.1,0-02-09-02-00
+1-03-09-03-01,Bronze peach,bronze,0.6,0-02-09-03-00
+1-03-09-03-02,Silver peach,silver,0.3,0-02-09-03-00
+1-03-09-03-03,Gold peach,gold,0.1,0-02-09-03-00
+1-03-10-01-01,Bronze banana,bronze,0.6,0-02-10-01-00
+1-03-10-01-02,Silver banana,silver,0.3,0-02-10-01-00
+1-03-10-01-03,Gold banana,gold,0.1,0-02-10-01-00
+1-03-10-02-01,Bronze coconut,bronze,0.6,0-02-10-02-00
+1-03-10-02-02,Silver coconut,silver,0.3,0-02-10-02-00
+1-03-10-02-03,Gold coconut,gold,0.1,0-02-10-02-00
+1-03-10-03-01,Bronze mango,bronze,0.6,0-02-10-03-00
+1-03-10-03-02,Silver mango,silver,0.3,0-02-10-03-00
+1-03-10-03-03,Gold mango,gold,0.1,0-02-10-03-00
+1-03-10-03-11,Bronze magic mango,bronze,0.6,0-02-10-03-10
+1-03-10-03-12,Silver magic mango,silver,0.3,0-02-10-03-10
+1-03-10-03-13,Gold magic mango,gold,0.1,0-02-10-03-10
+1-03-10-05-01,bronze pineapple,bronze,0.6,0-02-10-05-00
+1-03-10-05-02,silver pineapple,silver,0.3,0-02-10-05-00
+1-03-10-05-03,gold pineapple,gold,0.1,0-02-10-05-00
+1-03-99-99-91,Bronze error,bronze,0.6,0-02-99-99-99
+1-03-99-99-92,Silver error,silver,0.3,0-02-99-99-99
+1-03-99-99-93,Gold error,gold,0.1,0-02-99-99-99

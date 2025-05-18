@@ -1,4 +1,4 @@
-import historyData from '@/data/final/ActionHistories.json';
+import historyData from '@/data/final/current/ActionHistories.json';
 import ActionHistoryInterface from "./ActionHistoryInterface";
 
 export class ActionHistoryMetadataRepository {

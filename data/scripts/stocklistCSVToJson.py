@@ -2,8 +2,8 @@ import csv
 import json
 
 # Define the input and output file paths
-stocklist_file_path = 'store/stocklist.csv'
-json_file_path = 'final/Stocklists_From_CSV.json'
+stocklist_file_path = '../store/stocklist.csv'
+json_file_path = '../final/temp/Stocklists.json'
 data = {
     "Stocklists": []
 }

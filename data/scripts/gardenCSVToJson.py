@@ -2,8 +2,8 @@ import csv
 import json
 
 # Define the input and output file paths
-tools_file_path = 'garden/tools.csv'
-json_file_path = 'final/Garden_From_CSV.json'
+tools_file_path = '../garden/tools.csv'
+json_file_path = '../final/temp/Garden.json'
 
 # Initialize the data structure for JSON output
 data = {
