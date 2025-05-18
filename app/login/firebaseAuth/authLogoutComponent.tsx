@@ -3,11 +3,13 @@ import React, { useContext, useEffect, useState } from 'react';
  // Import the AuthContext
 import { useAccount } from '@/app/hooks/contexts/AccountContext';
 import { useAuth } from '@/app/hooks/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 const AuthLogoutComponent: React.FC = () => {
     const { firebaseUser, loading, logout } = useAuth(); // Access user and loading state
     const [message, setMessage] = useState<string>('');
     const { account, guestMode, setGuestMode } = useAccount();
+    const router = useRouter(); // Initialize the router
     // const allowFirebase = process.env.NEXT_PUBLIC_TEST_ENV_KEY;
 
     const handleLogout = async () => {
@@ -16,6 +18,7 @@ const AuthLogoutComponent: React.FC = () => {
             await logout();
             setMessage("User logged out successfully.");
             setGuestMode(false);
+            router.push('/login');
         } catch (error) {
             setMessage("Logout failed. Please try again.");
         }

@@ -237,7 +237,7 @@ class User {
 
 	isIconUnlocked(iconOption: Icon) {
 		if (iconOption.getName() === 'apple') return true;
-		const template = placeholderItemTemplates.getPlacedItemTemplateByName(iconOption.getName());
+		const template = placeholderItemTemplates.getInventoryItemTemplateByName(iconOption.getName());
 		if (!template) return false;
 		const itemAvailable = this.getItemHistory().contains(template);
 		if (itemAvailable.payload) {
