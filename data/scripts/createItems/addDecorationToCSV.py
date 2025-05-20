@@ -88,6 +88,7 @@ decorationData["subtype"] = "Decoration"
 decorationData["id"] = generateId(decorationData["type"], decorationData["subtype"], decorationData["category"], decorationData["item"], decorationData["idSuffix"])
 
 blueprintData = copy.deepcopy(decorationData)
+blueprintData["name"] = blueprintData["name"] + " blueprint"
 blueprintData["type"] = "InventoryItem"
 blueprintData["subtype"] = "Blueprint"
 blueprintData["id"] = generateId(blueprintData["type"], blueprintData["subtype"], blueprintData["category"], blueprintData["item"], blueprintData["idSuffix"])
