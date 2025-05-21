@@ -6,9 +6,12 @@ import LevelSystemComponent from "../level/LevelSystem";
 import IconDisplay from "../user/icon/IconDisplay";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
+import ToolboxComponent from "./toolbox/toolbox";
+import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 
 const UserProfileComponent = () => {
 	const { user } = useUser();
+	const { selectedItem, toggleSelectedItem } = useSelectedItem();
 
 	const [showDebugOptions, setShowDebugOptions] = useState(0);
 
@@ -39,7 +42,6 @@ const UserProfileComponent = () => {
 		displayLevel = levelState.level;
 		displayCurrentExp = levelState.currentExp;
 		displayExpToLevelUp = levelState.expToLevelUp;
-
 	}
 
 	return <>
@@ -50,6 +52,7 @@ const UserProfileComponent = () => {
 		<span className={`ml-4 ${getUsernameFontSize()} ${colors.user.usernameTextColor}`}>{user.getUsername()}</span>
 	</div>
 	<div className="mx-4 my-4"><LevelSystemComponent level={displayLevel} currentExp={displayCurrentExp} expToLevelUp={displayExpToLevelUp} /></div>
+	<div><ToolboxComponent toolbox={user.getToolbox()} onToolClickFunction={toggleSelectedItem} maxHeightPercentage={100}/></div>
 	<div className={`${showDebugOptions >= 3 ? `` : `hidden`}`}>
 		<GardenDebugOptions/>
 	</div>

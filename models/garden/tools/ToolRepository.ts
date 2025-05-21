@@ -1,4 +1,4 @@
-import toolData from '@/data/garden/Tools.json';
+import toolData from '@/data/final/current/Garden.json';
 import ToolInterface from "./ToolInterface";
 
 export class ToolRepository {

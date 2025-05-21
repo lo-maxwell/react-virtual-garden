@@ -15,6 +15,7 @@ import { addColumnAPI, addColumnLocal, addRowAPI, addRowLocal, harvestAllAPI, pi
 import { useAccount } from "../hooks/contexts/AccountContext";
 import { useDispatch } from "react-redux";
 import { setAllLevelSystemValues } from "@/store/slices/userLevelSystemSlice";
+import Tool from "@/models/garden/tools/Tool";
 
 const GardenComponent = () => {
 	const { inventory, reloadInventory } = useInventory();
@@ -39,8 +40,9 @@ const GardenComponent = () => {
 		return () => clearInterval(id); // Cleanup function to clear the interval on unmount
 	}, []);
 
-	const GetPlotAction = (plot: Plot, selected: InventoryItem | null) => {
-		
+	const GetPlotAction = (plot: Plot, selected: InventoryItem | Tool | null) => {
+		//TODO: Fix this
+		if (selected instanceof Tool) return doNothing(plot);
 		if (plot.getItemSubtype() == ItemSubtypes.GROUND.name && selected != null) {
 			if (selected.itemData.subtype == ItemSubtypes.SEED.name) {
 				return plantSeed(selected, plot);
@@ -90,7 +92,7 @@ const GardenComponent = () => {
 	}
 
 	const plantAll = async ()  => {
-		if (selectedItem == null || selectedItem.itemData.subtype != ItemSubtypes.SEED.name) return;
+		if (selectedItem == null || selectedItem instanceof Tool || selectedItem.itemData.subtype != ItemSubtypes.SEED.name) return;
 		const getItemResponse = inventory.getItem(selectedItem);
 		if (!getItemResponse.isSuccessful()) return;
 		let numRemaining = getItemResponse.payload.getQuantity();

@@ -8,7 +8,7 @@ const ItemComponent = ({icon, name, quantity, price, priceColor, width}: {icon: 
 	}
 	
 	return (
-		<>	
+		<div className={'w-full flex flex-row items-center'}>	
 			<span className="flex items-center min-w-[35px] text-center" data-testid="item-qt">
 				{quantity}
 			</span>
@@ -21,7 +21,7 @@ const ItemComponent = ({icon, name, quantity, price, priceColor, width}: {icon: 
 				<span className="mr-1">💰</span> {/* Gold icon */}
 				<span className={`${priceColor}`}>{price}</span>
 			</span>
-		</>
+		</div>
 	);
 }
 

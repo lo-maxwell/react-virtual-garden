@@ -67,9 +67,15 @@ const colors = {
 		inventoryItemBorderColor: "border-apple-600"
 	},
 
+	tool: {
+		descriptionTextColor: "text-coffee-800",
+		backgroundColor: "bg-moon-mist-700",
+	},
+
 	error: {
 		redErrorText: "text-red-600"
 	}
+
 	
 }
 

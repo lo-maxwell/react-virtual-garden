@@ -3,11 +3,22 @@ import Tool from "./Tool";
 import { toolRepository } from "./ToolRepository";
 import { ToolTypes } from "./ToolTypes";
 
+/** TODO: Make this like itemlist, with immutable fields and helper functions to interact with it */
 export default class Toolbox {
-	tools: Tool[];
+	private tools: Tool[];
 
 	constructor(tools: Tool[] = []) {
 		this.tools = tools;
+	}
+
+	static generateDefaultToolbox() {
+		const defaultTools: Tool[] = [];
+		const basicShovelInterface = toolRepository.getToolInterfaceByName("Basic Shovel");
+		if (basicShovelInterface) {
+			const basicShovel = Shovel.fromInterface(basicShovelInterface);
+			if (basicShovel) defaultTools.push(basicShovel);
+		}
+		return new Toolbox(defaultTools);
 	}
 
 	static fromPlainObject(plainObject: any): Toolbox {
@@ -16,7 +27,7 @@ export default class Toolbox {
             if (!plainObject || typeof plainObject !== 'object') {
                 throw new Error('Invalid plainObject structure for Toolbox');
             }
-			const tools = plainObject.tools.map((tool: any) => {
+			const tools: Tool[] = plainObject.tools.map((tool: any) => {
 				if (!tool) return null;
 				let toolInstance = toolRepository.getToolInterfaceById(tool.id);
 				if (!toolInstance) {
@@ -34,6 +45,10 @@ export default class Toolbox {
 						return null;
 				}
 			}).filter((tool: null | Tool) => tool !== null);
+
+			if (tools.length == 0) {
+				return Toolbox.generateDefaultToolbox();
+			}
 			return new Toolbox(tools);
 		} catch (err) {
 			console.error('Error creating Toolbox from plainObject:', err);
@@ -50,5 +65,18 @@ export default class Toolbox {
 		return toReturn;
 	} 
 
+	/**
+	 * @returns a copy of the tools within the list.
+	 */
+	 getAllTools(): Tool[] {
+		return this.tools.slice();
+	}
 
+	/**
+     * Get the size of the inventory.
+     * @returns The number of tools in the toolbox.
+     */
+	 size(): number {
+		return this.tools.length;
+	}
 }

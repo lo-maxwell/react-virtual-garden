@@ -16,6 +16,7 @@ import { useUser } from "@/app/hooks/contexts/UserContext";
 import { useAccount } from "@/app/hooks/contexts/AccountContext";
 import { useDispatch } from "react-redux";
 import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
+import Tool from "@/models/garden/tools/Tool";
 
 
 const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshKey}: {costMultiplier: number, forceRefreshKey: number, setForceRefreshKey: React.Dispatch<React.SetStateAction<number>>}) => {
@@ -35,7 +36,8 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 	}
 
 	const renderInventoryItem = () => {
-		if (selectedItem && owner != null) {
+		
+		if (selectedItem && !(selectedItem instanceof Tool) && owner != null) {
 			let operationString = "";
 			if (owner instanceof Store) {
 				operationString = "Buying: ";
@@ -61,7 +63,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 	}
 
 	useEffect(() => {
-		if (!selectedItem) return;
+		if (!selectedItem || selectedItem instanceof Tool) return;
 		if (quantity > selectedItem.getQuantity()) {
 		  setQuantity(selectedItem.getQuantity());
 		} else if (quantity <= 0 && selectedItem.getQuantity() > 0) {
@@ -76,7 +78,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 
 
 	const onPlusClick = useCallback((delta: number) => {
-		if (!selectedItem) return;
+		if (!selectedItem || selectedItem instanceof Tool) return;
 		setQuantity((quantity) => {
 		  if (quantity + delta <= selectedItem.getQuantity()) {
 			return quantity + delta;
@@ -86,7 +88,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 	  }, [selectedItem]);
 
 	const onMinusClick = useCallback((delta: number) => {
-		if (!selectedItem) return;
+		if (!selectedItem || selectedItem instanceof Tool) return;
 		setQuantity((quantity) => {
 			if (quantity - delta > 0) {
 			  return quantity - delta;
@@ -97,7 +99,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 	}, [selectedItem]);
 
 	const onAllClick = useCallback(() => {
-		if (!selectedItem || !owner) return;
+		if (!selectedItem || selectedItem instanceof Tool|| !owner) return;
 		if (owner instanceof Store) {
 			const maxBuy = Math.min(selectedItem.getQuantity(), Math.max(1, Math.floor(inventory.getGold()/(owner.getBuyPrice(selectedItem)))));
 			setQuantity(maxBuy);
@@ -109,7 +111,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 	}, [selectedItem, inventory, owner]);
 
 	const onConfirmClick = async () => {
-		if (!selectedItem) return;
+		if (!selectedItem || selectedItem instanceof Tool) return;
 		if (owner instanceof Store) {
 			if (!store.canBuyItem(selectedItem, quantity, inventory)) {
 				setTradeWindowMessage(`Not enough gold for purchase!`);

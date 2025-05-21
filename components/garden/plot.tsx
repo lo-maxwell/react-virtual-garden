@@ -125,7 +125,6 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 				// setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1); //we force a refresh to clear statuses
 			}
 		}
-		console.log(user.getLevelSystem());
 		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
 	}
 

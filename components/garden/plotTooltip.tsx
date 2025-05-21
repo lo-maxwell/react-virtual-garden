@@ -1,5 +1,6 @@
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import { Plot } from "@/models/garden/Plot";
+import Tool from "@/models/garden/tools/Tool";
 import { Blueprint } from "@/models/items/inventoryItems/Blueprint";
 import { Seed } from "@/models/items/inventoryItems/Seed";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
@@ -185,7 +186,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 
 	const RenderEmptyItemTooltip = () => {
 		const currentItem = plot.getItem();
-		if (currentItem.itemData.name === 'error' || !selectedItem) {
+		if (currentItem.itemData.name === 'error' || !selectedItem || selectedItem instanceof Tool) {
 			return <>
 				<div> An error occurred! Please report this to the developers.</div>
 			</>
@@ -216,9 +217,9 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 			case ItemSubtypes.PLANT.name:
 				return colors.plant.plotTooltipBackground;
 			case ItemSubtypes.GROUND.name:
-				if (selectedItem && selectedItem.itemData.subtype === ItemSubtypes.SEED.name) {
+				if (selectedItem && !(selectedItem instanceof Tool) && selectedItem.itemData.subtype === ItemSubtypes.SEED.name) {
 					return colors.plant.plotTooltipBackground;
-				} else if (selectedItem && selectedItem.itemData.subtype === ItemSubtypes.BLUEPRINT.name) {
+				} else if (selectedItem && !(selectedItem instanceof Tool) && selectedItem.itemData.subtype === ItemSubtypes.BLUEPRINT.name) {
 					return colors.decoration.plotTooltipBackground;
 				} else {
 					return colors.ground.plotTooltipBackground;
@@ -234,10 +235,10 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 		if (plot.getItemSubtype() === ItemSubtypes.DECORATION.name || plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
 			return '';
 		}
-		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name && selectedItem && (selectedItem.itemData.subtype === ItemSubtypes.SEED.name)) {
+		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name && selectedItem && !(selectedItem instanceof Tool) && (selectedItem.itemData.subtype === ItemSubtypes.SEED.name)) {
 			return '';
 		}
-		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name && selectedItem && (selectedItem.itemData.subtype === ItemSubtypes.BLUEPRINT.name)) {
+		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name && selectedItem && !(selectedItem instanceof Tool) && (selectedItem.itemData.subtype === ItemSubtypes.BLUEPRINT.name)) {
 			return '';
 		}
 

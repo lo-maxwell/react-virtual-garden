@@ -31,7 +31,7 @@ class User {
 	private actionHistory: ActionHistoryList;
 	private toolbox: Toolbox;
 
-	constructor(userId: string, username: string, icon: string, level: LevelSystem = User.generateDefaultLevelSystem(), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList(), toolbox: Toolbox = new Toolbox()) {
+	constructor(userId: string, username: string, icon: string, level: LevelSystem = User.generateDefaultLevelSystem(), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList(), toolbox: Toolbox = Toolbox.generateDefaultToolbox()) {
 		this.userId = userId;
 		this.username = username;
 		this.icon = icon;
@@ -174,6 +174,10 @@ class User {
 	 */
 	addExp(exp: number) {
 		return this.level.addExperience(exp);
+	}
+
+	getToolbox(): Toolbox {
+		return this.toolbox;
 	}
 
 	/**

@@ -1,7 +1,9 @@
 'use client'
 import { SelectedItemContext } from '@/app/hooks/contexts/SelectedItemContext';
+import Tool from '@/models/garden/tools/Tool';
 import { InventoryItem } from '@/models/items/inventoryItems/InventoryItem';
 import { ItemStore } from '@/models/itemStore/ItemStore';
+import User from '@/models/user/User';
 import { usePathname } from '@/node_modules/next/navigation';
 import { useLocation } from '@/node_modules/react-router-dom/dist/index';
 import React, { ReactNode, useEffect, useState } from 'react';
@@ -12,8 +14,8 @@ interface SelectedItemProviderProps {
 }
 
 export const SelectedItemProvider = ({ children }: SelectedItemProviderProps) => {
-  	const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
-	const [owner, setOwner] = useState<ItemStore | null>(null);
+  	const [selectedItem, setSelectedItem] = useState<InventoryItem | Tool | null>(null);
+	const [owner, setOwner] = useState<ItemStore | User | null>(null);
     const pathname = usePathname(); // Hook to get the current pathname in Next.js
 
     // Reset selectedItem on route change
@@ -21,7 +23,7 @@ export const SelectedItemProvider = ({ children }: SelectedItemProviderProps) =>
         setSelectedItem(null);
     }, [pathname]); // Runs whenever the pathname changes
 
-    function toggleSelectedItem(item: InventoryItem | null) {
+    function toggleSelectedItem(item: InventoryItem | Tool | null) {
         if (item && item === selectedItem) {
             setSelectedItem(null);
         } else {

@@ -52,8 +52,8 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 					{currentItem.itemData.value}
 				</span>
 			</div>
-			<div className={`${colors.blueprint.categoryTextColor} text-left`}>Seed</div>
-			<div className={`${colors.harvested.categoryTextColor} text-left`}>Category: {currentItem.itemData.category}</div>
+			<div className={`${colors.seed.categoryTextColor} text-left`}>Seed</div>
+			<div className={`${colors.seed.categoryTextColor} text-left`}>Category: {currentItem.itemData.category}</div>
 			<div>When planted: </div>
 			<div className="flex flex-row justify-between">
 				<div className="flex flex-row">
