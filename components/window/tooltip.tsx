@@ -66,7 +66,6 @@ const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVi
       if (tooltipRef.current) {
 
         const tooltipRect = tooltipRef.current.getBoundingClientRect();
-        
         // Check if the tooltip goes off the top of the screen
         if (tooltipRect.top - 10 < 0 && finalPosition === 'top') {
           tooltipTop = top + tooltipRect.height + height + 10; // Adjust to show below the element
@@ -77,10 +76,10 @@ const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVi
         }
 
         if (tooltipRect.left < 10) {
-          tooltipLeft = tooltipRect.width/2 + 10;
+          tooltipLeft = tooltipRect.width/2 + 20;
         }
-        else if (tooltipRect.right > window.innerHeight) {
-          tooltipLeft = window.innerHeight - tooltipRect.width/2 - 10;
+        else if (tooltipRect.right > window.innerWidth) {
+          tooltipLeft = window.innerWidth - tooltipRect.width/2 - 20;
         }
 
         // Update tooltip coordinates after checking bounds
