@@ -39,10 +39,10 @@ id,name,icon,type,subtype,category,description,value,level
 1-03-10-03-11,Bronze magic mango,🥭,InventoryItem,HarvestedItem,Tropical,Bronze version of magic mango,7200,0
 1-03-10-03-12,Silver magic mango,🥭,InventoryItem,HarvestedItem,Tropical,Silver version of magic mango,18000,0
 1-03-10-03-13,Gold magic mango,🥭,InventoryItem,HarvestedItem,Tropical,Gold version of magic mango,36000,0
-1-03-10-05-00,pineapple,🍍,InventoryItem,HarvestedItem,Tropical,Error,200,0
-1-03-10-05-01,bronze pineapple,🍍,InventoryItem,HarvestedItem,Tropical,bronze version of pineapple,400,0
-1-03-10-05-02,silver pineapple,🍍,InventoryItem,HarvestedItem,Tropical,silver version of pineapple,1000,0
-1-03-10-05-03,gold pineapple,🍍,InventoryItem,HarvestedItem,Tropical,gold version of pineapple,2000,0
+1-03-10-05-00,pineapple,🍍,InventoryItem,HarvestedItem,Tropical,Error,250,0
+1-03-10-05-01,bronze pineapple,🍍,InventoryItem,HarvestedItem,Tropical,bronze version of pineapple,500,0
+1-03-10-05-02,silver pineapple,🍍,InventoryItem,HarvestedItem,Tropical,silver version of pineapple,1250,0
+1-03-10-05-03,gold pineapple,🍍,InventoryItem,HarvestedItem,Tropical,gold version of pineapple,2500,0
 1-03-99-99-91,Bronze error,❌,InventoryItem,HarvestedItem,Error,Bronze version of error,0,0
 1-03-99-99-92,Silver error,❌,InventoryItem,HarvestedItem,Error,Silver version of error,0,0
 1-03-99-99-93,Gold error,❌,InventoryItem,HarvestedItem,Error,Gold version of error,0,0

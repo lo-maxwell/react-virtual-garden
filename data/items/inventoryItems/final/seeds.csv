@@ -9,5 +9,5 @@ id,name,icon,type,subtype,category,description,value,level,transformId
 1-01-10-02-00,coconut seed,🥥,InventoryItem,Seed,Tropical,Error,150,0,0-02-10-02-00
 1-01-10-03-00,mango seed,🥭,InventoryItem,Seed,Tropical,Error,120,0,0-02-10-03-00
 1-01-10-03-10,magic mango seed,🥭,InventoryItem,Seed,Tropical,Error,1200,0,0-02-10-03-10
-1-01-10-05-00,pineapple seed,🍍,InventoryItem,Seed,Tropical,Error,200,0,0-02-10-05-00
+1-01-10-05-00,pineapple seed,🍍,InventoryItem,Seed,Tropical,Error,250,0,0-02-10-05-00
 1-01-99-99-99,error,❌,InventoryItem,Seed,Error,Error,0,0,0-02-99-99-99

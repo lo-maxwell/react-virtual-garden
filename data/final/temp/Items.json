@@ -252,7 +252,7 @@
                 "value": 120,
                 "level": 0,
                 "transformId": "1-03-10-03-00",
-                "baseExp": 30,
+                "baseExp": 20,
                 "growTime": 10800,
                 "repeatedGrowTime": 5400,
                 "numHarvests": 1,
@@ -282,7 +282,7 @@
                 "value": 1200,
                 "level": 0,
                 "transformId": "1-03-10-03-10",
-                "baseExp": 300,
+                "baseExp": 200,
                 "growTime": 108000,
                 "repeatedGrowTime": 54000,
                 "numHarvests": 10,
@@ -309,10 +309,10 @@
                 "subtype": "Plant",
                 "category": "Tropical",
                 "description": "Error",
-                "value": 200,
+                "value": 250,
                 "level": 0,
                 "transformId": "1-03-10-05-00",
-                "baseExp": 20,
+                "baseExp": 30,
                 "growTime": 14400,
                 "repeatedGrowTime": 7200,
                 "numHarvests": 3,
@@ -593,7 +593,7 @@
                 "subtype": "Seed",
                 "category": "Tropical",
                 "description": "Error",
-                "value": 200,
+                "value": 250,
                 "level": 0,
                 "transformId": "0-02-10-05-00"
             },
@@ -1059,7 +1059,7 @@
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
                 "description": "Error",
-                "value": 200,
+                "value": 250,
                 "level": 0
             },
             {
@@ -1070,7 +1070,7 @@
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
                 "description": "bronze version of pineapple",
-                "value": 400,
+                "value": 500,
                 "level": 0
             },
             {
@@ -1081,7 +1081,7 @@
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
                 "description": "silver version of pineapple",
-                "value": 1000,
+                "value": 1250,
                 "level": 0
             },
             {
@@ -1092,7 +1092,7 @@
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
                 "description": "gold version of pineapple",
-                "value": 2000,
+                "value": 2500,
                 "level": 0
             },
             {
@@ -1144,7 +1144,7 @@
             {
                 "id": "1-05-01-01-00",
                 "name": "bench blueprint",
-                "icon": "📜",
+                "icon": "🪑",
                 "type": "InventoryItem",
                 "subtype": "Blueprint",
                 "category": "Normal",
@@ -1156,7 +1156,7 @@
             {
                 "id": "1-05-01-02-00",
                 "name": "flamingo blueprint",
-                "icon": "📜",
+                "icon": "🦩",
                 "type": "InventoryItem",
                 "subtype": "Blueprint",
                 "category": "Normal",
@@ -1168,7 +1168,7 @@
             {
                 "id": "1-05-01-03-00",
                 "name": "construction sign blueprint",
-                "icon": "📜",
+                "icon": "🚧",
                 "type": "InventoryItem",
                 "subtype": "Blueprint",
                 "category": "Normal",
@@ -1180,7 +1180,7 @@
             {
                 "id": "1-05-01-04-00",
                 "name": "potted plant blueprint",
-                "icon": "📜",
+                "icon": "🪴",
                 "type": "InventoryItem",
                 "subtype": "Blueprint",
                 "category": "Normal",
