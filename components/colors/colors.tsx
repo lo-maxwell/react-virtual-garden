@@ -69,7 +69,7 @@ const colors = {
 
 	tool: {
 		descriptionTextColor: "text-coffee-800",
-		backgroundColor: "bg-moon-mist-700",
+		backgroundColor: "bg-moon-mist-400",
 	},
 
 	error: {

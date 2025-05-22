@@ -7,9 +7,9 @@ import InventoryItemComponent from "../inventory/inventoryItem";
 import DropdownMenu from "../lists/DropdownMenu";
 import StoreItemComponent from "./storeItem";
 
-const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultiplier, maxHeightPercentage}: {itemStore: Store | Inventory, onInventoryItemClickFunction: (arg: any) => void, costMultiplier: number, maxHeightPercentage: number}) => {
-	const [subtypeFilter, setSubtypeFilter] = useState<ItemSubtype | null>(null);
-	const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultiplier, maxHeightPercentage, initialSubtypeFilter, initialCategoryFilter}: {itemStore: Store | Inventory, onInventoryItemClickFunction: (arg: any) => void, costMultiplier: number, maxHeightPercentage: number, initialSubtypeFilter: ItemSubtype | null, initialCategoryFilter: string | null}) => {
+	const [subtypeFilter, setSubtypeFilter] = useState<ItemSubtype | null>(initialSubtypeFilter);
+	const [categoryFilter, setCategoryFilter] = useState<string | null>(initialCategoryFilter);
 	const {selectedItem, owner} = useSelectedItem();
 
 	const getItemList = () => {

@@ -109,7 +109,7 @@ const StoreComponent = ({onInventoryItemClickFunction, forceRefreshKey}: {onInve
 		<div className="w-[80%]" key={forceRefreshKey}>
 			<div className="font-bold text-3xl">{store.getStoreName()}</div>
 			<div>{RenderStoreDiscountString()}</div>
-			<ItemStoreComponent itemStore={store} onInventoryItemClickFunction={onInventoryItemClickFunction} costMultiplier={store.getBuyMultiplier()} maxHeightPercentage={60}/>
+			<ItemStoreComponent itemStore={store} onInventoryItemClickFunction={onInventoryItemClickFunction} costMultiplier={store.getBuyMultiplier()} maxHeightPercentage={60} initialSubtypeFilter={"Seed"} initialCategoryFilter={null}/>
 			<div>
 				<div className="mt-2 text-sm text-gray-600">
 					<button 
