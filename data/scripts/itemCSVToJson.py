@@ -13,6 +13,7 @@ decorations_file_path = os.path.join(script_dir, '../items/placedItems/final/dec
 ground_file_path = os.path.join(script_dir, '../items/placedItems/final/ground.csv')
 plants_file_path = os.path.join(script_dir, '../items/placedItems/final/plants.csv')
 shiny_file_path = os.path.join(script_dir, '../items/placedItems/final/shinyItemRates.csv')
+tools_file_path = os.path.join(script_dir, '../items/tools/final/tools.csv')
 json_file_path = os.path.join(script_dir, '../final/temp/Items.json')
 
 # Initialize the data structure for JSON output
@@ -26,6 +27,9 @@ data = {
         "Seeds": [],
         "HarvestedItems": [],
         "Blueprints": []
+    },
+    "Tools": {
+        "Shovels": []
     }
 }
 
@@ -166,6 +170,21 @@ with open(plants_file_path, mode='r', encoding='utf-8') as csv_file:
             "transformShinyIds": transformShinyIdMap.get(row["id"], {})
         }
         data["PlacedItems"]["Plants"].append(plant)
+
+with open(tools_file_path, mode='r', encoding='utf-8') as csv_file:
+    csv_reader = csv.DictReader(csv_file)
+    # Process each row in the CSV
+    for row in csv_reader:
+        tool = {
+            "id": row["id"],
+            "name": row["name"],
+            "type": row["type"],
+            "icon": row["icon"],
+            "description": row["description"],
+            "value": int(row["value"]),
+            "level": int(row["level"])
+        }
+        data["Tools"][(row["type"] + "s")].append(tool)
 
 # Write the JSON data to the output file
 with open(json_file_path, mode='w', encoding='utf-8') as json_file:

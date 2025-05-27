@@ -8,7 +8,7 @@ def convert_all_csv_to_json():
     # Define the scripts with absolute paths
     scripts = [
         os.path.join(script_dir, "actionHistoryCSVToJson.py"),
-        os.path.join(script_dir, "gardenCSVToJson.py"),
+        # os.path.join(script_dir, "gardenCSVToJson.py"), #Removed, tools were merged into item csv
         os.path.join(script_dir, "iconCSVToJson.py"),
         os.path.join(script_dir, "itemCSVToJson.py"),
         os.path.join(script_dir, "stocklistCSVToJson.py"),
