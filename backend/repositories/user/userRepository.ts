@@ -21,10 +21,9 @@ class UserRepository {
 		return true;
 	}
 
-	makeUserObject(userEntity: UserEntity, levelSystem: LevelSystem, actionHistoryList: ActionHistoryList, itemHistoryList: ItemHistoryList): User {
+	makeUserObject(userEntity: UserEntity, levelSystem: LevelSystem, actionHistoryList: ActionHistoryList, itemHistoryList: ItemHistoryList, toolbox: Toolbox): User {
 		assert(this.validateUserEntity(userEntity), 'UserEntity validation failed');
 
-		let toolbox = new Toolbox();
 		return new User(userEntity.id, userEntity.username, userEntity.icon, levelSystem, itemHistoryList, actionHistoryList, toolbox);
 	}
 

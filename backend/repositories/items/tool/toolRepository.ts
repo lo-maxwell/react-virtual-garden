@@ -84,13 +84,13 @@ class ToolRepository {
 	}
 
 	/**
-	 * Given an inventory id, returns all inventory items owned by that inventory from the database.
-	 * @id the id of the inventory in the database
+	 * Given a toolbox id, returns all tools owned by that toolbox from the database.
+	 * @toolboxId the id of the toolbox in the database
 	 */
-	async getAllToolsByOwnerId(inventoryId: string): Promise<ToolEntity[]> {
+	async getAllToolsByOwnerId(toolboxId: string): Promise<ToolEntity[]> {
 		const result = await query<ToolEntity>(
 			'SELECT id, owner, identifier FROM tools WHERE owner = $1',
-			[inventoryId]);
+			[toolboxId]);
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return [];
 		return result.rows;
@@ -99,12 +99,12 @@ class ToolRepository {
 	}
 
 	/**
-	 * Given an inventory id, returns the row data of an tool from the database.
-	 * @id the id of the inventory in the database
+	 * Given a toolbox id, returns the row data of an tool from the database.
+	 * @toolboxId the id of the toolbox in the database
 	 * @identifier the item template id
 	 */
-	async getToolByOwnerId(inventoryId: string, identifier: string): Promise<ToolEntity | null> {
-		const result = await query<ToolEntity>('SELECT id, owner, identifier FROM tools WHERE owner = $1 AND identifier = $2', [inventoryId, identifier]);
+	async getToolByOwnerId(toolboxId: string, identifier: string): Promise<ToolEntity | null> {
+		const result = await query<ToolEntity>('SELECT id, owner, identifier FROM tools WHERE owner = $1 AND identifier = $2', [toolboxId, identifier]);
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found

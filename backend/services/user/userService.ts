@@ -6,6 +6,8 @@ import actionHistoryRepository from "@/backend/repositories/user/actionHistoryRe
 import itemHistoryRepository from "@/backend/repositories/user/itemHistoryRepository";
 import userRepository from "@/backend/repositories/user/userRepository";
 import HistoryComponent from "@/components/user/history/History";
+import { ToolEntity } from "@/models/items/tools/Tool";
+import Toolbox, { ToolboxEntity } from "@/models/itemStore/toolbox/tool/Toolbox";
 import LevelSystem, { LevelSystemEntity } from "@/models/level/LevelSystem";
 import { ActionHistoryEntity } from "@/models/user/history/actionHistory/ActionHistory";
 import { ItemHistoryEntity } from "@/models/user/history/itemHistory/ItemHistory";
@@ -765,6 +767,20 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 							}
 						},
 						"limit": 1000
+					},
+					{
+						"returnColumns": [
+							"id", 
+							"owner"
+						],
+						"tableName": "toolboxes",
+						"conditions": {
+							"owner": {
+								"operator": "=",
+								"value": userId
+							}
+						},
+						"limit": 1
 					}
 				]
 			  }
@@ -782,11 +798,38 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 			assert(Array.isArray(actionHistoryEntityListResult));
 			const itemHistoryEntityListResult = parseRows<ItemHistoryEntity[]>(userResult[3]);
 			assert(Array.isArray(itemHistoryEntityListResult));
+			const toolboxEntityResult = parseRows<ToolboxEntity[]>(userResult[4])[0];
+			assert(toolboxRepository.validateToolboxEntity(toolboxEntityResult));
 			const actionHistories = actionHistoryEntityListResult.map((actionHistoryEntity) => actionHistoryRepository.makeActionHistoryObject(actionHistoryEntity));
 			const actionHistoryList = actionHistoryRepository.makeActionHistoryListObject(actionHistories);
 			const itemHistories = itemHistoryEntityListResult.map((itemHistoryEntity) => itemHistoryRepository.makeItemHistoryObject(itemHistoryEntity));
 			const itemHistoryList = itemHistoryRepository.makeItemHistoryListObject(itemHistories);
-			const userObject = userRepository.makeUserObject(userEntityResult, levelSystemInstance, actionHistoryList, itemHistoryList);
+
+			const tool_payload = {
+				"queries": [
+					{
+						"returnColumns": [
+							"id",
+							"owner",
+							"identifier"
+						],
+						"tableName": "tools",
+						"conditions": {
+							"owner": {
+								"operator": "=",
+								"value": toolboxEntityResult.id
+							}
+						},
+						"limit": 1000
+					}
+				]
+			  }
+			const toolResult = await invokeLambda('garden-select', tool_payload);
+			const toolsEntity = parseRows<ToolEntity[]>(toolResult[0]);
+			const toolsInstance = toolRepository.makeToolObjectBatch(toolResult);
+			const toolboxInstance = await toolboxRepository.makeToolboxObject(toolboxEntityResult, toolsInstance);
+
+			const userObject = userRepository.makeUserObject(userEntityResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance);
 			return userObject.toPlainObject();
 		} catch (error) {
 			console.error('Error fetching user from Lambda:', error);
@@ -813,7 +856,16 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 			const itemHistoryEntities = await itemHistoryRepository.getItemHistoriesByUserId(userResult.id);
 			const itemHistories = itemHistoryEntities.map((itemHistoryEntity) => itemHistoryRepository.makeItemHistoryObject(itemHistoryEntity));
 			const itemHistoryList = itemHistoryRepository.makeItemHistoryListObject(itemHistories);
-			const userInstance = userRepository.makeUserObject(userResult, levelSystemInstance, actionHistoryList, itemHistoryList);
+			const toolboxEntity = await toolboxRepository.getToolboxByOwnerId(userResult.id);
+			let toolboxInstance;
+			if (!toolboxEntity) {
+				toolboxInstance = Toolbox.generateDefaultToolbox();
+			} else {
+				const toolEntities = await toolRepository.getAllToolsByOwnerId(toolboxEntity.id);
+				const tools = toolRepository.makeToolObjectBatch(toolEntities);
+				toolboxInstance = await toolboxRepository.makeToolboxObject(toolboxEntity, tools);
+			}
+			const userInstance = userRepository.makeUserObject(userResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance);
 	
 			return userInstance.toPlainObject();
 		}
