@@ -1,0 +1,27 @@
+{
+  "queries": [
+    {
+      "tableName": "placed_items",
+      "conditions": {
+        "owner": {
+          "operator": "=",
+          "value": "some-user-uuid"
+        },
+        "status": {
+            "operator": "=",
+            "value": "wilted"
+        }
+      },
+      "limit": 50
+    },
+    {
+      "tableName": "action_histories",
+      "conditions": {
+        "owner": {
+          "operator": "=",
+          "value": "another-user-uuid"
+        }
+      }
+    }
+  ]
+}

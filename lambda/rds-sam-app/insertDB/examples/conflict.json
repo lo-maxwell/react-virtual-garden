@@ -1,0 +1,65 @@
+{
+  "queries": [
+    {
+      "tableName": "inventory_items",
+      "columnsToWrite": ["owner", "identifier", "quantity"],
+      "values": [
+        ["some-user-uuid", "apple", 5],
+        ["some-user-uuid", "orange", 10]
+      ],
+      "conflictColumns": ["owner", "identifier"],
+      "updateQuery": {
+        "values": {
+          "quantity": {
+            "excluded": true 
+          }
+        },
+        "conditions": {}
+      },
+      "returnColumns": ["id", "owner", "identifier", "quantity"]
+    },
+    {
+        "tableName": "store_items",
+        "columnsToWrite": ["owner","identifier", "quantity"],
+        "values": [
+          ["some-user-uuid","blue-potion", 50]
+        ],
+        "conflictColumns": ["owner", "identifier"],
+        "updateQuery": {
+          "values": {
+            "quantity": {
+              "operator": "+",
+              "value": 5,
+              "excluded": true
+            }
+          },
+          "conditions": {
+            "owner": {
+                "operator": "=",
+                "value": "some-user-uuid"
+            }
+          }
+        },
+        "returnColumns": ["identifier", "quantity"]
+      },
+      {
+        "tableName": "plots",
+        "columnsToWrite": ["owner", "row_index", "col_index", "plant_time", "uses_remaining", "random_seed"],
+        "values": [
+          ["some-user-uuid", 0, 0, 999999999, 10, 12345]
+        ],
+        "conflictColumns": ["owner", "row_index", "col_index"],
+        "updateQuery": {
+          "values": {
+            "uses_remaining": {
+              "operator": "+",
+              "value": 1
+            },
+            "plant_time": 987654321
+          },
+          "conditions": {}
+        },
+        "returnColumns": ["id", "uses_remaining", "plant_time"]
+      }
+  ]
+}

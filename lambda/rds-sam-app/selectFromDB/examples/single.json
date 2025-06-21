@@ -1,0 +1,20 @@
+{
+	"queries": [
+		{
+			"returnColumns": [
+				"id",
+				"owner",
+				"identifier",
+				"last_restock_time_ms"
+			],
+			"tableName": "stores",
+			"conditions": {
+				"owner": {
+					"operator": "=",
+					"value": "userId"
+					}
+			},
+			"limit": 1
+		}
+	]
+}

@@ -1,0 +1,33 @@
+{
+  "queries": [
+    {
+      "tableName": "inventories",
+      "values": {
+        "gold": {
+          "operator": "+",
+          "value": 100
+        }
+      },
+      "conditions": {
+        "owner": {
+          "operator": "=",
+          "value": "some-user-uuid"
+        }
+      },
+      "returnColumns": ["id", "owner", "gold"]
+    },
+    {
+      "tableName": "users",
+      "values": {
+        "icon": "new-icon-name"
+      },
+      "conditions": {
+        "username": {
+          "operator": "=",
+          "value": "testuser"
+        }
+      },
+      "returnColumns": ["id", "username", "icon"]
+    }
+  ]
+}

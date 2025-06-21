@@ -26,6 +26,8 @@ const allowedTables = {
   store_items: ["id", "owner", "identifier", "quantity"],
   stores: ["id", "owner", "identifier", "last_restock_time_ms"],
   users: ["id", "username", "password_hash", "password_salt", "icon"], //Disallow password hash/salt select statements?
+  toolboxes: ["id", "owner"],
+  tools: ["id", "owner", "identifier"],
   // Add more tables and their columns as needed
 };
 

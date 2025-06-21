@@ -1,0 +1,49 @@
+{
+	"queries": [
+		{
+			"returnColumns": [
+				"id",
+				"owner",
+				"rows",
+				"columns"
+			],
+			"tableName": "gardens",
+			"conditions": {
+				"owner": {
+					"operator": "=",
+					"value": "some-user-uuid"
+				}
+			},
+			"limit": 10
+		},
+		{
+			"returnColumns": [
+				"id",
+				"username",
+				"icon"
+			],
+			"tableName": "users",
+			"conditions": {
+				"username": {
+					"operator": "LIKE",
+					"value": "testuser%"
+				}
+			},
+			"limit": 5
+		},
+		{
+			"returnColumns": [
+				"id",
+				"owner",
+				"plant_time"
+			],
+			"tableName": "plots",
+			"conditions": {
+				"owner": {
+					"operator": "IN",
+					"value": ["user-uuid-1", "user-uuid-2"]
+				}
+			}
+		}
+	]
+}
