@@ -1,7 +1,8 @@
-import { InventoryItemTemplate } from "@/models/items/templates/models/InventoryItemTemplate";
-import { PlacedItemTemplate } from "@/models/items/templates/models/PlacedItemTemplate";
-import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
+
+import { PlacedItemTemplate } from "@/models/items/templates/models/PlacedItemTemplates/PlacedItemTemplate";
+import { SeedTemplate } from "@/models/items/templates/models/InventoryItemTemplates/SeedTemplate";
 import { v4 as uuidv4 } from 'uuid';
+import { InventoryItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/InventoryItemTemplate";
 
 
 //TODO: Add tests for different template types
