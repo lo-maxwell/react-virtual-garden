@@ -2,15 +2,15 @@
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
 import { ItemSubtype, ItemType, ItemTypes } from "../items/ItemTypes";
 import { InventoryTransactionResponse } from "./inventory/InventoryTransactionResponse";
-import { getItemClassFromSubtype, ItemConstructor } from "../items/utility/classMaps";
-import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplate";
+import { getItemClassFromSubtype, ItemConstructor } from "../items/utility/itemClassMaps";
 import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { BooleanResponse } from "../utility/BooleanResponse";
 import { v4 as uuidv4 } from 'uuid';
+import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplates/InventoryItemTemplate";
 
 
-export class ItemList {
+export class InventoryItemList {
 	private items: InventoryItem[];
 	static fixedOrder = ['Seed', 'HarvestedItem', 'Blueprint'];
 	constructor(items: InventoryItem[] = []) {
@@ -26,7 +26,7 @@ export class ItemList {
 		});
 	}
 
-	static fromPlainObject(plainObject: any): ItemList {
+	static fromPlainObject(plainObject: any): InventoryItemList {
 		try {
             // Validate plainObject structure
             if (!plainObject || typeof plainObject !== 'object') {
@@ -36,7 +36,7 @@ export class ItemList {
 				if (!item) return null;
 				const ItemClass = getItemClassFromSubtype(item);
 				if (!ItemClass) {
-					console.warn(`Unknown item type: ${item.subtype}`);
+					console.warn(`Unknown item type of: ${item}`);
                     return null;
 				}
 				const toReturn = ItemClass.fromPlainObject(item);
@@ -45,10 +45,10 @@ export class ItemList {
 				}
 				return toReturn;
 			}).filter((item: null | InventoryItem) => item !== null);
-			return new ItemList(items);
+			return new InventoryItemList(items);
 		} catch (err) {
 			console.error('Error creating ItemList from plainObject:', err);
-            return new ItemList();
+            return new InventoryItemList();
 		}
 	}
 
@@ -113,13 +113,13 @@ export class ItemList {
 		// Sort subtypes based on their index in the fixedOrder array
 		// this.sortItems(subtypes);
 		subtypes.sort((a, b) => {
-			const indexA = ItemList.fixedOrder.indexOf(a);
-			const indexB = ItemList.fixedOrder.indexOf(b);
+			const indexA = InventoryItemList.fixedOrder.indexOf(a);
+			const indexB = InventoryItemList.fixedOrder.indexOf(b);
 	
 			// If a subtype is not in the fixedOrder array, it gets a large index number.
 			// This keeps unknown subtypes at the end of the sorted array.
-			const orderA = indexA !== -1 ? indexA : ItemList.fixedOrder.length;
-			const orderB = indexB !== -1 ? indexB : ItemList.fixedOrder.length;
+			const orderA = indexA !== -1 ? indexA : InventoryItemList.fixedOrder.length;
+			const orderB = indexB !== -1 ? indexB : InventoryItemList.fixedOrder.length;
 	
 			return orderA - orderB;
 		});
@@ -152,7 +152,7 @@ export class ItemList {
 		let itemName: string;
 		if (typeof item === 'string') {
 			itemName = item;
-		} else if (typeof item === 'object' && ItemList.isItemTemplate(item)) {
+		} else if (typeof item === 'object' && InventoryItemList.isItemTemplate(item)) {
 			itemName = item.name;
 		} else if (typeof item === 'object' && (item instanceof InventoryItem || item instanceof PlacedItem)) {
 			itemName = item.itemData.name;
@@ -175,7 +175,7 @@ export class ItemList {
 		let itemId: string;
 		if (typeof item === 'string') {
 			itemId = item;
-		} else if (typeof item === 'object' && ItemList.isItemTemplate(item)) {
+		} else if (typeof item === 'object' && InventoryItemList.isItemTemplate(item)) {
 			itemId = item.id;
 		} else if (typeof item === 'object' && (item instanceof InventoryItem || item instanceof PlacedItem)) {
 			itemId = item.itemData.id;
@@ -195,7 +195,7 @@ export class ItemList {
      */
 	getItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
-		const itemNameResponse = ItemList.getItemName(item);
+		const itemNameResponse = InventoryItemList.getItemName(item);
 		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
 		const itemName = itemNameResponse.payload;
 
@@ -218,7 +218,7 @@ export class ItemList {
      */
 	contains(item: InventoryItem | ItemTemplate | string): BooleanResponse {
 		const response = new BooleanResponse();
-		const itemNameResponse = ItemList.getItemName(item);
+		const itemNameResponse = InventoryItemList.getItemName(item);
 		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
 		const itemName = itemNameResponse.payload;
 		
@@ -246,7 +246,7 @@ export class ItemList {
 			return response;
 		}
 
-		const itemNameResponse = ItemList.getItemName(item);
+		const itemNameResponse = InventoryItemList.getItemName(item);
 		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
 		const itemName = itemNameResponse.payload;
 		
@@ -313,10 +313,10 @@ export class ItemList {
 			//Add item to inventory
 			let newItem: InventoryItem;
 			//TODO: Investigate type assertion
-			if (ItemList.isInventoryItem(item)) {
+			if (InventoryItemList.isInventoryItem(item)) {
 				const itemClass = getItemClassFromSubtype(item) as ItemConstructor<InventoryItem>;
 				newItem = new itemClass(item.getInventoryItemId(), item.itemData, quantity);
-			} else if (ItemList.isItemTemplate(item) && item instanceof InventoryItemTemplate) {
+			} else if (InventoryItemList.isItemTemplate(item) && item instanceof InventoryItemTemplate) {
 				const itemClass = getItemClassFromSubtype(item)  as ItemConstructor<InventoryItem>;
 				newItem = new itemClass(uuidv4(), item, quantity);
 				if (item.type === ItemTypes.PLACED.name) {

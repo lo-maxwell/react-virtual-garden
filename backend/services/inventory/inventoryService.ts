@@ -4,7 +4,7 @@ import inventoryItemRepository from "@/backend/repositories/items/inventoryItem/
 import inventoryRepository from "@/backend/repositories/itemStore/inventory/inventoryRepository";
 import { InventoryItemEntity } from "@/models/items/inventoryItems/InventoryItem";
 import { Inventory, InventoryEntity } from "@/models/itemStore/inventory/Inventory";
-import { ItemList } from "@/models/itemStore/ItemList";
+import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
 import assert from "assert";
 import { PoolClient } from "pg";
 import { transactionWrapper } from "../utility/utility";
@@ -336,7 +336,7 @@ export async function getInventoryFromDatabase(inventoryId: string, userId: stri
 			const inventoryEntityResult = parseRows<InventoryEntity[]>(inventoryResult)[0];
 			assert(inventoryRepository.validateInventoryEntity(inventoryEntityResult));
 
-			let inventoryItems: ItemList | null;
+			let inventoryItems: InventoryItemList | null;
 			if (!inventoryItemsResult) {
 				console.error(`Error parsing inventoryItems for inventory id ${inventoryId}`);
 				inventoryItems = null;

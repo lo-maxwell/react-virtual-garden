@@ -291,3 +291,46 @@ BEGIN
 		table_created := TRUE;
 	END IF;
 END $$;
+
+
+--Toolboxes
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'toolboxes'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS toolboxes (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner VARCHAR(28) NOT NULL,         -- User ID (foreign key from the 'users' table)
+			FOREIGN KEY (owner) REFERENCES users(id) -- Establishing relationship with 'users' table
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Tools
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'tools'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS tools (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,            -- Inventory ID (foreign key from the 'toolboxes' table)
+			identifier CHAR(13) NOT NULL,      -- Template reference (could be a foreign key if related to another table)
+			FOREIGN KEY (owner) REFERENCES toolboxes(id),  -- Establishing relationship with 'toolboxes' table
+			UNIQUE (owner, identifier)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;

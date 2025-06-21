@@ -4,8 +4,8 @@ import { Plot, PlotEntity } from "@/models/garden/Plot";
 import { EmptyItem } from "@/models/items/placedItems/EmptyItem";
 import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { Plant } from "@/models/items/placedItems/Plant";
-import { generateNewPlaceholderPlacedItem } from "@/models/items/PlaceholderItems";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { generatePlacedItem } from "@/models/items/ItemFactory";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
 import { PoolClient } from "pg";
 import placedItemRepository from "../../items/placedItem/placedItemRepository";
 import { transactionWrapper } from "@/backend/services/utility/utility";
@@ -28,7 +28,7 @@ class PlotRepository {
 		let itemEntity = await placedItemRepository.getPlacedItemByPlotId(id);
 		let item: PlacedItem;
 		if (!itemEntity) {
-			item = generateNewPlaceholderPlacedItem('ground', '');
+			item = generatePlacedItem('ground', '');
 		} else {
 			item = placedItemRepository.makePlacedItemObject(itemEntity);
 		}

@@ -1,6 +1,6 @@
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import { useUser } from "@/app/hooks/contexts/UserContext";
-import Toolbox from "@/models/garden/tools/Toolbox";
+import Toolbox from "@/models/itemStore/toolbox/tool/Toolbox";
 import ToolButton from "./toolButton";
 
 

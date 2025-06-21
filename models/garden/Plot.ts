@@ -3,13 +3,13 @@ import { InventoryItem } from "../items/inventoryItems/InventoryItem";
 import { ItemSubtypes, ItemTypes } from "../items/ItemTypes";
 import { EmptyItem } from "../items/placedItems/EmptyItem";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
-import { generateNewPlaceholderPlacedItem } from "../items/PlaceholderItems";
+import { generatePlacedItem } from "../items/ItemFactory";
 import { GardenTransactionResponse } from "./GardenTransactionResponse";
-import { getItemClassFromSubtype, ItemConstructor, itemTypeMap } from "../items/utility/classMaps";
+import { getItemClassFromSubtype, ItemConstructor, itemTypeMap } from "../items/utility/itemClassMaps";
 import { Plant } from "../items/placedItems/Plant";
-import { PlacedItemTemplate } from "../items/templates/models/PlacedItemTemplate";
-import { placeholderItemTemplates } from "../items/templates/models/PlaceholderItemTemplate";
-import { PlantTemplate } from "../items/templates/models/PlantTemplate";
+import { PlacedItemTemplate } from "../items/templates/models/PlacedItemTemplates/PlacedItemTemplate";
+import { itemTemplateFactory } from "../items/templates/models/ItemTemplateFactory";
+import { PlantTemplate } from "../items/templates/models/PlacedItemTemplates/PlantTemplate";
 import { v4 as uuidv4 } from 'uuid';
 import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 import { getTimeString } from "../utility/Time";
@@ -63,7 +63,7 @@ export class Plot {
 	}
 
 	private static getGroundTemplate(): PlacedItemTemplate {
-		const template = placeholderItemTemplates.getPlacedItemTemplateByName('ground');
+		const template = itemTemplateFactory.getPlacedItemTemplateByName('ground');
 		if (!template) throw new Error(`Error: Ground Template Does Not Exist!`);
 		return template!;
 	}
@@ -107,7 +107,7 @@ export class Plot {
 		} catch (error) {
 			console.error('Error creating Plot from plainObject:', error);
 			// Return a default or empty Plot instance in case of error
-			const ground = generateNewPlaceholderPlacedItem("ground", "");
+			const ground = generatePlacedItem("ground", "");
 			return new Plot(uuidv4(), ground, Date.now(), 0);
 		}
 	}
@@ -584,6 +584,33 @@ export class Plot {
 			newItem: findItemResponse.payload
 		}
 
+		return response;
+	}
+
+	/**
+		 * Removes the item at this plot, replacing it with a given item or ground.
+		 * Used for destroying plants or decorations with no update to player inventory.
+		 * @replacementItem the item to replace the destroyed one with, defaulting to ground
+		 * @plantTime the updated planttime, defaulting to Date.now()
+		 * @newUsesRemaining the updated usesRemaining, defaults to 0 for non plants, and numHarvests for plants.
+		 * @returns a response containing the following object, or an error message
+		 *  {
+				originalItem: PlacedItem
+				replacementItem: PlacedItem
+			}
+	 */
+	destroyItem(replacementItem: PlacedItem = Plot.generateEmptyItem(), plantTime: number = Date.now(), newUsesRemaining: number | null = null) {
+		const response = new GardenTransactionResponse();
+		if (this.getItemSubtype() == ItemSubtypes.GROUND.name) {
+			response.addErrorMessage(`Cannot destroy item of type ${this.getItemSubtype()}, try directly setting instead.`);
+			return response;
+		}
+		const originalItem = this.getItem();
+		const newItem = this.setItem(replacementItem, plantTime, newUsesRemaining);
+		response.payload = {
+			originalItem: originalItem,
+			replacementItem: newItem
+		}
 		return response;
 	}
 

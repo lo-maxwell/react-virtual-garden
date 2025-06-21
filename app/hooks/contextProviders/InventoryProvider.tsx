@@ -1,8 +1,8 @@
 'use client'
 import { InventoryContext } from '@/app/hooks/contexts/InventoryContext';
-import { generateNewPlaceholderInventoryItem } from '@/models/items/PlaceholderItems';
+import { generateInventoryItem } from '@/models/items/ItemFactory';
 import { Inventory } from '@/models/itemStore/inventory/Inventory';
-import { ItemList } from '@/models/itemStore/ItemList';
+import { InventoryItemList } from '@/models/itemStore/InventoryItemList';
 import { loadInventory, saveInventory } from '@/utils/localStorage/inventory';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';

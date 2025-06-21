@@ -1,5 +1,5 @@
 
-import { PlantTemplate } from "../templates/models/PlantTemplate";
+import { PlantTemplate } from "../templates/models/PlacedItemTemplates/PlantTemplate";
 import { PlacedItem } from "./PlacedItem";
 import { v4 as uuidv4 } from 'uuid';
 

@@ -1,5 +1,5 @@
-import { ItemSubtype, ItemType } from "../../ItemTypes";
-import { ItemTemplate } from "./ItemTemplate";
+import { ItemSubtype, ItemType } from "../../../ItemTypes";
+import { ItemTemplate } from "../ItemTemplate";
 
 export abstract class PlacedItemTemplate extends ItemTemplate{
 	transformId: string;

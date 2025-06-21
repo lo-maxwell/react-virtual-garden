@@ -2,7 +2,7 @@ import { useGarden } from "@/app/hooks/contexts/GardenContext";
 import { useInventory } from "@/app/hooks/contexts/InventoryContext";
 import { useStore } from "@/app/hooks/contexts/StoreContext";
 import { useUser } from "@/app/hooks/contexts/UserContext";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { saveUser } from "@/utils/localStorage/user";
 
@@ -14,7 +14,7 @@ const GardenDebugOptions = () => {
 	
 	function addAppleSeed() {
 		if (!inventory) return;
-		const appleSeedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple seed');
+		const appleSeedTemplate = itemTemplateFactory.getInventoryItemTemplateByName('apple seed');
 		inventory.gainItem(appleSeedTemplate!, 10);
 		updateInventoryForceRefreshKey();
 		saveInventory(inventory);

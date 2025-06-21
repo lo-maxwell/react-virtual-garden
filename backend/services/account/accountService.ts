@@ -1,16 +1,8 @@
 import { pool } from "@/backend/connection/db";
 import { invokeLambda, parseRows } from "@/backend/lambda/invokeLambda";
 import gardenRepository from "@/backend/repositories/garden/gardenRepository";
-import plotRepository from "@/backend/repositories/garden/plot/plotRepository";
-import inventoryItemRepository from "@/backend/repositories/items/inventoryItem/inventoryItemRepository";
-import storeItemRepository from "@/backend/repositories/items/inventoryItem/storeItemRepository";
-import placedItemRepository from "@/backend/repositories/items/placedItem/placedItemRepository";
 import inventoryRepository from "@/backend/repositories/itemStore/inventory/inventoryRepository";
 import storeRepository from "@/backend/repositories/itemStore/store/storeRepository";
-import levelRepository from "@/backend/repositories/level/levelRepository";
-import actionHistoryRepository from "@/backend/repositories/user/actionHistoryRepository";
-import itemHistoryRepository from "@/backend/repositories/user/itemHistoryRepository";
-import userRepository from "@/backend/repositories/user/userRepository";
 import { Garden, GardenEntity } from "@/models/garden/Garden";
 import { Inventory, InventoryEntity } from "@/models/itemStore/inventory/Inventory";
 import { Store, StoreEntity } from "@/models/itemStore/store/Store";
@@ -20,7 +12,6 @@ import { createGardenInDatabase, getGardenFromDatabase, upsertGardenInDatabase }
 import { createInventoryInDatabase, getInventoryFromDatabase, upsertInventoryInDatabase } from "../inventory/inventoryService";
 import { createStoreInDatabase, getStoreFromDatabase, upsertStoreInDatabase } from "../store/storeService";
 import { createUserInDatabase, getUserFromDatabase, upsertUserInDatabase } from "../user/userService";
-import { transactionWrapper } from "../utility/utility";
 
 //Does not need lambda specific
 /**

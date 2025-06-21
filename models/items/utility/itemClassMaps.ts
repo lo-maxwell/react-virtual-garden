@@ -7,15 +7,15 @@ import { Decoration } from "../placedItems/Decoration";
 import { EmptyItem } from "../placedItems/EmptyItem";
 import { PlacedItem } from "../placedItems/PlacedItem";
 import { Plant } from "../placedItems/Plant";
-import { BlueprintTemplate } from "../templates/models/BlueprintTemplate";
-import { DecorationTemplate } from "../templates/models/DecorationTemplate";
-import { EmptyItemTemplate } from "../templates/models/EmptyItemTemplate";
-import { HarvestedItemTemplate } from "../templates/models/HarvestedItemTemplate";
-import { InventoryItemTemplate } from "../templates/models/InventoryItemTemplate";
+import { BlueprintTemplate } from "../templates/models/InventoryItemTemplates/BlueprintTemplate";
 import { ItemTemplate } from "../templates/models/ItemTemplate";
-import { PlacedItemTemplate } from "../templates/models/PlacedItemTemplate";
-import { PlantTemplate } from "../templates/models/PlantTemplate";
-import { SeedTemplate } from "../templates/models/SeedTemplate";
+import { PlacedItemTemplate } from "../templates/models/PlacedItemTemplates/PlacedItemTemplate";
+import { PlantTemplate } from "../templates/models/PlacedItemTemplates/PlantTemplate";
+import { SeedTemplate } from "../templates/models/InventoryItemTemplates/SeedTemplate";
+import { InventoryItemTemplate } from "../templates/models/InventoryItemTemplates/InventoryItemTemplate";
+import { HarvestedItemTemplate } from "../templates/models/InventoryItemTemplates/HarvestedItemTemplate";
+import { DecorationTemplate } from "../templates/models/PlacedItemTemplates/DecorationTemplate";
+import { EmptyItemTemplate } from "../templates/models/PlacedItemTemplates/EmptyItemTemplate";
 
 export type ItemConstructor<T extends InventoryItem | PlacedItem> = {
     new (...args: any[]): T;

@@ -1,16 +1,16 @@
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import { Plot } from "@/models/garden/Plot";
-import Tool from "@/models/garden/tools/Tool";
+import { Tool } from "@/models/itemStore/toolbox/tool/tools/Tool";
 import { Blueprint } from "@/models/items/inventoryItems/Blueprint";
 import { Seed } from "@/models/items/inventoryItems/Seed";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { Plant } from "@/models/items/placedItems/Plant";
-import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
-import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
+import { PlantTemplate } from "@/models/items/templates/models/PlacedItemTemplates/PlantTemplate";
 import React, { useEffect, useState } from "react";
 import colors from "../colors/colors";
 import Tooltip from "../window/tooltip";
+import { HarvestedItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
 
 const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNode, plot: Plot, currentTime: number}) => {
 
@@ -33,7 +33,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 	//Can pull this out to a separate file if we ever need multiple formats for tooltips
 	const RenderPlantTooltip = () => {
 		const currentItem = plot.getItem() as Plant;
-		const harvestedItem = placeholderItemTemplates.getInventoryTemplate(currentItem.itemData.transformId);
+		const harvestedItem = itemTemplateFactory.getInventoryTemplateById(currentItem.itemData.transformId);
 		if (!harvestedItem) return <></>;
 		if (currentItem.itemData.name === 'error') {
 			return <>
@@ -65,7 +65,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 
 	const RenderDecorationTooltip = () => {
 		const currentItem = plot.getItem();
-		const blueprint = placeholderItemTemplates.getInventoryTemplate(currentItem.itemData.transformId);
+		const blueprint = itemTemplateFactory.getInventoryTemplateById(currentItem.itemData.transformId);
 		if (!blueprint) return <></>;
 		if (currentItem.itemData.name === 'error') {
 			return <>
@@ -99,10 +99,10 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 			</>
 		}
 		const currentItem = selectedItem as Seed;
-		const plantedItem = placeholderItemTemplates.getPlacedTemplate(currentItem.itemData.transformId);
+		const plantedItem = itemTemplateFactory.getPlacedTemplateById(currentItem.itemData.transformId);
 		if (!plantedItem || plantedItem.subtype !== ItemSubtypes.PLANT.name) return <></>;
 		const plantTemplate = plantedItem as PlantTemplate;
-		const harvestedItem = placeholderItemTemplates.getInventoryTemplate(plantedItem.transformId);
+		const harvestedItem = itemTemplateFactory.getInventoryTemplateById(plantedItem.transformId);
 		if (!harvestedItem|| harvestedItem.subtype !== ItemSubtypes.HARVESTED.name) return <></>;
 		const harvestedTemplate = harvestedItem as HarvestedItemTemplate;
 
@@ -148,7 +148,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 			</>
 		}
 		const currentItem = selectedItem as Blueprint;
-		const decoration = placeholderItemTemplates.getPlacedTemplate(currentItem.itemData.transformId);
+		const decoration = itemTemplateFactory.getPlacedTemplateById(currentItem.itemData.transformId);
 		if (!decoration) return <></>;
 		if (currentItem.itemData.name === 'error') {
 			return <>

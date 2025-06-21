@@ -1,4 +1,4 @@
-import { SeedTemplate } from "../templates/models/SeedTemplate";
+import { SeedTemplate } from "../templates/models/InventoryItemTemplates/SeedTemplate";
 import { InventoryItem } from "./InventoryItem";
 import { v4 as uuidv4 } from 'uuid';
 

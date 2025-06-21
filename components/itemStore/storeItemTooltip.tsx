@@ -3,12 +3,12 @@ import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { Seed } from "@/models/items/inventoryItems/Seed";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
-import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
-import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
+import { PlantTemplate } from "@/models/items/templates/models/PlacedItemTemplates/PlantTemplate";
 import { Store } from "@/models/itemStore/store/Store";
 import colors from "../colors/colors";
 import Tooltip from "../window/tooltip";
+import { HarvestedItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
 
 const StoreItemTooltip = ({ children, item, store }: { children: React.ReactNode, item: InventoryItem, store: Store}) => {
 
@@ -28,10 +28,10 @@ const StoreItemTooltip = ({ children, item, store }: { children: React.ReactNode
 	//Can pull this out to a separate file if we ever need multiple formats for tooltips
 	const RenderSeedTooltip = () => {
 		const currentItem = item as Seed;
-		const plantedItem = placeholderItemTemplates.getPlacedTemplate(currentItem.itemData.transformId);
+		const plantedItem = itemTemplateFactory.getPlacedTemplateById(currentItem.itemData.transformId);
 		if (!plantedItem || plantedItem.subtype !== ItemSubtypes.PLANT.name) return <></>;
 		const plantTemplate = plantedItem as PlantTemplate;
-		const harvestedItem = placeholderItemTemplates.getInventoryTemplate(plantedItem.transformId);
+		const harvestedItem = itemTemplateFactory.getInventoryTemplateById(plantedItem.transformId);
 		if (!harvestedItem|| harvestedItem.subtype !== ItemSubtypes.HARVESTED.name) return <></>;
 		const harvestedTemplate = harvestedItem as HarvestedItemTemplate;
 		if (currentItem.itemData.name === 'error') {
@@ -98,7 +98,7 @@ const StoreItemTooltip = ({ children, item, store }: { children: React.ReactNode
 
 	const RenderBlueprintTooltip = () => {
 		const currentItem = item as Blueprint;
-		const decoration = placeholderItemTemplates.getPlacedTemplate(currentItem.itemData.transformId);
+		const decoration = itemTemplateFactory.getPlacedTemplateById(currentItem.itemData.transformId);
 		if (!decoration) return <></>;
 		if (currentItem.itemData.name === 'error') {
 			return <>

@@ -1,7 +1,7 @@
 
-import { DecorationTemplate } from "../templates/models/DecorationTemplate";
 import { PlacedItem } from "./PlacedItem";
 import { v4 as uuidv4 } from 'uuid';
+import { DecorationTemplate } from "../templates/models/PlacedItemTemplates/DecorationTemplate";
 
 export class Decoration extends PlacedItem {
 	itemData: DecorationTemplate;

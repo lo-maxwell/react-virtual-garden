@@ -1,12 +1,12 @@
 import colors from "@/components/colors/colors";
 import Tooltip from "@/components/window/tooltip";
-import Shovel from "@/models/garden/tools/Shovel";
-import Tool from "@/models/garden/tools/Tool";
+import Shovel from "@/models/items/tools/Shovel";
+import { Tool } from "@/models/items/tools/Tool";
 
 const ToolTooltip = ({ children, tool }: { children: React.ReactNode, tool: Tool}) => {
 
 	const RenderItemTooltipInfo = () => {
-		switch(tool.type) {
+		switch(tool.itemData.type) {
 			case "Shovel":
 				return RenderShovelTooltip();
 			default:
@@ -22,9 +22,9 @@ const ToolTooltip = ({ children, tool }: { children: React.ReactNode, tool: Tool
 		<div className="flex flex-col items-left min-w-0 flex-grow">
 			<div className="flex flex-row justify-between min-w-max">
 				<div className="flex flex-row min-w-0">
-					<span className="w-6 flex-shrink-0">{currentTool.icon}</span>
+					<span className="w-6 flex-shrink-0">{currentTool.itemData.icon}</span>
 					{/* Might not display properly if screen size is small or name is too long */}
-					<span>{currentTool.name}</span>
+					<span>{currentTool.itemData.name}</span>
 				</div>
 			</div>
 			<div className={`${colors.tool.descriptionTextColor} text-left`}>
@@ -40,7 +40,7 @@ const ToolTooltip = ({ children, tool }: { children: React.ReactNode, tool: Tool
 	}
 
 	const getBackgroundColor = () => {
-		switch(tool.type) {
+		switch(tool.itemData.type) {
 			case "Shovel":
 				return "bg-gray-300"
 			default:

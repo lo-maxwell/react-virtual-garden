@@ -1,5 +1,6 @@
-import { ItemSubtype, ItemType } from "../../ItemTypes";
-import { ItemTemplate } from "./ItemTemplate";
+import { ItemType, ItemSubtype } from "@/models/items/ItemTypes";
+import { ItemTemplate } from "../ItemTemplate";
+
 
 export abstract class InventoryItemTemplate extends ItemTemplate{
 	

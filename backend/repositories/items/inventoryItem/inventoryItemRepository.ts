@@ -2,10 +2,10 @@ import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
 import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { InventoryItem, InventoryItemEntity } from "@/models/items/inventoryItems/InventoryItem";
-import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
-import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
-import { ItemList } from "@/models/itemStore/ItemList";
+import { HarvestedItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
+import { getItemClassFromSubtype } from "@/models/items/utility/itemClassMaps";
+import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
 import assert from "assert";
 import { PoolClient } from "pg";
 import { v4 as uuidv4 } from 'uuid';
@@ -23,8 +23,8 @@ class InventoryItemRepository {
 		return true;
 	}
 
-	makeInventoryItemObjectBatch(inventoryItemEntities: InventoryItemEntity[]): ItemList {
-		const items = new ItemList();
+	makeInventoryItemObjectBatch(inventoryItemEntities: InventoryItemEntity[]): InventoryItemList {
+		const items = new InventoryItemList();
 		for (const itemResult of inventoryItemEntities) {
 			try {
 				const item = this.makeInventoryItemObject(itemResult);
@@ -40,7 +40,7 @@ class InventoryItemRepository {
 	makeInventoryItemObject(inventoryItemEntity: InventoryItemEntity): InventoryItem {
 		assert(this.validateInventoryItemEntity(inventoryItemEntity), 'InventoryItemEntity validation failed');
 
-		const itemData = placeholderItemTemplates.getInventoryTemplate(inventoryItemEntity.identifier);
+		const itemData = itemTemplateFactory.getInventoryTemplateById(inventoryItemEntity.identifier);
 		if (!itemData) {
 			console.warn(`Could not find inventoryItem matching id ${inventoryItemEntity.identifier}`)
 			return new HarvestedItem(inventoryItemEntity.id, HarvestedItemTemplate.getErrorTemplate(), 0);

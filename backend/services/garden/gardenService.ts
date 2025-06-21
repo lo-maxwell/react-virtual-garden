@@ -9,9 +9,9 @@ import inventoryItemRepository from "@/backend/repositories/items/inventoryItem/
 import placedItemRepository from "@/backend/repositories/items/placedItem/placedItemRepository";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { PlacedItem, PlacedItemDetailsEntity, PlacedItemEntity } from "@/models/items/placedItems/PlacedItem";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
-import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
-import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
+import { PlantTemplate } from "@/models/items/templates/models/PlacedItemTemplates/PlantTemplate";
+import { SeedTemplate } from "@/models/items/templates/models/InventoryItemTemplates/SeedTemplate";
 import actionHistoryRepository from "@/backend/repositories/user/actionHistoryRepository";
 import itemHistoryRepository from "@/backend/repositories/user/itemHistoryRepository";
 import userRepository from "@/backend/repositories/user/userRepository";
@@ -20,9 +20,8 @@ import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { actionHistoryFactory } from "@/models/user/history/actionHistory/ActionHistoryFactory";
 import ItemHistory, { ItemHistoryEntity } from "@/models/user/history/itemHistory/ItemHistory";
 import { stringToBigIntNumber } from "@/models/utility/BigInt";
-import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
 import { v4 as uuidv4 } from 'uuid';
-import { PlacedItemTemplate } from "@/models/items/templates/models/PlacedItemTemplate";
+import { PlacedItemTemplate } from "@/models/items/templates/models/PlacedItemTemplates/PlacedItemTemplate";
 import { invokeLambda, parseRows } from "@/backend/lambda/invokeLambda";
 import assert from "assert";
 import LevelSystem, { LevelSystemEntity } from "@/models/level/LevelSystem";
@@ -30,10 +29,11 @@ import { InventoryItemEntity } from "@/models/items/inventoryItems/InventoryItem
 import { InventoryEntity } from "@/models/itemStore/inventory/Inventory";
 import inventoryRepository from "@/backend/repositories/itemStore/inventory/inventoryRepository";
 import { ActionHistoryEntity } from "@/models/user/history/actionHistory/ActionHistory";
-import { DecorationTemplate } from "@/models/items/templates/models/DecorationTemplate";
 import { Blueprint } from "@/models/items/inventoryItems/Blueprint";
-import { BlueprintTemplate } from "@/models/items/templates/models/BlueprintTemplate";
-import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
+import { BlueprintTemplate } from "@/models/items/templates/models/InventoryItemTemplates/BlueprintTemplate";
+import { generateInventoryItem } from "@/models/items/ItemFactory";
+import { HarvestedItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
+import { DecorationTemplate } from "@/models/items/templates/models/PlacedItemTemplates/DecorationTemplate";
 
 //TODO: Users can initiate race conditions by fudging the client side and running multiple add/removes, allowing for invalid row/column counts
 
@@ -1095,7 +1095,7 @@ export async function plantAll(plotIds: string[], inventoryId: string, inventory
 		}
 
 		//make sure current plot contains ground
-		const currentPlotItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier);
+		const currentPlotItemTemplate = itemTemplateFactory.getPlacedTemplateById(placedItemEntity.identifier);
 		if (!currentPlotItemTemplate || currentPlotItemTemplate.subtype !== ItemSubtypes.GROUND.name) {
 			console.warn(`Could not find valid ground matching identifier ${placedItemEntity.identifier}`);
 			return false;
@@ -1106,12 +1106,12 @@ export async function plantAll(plotIds: string[], inventoryId: string, inventory
 
 	/** Runs once per function */
 	function validatePlantItemData(inventoryItemEntity: InventoryItemEntity, inventoryEntity: InventoryEntity, gardenEntity: GardenEntity): PlantTemplate {
-		const seedItemTemplate = placeholderItemTemplates.getInventoryTemplate(inventoryItemEntity.identifier);
+		const seedItemTemplate = itemTemplateFactory.getInventoryTemplateById(inventoryItemEntity.identifier);
 		if (!seedItemTemplate || seedItemTemplate.subtype !== ItemSubtypes.SEED.name) {
 			throw new Error(`Could not find valid seed matching identifier ${inventoryItemEntity.identifier}`);
 		}
 
-		const plantItemTemplate = placeholderItemTemplates.getPlacedTemplate((seedItemTemplate as SeedTemplate).transformId) as PlantTemplate;
+		const plantItemTemplate = itemTemplateFactory.getPlacedTemplateById((seedItemTemplate as SeedTemplate).transformId) as PlantTemplate;
 		if (!plantItemTemplate || plantItemTemplate.subtype !== ItemSubtypes.PLANT.name) {
 			throw new Error(`Could not find valid plant matching identifier ${(seedItemTemplate as SeedTemplate).transformId}`);
 		}
@@ -1411,7 +1411,7 @@ export async function plantAll(plotIds: string[], inventoryId: string, inventory
 					nonCriticalError = true;
 					continue;
 				}
-				const itemData = placeholderItemTemplates.getPlacedTemplate(placedItem.identifier);
+				const itemData = itemTemplateFactory.getPlacedTemplateById(placedItem.identifier);
 				if (!itemData || itemData.subtype !== ItemSubtypes.GROUND.name) {
 					console.warn(`${placedItem.identifier} is not a valid target for planting, skipping`);
 					nonCriticalError = true;
@@ -1450,12 +1450,12 @@ export async function plantAll(plotIds: string[], inventoryId: string, inventory
 				nonCriticalError = true;
 			}
 
-			const seedItemTemplate = placeholderItemTemplates.getInventoryTemplate(inventoryItemResult.identifier);
+			const seedItemTemplate = itemTemplateFactory.getInventoryTemplateById(inventoryItemResult.identifier);
 			if (!seedItemTemplate || seedItemTemplate.subtype !== ItemSubtypes.SEED.name) {
 				throw new Error(`Could not find valid seed matching identifier ${inventoryItemResult.identifier}`);
 			}
 
-			const plantItemTemplate = placeholderItemTemplates.getPlacedTemplate((seedItemTemplate as SeedTemplate).transformId);
+			const plantItemTemplate = itemTemplateFactory.getPlacedTemplateById((seedItemTemplate as SeedTemplate).transformId);
 			if (!plantItemTemplate || plantItemTemplate.subtype !== ItemSubtypes.PLANT.name) {
 				throw new Error(`Could not find valid plant matching identifier ${(seedItemTemplate as SeedTemplate).transformId}`);
 			}
@@ -1514,7 +1514,7 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 	function validatePlotData(plotEntity: PlotEntity, placedItemEntity: PlacedItemEntity, gardenEntity: GardenEntity): boolean {
 
 		//make sure current plot contains plant
-		const plantItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier) as PlantTemplate;
+		const plantItemTemplate = itemTemplateFactory.getPlacedTemplateById(placedItemEntity.identifier) as PlantTemplate;
 		if (!plantItemTemplate || plantItemTemplate.subtype !== ItemSubtypes.PLANT.name) {
 			console.warn(`${placedItemEntity.identifier} is not a valid target for harvesting`);
 			return false;
@@ -1544,9 +1544,9 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 		const shinyTier = Plot.checkShinyHarvest(plantItemTemplate as PlantTemplate, plotEntity.random_seed, Plot.baseShinyChance);
 		let harvestedItemTemplate;
 		if (shinyTier === 'Regular') {
-			harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate(plantItemTemplate.transformId);
+			harvestedItemTemplate = itemTemplateFactory.getInventoryTemplateById(plantItemTemplate.transformId);
 		} else {
-			harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate((plantItemTemplate as PlantTemplate).transformShinyIds[shinyTier].id);
+			harvestedItemTemplate = itemTemplateFactory.getInventoryTemplateById((plantItemTemplate as PlantTemplate).transformShinyIds[shinyTier].id);
 		}
 
 		if (!harvestedItemTemplate || harvestedItemTemplate.subtype !== ItemSubtypes.HARVESTED.name) {
@@ -1600,13 +1600,13 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 	}
 
 	function validatePlantItemData(placedItemEntity: PlacedItemEntity): {plantItemTemplate: PlantTemplate, harvestedItemTemplate: HarvestedItemTemplate} | null {
-		const plantItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier) as PlantTemplate;
+		const plantItemTemplate = itemTemplateFactory.getPlacedTemplateById(placedItemEntity.identifier) as PlantTemplate;
 		if (!plantItemTemplate || plantItemTemplate.subtype !== ItemSubtypes.PLANT.name) {
 			console.warn(`Could not find valid plant matching identifier ${placedItemEntity.identifier}`);
 			return null;
 		}
 
-		const harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate((plantItemTemplate as PlantTemplate).transformId) as HarvestedItemTemplate;
+		const harvestedItemTemplate = itemTemplateFactory.getInventoryTemplateById((plantItemTemplate as PlantTemplate).transformId) as HarvestedItemTemplate;
 		if (!harvestedItemTemplate || harvestedItemTemplate.subtype !== ItemSubtypes.HARVESTED.name) {
 			console.warn(`Could not find valid harvestedItem matching identifier ${(plantItemTemplate as PlantTemplate).transformId}`);
 			return null;
@@ -1788,7 +1788,7 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 			if (!harvestAllHistory) throw new Error(`Could not create action history from identifier category all`);
 			actionHistories[harvestAllHistory] = 0;
 			for (const [key, value] of Object.entries(harvestedItemQuantityMap)) {
-				const harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate(key) as HarvestedItemTemplate;
+				const harvestedItemTemplate = itemTemplateFactory.getInventoryTemplateById(key) as HarvestedItemTemplate;
 				if (!harvestedItemTemplate || harvestedItemTemplate.subtype !== ItemSubtypes.HARVESTED.name) {
 					console.warn(`Could not find valid harvestedItem matching identifier ${key}`);
 					continue;
@@ -2236,7 +2236,7 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 					nonCriticalError = true;
 					continue;
 				}
-				const itemData = placeholderItemTemplates.getPlacedTemplate(placedItem.identifier);
+				const itemData = itemTemplateFactory.getPlacedTemplateById(placedItem.identifier);
 				if (!itemData || itemData.subtype !== ItemSubtypes.PLANT.name) {
 					console.warn(`${placedItem.identifier} is not a valid target for harvesting, skipping`);
 					nonCriticalError = true;
@@ -2251,7 +2251,7 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 						nonCriticalError = true;
 						continue;
 					}
-					const plotItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItem.identifier);
+					const plotItemTemplate = itemTemplateFactory.getPlacedTemplateById(placedItem.identifier);
 					if (!plotItemTemplate || plotItemTemplate.subtype !== ItemSubtypes.PLANT.name) {
 						console.warn(`Could not find valid plant matching identifier ${placedItem.identifier}, skipping`);
 						nonCriticalError = true;
@@ -2260,9 +2260,9 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 					const shinyTier = Plot.checkShinyHarvest(plotItemTemplate as PlantTemplate, plotEntity.random_seed, Plot.baseShinyChance);
 					let harvestedItemTemplate;
 					if (shinyTier === 'Regular') {
-						harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate(plotItemTemplate.transformId);
+						harvestedItemTemplate = itemTemplateFactory.getInventoryTemplateById(plotItemTemplate.transformId);
 					} else {
-						harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate((plotItemTemplate as PlantTemplate).transformShinyIds[shinyTier].id);
+						harvestedItemTemplate = itemTemplateFactory.getInventoryTemplateById((plotItemTemplate as PlantTemplate).transformShinyIds[shinyTier].id);
 					}
 
 					// const harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate(plotItemTemplate.transformId);
@@ -2353,7 +2353,7 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 			// Running this synchronously to avoid race conditions with creating multiple of the same history; 
 			// could be optimized by creating histories first and iterating through those
 			for (const [harvestedItemId, quantity] of Array.from(harvestItemMap.entries())) {
-				const harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate(harvestedItemId);
+				const harvestedItemTemplate = itemTemplateFactory.getInventoryTemplateById(harvestedItemId);
 
 				if (!harvestedItemTemplate || harvestedItemTemplate.subtype !== ItemSubtypes.HARVESTED.name) {
 					console.warn(`Could not find valid harvestedItem matching identifier ${harvestedItemId}, skipping`);
@@ -2439,7 +2439,7 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 
 		//make sure current plot contains plant
 
-		const plantItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier) as DecorationTemplate;
+		const plantItemTemplate = itemTemplateFactory.getPlacedTemplateById(placedItemEntity.identifier) as DecorationTemplate;
 		if (!plantItemTemplate || plantItemTemplate.subtype !== ItemSubtypes.DECORATION.name) {
 			console.warn(`${placedItemEntity.identifier} is not a valid target for picking up`);
 			return false;
@@ -2496,13 +2496,13 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 	}
 
 	function validateDecorationItemData(placedItemEntity: PlacedItemEntity): {decorationItemTemplate: DecorationTemplate, blueprintItemTemplate: BlueprintTemplate} | null {
-		const decorationItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier);
+		const decorationItemTemplate = itemTemplateFactory.getPlacedTemplateById(placedItemEntity.identifier);
 		if (!decorationItemTemplate || decorationItemTemplate.subtype !== ItemSubtypes.DECORATION.name) {
 			console.warn(`Could not find valid decoration matching identifier ${placedItemEntity.identifier}`);
 			return null;
 		}
 
-		const blueprintItemTemplate = placeholderItemTemplates.getInventoryTemplate((decorationItemTemplate as DecorationTemplate).transformId) as BlueprintTemplate;
+		const blueprintItemTemplate = itemTemplateFactory.getInventoryTemplateById((decorationItemTemplate as DecorationTemplate).transformId) as BlueprintTemplate;
 		if (!blueprintItemTemplate || blueprintItemTemplate.subtype !== ItemSubtypes.BLUEPRINT.name) {
 			console.warn(`Could not find valid harvestedItem matching identifier ${(decorationItemTemplate as DecorationTemplate).transformId}`);
 			return null;
@@ -2858,7 +2858,7 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 					nonCriticalError = true;
 					continue;
 				}
-				const itemData = placeholderItemTemplates.getPlacedTemplate(placedItem.identifier);
+				const itemData = itemTemplateFactory.getPlacedTemplateById(placedItem.identifier);
 				if (!itemData || itemData.subtype !== ItemSubtypes.DECORATION.name) {
 					console.warn(`${placedItem.identifier} is not a valid target for picking up, skipping`);
 					nonCriticalError = true;
@@ -2873,13 +2873,13 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 						nonCriticalError = true;
 						continue;
 					}
-					const plotItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItem.identifier);
+					const plotItemTemplate = itemTemplateFactory.getPlacedTemplateById(placedItem.identifier);
 					if (!plotItemTemplate || plotItemTemplate.subtype !== ItemSubtypes.DECORATION.name) {
 						console.warn(`Could not find valid decoration matching identifier ${placedItem.identifier}, skipping`);
 						nonCriticalError = true;
 						continue;
 					}
-					let blueprintItemTemplate = placeholderItemTemplates.getInventoryTemplate(plotItemTemplate.transformId);
+					let blueprintItemTemplate = itemTemplateFactory.getInventoryTemplateById(plotItemTemplate.transformId);
 
 					if (!blueprintItemTemplate || blueprintItemTemplate.subtype !== ItemSubtypes.BLUEPRINT.name) {
 						console.warn(`Could not find valid blueprintItem matching identifier ${plotItemTemplate.transformId}, skipping`);
@@ -2925,13 +2925,13 @@ export async function harvestAll(plotIds: string[], inventoryId: string, levelSy
 			const updateInventoryPromises: Promise<any>[] = [];
 
 			blueprintItemMap.forEach((value, key) => {
-				const itemTemplate = placeholderItemTemplates.getInventoryTemplate(key);
+				const itemTemplate = itemTemplateFactory.getInventoryTemplateById(key);
 				if (!itemTemplate) {
 					console.warn(`Error while updating inventoryItems with id ${key}`);
 					nonCriticalError = true;
 					return;
 				}
-				const item = generateNewPlaceholderInventoryItem(itemTemplate.name, value);
+				const item = generateInventoryItem(itemTemplate.name, value);
 				
 				// Create a promise and push it to the array
 				const updateInventoryItemPromise = inventoryItemRepository.addInventoryItem(inventoryId, item, client)

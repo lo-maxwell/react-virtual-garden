@@ -3,4 +3,4 @@ export const ToolTypes = Object.freeze({
   } as const);
 
 
-export type ItemType = typeof ToolTypes[keyof typeof ToolTypes]["name"];
+export type ToolType = typeof ToolTypes[keyof typeof ToolTypes]["name"];

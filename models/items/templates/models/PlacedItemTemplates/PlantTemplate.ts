@@ -1,6 +1,6 @@
-import { ItemType, ItemSubtype, ItemTypes, ItemSubtypes } from "../../ItemTypes";
-import { itemTemplateInterfaceRepository } from "../interfaces/ItemTemplateInterfaceRepository";
-import { PlacedItemTemplateInterface } from "../interfaces/PlacedItemTemplateInterface";
+import { ItemType, ItemSubtype, ItemTypes, ItemSubtypes } from "../../../ItemTypes";
+import { itemTemplateInterfaceRepository } from "../../interfaces/ItemTemplateInterfaceRepository";
+import { PlacedItemTemplateInterface } from "../../interfaces/PlacedItemTemplates/PlacedItemTemplateInterface";
 import { PlacedItemTemplate } from "./PlacedItemTemplate";
 
 export class PlantTemplate extends PlacedItemTemplate{

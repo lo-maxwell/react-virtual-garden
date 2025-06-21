@@ -1,4 +1,4 @@
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
 import ItemHistory, { ItemHistoryEntity } from "@/models/user/history/itemHistory/ItemHistory";
 import { ItemHistoryList } from "@/models/user/history/ItemHistoryList";
 import { query } from "@/backend/connection/db";
@@ -20,7 +20,7 @@ class ItemHistoryRepository {
 	makeItemHistoryObject(itemHistoryEntity: ItemHistoryEntity): ItemHistory {
 		assert(this.validateItemHistoryEntity(itemHistoryEntity));
 		
-		const itemHistoryTemplate = placeholderItemTemplates.getTemplate(itemHistoryEntity.identifier);
+		const itemHistoryTemplate = itemTemplateFactory.getTemplateById(itemHistoryEntity.identifier);
 		if (!itemHistoryTemplate) {
 			throw new Error(`Could not find item history template matching identifier ${itemHistoryEntity.identifier}`);
 		}

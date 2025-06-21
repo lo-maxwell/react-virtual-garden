@@ -16,7 +16,7 @@ import { useUser } from "@/app/hooks/contexts/UserContext";
 import { useAccount } from "@/app/hooks/contexts/AccountContext";
 import { useDispatch } from "react-redux";
 import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
-import Tool from "@/models/garden/tools/Tool";
+import { Tool } from "@/models/itemStore/toolbox/tool/tools/Tool";
 
 
 const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshKey}: {costMultiplier: number, forceRefreshKey: number, setForceRefreshKey: React.Dispatch<React.SetStateAction<number>>}) => {

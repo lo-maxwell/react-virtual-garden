@@ -1,6 +1,6 @@
 import { pool, query } from "@/backend/connection/db";
 import { InventoryEntity, Inventory } from "@/models/itemStore/inventory/Inventory";
-import { ItemList } from "@/models/itemStore/ItemList";
+import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
 import { stocklistFactory } from "@/models/itemStore/store/StocklistFactory";
 import assert from "assert";
 import { PoolClient } from 'pg';
@@ -9,9 +9,9 @@ import inventoryItemRepository from "../../items/inventoryItem/inventoryItemRepo
 class InventoryRepository {
 
 	/** Gets the inventory items given an inventory id, from the attached database */
-	async getInventoryItems(id: string): Promise<ItemList> {
+	async getInventoryItems(id: string): Promise<InventoryItemList> {
 		const itemResults = await inventoryItemRepository.getAllInventoryItemsByOwnerId(id);
-		const items = new ItemList();
+		const items = new InventoryItemList();
 		for (const itemResult of itemResults) {
 			try {
 				const item = inventoryItemRepository.makeInventoryItemObject(itemResult);
@@ -35,11 +35,11 @@ class InventoryRepository {
 	/**
 	 * Turns a inventoryEntity into a Inventory object.
 	 */
-	 async makeInventoryObject(inventoryEntity: InventoryEntity, itemList: ItemList | null): Promise<Inventory> {
+	 async makeInventoryObject(inventoryEntity: InventoryEntity, itemList: InventoryItemList | null): Promise<Inventory> {
 		assert(this.validateInventoryEntity(inventoryEntity), 'InventoryEntity validation failed');
 		//TODO: Fetches all relevant data from database and uses it to construct user
 		// let itemList: ItemList = await this.getInventoryItems(inventoryEntity.id);
-		if (!itemList) itemList = new ItemList();
+		if (!itemList) itemList = new InventoryItemList();
 		return new Inventory(inventoryEntity.id, '', inventoryEntity.gold, itemList);
 	}
 

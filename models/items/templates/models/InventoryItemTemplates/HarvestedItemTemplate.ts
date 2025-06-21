@@ -1,6 +1,7 @@
-import { ItemSubtype, ItemSubtypes, ItemType, ItemTypes } from "../../ItemTypes";
-import { InventoryItemTemplateInterface } from "../interfaces/InventoryItemTemplateInterface";
-import { itemTemplateInterfaceRepository } from "../interfaces/ItemTemplateInterfaceRepository";
+
+import { ItemType, ItemSubtype, ItemSubtypes } from "@/models/items/ItemTypes";
+import { InventoryItemTemplateInterface } from "../../interfaces/InventoryItemTemplates/InventoryItemTemplateInterface";
+import { itemTemplateInterfaceRepository } from "../../interfaces/ItemTemplateInterfaceRepository";
 import { InventoryItemTemplate } from "./InventoryItemTemplate";
 
 export class HarvestedItemTemplate extends InventoryItemTemplate{

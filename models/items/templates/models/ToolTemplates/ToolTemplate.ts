@@ -1,4 +1,4 @@
-export default abstract class Tool {
+export default abstract class ToolTemplate {
 	id: string;
 	name: string;
 	type: string;

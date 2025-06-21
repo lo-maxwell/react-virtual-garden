@@ -1,6 +1,6 @@
 import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
-import Toolbox from "@/models/garden/tools/Toolbox";
+import Toolbox from "@/models/itemStore/toolbox/tool/Toolbox";
 import LevelSystem from "@/models/level/LevelSystem";
 import { ActionHistoryList } from "@/models/user/history/ActionHistoryList";
 import { ItemHistoryList } from "@/models/user/history/ItemHistoryList";

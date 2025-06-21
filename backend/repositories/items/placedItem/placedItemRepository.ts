@@ -2,9 +2,9 @@ import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
 import { EmptyItem } from "@/models/items/placedItems/EmptyItem";
 import { PlacedItemEntity, PlacedItem } from "@/models/items/placedItems/PlacedItem";
-import { EmptyItemTemplate } from "@/models/items/templates/models/EmptyItemTemplate";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
-import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
+import { EmptyItemTemplate } from "@/models/items/templates/models/PlacedItemTemplates/EmptyItemTemplate";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
+import { getItemClassFromSubtype } from "@/models/items/utility/itemClassMaps";
 import { assert } from "console";
 import { PoolClient } from "pg";
 import { v4 as uuidv4 } from 'uuid';
@@ -25,7 +25,7 @@ class PlacedItemRepository {
 	makePlacedItemObject(placedItemEntity: PlacedItemEntity): PlacedItem {
 		assert(this.validatePlacedItemEntity(placedItemEntity));
 
-		const itemData = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier);
+		const itemData = itemTemplateFactory.getPlacedTemplateById(placedItemEntity.identifier);
 		if (!itemData) {
 			console.warn(`Could not find placedItem matching id ${placedItemEntity.identifier}`)
 			return new EmptyItem(placedItemEntity.id, EmptyItemTemplate.getErrorTemplate(), 'CRITICAL ERROR');

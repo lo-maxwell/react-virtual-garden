@@ -15,7 +15,8 @@ import { addColumnAPI, addColumnLocal, addRowAPI, addRowLocal, harvestAllAPI, pi
 import { useAccount } from "../hooks/contexts/AccountContext";
 import { useDispatch } from "react-redux";
 import { setAllLevelSystemValues } from "@/store/slices/userLevelSystemSlice";
-import Tool from "@/models/garden/tools/Tool";
+import { ToolTypes } from "@/models/itemStore/toolbox/tool/ToolTypes";
+import { Tool } from "@/models/itemStore/toolbox/tool/tools/Tool";
 
 const GardenComponent = () => {
 	const { inventory, reloadInventory } = useInventory();
@@ -25,7 +26,7 @@ const GardenComponent = () => {
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
 	const [showExpansionOptions, setShowExpansionOptions] = useState(false);
-	const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
+	const {plantSeed, placeDecoration, clickPlant, clickDecoration, destroyItem, doNothing} = usePlotActions();
 	const { account, guestMode } = useAccount();
 	const dispatch = useDispatch();
 
@@ -42,12 +43,18 @@ const GardenComponent = () => {
 
 	const GetPlotAction = (plot: Plot, selected: InventoryItem | Tool | null) => {
 		//TODO: Fix this
-		if (selected instanceof Tool) return doNothing(plot);
-		if (plot.getItemSubtype() == ItemSubtypes.GROUND.name && selected != null) {
+		if (plot.getItemSubtype() == ItemSubtypes.GROUND.name && selected instanceof InventoryItem) {
 			if (selected.itemData.subtype == ItemSubtypes.SEED.name) {
 				return plantSeed(selected, plot);
 			} else if (selected.itemData.subtype == ItemSubtypes.BLUEPRINT.name) {
 				return placeDecoration(selected, plot);
+			}
+		}
+		if (selected instanceof Tool) {
+			if (selected.itemData.type == ToolTypes.SHOVEL.name && (plot.getItemSubtype() == ItemSubtypes.PLANT.name || plot.getItemSubtype() == ItemSubtypes.DECORATION.name)) {
+				return destroyItem(plot, selected);
+			} else {
+				console.warn(`Tool of type ${selected.itemData.type} not yet implemented!`);
 			}
 		}
 		if (plot.getItemSubtype() == ItemSubtypes.PLANT.name) {

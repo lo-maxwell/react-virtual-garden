@@ -1,7 +1,8 @@
 
-import { HarvestedItemTemplate } from "../templates/models/HarvestedItemTemplate";
+
 import { InventoryItem } from "./InventoryItem";
 import { v4 as uuidv4 } from 'uuid';
+import { HarvestedItemTemplate } from "../templates/models/InventoryItemTemplates/HarvestedItemTemplate";
 
 export class HarvestedItem extends InventoryItem {
 	itemData: HarvestedItemTemplate;

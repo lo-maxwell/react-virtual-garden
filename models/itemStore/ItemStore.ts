@@ -1,19 +1,19 @@
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
 import { ItemSubtype } from "../items/ItemTypes";
-import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplate";
+import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplates/InventoryItemTemplate";
 import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 import { BooleanResponse } from "../utility/BooleanResponse";
 import { InventoryTransactionResponse } from "./inventory/InventoryTransactionResponse";
-import { ItemList } from "./ItemList";
+import { InventoryItemList } from "./InventoryItemList";
 
 /**
  * Abstract Class ItemStore
  * @class ItemStore
  */
 export class ItemStore {
-	protected items: ItemList;
+	protected items: InventoryItemList;
 
-	constructor(items: ItemList) {
+	constructor(items: InventoryItemList) {
 		if (new.target == ItemStore) {
 			throw new Error("Abstract classes can't be instantiated.");
 		}

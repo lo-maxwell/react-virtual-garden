@@ -8,12 +8,12 @@ import { Plot, PlotEntity } from "@/models/garden/Plot";
 import { Blueprint } from "@/models/items/inventoryItems/Blueprint";
 import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { InventoryItemEntity } from "@/models/items/inventoryItems/InventoryItem";
-import { ItemSubtypes } from "@/models/items/ItemTypes";
+import { ItemSubtypes, ItemTypes } from "@/models/items/ItemTypes";
 import { PlacedItem, PlacedItemDetailsEntity, PlacedItemEntity } from "@/models/items/placedItems/PlacedItem";
-import { BlueprintTemplate } from "@/models/items/templates/models/BlueprintTemplate";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
-import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
-import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
+import { BlueprintTemplate } from "@/models/items/templates/models/InventoryItemTemplates/BlueprintTemplate";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
+import { PlantTemplate } from "@/models/items/templates/models/PlacedItemTemplates/PlantTemplate";
+import { SeedTemplate } from "@/models/items/templates/models/InventoryItemTemplates/SeedTemplate";
 import { stringToBigIntNumber } from "@/models/utility/BigInt";
 import { PoolClient } from "pg";
 import { v4 as uuidv4 } from 'uuid';
@@ -27,10 +27,10 @@ import assert from "assert";
 import { InventoryEntity } from "@/models/itemStore/inventory/Inventory";
 import { GardenEntity } from "@/models/garden/Garden";
 import gardenRepository from "@/backend/repositories/garden/gardenRepository";
-import { DecorationTemplate } from "@/models/items/templates/models/DecorationTemplate";
-import { ActionHistoryEntity } from "@/models/user/history/actionHistory/ActionHistory";
-import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
 import { LevelSystemEntity } from "@/models/level/LevelSystem";
+import { HarvestedItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
+import { DecorationTemplate } from "@/models/items/templates/models/PlacedItemTemplates/DecorationTemplate";
+import { ActionHistoryEntity } from "@/models/user/history/actionHistory/ActionHistory";
 
 //TODO: Validate that plots are within garden bounds
 //TODO: Add level requirement to plant/place
@@ -50,12 +50,12 @@ export async function plantSeed(gardenId: string, plotId: string, inventoryId: s
 	const currentTime = Date.now();
 
 	function validateCanPlantSeed(inventoryItemEntity: InventoryItemEntity, inventoryEntity: InventoryEntity, placedItemEntity: PlacedItemEntity, plotEntity: PlotEntity, gardenEntity: GardenEntity): PlantTemplate {
-		const seedItemTemplate = placeholderItemTemplates.getInventoryTemplate(inventoryItemEntity.identifier);
+		const seedItemTemplate = itemTemplateFactory.getInventoryTemplateById(inventoryItemEntity.identifier);
 		if (!seedItemTemplate || seedItemTemplate.subtype !== ItemSubtypes.SEED.name) {
 			throw new Error(`Could not find valid seed matching identifier ${inventoryItemEntity.identifier}`);
 		}
 
-		const plantItemTemplate = placeholderItemTemplates.getPlacedTemplate((seedItemTemplate as SeedTemplate).transformId) as PlantTemplate;
+		const plantItemTemplate = itemTemplateFactory.getPlacedTemplateById((seedItemTemplate as SeedTemplate).transformId) as PlantTemplate;
 		if (!plantItemTemplate || plantItemTemplate.subtype !== ItemSubtypes.PLANT.name) {
 			throw new Error(`Could not find valid plant matching identifier ${(seedItemTemplate as SeedTemplate).transformId}`);
 		}
@@ -91,7 +91,7 @@ export async function plantSeed(gardenId: string, plotId: string, inventoryId: s
 		}
 
 		//make sure current plot contains ground
-		const currentPlotItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier);
+		const currentPlotItemTemplate = itemTemplateFactory.getPlacedTemplateById(placedItemEntity.identifier);
 		if (!currentPlotItemTemplate || currentPlotItemTemplate.subtype !== ItemSubtypes.GROUND.name) {
 			throw new Error(`Could not find valid ground matching identifier ${placedItemEntity.identifier}`);
 		}
@@ -388,14 +388,14 @@ export async function placeDecoration(gardenId: string, plotId: string, inventor
 
 	function validateCanPlaceDecoration(inventoryItemEntity: InventoryItemEntity, inventoryEntity: InventoryEntity, placedItemEntity: PlacedItemEntity, plotEntity: PlotEntity, gardenEntity: GardenEntity): {blueprintItemTemplate: BlueprintTemplate, decorationItemTemplate: DecorationTemplate} {
 		
-		const blueprintItemTemplate = placeholderItemTemplates.getInventoryTemplate(inventoryItemEntity.identifier) as BlueprintTemplate;
+		const blueprintItemTemplate = itemTemplateFactory.getInventoryTemplateById(inventoryItemEntity.identifier) as BlueprintTemplate;
 		if (!blueprintItemTemplate || blueprintItemTemplate.subtype !== ItemSubtypes.BLUEPRINT.name) {
 			throw new Error(`Could not find valid blueprint matching identifier ${inventoryItemEntity.identifier}`);
 		}
 
 		assert('transformId' in blueprintItemTemplate);
 
-		const decorationItemTemplate = placeholderItemTemplates.getPlacedTemplate((blueprintItemTemplate as BlueprintTemplate).transformId) as DecorationTemplate;
+		const decorationItemTemplate = itemTemplateFactory.getPlacedTemplateById((blueprintItemTemplate as BlueprintTemplate).transformId) as DecorationTemplate;
 		if (!decorationItemTemplate || decorationItemTemplate.subtype !== ItemSubtypes.DECORATION.name) {
 			throw new Error(`Could not find valid decoration matching identifier ${(blueprintItemTemplate as BlueprintTemplate).transformId}`);
 		}
@@ -950,7 +950,7 @@ export async function harvestPlot(gardenId: string, plotId: string, inventoryId:
 	}
 
 	function validateCanHarvestPlant(inventoryEntity: InventoryEntity, placedItemEntity: PlacedItemEntity, plotEntity: PlotEntity, gardenEntity: GardenEntity, levelSystemEntity: LevelSystemEntity): {plantItemTemplate: PlantTemplate, harvestedItemTemplate: HarvestedItemTemplate} {
-		const plantItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier) as PlantTemplate;
+		const plantItemTemplate = itemTemplateFactory.getPlacedTemplateById(placedItemEntity.identifier) as PlantTemplate;
 		if (!plantItemTemplate || plantItemTemplate.subtype !== ItemSubtypes.PLANT.name) {
 			throw new Error(`Could not find valid plant matching identifier ${placedItemEntity.identifier}`);
 		}
@@ -979,9 +979,9 @@ export async function harvestPlot(gardenId: string, plotId: string, inventoryId:
 		const shinyTier = Plot.checkShinyHarvest(plantItemTemplate as PlantTemplate, plotEntity.random_seed, Plot.baseShinyChance);
 		let harvestedItemTemplate;
 		if (shinyTier === 'Regular') {
-			harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate(plantItemTemplate.transformId);
+			harvestedItemTemplate = itemTemplateFactory.getInventoryTemplateById(plantItemTemplate.transformId);
 		} else {
-			harvestedItemTemplate = placeholderItemTemplates.getInventoryTemplate((plantItemTemplate as PlantTemplate).transformShinyIds[shinyTier].id);
+			harvestedItemTemplate = itemTemplateFactory.getInventoryTemplateById((plantItemTemplate as PlantTemplate).transformShinyIds[shinyTier].id);
 		}
 
 		if (!harvestedItemTemplate || harvestedItemTemplate.subtype !== ItemSubtypes.HARVESTED.name) {
@@ -1744,12 +1744,12 @@ export async function pickupDecoration(gardenId: string, plotId: string, invento
 	const currentTime = Date.now();
 
 	function validateCanPickupDecoration(inventoryEntity: InventoryEntity, placedItemEntity: PlacedItemEntity, plotEntity: PlotEntity, gardenEntity: GardenEntity): {blueprintItemTemplate: BlueprintTemplate, decorationItemTemplate: DecorationTemplate} {
-		const plotItemTemplate = placeholderItemTemplates.getPlacedTemplate(placedItemEntity.identifier);
+		const plotItemTemplate = itemTemplateFactory.getPlacedTemplateById(placedItemEntity.identifier);
 		if (!plotItemTemplate || plotItemTemplate.subtype !== ItemSubtypes.DECORATION.name) {
 			throw new Error(`Could not find valid decoration matching identifier ${placedItemEntity.identifier}`);
 		}
 
-		const blueprintItemTemplate = placeholderItemTemplates.getInventoryTemplate(plotItemTemplate.transformId) as BlueprintTemplate;
+		const blueprintItemTemplate = itemTemplateFactory.getInventoryTemplateById(plotItemTemplate.transformId) as BlueprintTemplate;
 		if (!blueprintItemTemplate || blueprintItemTemplate.subtype !== ItemSubtypes.BLUEPRINT.name) {
 			throw new Error(`Could not find valid blueprint matching identifier ${plotItemTemplate.transformId}`);
 		}
@@ -2126,6 +2126,262 @@ export async function pickupDecoration(gardenId: string, plotId: string, invento
 
 		// Call the transactionWrapper with the innerFunction and appropriate arguments
 		return transactionWrapper(innerFunction, 'PickupDecoration', client);
+	}
+}
+
+
+// TODO: Test this function
+/**
+ * Attempts to destroy an item in a plot, replacing it with a new item.
+ * If the item is a decoration, fails, leaving the original item in the plot unchanged. The UI should handle attempts to destroy decorations as picking them up instead.
+ * @gardenId the garden containing this plot
+ * @plotId the plot to remove the item from
+ * @userId the user to verify with
+ * @replacementItem a placedItemDetailsEntity to replace the plot, defaults to ground
+ * @client if null, creates a new client
+ * @returns an object containing the replacement item on success (or throws error)
+ */
+export async function destroyPlotItem(gardenId: string, plotId: string, userId: string, replacementItem?: PlacedItemDetailsEntity, client?: PoolClient): Promise<PlacedItemEntity> {
+	//Can put validation/business logic here
+	//We always check based on current time
+	const currentTime = Date.now();
+
+	function validateCanDestroyItem(placedItemEntity: PlacedItemEntity, plotEntity: PlotEntity, gardenEntity: GardenEntity): boolean {
+		const plotItemTemplate = itemTemplateFactory.getPlacedTemplateById(placedItemEntity.identifier);
+		if (!plotItemTemplate || plotItemTemplate.type !== ItemTypes.PLACED.name ) {
+			throw new Error(`Could not find valid placedItem matching identifier ${placedItemEntity.identifier}`);
+		}
+
+		if (plotItemTemplate.subtype === ItemSubtypes.DECORATION.name) {
+			throw new Error(`Attempt to destroy a decoration failed, use pickupDecoration instead.`)
+		}
+		
+		//Check if placement is valid
+
+		if (placedItemEntity.owner !== plotEntity.id) {
+			throw new Error(`Placed item ${placedItemEntity.id} is not owned by plot ${plotEntity.id}`);
+		}
+
+		if (plotEntity.owner !== gardenEntity.id) {
+			throw new Error(`Plot ${plotEntity.id} is not owned by garden ${gardenEntity.id}`);
+		}
+
+		if (gardenEntity.owner !== userId) {
+			throw new Error(`Garden ${gardenEntity.id} is not owned by user ${userId}`);
+		}
+
+		if (plotEntity.row_index >= gardenEntity.rows || plotEntity.col_index >= gardenEntity.columns) {
+			throw new Error(`Plot ${plotEntity.id} is not within bounds of garden ${gardenId}`);
+		}
+
+		return true;
+	}
+
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+
+			// 'SELECT id, owner, rows, columns FROM gardens WHERE id = $1 and owner = $2'
+			// 'SELECT id, owner, row_index, col_index, plant_time, uses_remaining, random_seed FROM plots WHERE id = $1 AND owner = $2'
+			// 'SELECT id, owner, identifier, status FROM placed_items WHERE owner = $1'
+			const fetch_payload = {
+				"queries": [
+					{
+						"tableName": "gardens",
+						"returnColumns": [
+							"id", 
+							"owner", 
+							"rows", 
+							"columns"
+						],
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": gardenId
+							},
+							"owner": {
+								"operator": "=",
+								"value": userId
+							}
+						},
+						"limit": 1
+					},
+					{
+						"tableName": "plots",
+						"returnColumns": [
+							"id", 
+							"owner", 
+							"row_index", 
+							"col_index", 
+							"plant_time", 
+							"uses_remaining", 
+							"random_seed"
+						],
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": plotId
+							},
+							"owner": {
+								"operator": "=",
+								"value": gardenId
+							}
+						},
+						"limit": 1
+					},
+					{
+						"tableName": "placed_items",
+						"returnColumns": [
+							"id", 
+							"owner", 
+							"identifier",
+							"status"
+						],
+						"conditions": {
+							"owner": {
+								"operator": "=",
+								"value": plotId
+							}
+						},
+						"limit": 1
+					}
+				]
+			  }
+
+			const fetchQueryResult = await invokeLambda('garden-select', fetch_payload);
+			if (!fetchQueryResult) {
+				throw new Error(`Failed to return value from lambda`);
+			}
+
+			const gardenEntity = parseRows<GardenEntity[]>(fetchQueryResult[0])[0];
+			assert(gardenRepository.validateGardenEntity(gardenEntity));
+			const plotEntity = parseRows<PlotEntity[]>(fetchQueryResult[1])[0];
+			assert(plotRepository.validatePlotEntity(plotEntity));
+			const placedItemEntity = parseRows<PlacedItemEntity[]>(fetchQueryResult[2])[0];
+			assert(placedItemRepository.validatePlacedItemEntity(placedItemEntity));
+
+			//Check that we can destroy item
+			assert(validateCanDestroyItem(placedItemEntity, plotEntity, gardenEntity));
+
+			if (!replacementItem) {
+				replacementItem = {
+					identifier: '0-00-00-00-00', //hardcoded ground id
+					status: '',
+					usesRemaining: 0
+				}
+			}
+
+			let returnItemEntity: PlacedItemEntity;
+
+			// 'UPDATE plots SET plant_time = $1, uses_remaining = $2 WHERE id = $3 AND owner = $4'
+			const update_payload: any = {
+				"queries": [
+					{
+						"tableName": "plots",
+						"values": {
+							"plant_time": currentTime,
+							"uses_remaining": replacementItem.usesRemaining
+						},
+						"returnColumns": [
+							"id"
+						],
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": plotId
+							},
+							"owner": {
+								"operator": "=",
+								"value": gardenId
+							}
+						}
+					},
+					{
+						"tableName": "placed_items",
+						"values": {
+							"identifier": replacementItem.identifier,
+							"status": replacementItem.status
+						},
+						"returnColumns": [
+							"id",
+							"owner", 
+							"identifier", 
+							"status"
+						],
+						"conditions": {
+							"id": {
+								"operator": "=",
+								"value": placedItemEntity.id
+							},
+							"owner": {
+								"operator": "=",
+								"value": plotEntity.id
+							}
+						}
+					}
+				]
+			  }
+
+			const updateQueryResult = await invokeLambda('garden-update', update_payload);
+			if (!updateQueryResult) {
+				throw new Error(`Failed to update from lambda`);
+			}
+
+			returnItemEntity = parseRows(updateQueryResult[1])[0];
+			return returnItemEntity!;
+		} catch (error) {
+			console.error('Error destroying item in plot from Lambda:', error);
+			throw error;
+		}
+	} else {
+		const innerFunction = async (client: PoolClient): Promise<PlacedItemEntity> => {
+
+			// Grab all relevant objects concurrently
+			const results = await Promise.allSettled([
+				gardenRepository.getGardenById(gardenId),
+				plotRepository.getPlotById(plotId),
+				placedItemRepository.getPlacedItemByPlotId(plotId)
+			]);
+
+			// Destructure the results for easier access
+			const [gardenResult, plotResult, placedItemResult] = results;
+
+			// Check for errors in each promise and handle accordingly
+			if (gardenResult.status === 'rejected' || gardenResult.value === null) {
+				throw new Error(`Could not find garden matching id ${gardenId}`);
+			}
+			if (plotResult.status === 'rejected' || plotResult.value === null) {
+				throw new Error(`Could not find plot matching id ${plotId}`);
+			}
+			if (placedItemResult.status === 'rejected' || placedItemResult.value === null) {
+				throw new Error(`Could not find placedItem matching plot id ${plotId}`);
+			}
+
+			// Extract the resolved values
+			const gardenEntity = gardenResult.value;
+			const plotEntity = plotResult.value;
+			const placedItemEntity = placedItemResult.value;
+			
+			//Check if destroy is valid
+			assert(validateCanDestroyItem(placedItemEntity, plotEntity, gardenEntity));
+
+			//pickup is OK
+			if (!replacementItem) {
+				replacementItem = {
+					identifier: '0-00-00-00-00', //hardcoded ground id
+					status: '',
+					usesRemaining: 0
+				}
+			}
+
+			//plot details are updated
+			await plotRepository.setPlotDetails(plotId, currentTime, replacementItem.usesRemaining, client);
+			const replacedItem = await placedItemRepository.replacePlacedItemByPlotId(plotId, replacementItem.identifier, replacementItem.status, client);
+			
+			return replacedItem;
+		} 
+
+		// Call the transactionWrapper with the innerFunction and appropriate arguments
+		return transactionWrapper(innerFunction, 'DestroyPlotItem', client);
 	}
 }
 
