@@ -16,7 +16,7 @@ import { useAccount } from "../hooks/contexts/AccountContext";
 import { useDispatch } from "react-redux";
 import { setAllLevelSystemValues } from "@/store/slices/userLevelSystemSlice";
 import { ToolTypes } from "@/models/itemStore/toolbox/tool/ToolTypes";
-import { Tool } from "@/models/itemStore/toolbox/tool/tools/Tool";
+import { Tool } from "@/models/items/tools/Tool";
 
 const GardenComponent = () => {
 	const { inventory, reloadInventory } = useInventory();

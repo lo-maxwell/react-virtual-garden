@@ -1,6 +1,5 @@
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import { Plot } from "@/models/garden/Plot";
-import { Tool } from "@/models/itemStore/toolbox/tool/tools/Tool";
 import { Blueprint } from "@/models/items/inventoryItems/Blueprint";
 import { Seed } from "@/models/items/inventoryItems/Seed";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
@@ -11,6 +10,7 @@ import React, { useEffect, useState } from "react";
 import colors from "../colors/colors";
 import Tooltip from "../window/tooltip";
 import { HarvestedItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
+import { Tool } from "@/models/items/tools/Tool";
 
 const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNode, plot: Plot, currentTime: number}) => {
 
