@@ -1,5 +1,4 @@
-
-import { Tool } from '@/models/itemStore/toolbox/tool/tools/Tool';
+import { Tool } from '@/models/items/tools/Tool';
 import { InventoryItem } from '@/models/items/inventoryItems/InventoryItem';
 import { ItemStore } from '@/models/itemStore/ItemStore';
 import User from '@/models/user/User';

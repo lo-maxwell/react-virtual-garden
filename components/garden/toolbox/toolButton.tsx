@@ -1,8 +1,8 @@
 import colors from "@/components/colors/colors";
-import { Tool } from "@/models/itemStore/toolbox/tool/tools/Tool";
 import { useDispatch } from "react-redux";
 import ToolDisplay from "./toolDisplay";
 import ToolTooltip from "./toolTooltip";
+import { Tool } from '@/models/items/tools/Tool';
 
 const ToolButton = ({tool, onClickFunction, focus}: {tool: Tool, onClickFunction: (arg: any) => void, focus: boolean}) => {
 	
