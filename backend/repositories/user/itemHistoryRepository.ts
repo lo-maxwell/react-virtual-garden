@@ -5,6 +5,8 @@ import { query } from "@/backend/connection/db";
 import { PoolClient } from "pg";
 import { transactionWrapper } from "@/backend/services/utility/utility";
 import assert from "assert";
+import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
+import { InventoryItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/InventoryItemTemplate";
 
 class ItemHistoryRepository {
 	/**
@@ -21,7 +23,7 @@ class ItemHistoryRepository {
 		assert(this.validateItemHistoryEntity(itemHistoryEntity));
 		
 		const itemHistoryTemplate = itemTemplateFactory.getTemplateById(itemHistoryEntity.identifier);
-		if (!itemHistoryTemplate) {
+		if (!itemHistoryTemplate || !(itemHistoryTemplate instanceof InventoryItemTemplate)) {
 			throw new Error(`Could not find item history template matching identifier ${itemHistoryEntity.identifier}`);
 		}
 		return new ItemHistory(itemHistoryEntity.id, itemHistoryTemplate, itemHistoryEntity.quantity);
