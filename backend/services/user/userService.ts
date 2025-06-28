@@ -103,9 +103,8 @@ import { transactionWrapper } from "../utility/utility";
 							  ]
 						],
 						"conflictColumns": [
-							"owner"
+							"id"
 						],
-						"conflictIndex": "owner",
 						"returnColumns": [
 							"id"
 						]
@@ -826,7 +825,7 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 			  }
 			const toolResult = await invokeLambda('garden-select', tool_payload);
 			const toolsEntity = parseRows<ToolEntity[]>(toolResult[0]);
-			const toolsInstance = toolRepository.makeToolObjectBatch(toolResult);
+			const toolsInstance = toolRepository.makeToolObjectBatch(toolsEntity);
 			const toolboxInstance = await toolboxRepository.makeToolboxObject(toolboxEntityResult, toolsInstance);
 
 			const userObject = userRepository.makeUserObject(userEntityResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance);
