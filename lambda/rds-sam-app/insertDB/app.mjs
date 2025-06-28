@@ -190,6 +190,7 @@ export const handler = async (event) => {
     if (conflictColumns.length > 0) {
       queryString += `ON CONFLICT (${conflictColumns.join(', ')}) `
       if (conflictIndex) {
+        //TODO: This is probably redundant, any conflictIndex will be not null
         //TODO: This can only take in a single conflictIndex
         queryString += `WHERE ${conflictIndex} IS NOT NULL `
       }
