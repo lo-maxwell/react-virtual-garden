@@ -29,7 +29,7 @@ const ToolTooltip = ({ children, tool }: { children: React.ReactNode, tool: Tool
 			</div>
 			<div className={`${colors.tool.descriptionTextColor} text-left`}>
 				{/* {currentTool.description} */}
-				{`This isn't implemented yet!`}
+				{`Destroys plants.`}
 			</div>
 		</div>
 	</>

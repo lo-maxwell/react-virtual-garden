@@ -147,7 +147,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 					reloadStore();
 					reloadInventory();
 					// TODO: force a refresh
-					setTradeWindowMessage(`There was an error purchasing the item! Please refresh the page!`);
+					setTradeWindowMessage(`There was an error purchasing the item! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 					setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1);
 					// return;
 				}
@@ -186,7 +186,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 					syncStoreAndInventory(user, store, inventory);
 					reloadStore();
 					reloadInventory();
-					setTradeWindowMessage(`There was an error selling the item! Please refresh the page!`);
+					setTradeWindowMessage(`There was an error selling the item! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 					setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1);
 					// return;
 				}

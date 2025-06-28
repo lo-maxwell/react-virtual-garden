@@ -86,7 +86,7 @@ export const usePlotActions = () => {
 				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
 				// plot.rollbackItem(originalItem);
 				console.warn(`There was an error planting a seed, rolled back to previous plot`);
-				setGardenMessage(`There was an error! Please refresh the page!`);
+				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
 		}
@@ -152,7 +152,7 @@ export const usePlotActions = () => {
 				const rollbackInventory = Inventory.fromPlainObject(originalInventoryObject);
 				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
 				console.warn(`There was an error placing a decoration, rolled back to previous plot`);
-				setGardenMessage(`There was an error! Please refresh the page!`);
+				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
 		}
@@ -241,7 +241,7 @@ export const usePlotActions = () => {
 				const rollbackUser = User.fromPlainObject(originalUserObject);
 				if (rollbackUser instanceof User) saveUser(rollbackUser);
 				console.warn(`There was an error clicking a plant, rolled back`);
-				setGardenMessage(`There was an error! Please refresh the page!`);
+				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
 		}
@@ -319,7 +319,7 @@ export const usePlotActions = () => {
 				const rollbackInventory = Inventory.fromPlainObject(originalInventoryObject);
 				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
 				console.warn(`There was an error clicking a decoration, rolled back`);
-				setGardenMessage(`There was an error! Please refresh the page!`);
+				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
 		}
@@ -383,7 +383,7 @@ export const usePlotActions = () => {
 				const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
 				if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
 				console.warn(`There was an error destroying an item, rolled back`);
-				setGardenMessage(`There was an error! Please refresh the page!`);
+				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
 		}
@@ -395,14 +395,14 @@ export const usePlotActions = () => {
 		return toReturn;
 	}
 
-	const doNothing = (plot: Plot) => {
+	const doNothing = (plot: Plot, newMessage: string = '') => {
 		const uiHelper = () => {
-			setGardenMessage(` `);
+			setGardenMessage(newMessage);
 			return {success: true, displayIcon: plot.getItem().itemData.icon};
 		}
 
 		const apiHelper = async () => {
-			setGardenMessage(` `);
+			setGardenMessage(newMessage);
 			return {success: true, displayIcon: plot.getItem().itemData.icon};
 		}
 		
