@@ -1,8 +1,8 @@
 import colors from "@/components/colors/colors";
-import Tool from "@/models/garden/tools/Tool";
 import { useDispatch } from "react-redux";
 import ToolDisplay from "./toolDisplay";
 import ToolTooltip from "./toolTooltip";
+import { Tool } from '@/models/items/tools/Tool';
 
 const ToolButton = ({tool, onClickFunction, focus}: {tool: Tool, onClickFunction: (arg: any) => void, focus: boolean}) => {
 	
@@ -27,7 +27,7 @@ const ToolButton = ({tool, onClickFunction, focus}: {tool: Tool, onClickFunction
 		<>
 		<ToolTooltip tool={tool}>
 			<button onClick={handleClick}>
-				<ToolDisplay icon={tool.icon} bgColor={colors.tool.backgroundColor} borderColor={getBorderColor()} textSize={"text-4xl"} elementSize={"20"}/>
+				<ToolDisplay icon={tool.itemData.icon} bgColor={colors.tool.backgroundColor} borderColor={getBorderColor()} textSize={"text-4xl"} elementSize={"20"}/>
 			</button>
 		</ToolTooltip>
 		</>

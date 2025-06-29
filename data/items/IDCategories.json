@@ -1,15 +1,19 @@
 {
 	"type": {		
 		"PLACED": "0",
-		"INVENTORY": "1"
+		"INVENTORY": "1",
+		"TOOL": "2"
 	},
-	"subtype": {
+	"subtype_item": {
 		"GROUND": "00",
 		"SEED": "01",
 		"PLANT": "02",
 		"HARVESTED_ITEM": "03",
 		"DECORATION": "04",
 		"BLUEPRINT": "05"
+	},
+	"subtype_tool": {
+		"SHOVEL": "01"
 	},
 	"category": {
 		"_comment": "2 digits depending on the subtype. For example, an apple is a pome which has id '09' in PlantCategories"

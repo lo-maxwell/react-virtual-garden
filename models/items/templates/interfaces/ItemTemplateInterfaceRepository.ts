@@ -1,16 +1,18 @@
 import itemsData from '@/data/final/current/Items.json';
-import { BlueprintTemplateInterface } from "./BlueprintTemplateInterface";
-import { InventoryItemTemplateInterface } from "./InventoryItemTemplateInterface";
-import { PlacedItemTemplateInterface } from "./PlacedItemTemplateInterface";
-import { DecorationTemplateInterface } from './DecorationTemplateInterface';
-import { EmptyItemTemplateInterface } from './EmptyItemTemplateInterface';
-import { HarvestedItemTemplateInterface } from './HarvestedItemTemplateInterface';
-import { PlantTemplateInterface } from './PlantTemplateInterface';
-import { SeedTemplateInterface } from './SeedTemplateInterface';
+import { BlueprintTemplateInterface } from './InventoryItemTemplates/BlueprintTemplateInterface';
+import { HarvestedItemTemplateInterface } from './InventoryItemTemplates/HarvestedItemTemplateInterface';
+import { InventoryItemTemplateInterface } from './InventoryItemTemplates/InventoryItemTemplateInterface';
+import { SeedTemplateInterface } from './InventoryItemTemplates/SeedTemplateInterface';
+import { DecorationTemplateInterface } from './PlacedItemTemplates/DecorationTemplateInterface';
+import { EmptyItemTemplateInterface } from './PlacedItemTemplates/EmptyItemTemplateInterface';
+import { PlacedItemTemplateInterface } from './PlacedItemTemplates/PlacedItemTemplateInterface';
+import { PlantTemplateInterface } from './PlacedItemTemplates/PlantTemplateInterface';
+import ToolTemplateInterface from './ToolTemplates/ToolTemplateInterface';
 
 class ItemTemplateInterfaceRepository {
 	PlacedItems: Record<string, PlacedItemTemplateInterface[]> = {};
 	InventoryItems: Record<string, InventoryItemTemplateInterface[]> = {};
+	Tools: Record<string, ToolTemplateInterface[]> = {};
 
 	constructor() {
 		this.loadItems();
@@ -35,6 +37,9 @@ class ItemTemplateInterfaceRepository {
 		);
 		this.InventoryItems['Blueprints'] = itemsData.InventoryItems.Blueprints.map((item: any) =>
 		  this.createBlueprintTemplate(item)
+		);
+		this.Tools['Shovels'] = itemsData.Tools.Shovels.map((tool: any) => 
+			this.createToolTemplate(tool)
 		);
 		// Repeat for other categories if needed
 	  }
@@ -139,6 +144,18 @@ class ItemTemplateInterfaceRepository {
       };
     }
 
+	private createToolTemplate(tool: any): ToolTemplateInterface {
+		return {
+			id: tool.id,
+			name: tool.name,
+			type: tool.type,
+			icon: tool.icon,
+			description: tool.description,
+			value: tool.value,
+			level: tool.level,
+		}
+	}
+
     /**
 	 * 
 	 * @name the item name, ie apple. Note that there cannot be 2 placedItems with the same name, unless it is error
@@ -166,6 +183,23 @@ class ItemTemplateInterfaceRepository {
 		else {
 			console.error('Error: found multiple items with the same name!');
 			console.error(inventoryItems);
+			return null;
+		}
+	}
+
+
+	/**
+	 * 
+	 * @name the tool name
+	 * @returns the found tool object or null
+	 */
+	 getToolInterfaceByName(name: string): ToolTemplateInterface | null {
+		const tools = Object.values(this.Tools).flat().filter(tool => tool.name === name);
+		if (tools.length === 1) return tools[0];
+		else if (tools.length === 0) return null;
+		else {
+			console.error('Error: found multiple tools with the same name!');
+			console.error(tools);
 			return null;
 		}
 	}
@@ -203,6 +237,22 @@ class ItemTemplateInterfaceRepository {
 		else {
 			console.error('Error: found multiple items with the same id!');
 			console.error(inventoryItems);
+			return null;
+		}
+	}
+
+	/**
+	 * 
+	 * @id the tool id
+	 * @returns the found tool object or null
+	 */
+	 getToolInterfaceById(id: string): ToolTemplateInterface | null {
+		const tools = Object.values(this.Tools).flat().filter(tool => tool.id === id);
+		if (tools.length === 1) return tools[0];
+		else if (tools.length === 0) return null;
+		else {
+			console.error('Error: found multiple tools with the same id!');
+			console.error(tools);
 			return null;
 		}
 	}

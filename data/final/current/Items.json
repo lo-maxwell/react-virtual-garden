@@ -1214,5 +1214,27 @@
                 "transformId": "0-04-99-99-99"
             }
         ]
+    },
+    "Tools": {
+        "Shovels": [
+            {
+                "id": "2-01-01-00-00",
+                "name": "Basic Shovel",
+                "type": "Shovel",
+                "icon": "🪓",
+                "description": "Error",
+                "value": 0,
+                "level": 0
+            },
+            {
+                "id": "2-01-02-00-00",
+                "name": "Super Shovel",
+                "type": "Shovel",
+                "icon": "🪓",
+                "description": "Error",
+                "value": 0,
+                "level": 0
+            }
+        ]
     }
 }

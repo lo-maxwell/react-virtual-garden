@@ -5,15 +5,15 @@ import { ItemSubtypes } from "@/models/items/ItemTypes";
 import { Decoration } from "@/models/items/placedItems/Decoration";
 import { EmptyItem } from "@/models/items/placedItems/EmptyItem";
 import { Plant } from "@/models/items/placedItems/Plant";
-import { BlueprintTemplate } from "@/models/items/templates/models/BlueprintTemplate";
-import { DecorationTemplate } from "@/models/items/templates/models/DecorationTemplate";
-import { EmptyItemTemplate } from "@/models/items/templates/models/EmptyItemTemplate";
-import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
-import { PlantTemplate } from "@/models/items/templates/models/PlantTemplate";
-import { SeedTemplate } from "@/models/items/templates/models/SeedTemplate";
+import { BlueprintTemplate } from "@/models/items/templates/models/InventoryItemTemplates/BlueprintTemplate";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
+import { PlantTemplate } from "@/models/items/templates/models/PlacedItemTemplates/PlantTemplate";
+import { SeedTemplate } from "@/models/items/templates/models/InventoryItemTemplates/SeedTemplate";
 import ItemHistory from "@/models/user/history/itemHistory/ItemHistory";
 import { v4 as uuidv4 } from 'uuid';
+import { HarvestedItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
+import { DecorationTemplate } from "@/models/items/templates/models/PlacedItemTemplates/DecorationTemplate";
+import { EmptyItemTemplate } from "@/models/items/templates/models/PlacedItemTemplates/EmptyItemTemplate";
 
 let seedItem: Seed;
 let blueprintItem: Blueprint;
@@ -29,17 +29,17 @@ let decorationTemplate: DecorationTemplate;
 let emptyTemplate: EmptyItemTemplate;
 
 beforeEach(() => {
-	seedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple seed') as SeedTemplate;
+	seedTemplate = itemTemplateFactory.getInventoryItemTemplateByName('apple seed') as SeedTemplate;
 	seedItem = new Seed(uuidv4(), seedTemplate, 1);
-	blueprintTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
+	blueprintTemplate = itemTemplateFactory.getInventoryItemTemplateByName('bench blueprint') as BlueprintTemplate;
 	blueprintItem = new Blueprint(uuidv4(), blueprintTemplate, 1);
-	harvestedTemplate = placeholderItemTemplates.getInventoryItemTemplateByName('apple') as HarvestedItemTemplate;
+	harvestedTemplate = itemTemplateFactory.getInventoryItemTemplateByName('apple') as HarvestedItemTemplate;
 	harvestedItem = new HarvestedItem(uuidv4(), harvestedTemplate, 1);
-	plantTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('apple') as PlantTemplate;
+	plantTemplate = itemTemplateFactory.getPlacedItemTemplateByName('apple') as PlantTemplate;
 	plantItem = new Plant(uuidv4(), plantTemplate, '');
-	decorationTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('bench') as DecorationTemplate;
+	decorationTemplate = itemTemplateFactory.getPlacedItemTemplateByName('bench') as DecorationTemplate;
 	decorationItem = new Decoration(uuidv4(), decorationTemplate, '');
-	emptyTemplate = placeholderItemTemplates.getPlacedItemTemplateByName('ground') as EmptyItemTemplate;
+	emptyTemplate = itemTemplateFactory.getPlacedItemTemplateByName('ground') as EmptyItemTemplate;
 	emptyItem = new EmptyItem(uuidv4(), emptyTemplate, 'ground');
 })
 
@@ -79,7 +79,7 @@ test('Should Not Combine ItemHistory With Invalid HarvestedQuantity', () => {
 
 test('Should Not Combine ItemHistory With Different Templates', () => {
 	const newItemHistory1 = new ItemHistory(uuidv4(), plantTemplate, 10);
-	const plantTemplate2 = placeholderItemTemplates.getPlacedItemTemplateByName('banana') as PlantTemplate;
+	const plantTemplate2 = itemTemplateFactory.getPlacedItemTemplateByName('banana') as PlantTemplate;
 	const newItemHistory2 = new ItemHistory(uuidv4(), plantTemplate2, 20);
 	expect(newItemHistory1.getQuantity()).toBe(10);
 	expect(newItemHistory2.getQuantity()).toBe(20);

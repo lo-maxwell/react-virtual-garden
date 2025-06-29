@@ -1,7 +1,7 @@
 import { Garden } from "@/models/garden/Garden";
-import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
+import { generateInventoryItem } from "@/models/items/ItemFactory";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
-import { ItemList } from "@/models/itemStore/ItemList";
+import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
 import { GardenUpgrades } from "@/models/itemStore/store/GardenUpgrades";
 import { Store } from "@/models/itemStore/store/Store";
 import LevelSystem from "@/models/level/LevelSystem";
@@ -14,13 +14,13 @@ let testGarden: Garden;
 let testUser: User;
 
 beforeEach(() => {
-	const item1 = generateNewPlaceholderInventoryItem("appleSeed", 1);
-	const item2 = generateNewPlaceholderInventoryItem("bananaSeed", 20);
-	const item3 = generateNewPlaceholderInventoryItem("coconutSeed", 30);
-	const testItemList = new ItemList([item1, item2, item3]);
-	testStore = new Store(uuidv4(), 1, "Test Store", 2.0, 1.0, 1, testItemList, new ItemList());
-	const item4 = generateNewPlaceholderInventoryItem("appleSeed", 1);
-	const testItemList2 = new ItemList([item4]);
+	const item1 = generateInventoryItem("appleSeed", 1);
+	const item2 = generateInventoryItem("bananaSeed", 20);
+	const item3 = generateInventoryItem("coconutSeed", 30);
+	const testItemList = new InventoryItemList([item1, item2, item3]);
+	testStore = new Store(uuidv4(), 1, "Test Store", 2.0, 1.0, 1, testItemList, new InventoryItemList());
+	const item4 = generateInventoryItem("appleSeed", 1);
+	const testItemList2 = new InventoryItemList([item4]);
 	testInventory = new Inventory(uuidv4(), "Test User", 1000, testItemList2);
 	testGarden = new Garden(uuidv4(), 6, 6, Garden.generateEmptyPlots(6, 6));
 	testUser = new User(User.generateLocalUid(), "test user", "test", new LevelSystem(uuidv4()));

@@ -1,10 +1,12 @@
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
 import ItemHistory, { ItemHistoryEntity } from "@/models/user/history/itemHistory/ItemHistory";
 import { ItemHistoryList } from "@/models/user/history/ItemHistoryList";
 import { query } from "@/backend/connection/db";
 import { PoolClient } from "pg";
 import { transactionWrapper } from "@/backend/services/utility/utility";
 import assert from "assert";
+import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
+import { InventoryItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/InventoryItemTemplate";
 
 class ItemHistoryRepository {
 	/**
@@ -20,8 +22,8 @@ class ItemHistoryRepository {
 	makeItemHistoryObject(itemHistoryEntity: ItemHistoryEntity): ItemHistory {
 		assert(this.validateItemHistoryEntity(itemHistoryEntity));
 		
-		const itemHistoryTemplate = placeholderItemTemplates.getTemplate(itemHistoryEntity.identifier);
-		if (!itemHistoryTemplate) {
+		const itemHistoryTemplate = itemTemplateFactory.getTemplateById(itemHistoryEntity.identifier);
+		if (!itemHistoryTemplate || !(itemHistoryTemplate instanceof InventoryItemTemplate)) {
 			throw new Error(`Could not find item history template matching identifier ${itemHistoryEntity.identifier}`);
 		}
 		return new ItemHistory(itemHistoryEntity.id, itemHistoryTemplate, itemHistoryEntity.quantity);

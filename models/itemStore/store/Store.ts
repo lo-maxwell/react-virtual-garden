@@ -1,4 +1,4 @@
-import { ItemList } from "../ItemList";
+import { InventoryItemList } from "../InventoryItemList";
 import { InventoryItem } from "../../items/inventoryItems/InventoryItem";
 import { ItemStore } from "../ItemStore";
 import { Inventory } from "../inventory/Inventory";
@@ -8,7 +8,7 @@ import { storeFactory } from "./StoreFactory";
 import { v4 as uuidv4 } from 'uuid';
 import { stocklistFactory } from "./StocklistFactory";
 import { DataRouterContext } from "react-router/dist/lib/context";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
 
 export interface StoreEntity {
 	id: string,
@@ -24,12 +24,12 @@ export class Store extends ItemStore {
 	private buyMultiplier: number;
 	private sellMultiplier: number;
 	private upgradeMultiplier: number;
-	private stockList: ItemList;
+	private stockList: InventoryItemList;
 	private lastRestockTime: number; //TODO: Convert to BigInt
 	private restockInterval: number;
 
 	//TODO: Make this pull from storeRepository
-	constructor(storeId: string, identifier: number, name: string, buyMultiplier: number = 2, sellMultiplier: number = 1, upgradeMultiplier: number = 1, items: ItemList = new ItemList(), stockList: ItemList = new ItemList(), lastRestockTime: number | string = Date.now(), restockInterval: number = 300000) {
+	constructor(storeId: string, identifier: number, name: string, buyMultiplier: number = 2, sellMultiplier: number = 1, upgradeMultiplier: number = 1, items: InventoryItemList = new InventoryItemList(), stockList: InventoryItemList = new InventoryItemList(), lastRestockTime: number | string = Date.now(), restockInterval: number = 300000) {
 		super(items);
 		this.storeId = storeId;
 		this.identifier = identifier;
@@ -64,7 +64,7 @@ export class Store extends ItemStore {
 		let storeId = uuidv4();
 		let identifier = 0;
 		let storeName = 'Default Store';
-		let items = new ItemList();
+		let items = new InventoryItemList();
 		// let stockList = new ItemList();
 		let restockTime = Date.now();
 		// Validate and assign id
@@ -85,7 +85,7 @@ export class Store extends ItemStore {
 		// Validate and assign items
 		if (plainObject && plainObject.items !== undefined) {
 			if (typeof plainObject.items === 'object' && plainObject.items !== null) {
-				items = ItemList.fromPlainObject(plainObject.items) || new ItemList();
+				items = InventoryItemList.fromPlainObject(plainObject.items) || new InventoryItemList();
 			}
 		}
 
@@ -106,7 +106,7 @@ export class Store extends ItemStore {
 
 		//then get stocklist data
 		let stocklistInterface = stocklistFactory.getStocklistInterfaceById(storeInterface.stocklistId);
-		let stocklistItems = new ItemList();
+		let stocklistItems = new InventoryItemList();
 		if (!stocklistInterface) {
 			stocklistInterface = stocklistFactory.getStocklistInterfaceByName(storeInterface.stocklistName);
 		}
@@ -154,7 +154,7 @@ export class Store extends ItemStore {
 			upgradeMultiplier = storeInterface.upgradeMultiplier;
 			restockInterval = storeInterface.restockInterval;
 		}
-		const initialStore = new Store(randomUuid, storeIdentifier, storeName, buyMultiplier, sellMultiplier, upgradeMultiplier, new ItemList(), generateItems(), restockTime, restockInterval);
+		const initialStore = new Store(randomUuid, storeIdentifier, storeName, buyMultiplier, sellMultiplier, upgradeMultiplier, new InventoryItemList(), generateItems(), restockTime, restockInterval);
 		initialStore.restockStore();
 		return initialStore;
 	}
@@ -225,14 +225,14 @@ export class Store extends ItemStore {
 	/**
 	 * @returns the stock list of the store
 	 */
-	getStockList(): ItemList {
+	getStockList(): InventoryItemList {
 		return this.stockList;
 	}
 
 	/**
 	 * @stockList the stock list of the store
 	 */
-	setStockList(stockList: ItemList): void {
+	setStockList(stockList: InventoryItemList): void {
 		this.stockList = stockList;
 	}
 
@@ -303,7 +303,7 @@ export class Store extends ItemStore {
 			return response;
 		}
 		//add item to inventory and remove gold
-		const buyItemTemplate = placeholderItemTemplates.getInventoryTemplate(toBuy.itemData.id);
+		const buyItemTemplate = itemTemplateFactory.getInventoryTemplateById(toBuy.itemData.id);
 		if (!buyItemTemplate) {
 			response.addErrorMessage(`Invalid item: cannot find inventoryItem from id ${toBuy.itemData.id}`);
 			return response;
@@ -348,7 +348,7 @@ export class Store extends ItemStore {
 			return response;
 		}
 		//remove item from inventory and add gold
-		const sellItemTemplate = placeholderItemTemplates.getInventoryTemplate(toSell.itemData.id);
+		const sellItemTemplate = itemTemplateFactory.getInventoryTemplateById(toSell.itemData.id);
 		if (!sellItemTemplate) {
 			response.addErrorMessage(`Invalid item: cannot find inventoryItem from id ${toSell.itemData.id}`);
 			return response;
@@ -392,7 +392,7 @@ export class Store extends ItemStore {
 	 * @stockList the ItemList of items to check for
 	 * @returns true/false
 	 */
-	needsRestock(stockList: ItemList = this.stockList): boolean {
+	needsRestock(stockList: InventoryItemList = this.stockList): boolean {
 		const currentItems = this.getAllItems();
 		return stockList.getAllItems().some((element) => {
 			
@@ -421,7 +421,7 @@ export class Store extends ItemStore {
 	 * @stockList the list of items to restock. Defaults to the internal stocklist.
 	 * @returns InventoryTransactionResponse of true or an error message.
 	 */
-	restockStore(stockList: ItemList = this.stockList): InventoryTransactionResponse {
+	restockStore(stockList: InventoryItemList = this.stockList): InventoryTransactionResponse {
 		const response = new InventoryTransactionResponse();
 		if (!this.needsRestock(stockList)) {
 			response.addErrorMessage(`Error: Nothing to restock!`);
@@ -468,7 +468,7 @@ export class Store extends ItemStore {
 			response.payload = true;
 		} else {
 			//error, rollback
-			this.items = new ItemList(currentItems);
+			this.items = new InventoryItemList(currentItems);
 		}
 		if (didAddItem) {
 			this.lastRestockTime = Date.now();

@@ -11,7 +11,7 @@ json_file_path = os.path.join(script_dir, '../final/temp/Garden.json')
 
 # Initialize the data structure for JSON output
 data = {
-    "Tools": []
+    "Shovels": []
 }
 
 with open(tools_file_path, mode='r', encoding='utf-8') as csv_file:
@@ -27,7 +27,7 @@ with open(tools_file_path, mode='r', encoding='utf-8') as csv_file:
             "value": int(row["value"]),
             "level": int(row["level"])
         }
-        data["Tools"].append(tool)
+        data[(row["type"] + "s")].append(tool)
 
 # Write the JSON data to the output file
 with open(json_file_path, mode='w', encoding='utf-8') as json_file:

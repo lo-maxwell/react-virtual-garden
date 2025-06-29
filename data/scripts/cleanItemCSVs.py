@@ -8,6 +8,7 @@ def clean_item_csvs():
     # Define the directories with absolute paths
     inventory_dir = os.path.join(script_dir, '../items/inventoryItems/temp')
     placed_dir = os.path.join(script_dir, '../items/placedItems/temp')
+    tool_dir = os.path.join(script_dir, '../items/tools/temp')
     
     
     # List to keep track of removed rows
@@ -42,7 +43,7 @@ def clean_item_csvs():
         # print(json.dumps(df_sorted.to_dict(orient='records'), indent=4))
 
     # Process all CSV files in both directories
-    for directory in [inventory_dir, placed_dir]:
+    for directory in [inventory_dir, placed_dir, tool_dir]:
         for filename in os.listdir(directory):
             if filename.endswith('.csv'):
                 process_csv(os.path.join(directory, filename))

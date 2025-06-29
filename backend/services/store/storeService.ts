@@ -3,9 +3,9 @@ import storeItemRepository from "@/backend/repositories/items/inventoryItem/stor
 import inventoryRepository from "@/backend/repositories/itemStore/inventory/inventoryRepository";
 import storeRepository from "@/backend/repositories/itemStore/store/storeRepository";
 import { InventoryItem, InventoryItemEntity, StoreItemEntity } from "@/models/items/inventoryItems/InventoryItem";
-import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
-import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
+import { generateInventoryItem } from "@/models/items/ItemFactory";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
+import { getItemClassFromSubtype } from "@/models/items/utility/itemClassMaps";
 import { stocklistFactory } from "@/models/itemStore/store/StocklistFactory";
 import { Store, StoreEntity } from "@/models/itemStore/store/Store";
 import { storeFactory } from "@/models/itemStore/store/StoreFactory";
@@ -15,7 +15,7 @@ import { transactionWrapper } from "../utility/utility";
 import { v4 as uuidv4 } from 'uuid';
 import { invokeLambda, parseRows } from "@/backend/lambda/invokeLambda";
 import assert from "assert";
-import { ItemList } from "@/models/itemStore/ItemList";
+import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
 import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
 import { InventoryEntity } from "@/models/itemStore/inventory/Inventory";
 
@@ -314,7 +314,7 @@ export async function restockStore(storeId: string, userId: string, client?: Poo
 		return true;
 	}
 
-	function getStockList(storeEntity: StoreEntity): ItemList {
+	function getStockList(storeEntity: StoreEntity): InventoryItemList {
 		const storeInterface = storeFactory.getStoreInterfaceById(storeEntity.identifier);
 		if (!storeInterface) {
 			throw new Error(`Cannot find store details matching identifier ${storeEntity.identifier}`);
@@ -589,7 +589,7 @@ export async function buyItem(storeId: string, userId: string, itemIdentifier: s
 			throw new Error(`Cannot find store details matching identifier ${storeEntity.identifier}`);
 		}
 
-		const storeItemTemplate = placeholderItemTemplates.getInventoryTemplate(storeItemEntity.identifier);
+		const storeItemTemplate = itemTemplateFactory.getInventoryTemplateById(storeItemEntity.identifier);
 		if (!storeItemTemplate) {
 			throw new Error(`Cannot find storeItem matching identifier ${storeItemEntity.identifier}`);
 		}
@@ -904,7 +904,7 @@ export async function sellItem(storeId: string, userId: string, itemIdentifier: 
 			throw new Error(`Cannot find store details matching identifier ${storeEntity.identifier}`);
 		}
 
-		const inventoryItemTemplate = placeholderItemTemplates.getInventoryTemplate(inventoryItemEntity.identifier);
+		const inventoryItemTemplate = itemTemplateFactory.getInventoryTemplateById(inventoryItemEntity.identifier);
 		if (!inventoryItemTemplate) {
 			throw new Error(`Cannot find inventoryItem matching identifier ${inventoryItemEntity.identifier}`);
 		}
@@ -1250,7 +1250,7 @@ export async function getStoreFromDatabase(storeId: string, userId: string, clie
 			const storeEntityResult = parseRows<StoreEntity[]>(storeResult)[0];
 			assert(storeRepository.validateStoreEntity(storeEntityResult));
 
-			let storeItems: ItemList | null;
+			let storeItems: InventoryItemList | null;
 			if (!storeItemsResult) {
 				console.error(`Error parsing storeItems for store id ${storeId}`);
 				storeItems = null;

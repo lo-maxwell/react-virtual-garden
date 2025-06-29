@@ -1,7 +1,7 @@
 
-import { EmptyItemTemplate } from "../templates/models/EmptyItemTemplate";
 import { PlacedItem } from "./PlacedItem";
 import { v4 as uuidv4 } from 'uuid';
+import { EmptyItemTemplate } from "../templates/models/PlacedItemTemplates/EmptyItemTemplate";
 
 export class EmptyItem extends PlacedItem{
 	itemData: EmptyItemTemplate;

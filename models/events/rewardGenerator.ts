@@ -1,7 +1,7 @@
-import { ItemList } from "../itemStore/ItemList";
+import { InventoryItemList } from "../itemStore/InventoryItemList";
 
 export class RewardGenerator {
-	rewardItems: ItemList;
+	rewardItems: InventoryItemList;
 	maxQuantity: number;
 	maxItems: number;
 	
@@ -10,17 +10,17 @@ export class RewardGenerator {
 	 * @rewardItems the list of possible items that this generator can give out
 	 * @maxQuantity the maximum quantity of a single item in a single reward
 	 */
-	constructor(rewardItems: ItemList, maxQuantity: number, maxItems: number) {
+	constructor(rewardItems: InventoryItemList, maxQuantity: number, maxItems: number) {
 		this.rewardItems = rewardItems;
 		this.maxQuantity = maxQuantity;
 		this.maxItems = maxItems;
 	}
 
-	getRewardItems(): ItemList {
+	getRewardItems(): InventoryItemList {
 		return this.rewardItems;
 	}
 
-	setRewardItems(rewardItems: ItemList): void {
+	setRewardItems(rewardItems: InventoryItemList): void {
 		this.rewardItems = rewardItems;
 	}
 

@@ -1,10 +1,10 @@
 import { InventoryTransactionResponse } from "@/models/itemStore/inventory/InventoryTransactionResponse";
 import { Item } from "../Item";
 import { ItemSubtypes} from "../ItemTypes";
-import { BlueprintTemplate } from "../templates/models/BlueprintTemplate";
-import { InventoryItemTemplate } from "../templates/models/InventoryItemTemplate";
-import { placeholderItemTemplates } from "../templates/models/PlaceholderItemTemplate";
-import { SeedTemplate } from "../templates/models/SeedTemplate";
+import { BlueprintTemplate } from "../templates/models/InventoryItemTemplates/BlueprintTemplate";
+import { itemTemplateFactory } from "../templates/models/ItemTemplateFactory";
+import { SeedTemplate } from "../templates/models/InventoryItemTemplates/SeedTemplate";
+import { InventoryItemTemplate } from "../templates/models/InventoryItemTemplates/InventoryItemTemplate";
 
 export interface InventoryItemEntity {
 	id: string,
@@ -93,7 +93,7 @@ export abstract class InventoryItem extends Item {
 				const blueprintData = this.itemData as BlueprintTemplate;
 				response.payload = {
 					originalItem: this,
-					newTemplate: placeholderItemTemplates.getPlacedTemplate(blueprintData.transformId),
+					newTemplate: itemTemplateFactory.getPlacedTemplateById(blueprintData.transformId),
 				};
 				this.setQuantity(this.getQuantity() - quantity);
 				break;
@@ -101,7 +101,7 @@ export abstract class InventoryItem extends Item {
 				const seedData = this.itemData as SeedTemplate;
 				response.payload = {
 					originalItem: this,
-					newTemplate: placeholderItemTemplates.getPlacedTemplate(seedData.transformId),
+					newTemplate: itemTemplateFactory.getPlacedTemplateById(seedData.transformId),
 				};
 				this.setQuantity(this.getQuantity() - quantity);
 				break;

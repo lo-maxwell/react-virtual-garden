@@ -1,6 +1,6 @@
 import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
-import Toolbox from "@/models/garden/tools/Toolbox";
+import Toolbox from "@/models/itemStore/toolbox/tool/Toolbox";
 import LevelSystem from "@/models/level/LevelSystem";
 import { ActionHistoryList } from "@/models/user/history/ActionHistoryList";
 import { ItemHistoryList } from "@/models/user/history/ItemHistoryList";
@@ -21,10 +21,9 @@ class UserRepository {
 		return true;
 	}
 
-	makeUserObject(userEntity: UserEntity, levelSystem: LevelSystem, actionHistoryList: ActionHistoryList, itemHistoryList: ItemHistoryList): User {
+	makeUserObject(userEntity: UserEntity, levelSystem: LevelSystem, actionHistoryList: ActionHistoryList, itemHistoryList: ItemHistoryList, toolbox: Toolbox): User {
 		assert(this.validateUserEntity(userEntity), 'UserEntity validation failed');
 
-		let toolbox = new Toolbox();
 		return new User(userEntity.id, userEntity.username, userEntity.icon, levelSystem, itemHistoryList, actionHistoryList, toolbox);
 	}
 

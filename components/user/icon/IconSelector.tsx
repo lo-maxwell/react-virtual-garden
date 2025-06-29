@@ -1,5 +1,5 @@
 import { useUser } from '@/app/hooks/contexts/UserContext';
-import { placeholderItemTemplates } from '@/models/items/templates/models/PlaceholderItemTemplate';
+import { itemTemplateFactory } from '@/models/items/templates/models/ItemTemplateFactory';
 import Icon from '@/models/user/icons/Icon';
 import { iconFactory } from '@/models/user/icons/IconRepository';
 import React, { useState } from 'react';

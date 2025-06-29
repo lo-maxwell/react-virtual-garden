@@ -15,7 +15,8 @@ import { addColumnAPI, addColumnLocal, addRowAPI, addRowLocal, harvestAllAPI, pi
 import { useAccount } from "../hooks/contexts/AccountContext";
 import { useDispatch } from "react-redux";
 import { setAllLevelSystemValues } from "@/store/slices/userLevelSystemSlice";
-import Tool from "@/models/garden/tools/Tool";
+import { ToolTypes } from "@/models/itemStore/toolbox/tool/ToolTypes";
+import { Tool } from "@/models/items/tools/Tool";
 
 const GardenComponent = () => {
 	const { inventory, reloadInventory } = useInventory();
@@ -25,7 +26,7 @@ const GardenComponent = () => {
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
 	const plotRefs = useRef<PlotComponentRef[][]>(garden.getPlots().map(row => row.map(() => null!)));
 	const [showExpansionOptions, setShowExpansionOptions] = useState(false);
-	const {plantSeed, placeDecoration, clickPlant, clickDecoration, doNothing} = usePlotActions();
+	const {plantSeed, placeDecoration, clickPlant, clickDecoration, destroyItem, doNothing} = usePlotActions();
 	const { account, guestMode } = useAccount();
 	const dispatch = useDispatch();
 
@@ -42,12 +43,19 @@ const GardenComponent = () => {
 
 	const GetPlotAction = (plot: Plot, selected: InventoryItem | Tool | null) => {
 		//TODO: Fix this
-		if (selected instanceof Tool) return doNothing(plot);
-		if (plot.getItemSubtype() == ItemSubtypes.GROUND.name && selected != null) {
+		if (plot.getItemSubtype() == ItemSubtypes.GROUND.name && selected instanceof InventoryItem) {
 			if (selected.itemData.subtype == ItemSubtypes.SEED.name) {
 				return plantSeed(selected, plot);
 			} else if (selected.itemData.subtype == ItemSubtypes.BLUEPRINT.name) {
 				return placeDecoration(selected, plot);
+			}
+		}
+		if (selected instanceof Tool) {
+			if (selected.itemData.type == ToolTypes.SHOVEL.name && (plot.getItemSubtype() == ItemSubtypes.PLANT.name)) {
+				return destroyItem(plot, selected);
+			} else {
+				// console.warn(`Tool of type ${selected.itemData.type} not yet implemented!`);
+				return doNothing(plot, `This tool doesn't have any effect here.`);
 			}
 		}
 		if (plot.getItemSubtype() == ItemSubtypes.PLANT.name) {
@@ -131,7 +139,7 @@ const GardenComponent = () => {
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
-				setGardenMessage(`There was an error planting 1 or more seeds! Please refresh the page!`);
+				setGardenMessage(`There was an error planting 1 or more seeds! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				// setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 				// return;
 			}
@@ -174,7 +182,7 @@ const GardenComponent = () => {
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
-				setGardenMessage(`There was an error harvesting 1 or more plants! Please refresh the page!`);
+				setGardenMessage(`There was an error harvesting 1 or more plants! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				// setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 				
 			}
@@ -217,7 +225,7 @@ const GardenComponent = () => {
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
-				setGardenMessage(`There was an error picking up 1 or more decorations! Please refresh the page!`);
+				setGardenMessage(`There was an error picking up 1 or more decorations! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				// setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			}
 		}
@@ -241,7 +249,7 @@ const GardenComponent = () => {
 			const apiResult = await addColumnAPI(garden, user);
 			if (!apiResult) {
 				syncGardenSize(garden, user);
-				// setGardenMessage(`There was an error expanding the garden, please refresh the page!`);
+				// setGardenMessage(`There was an error expanding the garden, please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				// removeColumnLocal(garden);
 			}
 		}
@@ -265,7 +273,7 @@ const GardenComponent = () => {
 			const apiResult = await addRowAPI(garden, user);
 			if (!apiResult) {
 				syncGardenSize(garden, user);
-				// setGardenMessage(`There was an error expanding the garden, please refresh the page!`);
+				// setGardenMessage(`There was an error expanding the garden, please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				// removeRowLocal(garden);
 			}
 		}
@@ -287,7 +295,7 @@ const GardenComponent = () => {
 			const apiResult = await removeColumnAPI(garden, user);
 			if (!apiResult) {
 				syncGardenSize(garden, user);
-				// setGardenMessage(`There was an error shrinking the garden, please refresh the page!`);
+				// setGardenMessage(`There was an error shrinking the garden, please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				// addColumnLocal(garden, user);
 			}
 		}
@@ -309,7 +317,7 @@ const GardenComponent = () => {
 			const apiResult = await removeRowAPI(garden, user);
 			if (!apiResult) {
 				syncGardenSize(garden, user);
-				// setGardenMessage(`There was an error shrinking the garden, please refresh the page!`);
+				// setGardenMessage(`There was an error shrinking the garden, please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				// addRowLocal(garden, user);
 			}
 		}

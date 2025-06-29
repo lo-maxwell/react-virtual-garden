@@ -1,9 +1,13 @@
 import { invokeLambda, parseRows } from "@/backend/lambda/invokeLambda";
+import toolRepository from "@/backend/repositories/items/tool/toolRepository";
+import toolboxRepository from "@/backend/repositories/itemStore/toolbox/toolboxRepository";
 import levelRepository from "@/backend/repositories/level/levelRepository";
 import actionHistoryRepository from "@/backend/repositories/user/actionHistoryRepository";
 import itemHistoryRepository from "@/backend/repositories/user/itemHistoryRepository";
 import userRepository from "@/backend/repositories/user/userRepository";
 import HistoryComponent from "@/components/user/history/History";
+import { ToolEntity } from "@/models/items/tools/Tool";
+import Toolbox, { ToolboxEntity } from "@/models/itemStore/toolbox/tool/Toolbox";
 import LevelSystem, { LevelSystemEntity } from "@/models/level/LevelSystem";
 import { ActionHistoryEntity } from "@/models/user/history/actionHistory/ActionHistory";
 import { ItemHistoryEntity } from "@/models/user/history/itemHistory/ItemHistory";
@@ -26,6 +30,7 @@ import { transactionWrapper } from "../utility/utility";
 	if (process.env.USE_DATABASE === 'LAMBDA') {
 		try {
 			const levelInstance = user.getLevelSystem();
+			const toolboxInstance = user.getToolbox();
 			const actionHistoryInstance = user.getActionHistory();
 			const itemHistoryInstance = user.getItemHistory();
 
@@ -84,9 +89,54 @@ import { transactionWrapper } from "../utility/utility";
 						"returnColumns": [
 							"id"
 						]
+					},
+					{
+						"tableName": "toolboxes",
+						"columnsToWrite": [
+							"id", 
+							"owner"
+						],
+						"values": [
+							[
+								toolboxInstance.getToolboxId(),
+								userId
+							  ]
+						],
+						"conflictColumns": [
+							"id"
+						],
+						"returnColumns": [
+							"id"
+						]
 					}
 				]
 			};
+			const insert_tool_values: any = [];
+			toolboxInstance.getAllTools().forEach((tool) => {
+				const toInsert = [
+					tool.getToolId(),
+					toolboxInstance.getToolboxId(),
+					tool.itemData.id
+					]
+				insert_tool_values.push(toInsert);
+			})
+			if (insert_tool_values.length > 0) {
+				const toolInsertQuery = {
+					"tableName": "tools",
+					"columnsToWrite": [
+						"id", "owner", "identifier"
+					],
+					"values": insert_tool_values,
+					"conflictColumns": [
+						"owner",
+						"identifier"
+					],
+					"returnColumns": [
+						"id"
+					]
+				};
+				payload.queries.push(toolInsertQuery);
+			}
 			const insert_action_history_values: any = [];
 			actionHistoryInstance.getAllHistories().forEach((history) => {
 				const toInsert = [
@@ -149,7 +199,9 @@ import { transactionWrapper } from "../utility/utility";
 			}
 			const userResult = parseRows<string[]>(insertResult[0]);
 			const levelResult = parseRows<string[]>(insertResult[1]);
-			const actionHistoryResult = insert_action_history_values.length > 0 ? parseRows<string[]>(insertResult[2]) : [];
+			const toolboxResult = parseRows<string[]>(insertResult[2]);
+			const toolResult = insert_tool_values.length > 0 ? parseRows<string[]>(insertResult[3]) : [];
+			const actionHistoryResult = insert_action_history_values.length > 0 ? parseRows<string[]>(insertResult[4]) : [];
 			const itemHistoryResult = insert_item_history_values.length > 0 ? parseRows<string[]>(insertResult[insertResult.length - 1]) : [];
 
 			// Check for discrepancies
@@ -158,6 +210,12 @@ import { transactionWrapper } from "../utility/utility";
 			}
 			if (levelResult.length !== 1) {
 				console.warn(`Expected 1 level to be created, but got ${levelResult.length}`);
+			}
+			if (toolboxResult.length !== 1) {
+				console.warn(`Expected 1 toolbox to be created, but got ${toolboxResult.length}`);
+			}
+			if (toolResult.length !== insert_tool_values.length) {
+				console.warn(`Expected ${insert_tool_values.length} tool IDs to be returned, but got ${toolResult.length}`);
 			}
 			if (actionHistoryResult.length !== insert_action_history_values.length) {
 				console.warn(`Expected ${insert_action_history_values.length} action history IDs to be returned, but got ${actionHistoryResult.length}`);
@@ -182,8 +240,23 @@ import { transactionWrapper } from "../utility/utility";
 			throw new Error('There was an error creating the level system');
 		}
 
+		//Create toolbox (relies on user)
+		const toolboxResult = await toolboxRepository.createToolbox(userResult.id, user.getToolbox(), client);
+		if (!toolboxResult) {
+			throw new Error('There was an error creating the toolbox');
+		}
+
 		// Array to store all promises
 		const allPromises: Promise<void>[] = [];
+
+		// Create tools
+		const toolPromises: Promise<void>[] = user.getToolbox().getAllTools().map(async (elem) => {
+			const result = await toolRepository.createTool(toolboxResult.id, elem, client);
+			if (!result) {
+				throw new Error(`Error creating tool for user ${user.getUserId()}`);
+			}
+		});
+		allPromises.push(...toolPromises);
 
 		// Create action histories
 		const actionHistoryPromises: Promise<void>[] = user.getActionHistory().getAllHistories().map(async (elem) => {
@@ -223,6 +296,7 @@ import { transactionWrapper } from "../utility/utility";
 	if (process.env.USE_DATABASE === 'LAMBDA') {
 		try {
 			const levelInstance = user.getLevelSystem();
+			const toolboxInstance = user.getToolbox();
 			const actionHistoryInstance = user.getActionHistory();
 			const itemHistoryInstance = user.getItemHistory();
 
@@ -297,9 +371,55 @@ import { transactionWrapper } from "../utility/utility";
 						"returnColumns": [
 							"id"
 						]
+					},
+					{
+						"tableName": "toolboxes",
+						"columnsToWrite": [
+							"id", 
+							"owner"
+						],
+						"values": [
+							[
+								toolboxInstance.getToolboxId(),
+								userId
+							  ]
+						],
+						"conflictColumns": [
+							"owner"
+						],
+						"conflictIndex": "owner",
+						"returnColumns": [
+							"id"
+						]
 					}
 				]
 			};
+			const insert_tool_values: any = [];
+			toolboxInstance.getAllTools().forEach((tool) => {
+				const toInsert = [
+					tool.getToolId(),
+					toolboxInstance.getToolboxId(),
+					tool.itemData.id
+					]
+				insert_tool_values.push(toInsert);
+			})
+			if (insert_tool_values.length > 0) {
+				const toolInsertQuery: any = {
+					"tableName": "tools",
+					"columnsToWrite": [
+						"id", "owner", "identifier"
+					],
+					"values": insert_tool_values,
+					"conflictColumns": [
+						"owner",
+						"identifier"
+					],
+					"returnColumns": [
+						"id"
+					]
+				};
+				payload.queries.push(toolInsertQuery);
+			}
 			const insert_action_history_values: any = [];
 			actionHistoryInstance.getAllHistories().forEach((history) => {
 				const toInsert = [
@@ -378,7 +498,9 @@ import { transactionWrapper } from "../utility/utility";
 			}
 			const userResult = parseRows<string[]>(insertResult[0]);
 			const levelResult = parseRows<string[]>(insertResult[1]);
-			const actionHistoryResult = insert_action_history_values.length > 0 ? parseRows<string[]>(insertResult[2]) : [];
+			const toolboxResult = parseRows<string[]>(insertResult[2]);
+			const toolResult = insert_tool_values.length > 0 ? parseRows<string[]>(insertResult[3]) : [];
+			const actionHistoryResult = insert_action_history_values.length > 0 ? parseRows<string[]>(insertResult[4]) : [];
 			const itemHistoryResult = insert_item_history_values.length > 0 ? parseRows<string[]>(insertResult[insertResult.length - 1]) : [];
 
 			// Check for discrepancies
@@ -387,6 +509,12 @@ import { transactionWrapper } from "../utility/utility";
 			}
 			if (levelResult.length !== 1) {
 				console.warn(`Expected 1 level to be upserted, but got ${levelResult.length}`);
+			}
+			if (toolboxResult.length !== 1) {
+				console.warn(`Expected 1 toolbox to be created, but got ${toolboxResult.length}`);
+			}
+			if (toolResult.length !== insert_tool_values.length) {
+				console.warn(`Expected ${insert_tool_values.length} tool IDs to be returned, but got ${toolResult.length}`);
 			}
 			if (actionHistoryResult.length !== insert_action_history_values.length) {
 				console.warn(`Expected ${insert_action_history_values.length} action history IDs to be returned, but got ${actionHistoryResult.length}`);
@@ -411,8 +539,23 @@ import { transactionWrapper } from "../utility/utility";
 			throw new Error('There was an error upserting the level system');
 		}
 
+		//Create toolbox (relies on user)
+		const toolboxResult = await toolboxRepository.createOrUpdateToolbox(userResult.id, user.getToolbox(), client);
+		if (!toolboxResult) {
+			throw new Error('There was an error creating the toolbox');
+		}
+
 		// Array to store all promises
 		const allPromises: Promise<void>[] = [];
+
+		// Create tools
+		const toolPromises: Promise<void>[] = user.getToolbox().getAllTools().map(async (elem) => {
+			const result = await toolRepository.createOrUpdateTool(toolboxResult.id, elem, client);
+			if (!result) {
+				throw new Error(`Error creating tool for user ${user.getUserId()}`);
+			}
+		});
+		allPromises.push(...toolPromises);
 
 		// Create action histories
 		const actionHistoryPromises: Promise<void>[] = user.getActionHistory().getAllHistories().map(async (elem) => {
@@ -623,6 +766,20 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 							}
 						},
 						"limit": 1000
+					},
+					{
+						"returnColumns": [
+							"id", 
+							"owner"
+						],
+						"tableName": "toolboxes",
+						"conditions": {
+							"owner": {
+								"operator": "=",
+								"value": userId
+							}
+						},
+						"limit": 1
 					}
 				]
 			  }
@@ -640,11 +797,38 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 			assert(Array.isArray(actionHistoryEntityListResult));
 			const itemHistoryEntityListResult = parseRows<ItemHistoryEntity[]>(userResult[3]);
 			assert(Array.isArray(itemHistoryEntityListResult));
+			const toolboxEntityResult = parseRows<ToolboxEntity[]>(userResult[4])[0];
+			assert(toolboxRepository.validateToolboxEntity(toolboxEntityResult));
 			const actionHistories = actionHistoryEntityListResult.map((actionHistoryEntity) => actionHistoryRepository.makeActionHistoryObject(actionHistoryEntity));
 			const actionHistoryList = actionHistoryRepository.makeActionHistoryListObject(actionHistories);
 			const itemHistories = itemHistoryEntityListResult.map((itemHistoryEntity) => itemHistoryRepository.makeItemHistoryObject(itemHistoryEntity));
 			const itemHistoryList = itemHistoryRepository.makeItemHistoryListObject(itemHistories);
-			const userObject = userRepository.makeUserObject(userEntityResult, levelSystemInstance, actionHistoryList, itemHistoryList);
+
+			const tool_payload = {
+				"queries": [
+					{
+						"returnColumns": [
+							"id",
+							"owner",
+							"identifier"
+						],
+						"tableName": "tools",
+						"conditions": {
+							"owner": {
+								"operator": "=",
+								"value": toolboxEntityResult.id
+							}
+						},
+						"limit": 1000
+					}
+				]
+			  }
+			const toolResult = await invokeLambda('garden-select', tool_payload);
+			const toolsEntity = parseRows<ToolEntity[]>(toolResult[0]);
+			const toolsInstance = toolRepository.makeToolObjectBatch(toolsEntity);
+			const toolboxInstance = await toolboxRepository.makeToolboxObject(toolboxEntityResult, toolsInstance);
+
+			const userObject = userRepository.makeUserObject(userEntityResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance);
 			return userObject.toPlainObject();
 		} catch (error) {
 			console.error('Error fetching user from Lambda:', error);
@@ -671,7 +855,16 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 			const itemHistoryEntities = await itemHistoryRepository.getItemHistoriesByUserId(userResult.id);
 			const itemHistories = itemHistoryEntities.map((itemHistoryEntity) => itemHistoryRepository.makeItemHistoryObject(itemHistoryEntity));
 			const itemHistoryList = itemHistoryRepository.makeItemHistoryListObject(itemHistories);
-			const userInstance = userRepository.makeUserObject(userResult, levelSystemInstance, actionHistoryList, itemHistoryList);
+			const toolboxEntity = await toolboxRepository.getToolboxByOwnerId(userResult.id);
+			let toolboxInstance;
+			if (!toolboxEntity) {
+				toolboxInstance = Toolbox.generateDefaultToolbox();
+			} else {
+				const toolEntities = await toolRepository.getAllToolsByOwnerId(toolboxEntity.id);
+				const tools = toolRepository.makeToolObjectBatch(toolEntities);
+				toolboxInstance = await toolboxRepository.makeToolboxObject(toolboxEntity, tools);
+			}
+			const userInstance = userRepository.makeUserObject(userResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance);
 	
 			return userInstance.toPlainObject();
 		}

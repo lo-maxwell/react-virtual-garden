@@ -1,9 +1,9 @@
 import { GardenTransactionResponse } from "@/models/garden/GardenTransactionResponse";
 import { Item } from "../Item";
 import { ItemSubtypes } from "../ItemTypes";
-import { PlacedItemTemplate } from "../templates/models/PlacedItemTemplate";
-import { placeholderItemTemplates } from "../templates/models/PlaceholderItemTemplate";
-import { PlantTemplate } from "../templates/models/PlantTemplate";
+import { PlacedItemTemplate } from "../templates/models/PlacedItemTemplates/PlacedItemTemplate";
+import { itemTemplateFactory } from "../templates/models/ItemTemplateFactory";
+import { PlantTemplate } from "../templates/models/PlacedItemTemplates/PlantTemplate";
 
 export interface PlacedItemDetailsEntity {
 	identifier: string, //itemData.id
@@ -112,7 +112,7 @@ export abstract class PlacedItem extends Item {
 			case ItemSubtypes.PLANT.name:
 				response.payload = {
 					originalItem: this,
-					newTemplate: placeholderItemTemplates.getInventoryTemplate(this.itemData.transformId),
+					newTemplate: itemTemplateFactory.getInventoryTemplateById(this.itemData.transformId),
 				};
 				// this.setStatus('removed');
 				break;
@@ -131,7 +131,7 @@ export abstract class PlacedItem extends Item {
 		}
 		response.payload = {
 			originalItem: this,
-			newTemplate: placeholderItemTemplates.getInventoryTemplate(this.itemData.transformId),
+			newTemplate: itemTemplateFactory.getInventoryTemplateById(this.itemData.transformId),
 		};
 		return response;
 	}
@@ -145,7 +145,7 @@ export abstract class PlacedItem extends Item {
 
 		response.payload = {
 			originalItem: this,
-			newTemplate: placeholderItemTemplates.getInventoryTemplate((this.itemData as PlantTemplate).transformShinyIds[tier].id),
+			newTemplate: itemTemplateFactory.getInventoryTemplateById((this.itemData as PlantTemplate).transformShinyIds[tier].id),
 		};
 		return response;
 	}

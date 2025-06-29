@@ -1,8 +1,8 @@
 import { Plot } from "@/models/garden/Plot";
 import { InventoryItem, InventoryItemEntity } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
-import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
+import { PlacedItem, PlacedItemEntity } from "@/models/items/placedItems/PlacedItem";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
 import { loadGarden, saveGarden } from "@/utils/localStorage/garden";
 import { loadInventory, saveInventory } from "@/utils/localStorage/inventory";
 import { loadUser, saveUser } from "@/utils/localStorage/user";
@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { makeApiRequest } from "@/utils/api/api";
 import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
 import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
+import { Tool } from "@/models/items/tools/Tool";
 
 //contains static onclick functions for plot components
 export const usePlotActions = () => {
@@ -85,7 +86,7 @@ export const usePlotActions = () => {
 				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
 				// plot.rollbackItem(originalItem);
 				console.warn(`There was an error planting a seed, rolled back to previous plot`);
-				setGardenMessage(`There was an error! Please refresh the page!`);
+				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
 		}
@@ -151,7 +152,7 @@ export const usePlotActions = () => {
 				const rollbackInventory = Inventory.fromPlainObject(originalInventoryObject);
 				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
 				console.warn(`There was an error placing a decoration, rolled back to previous plot`);
-				setGardenMessage(`There was an error! Please refresh the page!`);
+				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
 		}
@@ -218,7 +219,7 @@ export const usePlotActions = () => {
 				const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/harvest`;
 				const result: InventoryItemEntity = await makeApiRequest('PATCH', apiRoute, data, true);
 
-				const itemTemplate = placeholderItemTemplates.getInventoryTemplate(result.identifier);
+				const itemTemplate = itemTemplateFactory.getInventoryTemplateById(result.identifier);
 				if (!itemTemplate) {
 					console.error(itemTemplate);
 					throw new Error(`Error parsing item template`);
@@ -240,7 +241,7 @@ export const usePlotActions = () => {
 				const rollbackUser = User.fromPlainObject(originalUserObject);
 				if (rollbackUser instanceof User) saveUser(rollbackUser);
 				console.warn(`There was an error clicking a plant, rolled back`);
-				setGardenMessage(`There was an error! Please refresh the page!`);
+				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
 		}
@@ -299,7 +300,7 @@ export const usePlotActions = () => {
 				const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/pickup`;
 				const result: InventoryItemEntity = await makeApiRequest('PATCH', apiRoute, data, true);
 				
-				const itemTemplate = placeholderItemTemplates.getInventoryTemplate(result.identifier);
+				const itemTemplate = itemTemplateFactory.getInventoryTemplateById(result.identifier);
 				if (!itemTemplate) {
 					throw new Error(`Error parsing item template`);
 				}
@@ -318,7 +319,7 @@ export const usePlotActions = () => {
 				const rollbackInventory = Inventory.fromPlainObject(originalInventoryObject);
 				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
 				console.warn(`There was an error clicking a decoration, rolled back`);
-				setGardenMessage(`There was an error! Please refresh the page!`);
+				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
 		}
@@ -330,14 +331,78 @@ export const usePlotActions = () => {
 		return toReturn;
 	}
 
-	const doNothing = (plot: Plot) => {
+	/**
+	 * Can only be used in a plot with a decoration or plant. Destroys the item in the plot, giving nothing back to the player.
+	 * @plot the plot to modify
+	 * @tool the tool being used (currently does nothing)
+	 * @returns the updated icon
+	 */
+	const destroyItem = (plot: Plot, tool: Tool) => {
+		let originalGardenObject: any;
+		let originalIcon: string;
 		const uiHelper = () => {
-			setGardenMessage(` `);
+			originalIcon = plot.getItem().itemData.icon;
+			originalGardenObject = garden.toPlainObject();
+			// Optimistically update the local state
+			// const originalItem = plot.getItem();
+			if (!(plot.getItemSubtype() == ItemSubtypes.DECORATION.name || plot.getItemSubtype() == ItemSubtypes.PLANT.name)) {
+				setGardenMessage(` `);
+				return {success: false, displayIcon: originalIcon};
+			}
+			const destroyItemResponse = plot.destroyItem();
+			if (!destroyItemResponse.isSuccessful()) {
+				setGardenMessage(`There was an error destroying the item.`);
+				return {success: false, displayIcon: originalIcon};
+			}
+			
+			saveInventory(inventory);
+			saveGarden(garden);
+			saveUser(user);
+			setGardenMessage(`Destroyed ${destroyItemResponse.payload.originalItem.itemData.name}.`);
 			return {success: true, displayIcon: plot.getItem().itemData.icon};
 		}
 
 		const apiHelper = async () => {
-			setGardenMessage(` `);
+			const data = {
+				toolId: tool.itemData.id,
+				replacementItem: null, // Replace with ground as default
+			}
+			try {
+				const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/destroy`;
+				const result: PlacedItemEntity = await makeApiRequest('PATCH', apiRoute, data, true);
+				
+				const itemTemplate = itemTemplateFactory.getPlacedTemplateById(result.identifier);
+				if (!itemTemplate) {
+					throw new Error(`Error parsing item template`);
+				}
+				console.log('Successfully destroyed item.');
+				return {success: true, displayIcon: plot.getItem().itemData.icon};
+			} catch (error) {
+				console.error(error);
+				// Rollback the optimistic update
+				const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
+				if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
+				console.warn(`There was an error destroying an item, rolled back`);
+				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
+				return {success: false, displayIcon: originalIcon};
+			}
+		}
+		
+		const toReturn = {
+			uiHelper: uiHelper,
+			apiHelper: apiHelper
+		}
+		return toReturn;
+	}
+
+	const doNothing = (plot: Plot, newMessage: string = '') => {
+		const uiHelper = () => {
+			setGardenMessage(newMessage);
+			return {success: true, displayIcon: plot.getItem().itemData.icon};
+		}
+
+		const apiHelper = async () => {
+			setGardenMessage(newMessage);
 			return {success: true, displayIcon: plot.getItem().itemData.icon};
 		}
 		
@@ -353,6 +418,7 @@ export const usePlotActions = () => {
 		placeDecoration,
 		clickPlant,
 		clickDecoration,
+		destroyItem,
 		doNothing
 	}
 

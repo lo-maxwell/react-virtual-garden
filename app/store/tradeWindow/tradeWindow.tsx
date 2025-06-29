@@ -16,7 +16,7 @@ import { useUser } from "@/app/hooks/contexts/UserContext";
 import { useAccount } from "@/app/hooks/contexts/AccountContext";
 import { useDispatch } from "react-redux";
 import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
-import Tool from "@/models/garden/tools/Tool";
+import { Tool } from "@/models/items/tools/Tool";
 
 
 const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshKey}: {costMultiplier: number, forceRefreshKey: number, setForceRefreshKey: React.Dispatch<React.SetStateAction<number>>}) => {
@@ -147,7 +147,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 					reloadStore();
 					reloadInventory();
 					// TODO: force a refresh
-					setTradeWindowMessage(`There was an error purchasing the item! Please refresh the page!`);
+					setTradeWindowMessage(`There was an error purchasing the item! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 					setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1);
 					// return;
 				}
@@ -186,7 +186,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 					syncStoreAndInventory(user, store, inventory);
 					reloadStore();
 					reloadInventory();
-					setTradeWindowMessage(`There was an error selling the item! Please refresh the page!`);
+					setTradeWindowMessage(`There was an error selling the item! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 					setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1);
 					// return;
 				}

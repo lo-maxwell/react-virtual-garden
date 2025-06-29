@@ -1,0 +1,13 @@
+{
+  "queries": [
+    {
+      "tableName": "users",
+      "columnsToWrite": ["username", "password_hash", "password_salt", "icon"],
+      "values": [
+        ["newuser", "somehash", "somesalt", "default-icon"]
+      ],
+      "conflictColumns": [],
+      "returnColumns": ["id", "username"]
+    }
+  ]
+}

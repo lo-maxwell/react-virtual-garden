@@ -1,4 +1,4 @@
-import { BlueprintTemplate } from "../templates/models/BlueprintTemplate";
+import { BlueprintTemplate } from "../templates/models/InventoryItemTemplates/BlueprintTemplate";
 import { InventoryItem } from "./InventoryItem";
 import { v4 as uuidv4 } from 'uuid';
 

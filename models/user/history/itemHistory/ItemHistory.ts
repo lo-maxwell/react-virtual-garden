@@ -1,5 +1,5 @@
 import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
-import { getItemTemplateFromSubtype } from "@/models/items/utility/classMaps";
+import { getItemTemplateFromSubtype } from "@/models/items/utility/itemClassMaps";
 import { ItemHistoryTransactionResponse } from "./ItemHistoryTransactionResponse";
 
 export interface ItemHistoryEntity {

@@ -1,11 +1,11 @@
 import { InventoryItem } from "../../items/inventoryItems/InventoryItem";
 import { ItemTypes } from "../../items/ItemTypes";
 import { InventoryTransactionResponse } from "./InventoryTransactionResponse";
-import { ItemList } from "../ItemList";
+import { InventoryItemList } from "../InventoryItemList";
 import { ItemStore } from "../ItemStore";
 import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
 import { v4 as uuidv4 } from 'uuid';
-import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
+import { generateInventoryItem } from "@/models/items/ItemFactory";
 import User from "@/models/user/User";
 
 export interface InventoryEntity {
@@ -20,7 +20,7 @@ export class Inventory extends ItemStore{
 	private gold: number;
 	// private items: ItemList;
 	
-	constructor(inventoryId: string, ownerName: string, gold: number = 0, items: ItemList = new ItemList()) {
+	constructor(inventoryId: string, ownerName: string, gold: number = 0, items: InventoryItemList = new InventoryItemList()) {
 		super(items);
 		this.inventoryId = inventoryId;
 		this.ownerName = ownerName;
@@ -39,7 +39,7 @@ export class Inventory extends ItemStore{
 		let inventoryId = uuidv4();
 		let ownerName = '';
 		let gold = 0;
-		let items = new ItemList();
+		let items = new InventoryItemList();
 		// Validate and assign ownerName
 		if (plainObject && typeof plainObject.inventoryId === 'string') {
 			inventoryId = plainObject.inventoryId;
@@ -58,7 +58,7 @@ export class Inventory extends ItemStore{
 		// Validate and assign items
 		if (plainObject && plainObject.items !== undefined) {
 			if (typeof plainObject.items === 'object' && plainObject.items !== null) {
-				items = ItemList.fromPlainObject(plainObject.items) || new ItemList();
+				items = InventoryItemList.fromPlainObject(plainObject.items) || new InventoryItemList();
 			}
 		}
 	
@@ -77,8 +77,8 @@ export class Inventory extends ItemStore{
 	
 	static generateDefaultNewInventory(): Inventory {
 		const randomUuid = uuidv4();
-		return new Inventory(randomUuid, User.getDefaultUserName(), 100, new ItemList([
-			generateNewPlaceholderInventoryItem('apple seed', 100)]));
+		return new Inventory(randomUuid, User.getDefaultUserName(), 100, new InventoryItemList([
+			generateInventoryItem('apple seed', 100)]));
 	}
 
 	/**
@@ -155,9 +155,9 @@ export class Inventory extends ItemStore{
 		}
 
 		let itemCost: number;
-		if (ItemList.isInventoryItem(item)) {
+		if (InventoryItemList.isInventoryItem(item)) {
 			itemCost = item.itemData.getPrice(multiplier);
-		} else if (ItemList.isItemTemplate(item)) {
+		} else if (InventoryItemList.isItemTemplate(item)) {
 			itemCost = item.getPrice(multiplier);
 			if (item.type === ItemTypes.PLACED.name) { //we check this before the addItem call so that we don't return not enough money
 				response.addErrorMessage(`Cannot add a placeditem to inventory`);

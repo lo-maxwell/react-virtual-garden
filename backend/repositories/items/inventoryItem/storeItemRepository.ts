@@ -2,10 +2,10 @@ import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
 import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { InventoryItem, StoreItemEntity } from "@/models/items/inventoryItems/InventoryItem";
-import { HarvestedItemTemplate } from "@/models/items/templates/models/HarvestedItemTemplate";
-import { placeholderItemTemplates } from "@/models/items/templates/models/PlaceholderItemTemplate";
-import { getItemClassFromSubtype } from "@/models/items/utility/classMaps";
-import { ItemList } from "@/models/itemStore/ItemList";
+import { HarvestedItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
+import { getItemClassFromSubtype } from "@/models/items/utility/itemClassMaps";
+import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
 import { assert } from "console";
 import { PoolClient } from "pg";
 
@@ -22,8 +22,8 @@ class StoreItemRepository {
 		return true;
 	}
 
-	makeStoreItemObjectBatch(storeItemEntities: StoreItemEntity[]): ItemList {
-		const items = new ItemList();
+	makeStoreItemObjectBatch(storeItemEntities: StoreItemEntity[]): InventoryItemList {
+		const items = new InventoryItemList();
 		for (const itemResult of storeItemEntities) {
 			try {
 				const item = this.makeStoreItemObject(itemResult);
@@ -39,7 +39,7 @@ class StoreItemRepository {
 	makeStoreItemObject(storeItemEntity: StoreItemEntity): InventoryItem {
 		assert(this.validateStoreItemEntity(storeItemEntity), 'StoreItemEntity validation failed');
 
-		const itemData = placeholderItemTemplates.getInventoryTemplate(storeItemEntity.identifier);
+		const itemData = itemTemplateFactory.getInventoryTemplateById(storeItemEntity.identifier);
 		if (!itemData) {
 			console.warn(`Could not find storeItem matching id ${storeItemEntity.identifier}`)
 			return new HarvestedItem(storeItemEntity.id, HarvestedItemTemplate.getErrorTemplate(), 0);

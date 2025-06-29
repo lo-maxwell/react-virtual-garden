@@ -1,16 +1,19 @@
-import { BlueprintTemplate } from "./BlueprintTemplate";
-import { DecorationTemplate } from "./DecorationTemplate";
-import { EmptyItemTemplate } from "./EmptyItemTemplate";
-import { HarvestedItemTemplate } from "./HarvestedItemTemplate";
-import { InventoryItemTemplate } from "./InventoryItemTemplate";
-import { PlacedItemTemplate } from "./PlacedItemTemplate";
-import { PlantTemplate } from "./PlantTemplate";
-import { SeedTemplate } from "./SeedTemplate";
+import { BlueprintTemplate } from "./InventoryItemTemplates/BlueprintTemplate";
+import { PlacedItemTemplate } from "./PlacedItemTemplates/PlacedItemTemplate";
+import { PlantTemplate } from "./PlacedItemTemplates/PlantTemplate";
+import { SeedTemplate } from "./InventoryItemTemplates/SeedTemplate";
 import itemsData from '@/data/final/current/Items.json';
+import { HarvestedItemTemplate } from "./InventoryItemTemplates/HarvestedItemTemplate";
+import { InventoryItemTemplate } from "./InventoryItemTemplates/InventoryItemTemplate";
+import { DecorationTemplate } from "./PlacedItemTemplates/DecorationTemplate";
+import { EmptyItemTemplate } from "./PlacedItemTemplates/EmptyItemTemplate";
+import ToolTemplate from "./ToolTemplates/ToolTemplate";
+import { ShovelTemplate } from "./ToolTemplates/ShovelTemplate";
 
 export class ItemTemplateRepository {
 	PlacedItems: Record<string, PlacedItemTemplate[]> = {};
 	InventoryItems: Record<string, InventoryItemTemplate[]> = {};
+  Tools: Record<string, ToolTemplate[]> = {};
 
 	constructor() {
 		this.loadItems();
@@ -105,6 +108,17 @@ export class ItemTemplateRepository {
         item.level,
         item.transformId
       )
+    );
+    this.Tools['Shovels'] = itemsData.Tools.Shovels.map((tool: any) =>
+      new ShovelTemplate(
+        tool.id,
+        tool.name,
+        tool.type,
+        tool.icon,
+        tool.description,
+        tool.value, 
+        tool.level
+        )
     );
     // Repeat for other categories if needed
   	}

@@ -2,7 +2,7 @@ import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtype, ItemSubtypes, ItemTypes } from "@/models/items/ItemTypes";
 import { PlacedItem } from "@/models/items/placedItems/PlacedItem";
 import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
-import { ItemList } from "@/models/itemStore/ItemList";
+import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
 import { ItemHistoryTransactionResponse } from "./itemHistory/ItemHistoryTransactionResponse";
 import ItemHistory from "./itemHistory/ItemHistory";
 import { CustomResponse } from "@/models/utility/CustomResponse";
@@ -126,7 +126,7 @@ export class ItemHistoryList {
      */
 	getHistory(item: InventoryItem | PlacedItem | ItemTemplate | string): ItemHistoryTransactionResponse {
 		const response = new ItemHistoryTransactionResponse();
-		const itemIdResponse = ItemList.getItemId(item);
+		const itemIdResponse = InventoryItemList.getItemId(item);
 		if (!itemIdResponse.isSuccessful()) return itemIdResponse;
 		const itemId = itemIdResponse.payload;
 
@@ -148,7 +148,7 @@ export class ItemHistoryList {
      */
 	contains(item: InventoryItem | PlacedItem | ItemTemplate | string): BooleanResponse {
 		const response = new BooleanResponse();
-		const itemIdResponse = ItemList.getItemId(item);
+		const itemIdResponse = InventoryItemList.getItemId(item);
 		if (!itemIdResponse.isSuccessful()) return itemIdResponse;
 		const itemId = itemIdResponse.payload;
 		

@@ -34,13 +34,15 @@ const AuthComponent: React.FC = () => {
                     <div className="flex justify-center space-x-4 mb-2"> {/* Added mb-2 for vertical gap */}
                         <button 
                             onClick={() => toggleDisplayLogin(true)} 
-                            className={`w-32 px-4 py-2 rounded border border-gray-400 ${displayLogin ? 'bg-green-500 text-white cursor-default' : 'bg-white'}`} // Tailwind classes for styling
+                            disabled={displayLogin}
+                            className={`w-32 px-4 py-2 rounded border border-gray-400 ${displayLogin ? 'bg-green-500 text-white cursor-default opacity-75' : 'bg-white hover:bg-gray-50'}`} // Tailwind classes for styling
                         >
                             Login
                         </button>
                         <button 
                             onClick={() => toggleDisplayLogin(false)} 
-                            className={`w-32 px-4 py-2 rounded border border-gray-400 ${!displayLogin ? 'bg-blue-500 text-white cursor-default' : 'bg-white'}`} // Tailwind classes for styling
+                            disabled={!displayLogin}
+                            className={`w-32 px-4 py-2 rounded border border-gray-400 ${!displayLogin ? 'bg-blue-500 text-white cursor-default opacity-75' : 'bg-white hover:bg-gray-50'}`} // Tailwind classes for styling
                         >
                             Register
                         </button>

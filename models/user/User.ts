@@ -1,11 +1,7 @@
-import ItemStoreComponent from "@/components/itemStore/itemStore";
-import { triggerAsyncId } from "async_hooks";
-import Toolbox from "../garden/tools/Toolbox";
+
+import Toolbox from "../itemStore/toolbox/tool/Toolbox";
 import { ItemSubtypes } from "../items/ItemTypes";
-import { PlacedItem } from "../items/placedItems/PlacedItem";
-import { DecorationTemplate } from "../items/templates/models/DecorationTemplate";
-import { placeholderItemTemplates } from "../items/templates/models/PlaceholderItemTemplate";
-import { PlantTemplate } from "../items/templates/models/PlantTemplate";
+import { itemTemplateFactory } from "../items/templates/models/ItemTemplateFactory";
 import LevelSystem, { LevelSystemEntity } from "../level/LevelSystem";
 import { BooleanResponse } from "../utility/BooleanResponse";
 import { actionHistoryFactory } from "./history/actionHistory/ActionHistoryFactory";
@@ -31,7 +27,7 @@ class User {
 	private actionHistory: ActionHistoryList;
 	private toolbox: Toolbox;
 
-	constructor(userId: string, username: string, icon: string, level: LevelSystem = User.generateDefaultLevelSystem(), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList(), toolbox: Toolbox = Toolbox.generateDefaultToolbox()) {
+	constructor(userId: string, username: string, icon: string, level: LevelSystem = User.generateDefaultLevelSystem(), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList, toolbox: Toolbox = Toolbox.generateDefaultToolbox()) {
 		this.userId = userId;
 		this.username = username;
 		this.icon = icon;
@@ -241,7 +237,7 @@ class User {
 
 	isIconUnlocked(iconOption: Icon) {
 		if (iconOption.getName() === 'apple') return true;
-		const template = placeholderItemTemplates.getInventoryItemTemplateByName(iconOption.getName());
+		const template = itemTemplateFactory.getInventoryItemTemplateByName(iconOption.getName());
 		if (!template) return false;
 		const itemAvailable = this.getItemHistory().contains(template);
 		if (itemAvailable.payload) {

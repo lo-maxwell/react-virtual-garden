@@ -1,8 +1,8 @@
 import { EmptyItem } from "../items/placedItems/EmptyItem";
 import { PlacedItem } from "../items/placedItems/PlacedItem";
-import { generateNewPlaceholderPlacedItem} from "../items/PlaceholderItems";
-import { PlacedItemTemplate } from "../items/templates/models/PlacedItemTemplate";
-import { placeholderItemTemplates } from "../items/templates/models/PlaceholderItemTemplate";
+import { generatePlacedItem} from "../items/ItemFactory";
+import { PlacedItemTemplate } from "../items/templates/models/PlacedItemTemplates/PlacedItemTemplate";
+import { itemTemplateFactory } from "../items/templates/models/ItemTemplateFactory";
 import User from "../user/User";
 import { GardenTransactionResponse } from "./GardenTransactionResponse";
 import { Plot } from "./Plot";
@@ -29,7 +29,7 @@ export class Garden {
 	static getMaximumCols() {return 20;}
 
 	private static getGroundTemplate(): PlacedItemTemplate {
-		const template = placeholderItemTemplates.getPlacedItemTemplateByName('ground');
+		const template = itemTemplateFactory.getPlacedItemTemplateByName('ground');
 		if (!template) throw new Error(`Error: Ground Template Does Not Exist!`);
 		return template!;
 	}
@@ -144,7 +144,7 @@ export class Garden {
      * @returns new Plot()
      */
 	static generateEmptyPlot(rowIndex: number, colIndex: number): Plot {
-		const ground = generateNewPlaceholderPlacedItem("ground", "");
+		const ground = generatePlacedItem("ground", "");
 		const newPlot = new Plot(uuidv4(), ground, Date.now(), 0);
 		return newPlot;
 	}

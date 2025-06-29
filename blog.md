@@ -381,24 +381,13 @@
 Guest mode: Should have a level/xp/money etc cap, and some warnings that guest mode is local only; allow users to port their guest mode account into an online account (with the cap)
 
 TODO:
-Look into icon unlocks
-Python script to convert csv to json
-Python script to add rows to multiple csvs (add seed, plant, harvested item, shinyItems, or blueprint/decoration)
-Restocking immediately starts the timer, instead of waiting for items to be under stock amount
+Add examples of how to write queries for select/insert/update/delete lambdas
 SQS queue for rate limiting between backend and lambda?
-Fix login screen, allow creation in a different user flow, allow resetting password
 Fix guest mode banners
-Rate limit on aws
-Rate limit on backend api
 
 New password reset landing page
 
 Lambda should have a single interact with database function which takes in the action type (insert, update, select, delete) and then calls all queries, so we can use a single transaction and make it atomic
-
-Itemlist is not updating properly again when buying/selling items
-XP is not updating properly when harvesting plants <--------------
-Check syncing with redux when buying/restocking
-Check restock timer when loading in
 
 Username cannot include special characters, must be alphanumeric or whitespace (esp no *, %, \ to prevent sql problems)
 

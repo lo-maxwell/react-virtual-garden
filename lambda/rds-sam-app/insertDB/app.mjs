@@ -26,6 +26,8 @@ const allowedTables = {
   store_items: ["id", "owner", "identifier", "quantity"],
   stores: ["id", "owner", "identifier", "last_restock_time_ms"],
   users: ["id", "username", "password_hash", "password_salt", "icon"], //Disallow password hash/salt select statements?
+  toolboxes: ["id", "owner"],
+  tools: ["id", "owner", "identifier"],
   // Add more tables and their columns as needed
 };
 
@@ -53,6 +55,7 @@ const constructUpdateQuery = (tableName, values, conditions, numExistingParams) 
         queryParams.push(values[key].value);
         return `${key} = ${tableName}.${key} ${values[key].operator} $${queryParams.length + numExistingParams}`; // Use parameterized query
       } else if (values[key].excluded === true) {
+        // If excluded is true, we overwrite the original value with the excluded value
         return `${key} = EXCLUDED.${key}`;
       } else {
         queryParams.push(values[key]); // Push the value for the column into queryParams
@@ -63,6 +66,7 @@ const constructUpdateQuery = (tableName, values, conditions, numExistingParams) 
   // Construct the initial query string
   let queryString = `${setClause}`; // Initial query string
 
+  // Conditions here are only applied to the conflicting row that is being updated
   // Add conditions if provided
   const conditionStrings = Object.keys(conditions).map((key) => {
       const { operator, value } = conditions[key]; // Extract operator and value from the condition object
@@ -186,6 +190,7 @@ export const handler = async (event) => {
     if (conflictColumns.length > 0) {
       queryString += `ON CONFLICT (${conflictColumns.join(', ')}) `
       if (conflictIndex) {
+        //TODO: This is probably redundant, any conflictIndex will be not null
         //TODO: This can only take in a single conflictIndex
         queryString += `WHERE ${conflictIndex} IS NOT NULL `
       }

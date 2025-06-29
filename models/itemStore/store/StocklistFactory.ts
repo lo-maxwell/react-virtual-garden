@@ -1,7 +1,7 @@
 import { StocklistInterface } from "./StocklistInterface";
 import stocklistData from '@/data/final/current/Stocklists.json';
-import { ItemList } from "../ItemList";
-import { generateNewPlaceholderInventoryItem } from "@/models/items/PlaceholderItems";
+import { InventoryItemList } from "../InventoryItemList";
+import { generateInventoryItem } from "@/models/items/ItemFactory";
 
 class StocklistFactory {
 	stocklists: StocklistInterface[];
@@ -18,9 +18,9 @@ class StocklistFactory {
   	}
 
 	private createStocklist(stocklist: any): StocklistInterface {
-		const itemList = new ItemList();
+		const itemList = new InventoryItemList();
 		stocklist.items.forEach((item: any) => {
-			const foundItem = generateNewPlaceholderInventoryItem(item.name, item.quantity);
+			const foundItem = generateInventoryItem(item.name, item.quantity);
 			if (foundItem.itemData.name !== 'error') {
 				itemList.addItem(foundItem, foundItem.getQuantity());
 			}
