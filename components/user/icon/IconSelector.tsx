@@ -1,7 +1,7 @@
 import { useUser } from '@/app/hooks/contexts/UserContext';
 import { itemTemplateFactory } from '@/models/items/templates/models/ItemTemplateFactory';
 import Icon from '@/models/user/icons/Icon';
-import { iconFactory } from '@/models/user/icons/IconRepository';
+import { iconFactory } from '@/models/user/icons/IconFactory';
 import React, { useState } from 'react';
 import DropdownMenu from '../../lists/DropdownMenu';
 import { PopupWindow } from '../../window/popupWindow';

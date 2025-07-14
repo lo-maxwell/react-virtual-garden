@@ -1,0 +1,22 @@
+{
+    "Icons": {
+        "Error": [
+            {
+                "name": "error",
+				"path": "error.svg"
+            }
+        ],
+        "Plants": [
+            {
+                "name": "default",
+				"path": "error.svg"
+            }
+        ],
+        "Decorations": [
+            {
+                "name": "default",
+				"path": "error.svg"
+            }
+        ]
+    }
+}

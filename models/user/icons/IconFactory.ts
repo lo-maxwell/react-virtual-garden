@@ -1,19 +1,19 @@
 import Icon from "./Icon";
-import iconData from "@/data/final/current/Icons.json";
+import { iconEmojiRepository } from "./IconEmojiRepository";
 
 class IconFactory {
 	Icons: Record<string, Icon[]> = {};
 
-	constructor() {
-		this.loadIcons();
+	constructor(icons: Record<string, Icon[]>) {
+		this.loadIcons(icons);
 	}
 
-	loadIcons() {
+	loadIcons(icons: Record<string, Icon[]>) {
 		// Example to load PlacedItems > Plants
-		this.Icons['Plants'] = iconData.Icons.Plants.map((iconObject: any) =>
+		this.Icons['Plants'] = icons.Plants.map((iconObject: any) =>
 		  {return new Icon(iconObject.name, iconObject.icon);}
 		);
-		this.Icons['Decorations'] = iconData.Icons.Decorations.map((iconObject: any) =>
+		this.Icons['Decorations'] = icons.Decorations.map((iconObject: any) =>
 		  {return new Icon(iconObject.name, iconObject.icon);}
 		);
 		// this.Icons['Error'] = iconData.Icons.Error.map((iconObject: any) =>
@@ -34,7 +34,7 @@ class IconFactory {
 	getIconByName(name: string): string | null {
 		const icons = Object.values(this.Icons).flat().filter(icon => icon.getName() === name);
 		if (icons.length === 1) return icons[0].getIcon();
-		else if (icons.length === 0) return null;
+		else if (icons.length === 0) return "ERROR";
 		else {
 			console.error('Error: found multiple icons with the same name!');
 			console.error(icons);
@@ -44,4 +44,4 @@ class IconFactory {
 	
 }
 
-export const iconFactory = new IconFactory();
+export const iconFactory = new IconFactory(iconEmojiRepository.Icons);

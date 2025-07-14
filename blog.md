@@ -381,6 +381,11 @@
 Guest mode: Should have a level/xp/money etc cap, and some warnings that guest mode is local only; allow users to port their guest mode account into an online account (with the cap)
 
 TODO:
+Landing/loading pages for login/register - inform user not to leave the page
+
+Updated home page
+
+
 Add examples of how to write queries for select/insert/update/delete lambdas
 SQS queue for rate limiting between backend and lambda?
 Fix guest mode banners
