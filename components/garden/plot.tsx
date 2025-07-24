@@ -11,6 +11,8 @@ import { useInventory } from "@/app/hooks/contexts/InventoryContext";
 import { useUser } from "@/app/hooks/contexts/UserContext";
 import { setAllLevelSystemValues, setCurrentExp, setExpToLevelUp, setUserLevel } from "@/store/slices/userLevelSystemSlice";
 import { useDispatch } from "react-redux";
+import IconButton from "../user/icon/IconButton";
+import IconSVGButton from "../user/icon/IconSVGButton";
 
 type PlotComponentProps = {
 	plot: Plot;
@@ -29,7 +31,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 	PlotComponent.displayName = "Plot";
 	const [displayIcon, setDisplayIcon] = useState(plot.getItem().itemData.icon);
 	const [forceRefreshKey, setForceRefreshKey] = useState(0);
-	const { account, guestMode } = useAccount();
+	const { account, guestMode, displayEmojiIcons } = useAccount();
 	const { user, reloadUser } = useUser();
 	const { garden, reloadGarden } = useGarden();
 	const { inventory, reloadInventory } = useInventory();
@@ -131,7 +133,24 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 
 	return (
 		<PlotTooltip plot={plot} currentTime={currentTime} key={forceRefreshKey}>
-			<button onClick={handleClick} className={`flex items-center justify-center text-4xl ${color} w-12 h-12 text-purple-600 font-semibold hover:text-white hover:bg-purple-600 hover:border-transparent`} data-testid="plot">{displayIcon}</button>
+			{displayEmojiIcons ? 
+				<IconButton
+					icon={displayIcon}
+					onClickFunction={handleClick}
+					bgColor={color.split(' ').find(c => c.startsWith('bg-')) || "bg-white"}
+					borderColor={color.split(' ').find(c => c.startsWith('border-')) || "border-gray-300"}
+					textSize="text-4xl"
+					elementSize="12"
+				/> : 
+				<IconSVGButton
+					icon={displayIcon}
+					onClickFunction={handleClick}
+					bgColor={color.split(' ').find(c => c.startsWith('bg-')) || "bg-white"}
+					borderColor={color.split(' ').find(c => c.startsWith('border-')) || "border-gray-300"}
+					textSize="text-4xl"
+					elementSize="12"
+				/> 
+			}
 		</PlotTooltip>
 	);
 });

@@ -16,9 +16,15 @@ class IconEmojiRepository {
 		this.Icons['Decorations'] = iconData.Icons.Decorations.map((iconObject: any) =>
 		  {return new Icon(iconObject.name, iconObject.icon);}
 		);
-		// this.Icons['Error'] = iconData.Icons.Error.map((iconObject: any) =>
-		//   {return new Icon(iconObject.name, iconObject.icon);}
-		// );
+		this.Icons['Error'] = iconData.Icons.Error.map((iconObject: any) =>
+		  {return new Icon(iconObject.name, iconObject.icon);}
+		);
+		this.Icons['Ground'] = iconData.Icons.Ground.map((iconObject: any) =>
+		{return new Icon(iconObject.name, iconObject.icon);}
+	  	);
+		this.Icons['Tools'] = iconData.Icons.Tools.map((iconObject: any) =>
+		{return new Icon(iconObject.name, iconObject.icon);}
+		);
 	  }
 
 	getIconCategories() {

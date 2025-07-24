@@ -6,6 +6,12 @@
 				"icon": "❌"
 			}
 		],
+		"Ground": [
+			{
+				"name": "ground",
+				"icon": "_"
+			}
+		],
 		"Plants": [
 			{
 				"name": "onion",
@@ -56,6 +62,12 @@
 			{
 				"name": "blueprint",
 				"icon": "📜"
+			}
+		],
+		"Tools": [
+			{
+				"name": "shovel",
+				"icon": "🪓"
 			}
 		]
 	}

@@ -1,4 +1,5 @@
 import colors from "@/components/colors/colors";
+import RawIconDisplay from "@/components/user/icon/RawIconDisplay";
 import Tooltip from "@/components/window/tooltip";
 import Shovel from "@/models/items/tools/Shovel";
 import { Tool } from "@/models/items/tools/Tool";
@@ -22,7 +23,7 @@ const ToolTooltip = ({ children, tool }: { children: React.ReactNode, tool: Tool
 		<div className="flex flex-col items-left min-w-0 flex-grow">
 			<div className="flex flex-row justify-between min-w-max">
 				<div className="flex flex-row min-w-0">
-					<span className="w-6 flex-shrink-0">{currentTool.itemData.icon}</span>
+				<RawIconDisplay icon={currentTool.itemData.icon} width={6} height={6}/>
 					{/* Might not display properly if screen size is small or name is too long */}
 					<span>{currentTool.itemData.name}</span>
 				</div>

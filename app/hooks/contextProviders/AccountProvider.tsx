@@ -12,10 +12,11 @@ interface AccountProviderProps {
 export const AccountProvider = ({ children }: AccountProviderProps) => {
     const [account, setAccount] = useState<Account | null>(null);
 	const [guestMode, setGuestMode] = useState<boolean>(false);
+	const [displayEmojiIcons, setDisplayEmojiIcons] = useState<boolean>(true);
 	const [environmentTestKey, setEnvironmentTestKey] = useState<string>('');
 
 	function generateDefaultNewAccount(): Account {
-		return new Account(false);
+		return new Account();
 	}
 	
 	function setupAccount(): Account {
@@ -32,13 +33,22 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 	useEffect(() => {
 		const account = setupAccount();
 		setAccount(account);
-		setGuestMode(account.guestMode);
+		setGuestMode(account.settings.guestMode);
+		setDisplayEmojiIcons(account.settings.displayEmojiIcons);
 	}, []);
 
 	function setGuestModeHandler(value: boolean): void {
 		setGuestMode(value);
 		if (account) {
-			account.guestMode = value;
+			account.settings.guestMode = value;
+			saveAccount(account);
+		}
+	}
+
+	function setDisplayEmojiIconsHandler(value: boolean): void {
+		setDisplayEmojiIcons(value);
+		if (account) {
+			account.settings.displayEmojiIcons = value;
 			saveAccount(account);
 		}
 	}
@@ -76,7 +86,7 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 
 
     return (
-        <AccountContext.Provider value={{ account: account!, guestMode: guestMode, setGuestMode: setGuestModeHandler, environmentTestKey}}>
+        <AccountContext.Provider value={{ account: account!, guestMode: guestMode, setGuestMode: setGuestModeHandler, displayEmojiIcons: displayEmojiIcons, setDisplayEmojiIcons: setDisplayEmojiIconsHandler, environmentTestKey}}>
             {children}
         </AccountContext.Provider>
     );

@@ -16,29 +16,39 @@ class IconFactory {
 		this.Icons['Decorations'] = icons.Decorations.map((iconObject: any) =>
 		  {return new Icon(iconObject.name, iconObject.icon);}
 		);
-		// this.Icons['Error'] = iconData.Icons.Error.map((iconObject: any) =>
-		//   {return new Icon(iconObject.name, iconObject.icon);}
-		// );
+		this.Icons['Ground'] = icons.Ground.map((iconObject: any) =>
+		  {return new Icon(iconObject.name, iconObject.icon);}
+		);
+		this.Icons['Error'] = icons.Error.map((iconObject: any) =>
+		  {return new Icon(iconObject.name, iconObject.icon);}
+		);
+		this.Icons['Tools'] = icons.Tools.map((iconObject: any) =>
+		  {return new Icon(iconObject.name, iconObject.icon);}
+		);
 	  }
 
 	getIconCategories() {
 		return Object.keys(this.Icons);
+	}
+
+	getDefaultErrorIcon() {
+		return new Icon("error", "❌");
 	}
 	
 
 	/**
 	 * 
 	 * @name the icon name
-	 * @returns the found icon image (as a string) or null
+	 * @returns the found icon image (as a string)
 	 */
-	getIconByName(name: string): string | null {
+	getIconByName(name: string): string {
 		const icons = Object.values(this.Icons).flat().filter(icon => icon.getName() === name);
 		if (icons.length === 1) return icons[0].getIcon();
-		else if (icons.length === 0) return "ERROR";
+		else if (icons.length === 0) return this.getDefaultErrorIcon().getIcon();
 		else {
 			console.error('Error: found multiple icons with the same name!');
 			console.error(icons);
-			return null;
+			return this.getDefaultErrorIcon().getIcon();
 		}
 	}
 	

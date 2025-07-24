@@ -1,5 +1,6 @@
 name,icon,type
 error,❌,Error
+ground,_,Ground
 onion,🧅,Plants
 garlic,🧄,Plants
 apple,🍎,Plants
@@ -13,3 +14,8 @@ bench,🪑,Decorations
 flamingo,🦩,Decorations
 construction sign,🚧,Decorations
 blueprint,📜,Decorations
+pumpkin,🎃,Plants
+pineapple,🍍,Plants
+potted plant,🪴,Decorations
+goose,🪿,Decorations
+shovel,🪓,Tools

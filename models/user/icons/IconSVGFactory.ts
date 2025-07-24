@@ -1,7 +1,7 @@
 import Icon from "./Icon";
 import { iconSVGRepository } from "./IconSVGRepository";
 
-export class IconSVGFactory {
+class IconSVGFactory {
 	Icons: Record<string, Icon[]> = {};
 
 	constructor(icons: Record<string, Icon[]>) {
@@ -22,23 +22,23 @@ export class IconSVGFactory {
 		return Object.keys(this.Icons);
 	}
 	
-	static getDefaultErrorIcon(): Icon {
+	getDefaultErrorIcon(): Icon {
 		return new Icon("error", "/assets/icons/error/error.svg");
 	}
 
 	/**
 	 * 
 	 * @name the icon name
-	 * @returns the found icon image (as a string) or null
+	 * @returns the found icon image (as a string)
 	 */
-	getIconByName(name: string): string | null {
+	getIconByName(name: string): string {
 		const icons = Object.values(this.Icons).flat().filter(icon => icon.getName() === name);
 		if (icons.length === 1) return icons[0].getIcon();
-		else if (icons.length === 0) return IconSVGFactory.getDefaultErrorIcon().getIcon();
+		else if (icons.length === 0) return this.getDefaultErrorIcon().getIcon();
 		else {
 			console.error('Error: found multiple icons with the same name!');
 			console.error(icons);
-			return IconSVGFactory.getDefaultErrorIcon().getIcon();
+			return this.getDefaultErrorIcon().getIcon();
 		}
 	}
 	

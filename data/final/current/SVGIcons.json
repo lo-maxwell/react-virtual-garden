@@ -6,6 +6,12 @@
 				"path": "error.svg"
             }
         ],
+        "Ground": [
+            {
+                "name": "default",
+				"path": "error.svg"
+            }
+        ],
         "Plants": [
             {
                 "name": "default",
@@ -13,6 +19,12 @@
             }
         ],
         "Decorations": [
+            {
+                "name": "default",
+				"path": "error.svg"
+            }
+        ],
+        "Tools": [
             {
                 "name": "default",
 				"path": "error.svg"
