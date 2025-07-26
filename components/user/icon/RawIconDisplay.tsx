@@ -1,12 +1,12 @@
 import { useAccount } from "@/app/hooks/contexts/AccountContext";
-import { iconFactory } from "@/models/user/icons/IconFactory";
+import { iconEmojiFactory } from "@/models/user/icons/IconEmojiFactory";
 import { iconSVGFactory } from "@/models/user/icons/IconSVGFactory";
 
 const RawIconDisplay = ({icon, width, height, additionalSettings = ''}: {icon: string, width: string | number, height: string | number, additionalSettings?: string}) => {
     const {displayEmojiIcons} = useAccount();
 	if (displayEmojiIcons) {
         return <>
-            <span className={`w-${width} ${additionalSettings}`}>{iconFactory.getIconByName(icon)}</span>
+            <span className={`w-${width} ${additionalSettings}`}>{iconEmojiFactory.getIconByName(icon)}</span>
         </>;
     } else {
         return <>

@@ -1,6 +1,6 @@
 import { useAccount } from "@/app/hooks/contexts/AccountContext";
 import { useUser } from "@/app/hooks/contexts/UserContext";
-import { iconFactory } from "@/models/user/icons/IconFactory";
+import { iconEmojiFactory } from "@/models/user/icons/IconEmojiFactory";
 import IconEmojiDisplay from "./IconEmojiDisplay";
 import IconSVGDisplay from "./IconSVGDisplay";
 

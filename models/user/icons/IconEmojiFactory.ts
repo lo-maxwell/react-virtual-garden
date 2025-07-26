@@ -1,7 +1,7 @@
 import Icon from "./Icon";
 import { iconEmojiRepository } from "./IconEmojiRepository";
 
-class IconFactory {
+class IconEmojiFactory {
 	Icons: Record<string, Icon[]> = {};
 
 	constructor(icons: Record<string, Icon[]>) {
@@ -54,4 +54,4 @@ class IconFactory {
 	
 }
 
-export const iconFactory = new IconFactory(iconEmojiRepository.Icons);
+export const iconEmojiFactory = new IconEmojiFactory(iconEmojiRepository.Icons);

@@ -39,29 +39,53 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 
 	const getColor = () => {
 		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name) {
-			return `border ${colors.ground.plotBackgroundColor} ${colors.ground.defaultBorderColor}`;
+			return {
+				bgColor: colors.ground.plotBackgroundColor,
+				borderColor: `border-2 ${colors.ground.defaultBorderColor}`
+			};
 		} else if (plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
 			const plant = plot.getItem() as Plant;
 			const timeElapsed = Date.now() - plot.getPlantTime();
 			const growTime = plot.getTotalGrowTime();
 			// const growTime = plant.itemData.growTime;
 			if (growTime * 1000 <= timeElapsed) {
-				return `bg-apple-500 border ${colors.plant.grownBorderColor}`;
+				return {
+					bgColor: 'bg-apple-500',
+					borderColor: `border-2 ${colors.plant.grownBorderColor}`
+				};
 			} else if (growTime * 3/4 * 1000 <= timeElapsed) {
-				return `bg-apple-400 border ${colors.plant.defaultBorderColor}`;
+				return {
+					bgColor: 'bg-apple-400',
+					borderColor: `border-2 ${colors.plant.defaultBorderColor}`
+				};
 			} else if (growTime/2 * 1000 <= timeElapsed) {
-				return `bg-apple-300 border ${colors.plant.defaultBorderColor}`;
+				return {
+					bgColor: 'bg-apple-300',
+					borderColor: `border-2 ${colors.plant.defaultBorderColor}`
+				};
 			} else if (growTime * 1/4 * 1000 <= timeElapsed) {
-				return `bg-apple-200 border ${colors.plant.defaultBorderColor}`;
+				return {
+					bgColor: 'bg-apple-200',
+					borderColor: `border-2 ${colors.plant.defaultBorderColor}`
+				};
 			} else {
-				return `bg-apple-100 border ${colors.plant.defaultBorderColor}`;
+				return {
+					bgColor: 'bg-apple-100',
+					borderColor: `border-2 ${colors.plant.defaultBorderColor}`
+				};
 			}
 
 		} else if (plot.getItemSubtype() === ItemSubtypes.DECORATION.name) {
-			return `border ${colors.decoration.plotBackgroundColor} ${colors.decoration.defaultBorderColor}`;
+			return {
+				bgColor: colors.decoration.plotBackgroundColor,
+				borderColor: `border-2 ${colors.decoration.defaultBorderColor}`
+			};
 		} else {
 			//should never occur
-			return `bg-gray-300 border ${colors.plant.defaultBorderColor}`;
+			return {
+				bgColor: 'bg-gray-300',
+				borderColor: `border-2 ${colors.plant.defaultBorderColor}`
+			};
 		}
 	}
 
@@ -80,25 +104,21 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 		}
 	}));
 
-	const currentItem = plot.getItem();
-	const currentPlantTime = plot.getPlantTime();
-
+	// Update color when plot data changes
 	useEffect(() => {
-		let interval: NodeJS.Timeout | null = null;
 		setColor(getColor());
-  
+	}, [plot.getItem().itemData.icon, plot.getPlantTime(), plot.getItemSubtype()]);
+
+	// Set up interval for plant growth visualization
+	useEffect(() => {
 		if (plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
-		  interval = setInterval(() => {
-			setColor(getColor());
-		  }, 1000);
+			const interval = setInterval(() => {
+				setColor(getColor());
+			}, 1000);
+
+			return () => clearInterval(interval);
 		}
-  
-		return () => {
-		  if (interval) {
-			clearInterval(interval);
-		  }
-		};
-	  }, [currentItem, currentPlantTime, plot]);
+	}, [plot.getItemSubtype()]);
 
 	const handleClick = async () => {
 		//onPlotClick comes from plotActions which may/may not be async
@@ -133,24 +153,13 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 
 	return (
 		<PlotTooltip plot={plot} currentTime={currentTime} key={forceRefreshKey}>
-			{displayEmojiIcons ? 
-				<IconButton
-					icon={displayIcon}
-					onClickFunction={handleClick}
-					bgColor={color.split(' ').find(c => c.startsWith('bg-')) || "bg-white"}
-					borderColor={color.split(' ').find(c => c.startsWith('border-')) || "border-gray-300"}
-					textSize="text-4xl"
-					elementSize="12"
-				/> : 
-				<IconSVGButton
-					icon={displayIcon}
-					onClickFunction={handleClick}
-					bgColor={color.split(' ').find(c => c.startsWith('bg-')) || "bg-white"}
-					borderColor={color.split(' ').find(c => c.startsWith('border-')) || "border-gray-300"}
-					textSize="text-4xl"
-					elementSize="12"
-				/> 
-			}
+			<IconButton
+			icon={displayIcon}
+			onClickFunction={handleClick}
+			bgColor={color.bgColor}
+			borderColor={color.borderColor}
+			textSize="text-5xl"
+			elementSize="16"/>
 		</PlotTooltip>
 	);
 });

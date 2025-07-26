@@ -235,15 +235,25 @@ class User {
 	// 	return response;
 	// }
 
-	isIconUnlocked(iconOption: Icon) {
-		if (iconOption.getName() === 'apple') return true;
-		const template = itemTemplateFactory.getInventoryItemTemplateByName(iconOption.getName());
-		if (!template) return false;
-		const itemAvailable = this.getItemHistory().contains(template);
-		if (itemAvailable.payload) {
+
+
+	isIconUnlocked(iconOption: Icon, isEmoji: boolean) {
+		if (isEmoji) {
+			if (iconOption.getName() === 'apple') return true;
+			if (iconOption.getName() === 'error') return false;
+			const template = itemTemplateFactory.getInventoryItemTemplateByName(iconOption.getName());
+			if (!template) return false;
+			const itemAvailable = this.getItemHistory().contains(template);
+			if (itemAvailable.payload) {
+				return true;
+			}
+			return false;
+		} else {
+			if (iconOption.getName() === 'default') return true;
+			if (iconOption.getName() === 'error') return false;
 			return true;
 		}
-		return false;
+		
 	}
 }
 export default User;

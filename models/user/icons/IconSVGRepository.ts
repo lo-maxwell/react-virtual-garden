@@ -17,13 +17,16 @@ class IconSVGRepository {
 		  {return new Icon(iconObject.name, iconObject.path);}
 		);
 		this.Icons['Error'] = iconData.Icons.Error.map((iconObject: any) =>
-		  {return new Icon(iconObject.name, iconObject.icon);}
+		  {return new Icon(iconObject.name, iconObject.path);}
 		);
 		this.Icons['Ground'] = iconData.Icons.Ground.map((iconObject: any) =>
-		{return new Icon(iconObject.name, iconObject.icon);}
+		{return new Icon(iconObject.name, iconObject.path);}
 	  	);
 		this.Icons['Tools'] = iconData.Icons.Tools.map((iconObject: any) =>
-		{return new Icon(iconObject.name, iconObject.icon);}
+		{return new Icon(iconObject.name, iconObject.path);}
+		);
+		this.Icons['User'] = iconData.Icons.User.map((iconObject: any) =>
+		{return new Icon(iconObject.name, iconObject.path);}
 		);
 	  }
 

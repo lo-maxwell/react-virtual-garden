@@ -27,7 +27,7 @@ const ToolButton = ({tool, onClickFunction, focus}: {tool: Tool, onClickFunction
 	return (
 		<>
 		<ToolTooltip tool={tool}>
-			<IconButton icon={tool.itemData.icon} onClickFunction={handleClick} bgColor={colors.tool.backgroundColor} borderColor={getBorderColor()} textSize={"text-4xl"} elementSize={"20"}/>
+			<IconButton icon={tool.itemData.icon} onClickFunction={handleClick} bgColor={colors.tool.backgroundColor} borderColor={getBorderColor()} textSize={"text-4xl"} elementSize={"12"}/>
 		</ToolTooltip>
 		</>
 	);

@@ -16,7 +16,15 @@
             {
                 "name": "default",
 				"path": "error.svg"
-            }
+            },
+			{
+				"name": "mango",
+				"path": "gooseMango.svg"
+			},
+			{
+				"name": "carrot",
+				"path": "gooseCarrot.svg"
+			}
         ],
         "Decorations": [
             {
@@ -29,6 +37,16 @@
                 "name": "default",
 				"path": "error.svg"
             }
-        ]
+        ],
+		"User": [
+			{
+                "name": "default",
+				"path": "goosePortrait.svg"
+            },
+            {
+                "name": "farmer",
+				"path": "farmerGoose.svg"
+            }
+		]
     }
 }

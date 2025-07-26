@@ -6,7 +6,7 @@ const IconSVGDisplay = ({icon, bgColor, borderColor, textSize, elementSize}: {ic
 	
 	return (
 		<span
-		className={`inline-flex border border-2 border-${borderColor} text-center bg-${bgColor} font-semibold rounded-lg aspect-square ${textSize} w-${elementSize} h-${elementSize} px-1 py-1 flex items-center justify-center`}>
+		className={`inline-flex ${borderColor} text-center ${bgColor} font-semibold rounded-lg aspect-square ${textSize} w-${elementSize} h-${elementSize} px-1 py-1 flex items-center justify-center`}>
 		<span className="inset-0 flex items-center justify-center">
 			<RawIconDisplay icon={icon} width={"full"} height={"full"} />
 		</span>

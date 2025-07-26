@@ -12,7 +12,7 @@ class IconSVGFactory {
 		Object.keys(icons).forEach((type) => {
 			this.Icons[type] = icons[type].map((iconObject: any) => {
 				// Construct the SVG path dynamically
-				const iconPath = `/assets/icons/${type.toLowerCase()}/${iconObject.name}.svg`;
+				const iconPath = `/assets/icons/${type.toLowerCase()}/${iconObject.icon}`;
 				return new Icon(iconObject.name, iconPath);
 			});
 		});
@@ -23,7 +23,7 @@ class IconSVGFactory {
 	}
 	
 	getDefaultErrorIcon(): Icon {
-		return new Icon("error", "/assets/icons/error/error.svg");
+		return new Icon("default", "/assets/icons/user/goosePortrait.svg");
 	}
 
 	/**
@@ -36,8 +36,6 @@ class IconSVGFactory {
 		if (icons.length === 1) return icons[0].getIcon();
 		else if (icons.length === 0) return this.getDefaultErrorIcon().getIcon();
 		else {
-			console.error('Error: found multiple icons with the same name!');
-			console.error(icons);
 			return this.getDefaultErrorIcon().getIcon();
 		}
 	}

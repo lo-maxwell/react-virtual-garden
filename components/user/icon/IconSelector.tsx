@@ -1,20 +1,26 @@
+import { useAccount } from '@/app/hooks/contexts/AccountContext';
 import { useUser } from '@/app/hooks/contexts/UserContext';
 import { itemTemplateFactory } from '@/models/items/templates/models/ItemTemplateFactory';
 import Icon from '@/models/user/icons/Icon';
-import { iconFactory } from '@/models/user/icons/IconFactory';
+import { iconEmojiFactory } from '@/models/user/icons/IconEmojiFactory';
+import { iconSVGFactory } from '@/models/user/icons/IconSVGFactory';
 import React, { useState } from 'react';
 import DropdownMenu from '../../lists/DropdownMenu';
 import { PopupWindow } from '../../window/popupWindow';
 import IconButton from './IconButton';
 
-const availableIcons = iconFactory.Icons; // Example list of icons
-
 const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconChange: Function}) => {
     const [showAllIcons, setShowAllIcons] = useState(false);
     const [categoryFilter, setCategoryFilter] = useState<string | null>('');
     const { user } = useUser();
+    const { displayEmojiIcons } = useAccount();
     const showAllIconsWindow = () => {
         setShowAllIcons(true);
+    }
+
+    function getIconFactory() {
+        if (displayEmojiIcons) return iconEmojiFactory;
+        else return iconSVGFactory;
     }
 
     const onIconClick = (iconOption: Icon) => {
@@ -25,7 +31,7 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
     }
 
     const RenderCategoryFilter = () => {
-		const categories = iconFactory.getIconCategories();
+		const categories = getIconFactory().getIconCategories();
 		const selectCategoryFilter = (value: string | null) => {
 			setCategoryFilter(value);
 		}
@@ -44,18 +50,19 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
 
     const RenderIconChoices = () => {
         const iconSet: Icon[] = [];
-
+        let factory = getIconFactory();
+        let availableIcons = factory.Icons;
         if (!categoryFilter || categoryFilter === '') {
-            iconFactory.getIconCategories().map((categoryName) => {
+            factory.getIconCategories().map((categoryName) => {
                 availableIcons[categoryName].map((iconOption) => {
-                    if(user.isIconUnlocked(iconOption)) {
+                    if(user.isIconUnlocked(iconOption, displayEmojiIcons)) {
                         iconSet.push(iconOption);
                     }
                 })
             });
         } else {
             availableIcons[categoryFilter].map((iconOption) => {
-                if(user.isIconUnlocked(iconOption)) {
+                if(user.isIconUnlocked(iconOption, displayEmojiIcons)) {
                     iconSet.push(iconOption);
                 }
             });
@@ -77,7 +84,7 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
             {chunkedIcons.map((iconGroup, index) => (
             <div key={index} className="flex flex-row mx-4 my-4"> {/* Flexbox for horizontal alignment */}
               {iconGroup.map((iconOption) => (
-                <IconButton key={iconOption.getName()} icon={iconOption.getName()} onClickFunction={() => onIconClick(iconOption)} bgColor={`gray-300`} borderColor={`coffee-700`} textSize={"text-8xl"} elementSize={"100"}/>
+                <IconButton key={iconOption.getName() + iconOption.getIcon()} icon={iconOption.getName()} onClickFunction={() => onIconClick(iconOption)} bgColor={`gray-300`} borderColor={`coffee-700`} textSize={"text-8xl"} elementSize={"100"}/>
               ))}
             </div>
           ))}
