@@ -54,7 +54,7 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 				{/* Top row: icon, name, value */}
 				<div className="flex flex-row justify-between min-w-max">
 					<div className="flex flex-row min-w-0">
-						<RawIconDisplay icon={icon} width={6} height={6}/>
+						<RawIconDisplay icon={icon} width={6} height={6} additionalSettings={"mr-1"}/>
 						<span>{name}</span>
 					</div>
 					<span className="ml-2 flex ">
@@ -86,7 +86,7 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 						<div>When planted: </div>
 						<div className="flex flex-row justify-between">
 							<div className="flex flex-row">
-								<RawIconDisplay icon={plantTemplate.icon} width={6} height={6}/>
+								<RawIconDisplay icon={plantTemplate.icon} width={6} height={6} additionalSettings={"mr-1"}/>
 								<span>{plantTemplate.name}</span>
 							</div>
 							<span className="ml-2 flex ">
@@ -105,7 +105,7 @@ const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, i
 					<>
 						<div>When placed: </div>
 						<div className="flex flex-row">
-							<RawIconDisplay icon={decoration.icon} width={6} height={6}/>
+							<RawIconDisplay icon={decoration.icon} width={6} height={6} additionalSettings={"mr-1"}/>
 							<span>{decoration.name}</span>
 						</div>
 					</>

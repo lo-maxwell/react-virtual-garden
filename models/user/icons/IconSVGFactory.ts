@@ -23,7 +23,12 @@ class IconSVGFactory {
 	}
 	
 	getDefaultErrorIcon(): Icon {
-		return new Icon("default", "/assets/icons/user/goosePortrait.svg");
+		return new Icon("default", "/assets/icons/error/error.svg");
+	}
+
+	iconExists(name: string): boolean {
+		if (name === 'error') return false;
+		return Object.values(this.Icons).flat().filter(icon => icon.getName() === name).length === 1;
 	}
 
 	/**
