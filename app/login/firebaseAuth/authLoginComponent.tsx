@@ -15,11 +15,11 @@ import { useGarden } from '@/app/hooks/contexts/GardenContext';
 import { useInventory } from '@/app/hooks/contexts/InventoryContext';
 import { useUser } from '@/app/hooks/contexts/UserContext';
 import { useStore } from '@/app/hooks/contexts/StoreContext';
+import { FirebaseError } from 'firebase/app';
 
-const AuthLoginComponent: React.FC = () => {
+const AuthLoginComponent = ({message, setMessage}: {message: string, setMessage: React.Dispatch<React.SetStateAction<string>>}) => {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [message, setMessage] = useState<string>('');
     const { reloadUser, resetUser } = useUser();
     const { reloadInventory, resetInventory } = useInventory();
     const { reloadStore, resetStore } = useStore();
@@ -53,10 +53,16 @@ const AuthLoginComponent: React.FC = () => {
         try {
             const userCredential = await loginUser(email, password);
             setMessage(`User logged in: ${userCredential.user.email}`);
-            syncAccountObjects();
+            await syncAccountObjects();
             setGuestMode(false);
         } catch (error) {
-            setMessage("Login failed. Please check your credentials.");
+            if (error instanceof FirebaseError) {
+                setMessage("Login failed. Please check your credentials.");
+            } else if (error instanceof Error && error.message.includes("Failed to fetch /api/auth/getAccountObjects")) {
+                setMessage("Unable to connect to database. Please try again later.");
+            } else {
+                setMessage("There was an unknown error. Try again later.");
+            }
         }
     };
 
@@ -69,10 +75,16 @@ const AuthLoginComponent: React.FC = () => {
         try {
             const userCredential = await loginWithGoogle();
             setMessage(`User logged in with Google: ${userCredential.user.email}`);
-            syncAccountObjects();
+            await syncAccountObjects();
             setGuestMode(false);
         } catch (error) {
-            setMessage("Google login failed. Please try again.");
+            if (error instanceof FirebaseError) {
+                setMessage("Login failed. Please check your credentials.");
+            } else if (error instanceof Error && error.message.includes("Failed to fetch /api/auth/getAccountObjects")) {
+                setMessage("Unable to connect to database. Please try again later.");
+            } else {
+                setMessage("There was an unknown error. Try again later.");
+            }
         }
     };
 
