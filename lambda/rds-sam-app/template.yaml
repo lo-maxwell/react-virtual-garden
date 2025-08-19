@@ -51,6 +51,13 @@ Resources:
       Role: !Ref LambdaExecutionRoleArn
       FunctionName: garden-delete
 
+  GetRandomNumber:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: getRandomNumber/app.handler
+      Role: !Ref LambdaExecutionRoleArn
+      FunctionName: random-number
+
 Parameters:
   DBEndpoint:
     Type: String

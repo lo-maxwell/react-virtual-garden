@@ -33,35 +33,35 @@ const LoginPage: React.FC = () => {
     const syncAccountObjects = async () => {
 		    setSyncing(true);
         try {
-        const result = await fetchAccountObjects();
-        console.log('result:');
-        console.log(result);
-        if (!result) {
-          console.error(`Could not find result of fetchAccountObjects!`);
-          setMessage(`Could not fetch account data! Please refresh the page!`);
-          setMessageColor("red-400");
-			    return;
-        }
+          const result = await fetchAccountObjects();
+          console.log('result:');
+          console.log(result);
+          if (!result) {
+            console.error(`Could not find result of fetchAccountObjects!`);
+            setMessage(`Could not fetch account data! Please refresh the page!`);
+            setMessageColor("red-400");
+            return;
+          }
 
-        saveUser(User.fromPlainObject(result.plainUserObject));
-        saveGarden(Garden.fromPlainObject(result.plainGardenObject));
-        saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
-        saveStore(Store.fromPlainObject(result.plainStoreObject));
-        
-        const updatedInventory = Inventory.fromPlainObject(result.plainInventoryObject);
-        updatedInventory.getAllItems().forEach(item => {
-            dispatch(setItemQuantity({ 
-                inventoryItemId: item.getInventoryItemId(), 
-                quantity: item.getQuantity()
-            }));
-        });
+          saveUser(User.fromPlainObject(result.plainUserObject));
+          saveGarden(Garden.fromPlainObject(result.plainGardenObject));
+          saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
+          saveStore(Store.fromPlainObject(result.plainStoreObject));
+          
+          const updatedInventory = Inventory.fromPlainObject(result.plainInventoryObject);
+          updatedInventory.getAllItems().forEach(item => {
+              dispatch(setItemQuantity({ 
+                  inventoryItemId: item.getInventoryItemId(), 
+                  quantity: item.getQuantity()
+              }));
+          });
 
-        reloadUser();
-        reloadGarden();
-        reloadInventory();
-        reloadStore();
-        setMessage(`Successfully loaded account data.`);
-        setMessageColor("text-green-600");
+          reloadUser();
+          reloadGarden();
+          reloadInventory();
+          reloadStore();
+          setMessage(`Successfully loaded account data.`);
+          setMessageColor("text-green-600");
         } catch {
           console.error(`Could not find result of fetchAccountObjects!`);
           setMessage(`Could not fetch account data! Please refresh the page!`);

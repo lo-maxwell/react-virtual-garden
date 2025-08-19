@@ -1,0 +1,19 @@
+{
+	"queries": [
+		{
+			"inputMin": 0,
+			"inputMax": 1,
+			"inputQuantity": 10
+		},
+		{
+			"inputMin": 0,
+			"inputMax": 10,
+			"inputQuantity": 5
+		},
+		{
+			"inputMin": 0,
+			"inputMax": 100,
+			"inputQuantity": 100
+		}
+	]
+}

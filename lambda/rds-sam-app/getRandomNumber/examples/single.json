@@ -1,0 +1,9 @@
+{
+	"queries": [
+		{
+			"inputMin": 0,
+			"inputMax": 10,
+			"inputQuantity": 10
+		}
+	]
+}

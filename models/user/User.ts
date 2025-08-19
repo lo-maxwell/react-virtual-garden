@@ -11,6 +11,8 @@ import Icon from "./icons/Icon";
 import { v4 as uuidv4 } from 'uuid';
 import ItemHistory from "./history/itemHistory/ItemHistory";
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
+import { UserEvent } from "./userEvents/UserEvent";
+import { hydrateMap, mapToPlainObject } from "../utility/PlainObjectHelpers";
 
 export interface UserEntity {
 	id: string;
@@ -26,8 +28,9 @@ class User {
 	private itemHistory: ItemHistoryList;
 	private actionHistory: ActionHistoryList;
 	private toolbox: Toolbox;
+	private userEvents: Map<string, UserEvent>; //key = event_type, value = event; only 1 event stored per event type per user
 
-	constructor(userId: string, username: string, icon: string, level: LevelSystem = User.generateDefaultLevelSystem(), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList, toolbox: Toolbox = Toolbox.generateDefaultToolbox()) {
+	constructor(userId: string, username: string, icon: string, level: LevelSystem = User.generateDefaultLevelSystem(), itemHistory: ItemHistoryList = new ItemHistoryList, actionHistory: ActionHistoryList = new ActionHistoryList, toolbox: Toolbox = Toolbox.generateDefaultToolbox(), userEvents: Map<string, UserEvent> = new Map<string, UserEvent>()) {
 		this.userId = userId;
 		this.username = username;
 		this.icon = icon;
@@ -35,6 +38,7 @@ class User {
 		this.itemHistory = itemHistory;
 		this.actionHistory = actionHistory;
 		this.toolbox = toolbox;
+		this.userEvents = userEvents;
 	}
 
 	static fromPlainObject(plainObject: any) {
@@ -43,7 +47,7 @@ class User {
             if (!plainObject || typeof plainObject !== 'object') {
                 throw new Error('Invalid plainObject structure for User');
             }
-			const { userId, username, icon, level, itemHistory, actionHistory, toolbox } = plainObject;
+			const { userId, username, icon, level, itemHistory, actionHistory, toolbox, userEvents } = plainObject;
 			// Perform additional type checks if necessary
 			if (typeof userId !== 'string') {
 				throw new Error('Invalid userId property in plainObject for User');
@@ -58,8 +62,23 @@ class User {
 			const hydratedItemHistory = ItemHistoryList.fromPlainObject(itemHistory);
 			const hydratedActionHistory = ActionHistoryList.fromPlainObject(actionHistory);
 			const hydratedToolbox = Toolbox.fromPlainObject(toolbox);
-			return new User(userId, username, icon, hydratedLevel, hydratedItemHistory, hydratedActionHistory, hydratedToolbox);
-			
+			const hydratedUserEvents = hydrateMap(userEvents, UserEvent.fromPlainObject);
+			if (userEvents && typeof userEvents === 'object') {
+				for (const [key, value] of Object.entries(userEvents)) {
+					hydratedUserEvents.set(key, UserEvent.fromPlainObject(value));
+				}
+			}
+
+			return new User(
+				userId,
+				username,
+				icon,
+				hydratedLevel,
+				hydratedItemHistory,
+				hydratedActionHistory,
+				hydratedToolbox,
+				hydratedUserEvents
+			);
 		} catch (err) {
 			console.error(plainObject);
 			console.error('Error creating User from plainObject:', err);
@@ -76,6 +95,7 @@ class User {
 			itemHistory: this.itemHistory.toPlainObject(),
 			actionHistory: this.actionHistory.toPlainObject(),
 			toolbox: this.toolbox.toPlainObject(),
+			userEvents: mapToPlainObject(this.userEvents, v => v.toPlainObject()),
 		};
 	}
 
@@ -125,11 +145,11 @@ class User {
 		this.icon = newIcon;
 	}
 
-	getItemHistory() {
+	getItemHistory(): ItemHistoryList {
 		return this.itemHistory;
 	}
 
-	getActionHistory() {
+	getActionHistory(): ActionHistoryList {
 		return this.actionHistory;
 	}
 
@@ -174,6 +194,29 @@ class User {
 
 	getToolbox(): Toolbox {
 		return this.toolbox;
+	}
+
+	/**
+	 * Adds an event to this user's event map, overwriting any existing event of the same type.
+	 * @event the new Event to add
+	 */
+	addEvent(event: UserEvent) {
+		this.userEvents.set(event.getEventType(), event);
+	}
+
+	/**
+	 * Fetch the event associated with the event type in this user's event map
+	 * @eventType the string event_type, ie. DAILY
+	 */
+	getEvent(eventType: string): UserEvent | undefined {
+		return this.userEvents.get(eventType);
+	}
+
+	/**
+	 * Fetch all events from this user's event map
+	 */
+	getAllEvents(): UserEvent[] {
+		return Array.from(this.userEvents.values());
 	}
 
 	/**

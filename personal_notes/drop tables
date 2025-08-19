@@ -1,4 +1,6 @@
-
+DELETE FROM user_events;
+DELETE FROM tools;
+DELETE FROM toolboxes;
 DELETE FROM placed_items;
 DELETE FROM action_histories;
 DELETE FROM item_histories;
@@ -12,6 +14,9 @@ DELETE FROM plots;
 DELETE FROM gardens;
 DELETE FROM users;
 
+DROP TABLE IF EXISTS user_events CASCADE;
+DROP TABLE IF EXISTS tools CASCADE;
+DROP TABLE IF EXISTS toolboxes CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS icons CASCADE;
 DROP TABLE IF EXISTS inventories CASCADE;
