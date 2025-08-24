@@ -70,7 +70,7 @@ const GardenPage = () => {
   }
 
   return (<>
-    <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
+    <div className="w-full px-4 py-4 bg-reno-sand-200 text-black relative">
       <div className="flex">
         <div className="w-1/4">
           {RenderUser()}

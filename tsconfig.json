@@ -37,7 +37,8 @@
     ".next/types/**/*.ts",
     "uiTests/cypress/support/e2e.js",
     "backend/firebase/scripts/toJson.js",
-    "src/**/*"
+    "src/**/*",
+    "backend/firebase/scripts/firstAdmin.js"  
   ],
   "exclude": [
     "node_modules"

@@ -1,28 +1,35 @@
+import { AccountSettings } from "./AccountSettings";
+
 export class Account {
 
-	guestMode: boolean;
+	settings: AccountSettings
 
-	constructor(guestMode: boolean) {
-		this.guestMode = guestMode;
+	constructor(settings: AccountSettings = AccountSettings.getDefaultSettings()) {
+		this.settings = settings;
 	}
 
 	static fromPlainObject(plainObject: any) {
-		// Validate plainObject structure
-		if (!plainObject || typeof plainObject !== 'object') {
-			throw new Error('Invalid plainObject structure for Account');
+		try {
+			// Validate plainObject structure
+			if (!plainObject || typeof plainObject !== 'object') {
+				throw new Error('Invalid plainObject structure for Account');
+			}
+			const { settings } = plainObject;
+			// Perform additional type checks if necessary
+			if (!settings || typeof settings !== 'object') {
+				throw new Error('Invalid settings property in plainObject for Account');
+			}
+			const settingsInstance = AccountSettings.fromPlainObject(settings);
+			return new Account(settingsInstance);
+		} catch (error) {
+			return new Account(AccountSettings.getDefaultSettings());
 		}
-		const { guestMode } = plainObject;
-		// Perform additional type checks if necessary
-		if (typeof guestMode !== 'boolean') {
-			throw new Error('Invalid guestMode property in plainObject for Account');
-		}
-		return new Account(guestMode);
 			
 	}
 
 	toPlainObject(): any {
 		return {
-			guestMode: this.guestMode
+			settings: this.settings.toPlainObject(),
 		};
 	}
 

@@ -11,6 +11,8 @@ import { useInventory } from "@/app/hooks/contexts/InventoryContext";
 import { useUser } from "@/app/hooks/contexts/UserContext";
 import { setAllLevelSystemValues, setCurrentExp, setExpToLevelUp, setUserLevel } from "@/store/slices/userLevelSystemSlice";
 import { useDispatch } from "react-redux";
+import IconButton from "../user/icon/IconButton";
+import IconSVGButton from "../user/icon/IconSVGButton";
 
 type PlotComponentProps = {
 	plot: Plot;
@@ -29,7 +31,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 	PlotComponent.displayName = "Plot";
 	const [displayIcon, setDisplayIcon] = useState(plot.getItem().itemData.icon);
 	const [forceRefreshKey, setForceRefreshKey] = useState(0);
-	const { account, guestMode } = useAccount();
+	const { account, guestMode, displayEmojiIcons } = useAccount();
 	const { user, reloadUser } = useUser();
 	const { garden, reloadGarden } = useGarden();
 	const { inventory, reloadInventory } = useInventory();
@@ -37,29 +39,53 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 
 	const getColor = () => {
 		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name) {
-			return `border ${colors.ground.plotBackgroundColor} ${colors.ground.defaultBorderColor}`;
+			return {
+				bgColor: colors.ground.plotBackgroundColor,
+				borderColor: `border-2 ${colors.ground.defaultBorderColor}`
+			};
 		} else if (plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
 			const plant = plot.getItem() as Plant;
 			const timeElapsed = Date.now() - plot.getPlantTime();
 			const growTime = plot.getTotalGrowTime();
 			// const growTime = plant.itemData.growTime;
 			if (growTime * 1000 <= timeElapsed) {
-				return `bg-apple-500 border ${colors.plant.grownBorderColor}`;
+				return {
+					bgColor: 'bg-apple-500',
+					borderColor: `border-2 ${colors.plant.grownBorderColor}`
+				};
 			} else if (growTime * 3/4 * 1000 <= timeElapsed) {
-				return `bg-apple-400 border ${colors.plant.defaultBorderColor}`;
+				return {
+					bgColor: 'bg-apple-400',
+					borderColor: `border-2 ${colors.plant.defaultBorderColor}`
+				};
 			} else if (growTime/2 * 1000 <= timeElapsed) {
-				return `bg-apple-300 border ${colors.plant.defaultBorderColor}`;
+				return {
+					bgColor: 'bg-apple-300',
+					borderColor: `border-2 ${colors.plant.defaultBorderColor}`
+				};
 			} else if (growTime * 1/4 * 1000 <= timeElapsed) {
-				return `bg-apple-200 border ${colors.plant.defaultBorderColor}`;
+				return {
+					bgColor: 'bg-apple-200',
+					borderColor: `border-2 ${colors.plant.defaultBorderColor}`
+				};
 			} else {
-				return `bg-apple-100 border ${colors.plant.defaultBorderColor}`;
+				return {
+					bgColor: 'bg-apple-100',
+					borderColor: `border-2 ${colors.plant.defaultBorderColor}`
+				};
 			}
 
 		} else if (plot.getItemSubtype() === ItemSubtypes.DECORATION.name) {
-			return `border ${colors.decoration.plotBackgroundColor} ${colors.decoration.defaultBorderColor}`;
+			return {
+				bgColor: colors.decoration.plotBackgroundColor,
+				borderColor: `border-2 ${colors.decoration.defaultBorderColor}`
+			};
 		} else {
 			//should never occur
-			return `bg-gray-300 border ${colors.plant.defaultBorderColor}`;
+			return {
+				bgColor: 'bg-gray-300',
+				borderColor: `border-2 ${colors.plant.defaultBorderColor}`
+			};
 		}
 	}
 
@@ -78,25 +104,21 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 		}
 	}));
 
-	const currentItem = plot.getItem();
-	const currentPlantTime = plot.getPlantTime();
-
+	// Update color when plot data changes
 	useEffect(() => {
-		let interval: NodeJS.Timeout | null = null;
 		setColor(getColor());
-  
+	}, [plot.getItem().itemData.icon, plot.getPlantTime(), plot.getItemSubtype()]);
+
+	// Set up interval for plant growth visualization
+	useEffect(() => {
 		if (plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
-		  interval = setInterval(() => {
-			setColor(getColor());
-		  }, 1000);
+			const interval = setInterval(() => {
+				setColor(getColor());
+			}, 1000);
+
+			return () => clearInterval(interval);
 		}
-  
-		return () => {
-		  if (interval) {
-			clearInterval(interval);
-		  }
-		};
-	  }, [currentItem, currentPlantTime, plot]);
+	}, [plot.getItemSubtype()]);
 
 	const handleClick = async () => {
 		//onPlotClick comes from plotActions which may/may not be async
@@ -131,7 +153,13 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 
 	return (
 		<PlotTooltip plot={plot} currentTime={currentTime} key={forceRefreshKey}>
-			<button onClick={handleClick} className={`flex items-center justify-center text-4xl ${color} w-12 h-12 text-purple-600 font-semibold hover:text-white hover:bg-purple-600 hover:border-transparent`} data-testid="plot">{displayIcon}</button>
+			<IconButton
+			icon={displayIcon}
+			onClickFunction={handleClick}
+			bgColor={color.bgColor}
+			borderColor={color.borderColor}
+			textSize="text-5xl"
+			elementSize="16"/>
 		</PlotTooltip>
 	);
 });

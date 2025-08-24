@@ -6,6 +6,8 @@ interface AccountContextType {
     account: Account;
     guestMode: boolean;
     setGuestMode: (arg: boolean) => void;
+    displayEmojiIcons: boolean;
+    setDisplayEmojiIcons: (arg: boolean) => void;
     environmentTestKey: string;
     // Add any other actions or state you need
 }

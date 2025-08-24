@@ -1,0 +1,52 @@
+{
+    "Icons": {
+        "Error": [
+            {
+                "name": "error",
+				"path": "error.svg"
+            }
+        ],
+        "Ground": [
+            {
+                "name": "default",
+				"path": "error.svg"
+            }
+        ],
+        "Plants": [
+            {
+                "name": "default",
+				"path": "error.svg"
+            },
+			{
+				"name": "mango",
+				"path": "gooseMango.svg"
+			},
+			{
+				"name": "carrot",
+				"path": "gooseCarrot.svg"
+			}
+        ],
+        "Decorations": [
+            {
+                "name": "default",
+				"path": "error.svg"
+            }
+        ],
+        "Tools": [
+            {
+                "name": "default",
+				"path": "error.svg"
+            }
+        ],
+		"User": [
+			{
+                "name": "default",
+				"path": "goosePortrait.svg"
+            },
+            {
+                "name": "farmer",
+				"path": "farmerGoose.svg"
+            }
+		]
+    }
+}

@@ -11,6 +11,7 @@ import colors from "../colors/colors";
 import Tooltip from "../window/tooltip";
 import { HarvestedItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
 import { Tool } from "@/models/items/tools/Tool";
+import RawIconDisplay from "../user/icon/RawIconDisplay";
 
 const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNode, plot: Plot, currentTime: number}) => {
 
@@ -45,7 +46,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 			<div className="flex flex-col items-left min-w-0 flex-grow" data-testid="tool-tip">
 				<div className="flex flex-row justify-between flex-grow min-w-max">
 					<div className="flex flex-row min-w-0">
-						<span className="w-6">{currentItem.itemData.icon}</span>
+					<RawIconDisplay icon={currentItem.itemData.icon} width={6} height={6}/>
 						{/* Might not display properly if screen size is small or name is too long */}
 						<span>{currentItem.itemData.name}</span>
 					</div>
@@ -77,7 +78,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 		<div className="flex flex-col items-left min-w-0 flex-grow">
 			<div className="flex flex-row justify-between flex-grow min-w-max">
 				<div className="flex flex-row min-w-0">
-					<span className="w-6">{currentItem.itemData.icon}</span>
+					<RawIconDisplay icon={currentItem.itemData.icon} width={6} height={6}/>
 					{/* Might not display properly if screen size is small or name is too long */}
 					<span>{currentItem.itemData.name}</span>
 				</div>
@@ -110,7 +111,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 		<div className="flex flex-col items-left min-w-0 flex-grow">
 			<div className="flex flex-row justify-between min-w-max">
 				<div className="flex flex-row min-w-0">
-					<span className="w-6 flex-shrink-0">{currentItem.itemData.icon}</span>
+					<RawIconDisplay icon={currentItem.itemData.icon} width={6} height={6}/>
 					{/* Might not display properly if screen size is small or name is too long */}
 					<span>{currentItem.itemData.name}</span>
 				</div>
@@ -124,7 +125,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 			<div>When planted: </div>
 			<div className="flex flex-row justify-between">
 				<div className="flex flex-row">
-					<span className="w-6">{plantedItem.icon}</span>
+					<RawIconDisplay icon={plantedItem.icon} width={6} height={6}/>
 					{/* Might not display properly if screen size is small or name is too long */}
 					<span>{plantedItem.name}</span>
 				</div>
@@ -161,7 +162,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 				<div>Placing: </div>
 				<div className="flex flex-row justify-between min-w-max">
 					<div className="flex flex-row">
-						<span className="w-6">{currentItem.itemData.icon}</span>
+						<RawIconDisplay icon={currentItem.itemData.icon} width={6} height={6}/>
 						{/* Might not display properly if screen size is small or name is too long */}
 						<span>{currentItem.itemData.name}</span>
 					</div>
@@ -176,7 +177,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 				<div className={`${colors.blueprint.categoryTextColor} text-left`}>Blueprint</div>
 				<div>When placed: </div>
 				<div className="flex flex-row">
-					<span className="w-6">{decoration.icon}</span>
+					<RawIconDisplay icon={decoration.icon} width={6} height={6}/>
 					{/* Might not display properly if screen size is small or name is too long */}
 					<span>{decoration.name}</span>
 				</div>

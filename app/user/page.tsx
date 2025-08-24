@@ -82,7 +82,7 @@ const UserPage = () => {
           plainStoreObject: store.toPlainObject(),
           plainGardenObject: garden.toPlainObject()
         }
-        const apiRoute = `/api/account`;
+        const apiRoute = `/api/admin`;
         const result = await makeApiRequest('POST', apiRoute, data, true);
         console.log('Successfully posted:', result);
       } catch (error) {
@@ -98,7 +98,7 @@ const UserPage = () => {
           plainStoreObject: store.toPlainObject(),
           plainGardenObject: garden.toPlainObject()
         }
-        const apiRoute = `/api/account`;
+        const apiRoute = `/api/admin`;
         const result = await makeApiRequest('PATCH', apiRoute, data, true);
         console.log('Successfully updated:', result);
       } catch (error) {

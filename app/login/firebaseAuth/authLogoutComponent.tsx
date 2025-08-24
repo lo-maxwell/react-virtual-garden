@@ -5,9 +5,8 @@ import { useAccount } from '@/app/hooks/contexts/AccountContext';
 import { useAuth } from '@/app/hooks/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
-const AuthLogoutComponent: React.FC = () => {
+const AuthLogoutComponent = ({message, setMessage}: {message: string, setMessage: React.Dispatch<React.SetStateAction<string>>}) => {
     const { firebaseUser, loading, logout } = useAuth(); // Access user and loading state
-    const [message, setMessage] = useState<string>('');
     const { account, guestMode, setGuestMode } = useAccount();
     const router = useRouter(); // Initialize the router
     // const allowFirebase = process.env.NEXT_PUBLIC_TEST_ENV_KEY;

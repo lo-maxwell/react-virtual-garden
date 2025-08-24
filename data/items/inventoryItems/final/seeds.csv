@@ -1,13 +1,13 @@
 id,name,icon,type,subtype,category,description,value,level,transformId
-1-01-01-01-00,garlic seed,🧄,InventoryItem,Seed,Onion,Error,40,0,0-02-01-01-00
-1-01-01-06-00,onion seed,🧅,InventoryItem,Seed,Onion,Error,40,0,0-02-01-06-00
-1-01-06-04-00,pumpkin seed,🎃,InventoryItem,Seed,Squash,Error,60,0,0-02-06-04-00
-1-01-09-01-00,apple seed,🍎,InventoryItem,Seed,Tree Fruit,Error,5,0,0-02-09-01-00
-1-01-09-02-00,cherry seed,🍒,InventoryItem,Seed,Tree Fruit,Error,60,0,0-02-09-02-00
-1-01-09-03-00,peach seed,🍑,InventoryItem,Seed,Tree Fruit,Error,90,0,0-02-09-03-00
-1-01-10-01-00,banana seed,🍌,InventoryItem,Seed,Tropical,Error,15,0,0-02-10-01-00
-1-01-10-02-00,coconut seed,🥥,InventoryItem,Seed,Tropical,Error,150,0,0-02-10-02-00
-1-01-10-03-00,mango seed,🥭,InventoryItem,Seed,Tropical,Error,120,0,0-02-10-03-00
-1-01-10-03-10,magic mango seed,🥭,InventoryItem,Seed,Tropical,Error,1200,0,0-02-10-03-10
-1-01-10-05-00,pineapple seed,🍍,InventoryItem,Seed,Tropical,Error,250,0,0-02-10-05-00
-1-01-99-99-99,error,❌,InventoryItem,Seed,Error,Error,0,0,0-02-99-99-99
+1-01-01-01-00,garlic seed,garlic,InventoryItem,Seed,Onion,Error,40,0,0-02-01-01-00
+1-01-01-06-00,onion seed,onion,InventoryItem,Seed,Onion,Error,40,0,0-02-01-06-00
+1-01-06-04-00,pumpkin seed,pumpkin,InventoryItem,Seed,Squash,Error,60,0,0-02-06-04-00
+1-01-09-01-00,apple seed,apple,InventoryItem,Seed,Tree Fruit,Error,5,0,0-02-09-01-00
+1-01-09-02-00,cherry seed,cherry,InventoryItem,Seed,Tree Fruit,Error,60,0,0-02-09-02-00
+1-01-09-03-00,peach seed,peach,InventoryItem,Seed,Tree Fruit,Error,90,0,0-02-09-03-00
+1-01-10-01-00,banana seed,banana,InventoryItem,Seed,Tropical,Error,15,0,0-02-10-01-00
+1-01-10-02-00,coconut seed,coconut,InventoryItem,Seed,Tropical,Error,150,0,0-02-10-02-00
+1-01-10-03-00,mango seed,mango,InventoryItem,Seed,Tropical,Error,120,0,0-02-10-03-00
+1-01-10-03-10,magic mango seed,magic mango,InventoryItem,Seed,Tropical,Error,1200,0,0-02-10-03-10
+1-01-10-05-00,pineapple seed,pineapple,InventoryItem,Seed,Tropical,Error,250,0,0-02-10-05-00
+1-01-99-99-99,error,error,InventoryItem,Seed,Error,Error,0,0,0-02-99-99-99

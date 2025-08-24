@@ -334,3 +334,27 @@ BEGIN
 		table_created := TRUE;
 	END IF;
 END $$;
+
+--User Events
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'user_events'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS user_events (
+			id SERIAL PRIMARY KEY,  -- Generate a UUID by default
+			user VARCHAR(28) NOT NULL,            -- user ID (foreign key from the 'users' table)
+			event_type VARCHAR(255) NOT NULL,
+			last_occurrence TIMESTAMP NOT NULL,
+			streak INT DEFAULT 0,
+			FOREIGN KEY (user) REFERENCES users(id),  -- Establishing relationship with 'users' table
+			UNIQUE (user, event_type)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;

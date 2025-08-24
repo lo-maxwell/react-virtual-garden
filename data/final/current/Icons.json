@@ -6,6 +6,12 @@
                 "icon": "❌"
             }
         ],
+        "Ground": [
+            {
+                "name": "ground",
+                "icon": ""
+            }
+        ],
         "Plants": [
             {
                 "name": "onion",
@@ -38,6 +44,18 @@
             {
                 "name": "mango",
                 "icon": "🥭"
+            },
+            {
+                "name": "magic mango",
+                "icon": "🥭"
+            },
+            {
+                "name": "pumpkin",
+                "icon": "🎃"
+            },
+            {
+                "name": "pineapple",
+                "icon": "🍍"
             }
         ],
         "Decorations": [
@@ -56,6 +74,20 @@
             {
                 "name": "blueprint",
                 "icon": "📜"
+            },
+            {
+                "name": "potted plant",
+                "icon": "🪴"
+            },
+            {
+                "name": "goose",
+                "icon": "🪿"
+            }
+        ],
+        "Tools": [
+            {
+                "name": "shovel",
+                "icon": "🪓"
             }
         ]
     }

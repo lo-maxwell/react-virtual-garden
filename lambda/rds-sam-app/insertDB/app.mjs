@@ -28,6 +28,7 @@ const allowedTables = {
   users: ["id", "username", "password_hash", "password_salt", "icon"], //Disallow password hash/salt select statements?
   toolboxes: ["id", "owner"],
   tools: ["id", "owner", "identifier"],
+  userEvents: ["id", "user", "event_type", "last_occurrence", "streak"],
   // Add more tables and their columns as needed
 };
 
@@ -43,21 +44,24 @@ const constructUpdateQuery = (tableName, values, conditions, numExistingParams) 
   const setClause = Object.keys(values).map((key) => {
       // Check if the value is an object with an operator
       if (typeof values[key] === 'object' && values[key].operator && values[key].excluded === true) {
+        // Excluded + operator -> new value is the excluded value with operator applied
         if (!allowedUpdateOperators.includes(values[key].operator)) {
           throw new Error(`Invalid operator: ${values[key].operator}`);
         }
         queryParams.push(values[key].value);
         return `${key} = EXCLUDED.${key} ${values[key].operator} $${queryParams.length + numExistingParams}`;
       } else if (typeof values[key] === 'object' && values[key].operator) {
+        // Not excluded + operator -> new value is original with operator applied
         if (!allowedUpdateOperators.includes(values[key].operator)) {
           throw new Error(`Invalid operator: ${values[key].operator}`);
         }
         queryParams.push(values[key].value);
         return `${key} = ${tableName}.${key} ${values[key].operator} $${queryParams.length + numExistingParams}`; // Use parameterized query
       } else if (values[key].excluded === true) {
-        // If excluded is true, we overwrite the original value with the excluded value
+        // Excluded + no operator -> new value is excluded value
         return `${key} = EXCLUDED.${key}`;
       } else {
+        // Not excluded + no operator -> keep original value
         queryParams.push(values[key]); // Push the value for the column into queryParams
         return `${key} = $${queryParams.length + numExistingParams}`; // Use parameterized query
       }

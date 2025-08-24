@@ -13,8 +13,10 @@ json_file_path = os.path.join(script_dir, '../final/temp/Icons.json')
 data = {
 	"Icons": {
 		"Error": [],
+        "Ground": [],
 		"Plants": [],
-		"Decorations": []
+		"Decorations": [],
+        "Tools": []
 	}
 }
 

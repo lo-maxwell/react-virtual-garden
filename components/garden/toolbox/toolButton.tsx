@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import ToolDisplay from "./toolDisplay";
 import ToolTooltip from "./toolTooltip";
 import { Tool } from '@/models/items/tools/Tool';
+import IconButton from "@/components/user/icon/IconButton";
 
 const ToolButton = ({tool, onClickFunction, focus}: {tool: Tool, onClickFunction: (arg: any) => void, focus: boolean}) => {
 	
@@ -26,9 +27,7 @@ const ToolButton = ({tool, onClickFunction, focus}: {tool: Tool, onClickFunction
 	return (
 		<>
 		<ToolTooltip tool={tool}>
-			<button onClick={handleClick}>
-				<ToolDisplay icon={tool.itemData.icon} bgColor={colors.tool.backgroundColor} borderColor={getBorderColor()} textSize={"text-4xl"} elementSize={"20"}/>
-			</button>
+			<IconButton icon={tool.itemData.icon} onClickFunction={handleClick} bgColor={colors.tool.backgroundColor} borderColor={getBorderColor()} textSize={"text-4xl"} elementSize={"12"}/>
 		</ToolTooltip>
 		</>
 	);

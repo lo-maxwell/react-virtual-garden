@@ -1,7 +1,7 @@
 id,name,icon,type,subtype,category,description,value,level,transformId
-1-05-01-01-00,bench blueprint,🪑,InventoryItem,Blueprint,Normal,Error,100,0,0-04-01-01-00
-1-05-01-02-00,flamingo blueprint,🦩,InventoryItem,Blueprint,Normal,Error,5000,0,0-04-01-02-00
-1-05-01-03-00,construction sign blueprint,🚧,InventoryItem,Blueprint,Normal,Error,25,0,0-04-01-03-00
-1-05-01-04-00,potted plant blueprint,🪴,InventoryItem,Blueprint,Normal,Error,100,0,0-04-01-04-00
-1-05-01-05-00,goose blueprint,🪿,InventoryItem,Blueprint,Normal,Error,50000,0,0-04-01-05-00
-1-05-99-99-99,error,❌,InventoryItem,Blueprint,Error,Error,0,0,0-04-99-99-99
+1-05-01-01-00,bench blueprint,bench,InventoryItem,Blueprint,Normal,Error,100,0,0-04-01-01-00
+1-05-01-02-00,flamingo blueprint,flamingo,InventoryItem,Blueprint,Normal,Error,5000,0,0-04-01-02-00
+1-05-01-03-00,construction sign blueprint,construction sign,InventoryItem,Blueprint,Normal,Error,25,0,0-04-01-03-00
+1-05-01-04-00,potted plant blueprint,potted plant,InventoryItem,Blueprint,Normal,Error,100,0,0-04-01-04-00
+1-05-01-05-00,goose blueprint,goose,InventoryItem,Blueprint,Normal,Error,50000,0,0-04-01-05-00
+1-05-99-99-99,error,error,InventoryItem,Blueprint,Error,Error,0,0,0-04-99-99-99

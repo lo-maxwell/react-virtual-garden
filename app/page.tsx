@@ -1,114 +1,74 @@
 'use client'
-import { Inventory } from "@/models/itemStore/inventory/Inventory";
-import User from "@/models/user/User";
-import { useRouter } from "@/node_modules/next/navigation";
-import { makeApiRequest } from "@/utils/api/api";
 import Link from "next/link";
-import { useEffect } from "react";
-import { useGarden } from "./hooks/contexts/GardenContext";
-import { useInventory } from "./hooks/contexts/InventoryContext";
-import { useStore } from "./hooks/contexts/StoreContext";
-import { useUser } from "./hooks/contexts/UserContext";
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/hooks/contexts/AuthContext';
+import { useAccount } from '@/app/hooks/contexts/AccountContext';
 
 const HomePage = () => {
   const router = useRouter();
-  const {user} = useUser();
-  const {store} = useStore();
-  const {inventory} = useInventory();
-  const { garden } = useGarden();
+  const { firebaseUser } = useAuth();
+  const { guestMode } = useAccount();
 
-  useEffect(() => {
-    // router.replace('/garden');
-  }, [router]);
-
-  async function testAWSLambda () {
-    const data = {
+  const handlePlayNow = () => {
+    if (firebaseUser || guestMode) {
+      router.push('/garden');
+    } else {
+      router.push('/login');
     }
-    const apiRoute = `/api/user/${user.getUserId()}/get`;
-    const result = await makeApiRequest('GET', apiRoute, data, true);
-    console.log('Successfully called lambda function:', result);
-
-    // const data = {
-    //   newUsername: "onion farmer"
-    // }
-    // const apiRoute = `/api/user/${user.getUserId()}/username`;
-    // const result = await makeApiRequest('PATCH', apiRoute, data, true);
-    // console.log('Successfully called lambda function:', result);
-
-    // const data = {
-    //   newIcon: "onion"
-    // }
-    // const apiRoute = `/api/user/${user.getUserId()}/icon`;
-    // const result = await makeApiRequest('PATCH', apiRoute, data, true);
-    // console.log('Successfully called lambda function:', result);
-
-    // const data = {
-    // }
-    // const apiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/restock`;
-    // const result = await makeApiRequest('PATCH', apiRoute, data, true);
-    // console.log('Successfully called lambda function:', result);
-
-    // const data = {
-    // }
-    // const apiRoute = `/api/user/${user.getUserId()}/inventory/${inventory.getInventoryId()}/get`;
-    // const result = await makeApiRequest('GET', apiRoute, data, true);
-    // console.log('Successfully called lambda function:', result);
-    // console.log(Inventory.fromPlainObject(result));
-
-    // const data = {
-    // }
-    // const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/size`;
-    // const result = await makeApiRequest('GET', apiRoute, data, true);
-    // console.log('Successfully called lambda function:', result);
-
-    // const data = {
-    // }
-    // const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${garden.getPlotByRowAndColumn(0,0)?.getPlotId()}/get`;
-    // const result = await makeApiRequest('GET', apiRoute, data, true);
-    // console.log('Successfully called lambda function:', result);
-
-    // const data = {
-    // }
-    // const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/get`;
-    // const result = await makeApiRequest('GET', apiRoute, data, true);
-    // console.log('Successfully called lambda function:', result);
-  }
+  };
 
   return (
     <>
-      <div className="flex flex-1 flex-col bg-reno-sand-200 text-black"> 
-      <div className="mx-4 mb-4">The home page isn&apos;t done yet! Check out these other pages in the meantime.</div>
-      <div className="mx-4 ">
-        <Link
-          href={"/garden"}
+      <div className="flex flex-1 flex-col bg-reno-sand-200 text-black">
+      <div className="flex-1 relative w-full h-full">
+        <img
+          src="/assets/home/gooseBanner.svg"
+          alt="Goose Banner"
+          className="w-full h-full object-cover"
+        />
+        <div
+          className="absolute top-[30%] left-[70%] -translate-y-1/2 -translate-x-1/2 flex flex-col items-center text-black text-8xl font-extrabold drop-shadow-lg select-none pointer-events-none whitespace-nowrap"
         >
-        <p className="inline-block">Go to Garden Page</p>
-        </Link>
+          Goose Farm
+          <button
+            onClick={handlePlayNow}
+            className="px-8 py-4 bg-yellow-400 hover:bg-yellow-500 text-black text-3xl font-bold rounded-lg shadow-lg transition-colors duration-200 mt-4 pointer-events-auto select-auto"
+            type="button"
+          >
+            Play Now
+          </button>
+        </div>
       </div>
-      <div className="mx-4">
-        <Link
-          href={"/store"}
-        >
-        <p className="inline-block">Go to Store Page</p>
-        </Link>
-      </div>
-      <div className="mx-4">
-        <Link
-          href={"/user"}
-        >
-        <p className="inline-block">Go to User Page</p>
-        </Link>
-      </div>
-      <div className="mx-4">
-        <Link
-          href={"/login"}
-        >
-        <p className="inline-block">Go to Login Page</p>
-        </Link>
-      </div>
-      <div className="mx-4">
-        <button onClick={testAWSLambda} >Test AWS Lambda!</button>
-      </div>
+        <div className="mx-4 my-4">The home page isn&apos;t done yet! Check out these other pages in the meantime.</div>
+
+        <div className="mx-4 ">
+          <Link
+            href={"/garden"}
+          >
+          <p className="inline-block">Go to Garden Page</p>
+          </Link>
+        </div>
+        <div className="mx-4">
+          <Link
+            href={"/store"}
+          >
+          <p className="inline-block">Go to Store Page</p>
+          </Link>
+        </div>
+        <div className="mx-4">
+          <Link
+            href={"/user"}
+          >
+          <p className="inline-block">Go to User Page</p>
+          </Link>
+        </div>
+        <div className="mx-4">
+          <Link
+            href={"/login"}
+          >
+          <p className="inline-block">Go to Login Page</p>
+          </Link>
+        </div>
 
       </div>
     </>

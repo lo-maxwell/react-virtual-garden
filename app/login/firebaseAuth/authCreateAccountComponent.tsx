@@ -13,16 +13,16 @@ import { saveGarden } from '@/utils/localStorage/garden';
 import { saveInventory } from '@/utils/localStorage/inventory';
 import { saveStore } from '@/utils/localStorage/store';
 import { saveUser } from '@/utils/localStorage/user';
+import { FirebaseError } from 'firebase/app';
 import React, { useContext, useEffect, useState } from 'react';
 import { fetchAccountObjects, loginWithGoogle, registerUser } from './authClientService';
  // Import the AuthContext
 
-const AuthCreateAccountComponent: React.FC = () => {
+const AuthCreateAccountComponent = ({message, setMessage}: {message: string, setMessage: React.Dispatch<React.SetStateAction<string>>}) => {
     const { firebaseUser, loading, logout } = useAuth(); // Access user and loading state
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [confirmedPassword, setConfirmedPassword] = useState<string>('');
-    const [message, setMessage] = useState<string>('');
     const { user, reloadUser, resetUser } = useUser();
     const { inventory, reloadInventory, resetInventory } = useInventory();
     const { store, reloadStore, resetStore } = useStore();
@@ -90,7 +90,13 @@ const AuthCreateAccountComponent: React.FC = () => {
             syncAccountObjects();
             setGuestMode(false);
         } catch (error) {
-            setMessage("Registration failed. Please try again.");
+            if (error instanceof FirebaseError) {
+                setMessage("Login failed. Please check your credentials.");
+            } else if (error instanceof Error && error.message.includes("Failed to fetch /api/auth/getAccountObjects")) {
+                setMessage("Unable to connect to database. Please try again later.");
+            } else {
+                setMessage("There was an unknown error. Try again later.");
+            }
         }
     };
 
@@ -106,7 +112,13 @@ const AuthCreateAccountComponent: React.FC = () => {
             syncAccountObjects();
             setGuestMode(false);
         } catch (error) {
-            setMessage("Google login failed. Please try again.");
+            if (error instanceof FirebaseError) {
+                setMessage("Login failed. Please check your credentials.");
+            } else if (error instanceof Error && error.message.includes("Failed to fetch /api/auth/getAccountObjects")) {
+                setMessage("Unable to connect to database. Please try again later.");
+            } else {
+                setMessage("There was an unknown error. Try again later.");
+            }
         }
     };
 

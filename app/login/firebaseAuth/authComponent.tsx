@@ -9,6 +9,7 @@ import AuthLogoutComponent from './authLogoutComponent';
 const AuthComponent: React.FC = () => {
     const { firebaseUser, loading, logout } = useAuth(); // Access user and loading state
     const [displayLogin, setDisplayLogin] = useState<boolean>(true);
+    const [message, setMessage] = useState<string>('');
     // const allowFirebase = process.env.NEXT_PUBLIC_TEST_ENV_KEY;
 
     const toggleDisplayLogin = (newValue: boolean | null = null) => {
@@ -28,7 +29,7 @@ const AuthComponent: React.FC = () => {
             <div className="bg-white p-8 rounded-lg shadow-md w-96">
                 <h2 className="text-2xl font-bold mb-4 text-center">Sign in to Virtual Garden</h2>
                 {firebaseUser ? (
-                    <AuthLogoutComponent></AuthLogoutComponent>
+                    <AuthLogoutComponent message={message} setMessage={setMessage}></AuthLogoutComponent>
                 ) : (
                     <>
                     <div className="flex justify-center space-x-4 mb-2"> {/* Added mb-2 for vertical gap */}
@@ -48,9 +49,9 @@ const AuthComponent: React.FC = () => {
                         </button>
                     </div>
                     {displayLogin ? (
-                        <AuthLoginComponent></AuthLoginComponent>
+                        <AuthLoginComponent message={message} setMessage={setMessage}></AuthLoginComponent>
                     ) : (
-                        <AuthCreateAccountComponent></AuthCreateAccountComponent>
+                        <AuthCreateAccountComponent message={message} setMessage={setMessage}></AuthCreateAccountComponent>
                     )}
                     </>
                 )}

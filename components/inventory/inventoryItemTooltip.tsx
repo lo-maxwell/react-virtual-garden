@@ -8,130 +8,111 @@ import { PlantTemplate } from "@/models/items/templates/models/PlacedItemTemplat
 import colors from "../colors/colors";
 import Tooltip from "../window/tooltip";
 import { HarvestedItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
+import RawIconDisplay from "../user/icon/RawIconDisplay";
+import { DecorationTemplate } from "@/models/items/templates/models/PlacedItemTemplates/DecorationTemplate";
+import { BlueprintTemplate } from "@/models/items/templates/models/InventoryItemTemplates/BlueprintTemplate";
+import { SeedTemplate } from "@/models/items/templates/models/InventoryItemTemplates/SeedTemplate";
 
 const InventoryItemTooltip = ({ children, item }: { children: React.ReactNode, item: InventoryItem}) => {
 
 	const RenderItemTooltipInfo = () => {
-		switch(item.itemData.subtype) {
-			case ItemSubtypes.SEED.name:
-				return RenderSeedTooltip();
-			case ItemSubtypes.HARVESTED.name:
-				return RenderHarvestedTooltip();
-			case ItemSubtypes.BLUEPRINT.name:
-				return RenderBlueprintTooltip();
-			default:
-				return RenderEmptyItemTooltip();
-		}
-	}
+		// Common variables
+		const subtype = item.itemData.subtype;
+		const name = item.itemData.name;
+		const icon = item.itemData.icon;
+		const value = item.itemData.value;
+		const category = item.itemData.category;
 
-	//Can pull this out to a separate file if we ever need multiple formats for tooltips
-	const RenderSeedTooltip = () => {
-		const currentItem = item as Seed;
-		const plantedItem = itemTemplateFactory.getPlacedTemplateById(currentItem.itemData.transformId);
-		if (!plantedItem || plantedItem.subtype !== ItemSubtypes.PLANT.name) return <></>;
-		const plantTemplate = plantedItem as PlantTemplate;
-		const harvestedItem = itemTemplateFactory.getInventoryTemplateById(plantedItem.transformId);
-		if (!harvestedItem|| harvestedItem.subtype !== ItemSubtypes.HARVESTED.name) return <></>;
-		const harvestedTemplate = harvestedItem as HarvestedItemTemplate;
-		if (currentItem.itemData.name === 'error') {
-			return <>
+		// Seed-specific
+		let plantedItem, plantTemplate, harvestedItem, harvestedTemplate;
+		if (subtype === ItemSubtypes.SEED.name) {
+			plantedItem = itemTemplateFactory.getPlacedTemplateById((item.itemData as SeedTemplate).transformId);
+			if (plantedItem && plantedItem.subtype === ItemSubtypes.PLANT.name) {
+				plantTemplate = plantedItem as PlantTemplate;
+				harvestedItem = itemTemplateFactory.getInventoryTemplateById(plantedItem.transformId);
+				if (harvestedItem && harvestedItem.subtype === ItemSubtypes.HARVESTED.name) {
+					harvestedTemplate = harvestedItem as HarvestedItemTemplate;
+				}
+			}
+		}
+
+		// Blueprint-specific
+		let decoration;
+		if (subtype === ItemSubtypes.BLUEPRINT.name) {
+			decoration = itemTemplateFactory.getPlacedTemplateById((item.itemData as BlueprintTemplate).transformId);
+		}
+
+		// Error case
+		if (name === "error") {
+			return (
 				<div> An error occurred! Please report this to the developers.</div>
-			</>
+			);
 		}
 
-		return <>
-		<div className="flex flex-col items-left min-w-0 flex-grow">
-			<div className="flex flex-row justify-between min-w-max">
-				<div className="flex flex-row min-w-0">
-					<span className="w-6 flex-shrink-0">{currentItem.itemData.icon}</span>
-					{/* Might not display properly if screen size is small or name is too long */}
-					<span>{currentItem.itemData.name}</span>
-				</div>
-				<span className="ml-2 flex ">
-					<span className="">💰</span> {/* Gold icon */}
-					{currentItem.itemData.value}
-				</span>
-			</div>
-			<div className={`${colors.seed.categoryTextColor} text-left`}>Seed</div>
-			<div className={`${colors.seed.categoryTextColor} text-left`}>Category: {currentItem.itemData.category}</div>
-			<div>When planted: </div>
-			<div className="flex flex-row justify-between">
-				<div className="flex flex-row">
-					<span className="w-6">{plantedItem.icon}</span>
-					{/* Might not display properly if screen size is small or name is too long */}
-					<span>{plantedItem.name}</span>
-				</div>
-				<span className="ml-2 flex ">
-					<span className="">💰</span> {/* Gold icon */}
-					{harvestedItem.value}
-				</span>
-			</div>
-			{plantTemplate.numHarvests > 1 && <div>{plantTemplate.numHarvests.toString() + ' harvests'}</div>}
-			<div>{plantTemplate.getGrowTimeString()}</div>
-			<div>XP Gained: {plantTemplate.baseExp}</div>
-		</div>
-	</>
-	}
-
-	const RenderHarvestedTooltip = () => {
-		const currentItem = item as HarvestedItem;
-
-		return <>
-		<div className="flex flex-col items-left min-w-0 flex-grow">
-			<div className="flex flex-row justify-between flex-grow min-w-max">
-				<div className="flex flex-row">
-					<span className="w-6">{currentItem.itemData.icon}</span>
-					{/* Might not display properly if screen size is small or name is too long */}
-					<span>{currentItem.itemData.name}</span>
-				</div>
-				<span className="ml-2 flex ">
-					<span className="">💰</span> {/* Gold icon */}
-					{currentItem.itemData.value}
-				</span>
-			</div>
-			<div className={`${colors.harvested.categoryTextColor} text-left`}>Harvested</div>
-			<div className={`${colors.harvested.categoryTextColor} text-left`}>Category: {currentItem.itemData.category}</div>
-		</div>
-	</>
-	}
-
-	const RenderBlueprintTooltip = () => {
-		const currentItem = item as Blueprint;
-		const decoration = itemTemplateFactory.getPlacedTemplateById(currentItem.itemData.transformId);
-		if (!decoration) return <></>;
-		if (currentItem.itemData.name === 'error') {
-			return <>
-				<div> An error occurred! Please report this to the developers.</div>
-			</>
-		}
-
-		return <>
+		return (
 			<div className="flex flex-col items-left min-w-0 flex-grow">
+				{/* Top row: icon, name, value */}
 				<div className="flex flex-row justify-between min-w-max">
-					<div className="flex flex-row">
-						<span className="w-6">{currentItem.itemData.icon}</span>
-						{/* Might not display properly if screen size is small or name is too long */}
-						<span>{currentItem.itemData.name}</span>
+					<div className="flex flex-row min-w-0">
+						<RawIconDisplay icon={icon} width={6} height={6} additionalSettings={"mr-1"}/>
+						<span>{name}</span>
 					</div>
 					<span className="ml-2 flex ">
-						<span className="">💰</span> {/* Gold icon */}
-						{currentItem.itemData.value}
+						<span className="">💰</span>
+						{value}
 					</span>
 				</div>
-				<div className={`${colors.blueprint.categoryTextColor} text-left`}>Blueprint</div>
-				<div>When placed: </div>
-				<div className="flex flex-row">
-					<span className="w-6">{decoration.icon}</span>
-					{/* Might not display properly if screen size is small or name is too long */}
-					<span>{decoration.name}</span>
-				</div>
-			</div>
-		</>
-	}
 
-	const RenderEmptyItemTooltip = () => {
-		return <>hello world</>;
-	}
+				{/* Subtype label and category */}
+				{subtype === ItemSubtypes.SEED.name && (
+					<>
+						<div className={`${colors.seed.categoryTextColor} text-left`}>Seed</div>
+						<div className={`${colors.seed.categoryTextColor} text-left`}>Category: {category}</div>
+					</>
+				)}
+				{subtype === ItemSubtypes.HARVESTED.name && (
+					<>
+						<div className={`${colors.harvested.categoryTextColor} text-left`}>Harvested</div>
+						<div className={`${colors.harvested.categoryTextColor} text-left`}>Category: {category}</div>
+					</>
+				)}
+				{subtype === ItemSubtypes.BLUEPRINT.name && (
+					<div className={`${colors.blueprint.categoryTextColor} text-left`}>Blueprint</div>
+				)}
+
+				{/* Seed-specific extra info */}
+				{subtype === ItemSubtypes.SEED.name && plantTemplate && harvestedTemplate && (
+					<>
+						<div>When planted: </div>
+						<div className="flex flex-row justify-between">
+							<div className="flex flex-row">
+								<RawIconDisplay icon={plantTemplate.icon} width={6} height={6} additionalSettings={"mr-1"}/>
+								<span>{plantTemplate.name}</span>
+							</div>
+							<span className="ml-2 flex ">
+								<span className="">💰</span>
+								{harvestedTemplate.value}
+							</span>
+						</div>
+						{plantTemplate.numHarvests > 1 && <div>{plantTemplate.numHarvests.toString() + ' harvests'}</div>}
+						<div>{plantTemplate.getGrowTimeString()}</div>
+						<div>XP Gained: {plantTemplate.baseExp}</div>
+					</>
+				)}
+
+				{/* Blueprint-specific extra info */}
+				{subtype === ItemSubtypes.BLUEPRINT.name && decoration && (
+					<>
+						<div>When placed: </div>
+						<div className="flex flex-row">
+							<RawIconDisplay icon={decoration.icon} width={6} height={6} additionalSettings={"mr-1"}/>
+							<span>{decoration.name}</span>
+						</div>
+					</>
+				)}
+			</div>
+		);
+	};
 
 	const getBackgroundColor = () => {
 		switch(item.itemData.subtype) {

@@ -4,7 +4,7 @@
             {
                 "id": "0-02-01-01-00",
                 "name": "garlic",
-                "icon": "🧄",
+                "icon": "garlic",
                 "type": "PlacedItem",
                 "subtype": "Plant",
                 "category": "Onion",
@@ -34,7 +34,7 @@
             {
                 "id": "0-02-01-06-00",
                 "name": "onion",
-                "icon": "🧅",
+                "icon": "onion",
                 "type": "PlacedItem",
                 "subtype": "Plant",
                 "category": "Onion",
@@ -64,7 +64,7 @@
             {
                 "id": "0-02-06-04-00",
                 "name": "pumpkin",
-                "icon": "🎃",
+                "icon": "pumpkin",
                 "type": "PlacedItem",
                 "subtype": "Plant",
                 "category": "Squash",
@@ -94,7 +94,7 @@
             {
                 "id": "0-02-09-01-00",
                 "name": "apple",
-                "icon": "🍎",
+                "icon": "apple",
                 "type": "PlacedItem",
                 "subtype": "Plant",
                 "category": "Tree Fruit",
@@ -124,7 +124,7 @@
             {
                 "id": "0-02-09-02-00",
                 "name": "cherry",
-                "icon": "🍒",
+                "icon": "cherry",
                 "type": "PlacedItem",
                 "subtype": "Plant",
                 "category": "Tree Fruit",
@@ -154,7 +154,7 @@
             {
                 "id": "0-02-09-03-00",
                 "name": "peach",
-                "icon": "🍑",
+                "icon": "peach",
                 "type": "PlacedItem",
                 "subtype": "Plant",
                 "category": "Tree Fruit",
@@ -184,7 +184,7 @@
             {
                 "id": "0-02-10-01-00",
                 "name": "banana",
-                "icon": "🍌",
+                "icon": "banana",
                 "type": "PlacedItem",
                 "subtype": "Plant",
                 "category": "Tropical",
@@ -214,7 +214,7 @@
             {
                 "id": "0-02-10-02-00",
                 "name": "coconut",
-                "icon": "🥥",
+                "icon": "coconut",
                 "type": "PlacedItem",
                 "subtype": "Plant",
                 "category": "Tropical",
@@ -244,7 +244,7 @@
             {
                 "id": "0-02-10-03-00",
                 "name": "mango",
-                "icon": "🥭",
+                "icon": "mango",
                 "type": "PlacedItem",
                 "subtype": "Plant",
                 "category": "Tropical",
@@ -274,7 +274,7 @@
             {
                 "id": "0-02-10-03-10",
                 "name": "magic mango",
-                "icon": "🥭",
+                "icon": "mango",
                 "type": "PlacedItem",
                 "subtype": "Plant",
                 "category": "Tropical",
@@ -304,7 +304,7 @@
             {
                 "id": "0-02-10-05-00",
                 "name": "pineapple",
-                "icon": "🍍",
+                "icon": "pineapple",
                 "type": "PlacedItem",
                 "subtype": "Plant",
                 "category": "Tropical",
@@ -334,7 +334,7 @@
             {
                 "id": "0-02-99-99-99",
                 "name": "error",
-                "icon": "❌",
+                "icon": "error",
                 "type": "PlacedItem",
                 "subtype": "Plant",
                 "category": "Error",
@@ -366,7 +366,7 @@
             {
                 "id": "0-04-01-01-00",
                 "name": "bench",
-                "icon": "🪑",
+                "icon": "bench",
                 "type": "PlacedItem",
                 "subtype": "Decoration",
                 "category": "Normal",
@@ -378,7 +378,7 @@
             {
                 "id": "0-04-01-02-00",
                 "name": "flamingo",
-                "icon": "🦩",
+                "icon": "flamingo",
                 "type": "PlacedItem",
                 "subtype": "Decoration",
                 "category": "Normal",
@@ -390,7 +390,7 @@
             {
                 "id": "0-04-01-03-00",
                 "name": "construction sign",
-                "icon": "🚧",
+                "icon": "construction sign",
                 "type": "PlacedItem",
                 "subtype": "Decoration",
                 "category": "Normal",
@@ -402,7 +402,7 @@
             {
                 "id": "0-04-01-04-00",
                 "name": "potted plant",
-                "icon": "🪴",
+                "icon": "potted plant",
                 "type": "PlacedItem",
                 "subtype": "Decoration",
                 "category": "Normal",
@@ -414,7 +414,7 @@
             {
                 "id": "0-04-01-05-00",
                 "name": "goose",
-                "icon": "🪿",
+                "icon": "goose",
                 "type": "PlacedItem",
                 "subtype": "Decoration",
                 "category": "Normal",
@@ -426,7 +426,7 @@
             {
                 "id": "0-04-99-99-99",
                 "name": "error",
-                "icon": "❌",
+                "icon": "error",
                 "type": "PlacedItem",
                 "subtype": "Decoration",
                 "category": "Error",
@@ -440,7 +440,7 @@
             {
                 "id": "0-00-00-00-00",
                 "name": "ground",
-                "icon": "_",
+                "icon": "ground",
                 "type": "PlacedItem",
                 "subtype": "Ground",
                 "category": "Ground",
@@ -452,7 +452,7 @@
             {
                 "id": "0-00-99-99-99",
                 "name": "error",
-                "icon": "❌",
+                "icon": "error",
                 "type": "PlacedItem",
                 "subtype": "Ground",
                 "category": "Error",
@@ -468,7 +468,7 @@
             {
                 "id": "1-01-01-01-00",
                 "name": "garlic seed",
-                "icon": "🧄",
+                "icon": "garlic",
                 "type": "InventoryItem",
                 "subtype": "Seed",
                 "category": "Onion",
@@ -480,7 +480,7 @@
             {
                 "id": "1-01-01-06-00",
                 "name": "onion seed",
-                "icon": "🧅",
+                "icon": "onion",
                 "type": "InventoryItem",
                 "subtype": "Seed",
                 "category": "Onion",
@@ -492,7 +492,7 @@
             {
                 "id": "1-01-06-04-00",
                 "name": "pumpkin seed",
-                "icon": "🎃",
+                "icon": "pumpkin",
                 "type": "InventoryItem",
                 "subtype": "Seed",
                 "category": "Squash",
@@ -504,7 +504,7 @@
             {
                 "id": "1-01-09-01-00",
                 "name": "apple seed",
-                "icon": "🍎",
+                "icon": "apple",
                 "type": "InventoryItem",
                 "subtype": "Seed",
                 "category": "Tree Fruit",
@@ -516,7 +516,7 @@
             {
                 "id": "1-01-09-02-00",
                 "name": "cherry seed",
-                "icon": "🍒",
+                "icon": "cherry",
                 "type": "InventoryItem",
                 "subtype": "Seed",
                 "category": "Tree Fruit",
@@ -528,7 +528,7 @@
             {
                 "id": "1-01-09-03-00",
                 "name": "peach seed",
-                "icon": "🍑",
+                "icon": "peach",
                 "type": "InventoryItem",
                 "subtype": "Seed",
                 "category": "Tree Fruit",
@@ -540,7 +540,7 @@
             {
                 "id": "1-01-10-01-00",
                 "name": "banana seed",
-                "icon": "🍌",
+                "icon": "banana",
                 "type": "InventoryItem",
                 "subtype": "Seed",
                 "category": "Tropical",
@@ -552,7 +552,7 @@
             {
                 "id": "1-01-10-02-00",
                 "name": "coconut seed",
-                "icon": "🥥",
+                "icon": "coconut",
                 "type": "InventoryItem",
                 "subtype": "Seed",
                 "category": "Tropical",
@@ -564,7 +564,7 @@
             {
                 "id": "1-01-10-03-00",
                 "name": "mango seed",
-                "icon": "🥭",
+                "icon": "mango",
                 "type": "InventoryItem",
                 "subtype": "Seed",
                 "category": "Tropical",
@@ -576,7 +576,7 @@
             {
                 "id": "1-01-10-03-10",
                 "name": "magic mango seed",
-                "icon": "🥭",
+                "icon": "magic mango",
                 "type": "InventoryItem",
                 "subtype": "Seed",
                 "category": "Tropical",
@@ -588,7 +588,7 @@
             {
                 "id": "1-01-10-05-00",
                 "name": "pineapple seed",
-                "icon": "🍍",
+                "icon": "pineapple",
                 "type": "InventoryItem",
                 "subtype": "Seed",
                 "category": "Tropical",
@@ -600,7 +600,7 @@
             {
                 "id": "1-01-99-99-99",
                 "name": "error",
-                "icon": "❌",
+                "icon": "error",
                 "type": "InventoryItem",
                 "subtype": "Seed",
                 "category": "Error",
@@ -614,7 +614,7 @@
             {
                 "id": "1-03-01-01-00",
                 "name": "garlic",
-                "icon": "🧄",
+                "icon": "garlic",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Onion",
@@ -625,7 +625,7 @@
             {
                 "id": "1-03-01-01-01",
                 "name": "Bronze garlic",
-                "icon": "🧄",
+                "icon": "garlic",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Onion",
@@ -636,7 +636,7 @@
             {
                 "id": "1-03-01-01-02",
                 "name": "Silver garlic",
-                "icon": "🧄",
+                "icon": "garlic",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Onion",
@@ -647,7 +647,7 @@
             {
                 "id": "1-03-01-01-03",
                 "name": "Gold garlic",
-                "icon": "🧄",
+                "icon": "garlic",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Onion",
@@ -658,7 +658,7 @@
             {
                 "id": "1-03-01-06-00",
                 "name": "onion",
-                "icon": "🧅",
+                "icon": "onion",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Onion",
@@ -669,7 +669,7 @@
             {
                 "id": "1-03-01-06-01",
                 "name": "Bronze onion",
-                "icon": "🧅",
+                "icon": "onion",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Onion",
@@ -680,7 +680,7 @@
             {
                 "id": "1-03-01-06-02",
                 "name": "Silver onion",
-                "icon": "🧅",
+                "icon": "onion",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Onion",
@@ -691,7 +691,7 @@
             {
                 "id": "1-03-01-06-03",
                 "name": "Gold onion",
-                "icon": "🧅",
+                "icon": "onion",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Onion",
@@ -702,7 +702,7 @@
             {
                 "id": "1-03-06-04-00",
                 "name": "pumpkin",
-                "icon": "🎃",
+                "icon": "pumpkin",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Squash",
@@ -713,7 +713,7 @@
             {
                 "id": "1-03-06-04-01",
                 "name": "Bronze pumpkin",
-                "icon": "🎃",
+                "icon": "pumpkin",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Squash",
@@ -724,7 +724,7 @@
             {
                 "id": "1-03-06-04-02",
                 "name": "Silver pumpkin",
-                "icon": "🎃",
+                "icon": "pumpkin",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Squash",
@@ -735,7 +735,7 @@
             {
                 "id": "1-03-06-04-03",
                 "name": "Gold pumpkin",
-                "icon": "🎃",
+                "icon": "pumpkin",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Squash",
@@ -746,7 +746,7 @@
             {
                 "id": "1-03-09-01-00",
                 "name": "apple",
-                "icon": "🍎",
+                "icon": "apple",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tree Fruit",
@@ -757,7 +757,7 @@
             {
                 "id": "1-03-09-01-01",
                 "name": "Bronze apple",
-                "icon": "🍎",
+                "icon": "apple",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tree Fruit",
@@ -768,7 +768,7 @@
             {
                 "id": "1-03-09-01-02",
                 "name": "Silver apple",
-                "icon": "🍎",
+                "icon": "apple",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tree Fruit",
@@ -779,7 +779,7 @@
             {
                 "id": "1-03-09-01-03",
                 "name": "Gold apple",
-                "icon": "🍎",
+                "icon": "apple",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tree Fruit",
@@ -790,7 +790,7 @@
             {
                 "id": "1-03-09-02-00",
                 "name": "cherry",
-                "icon": "🍒",
+                "icon": "cherry",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tree Fruit",
@@ -801,7 +801,7 @@
             {
                 "id": "1-03-09-02-01",
                 "name": "Bronze cherry",
-                "icon": "🍒",
+                "icon": "cherry",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tree Fruit",
@@ -812,7 +812,7 @@
             {
                 "id": "1-03-09-02-02",
                 "name": "Silver cherry",
-                "icon": "🍒",
+                "icon": "cherry",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tree Fruit",
@@ -823,7 +823,7 @@
             {
                 "id": "1-03-09-02-03",
                 "name": "Gold cherry",
-                "icon": "🍒",
+                "icon": "cherry",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tree Fruit",
@@ -834,7 +834,7 @@
             {
                 "id": "1-03-09-03-00",
                 "name": "peach",
-                "icon": "🍑",
+                "icon": "peach",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tree Fruit",
@@ -845,7 +845,7 @@
             {
                 "id": "1-03-09-03-01",
                 "name": "Bronze peach",
-                "icon": "🍑",
+                "icon": "peach",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tree Fruit",
@@ -856,7 +856,7 @@
             {
                 "id": "1-03-09-03-02",
                 "name": "Silver peach",
-                "icon": "🍑",
+                "icon": "peach",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tree Fruit",
@@ -867,7 +867,7 @@
             {
                 "id": "1-03-09-03-03",
                 "name": "Gold peach",
-                "icon": "🍑",
+                "icon": "peach",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tree Fruit",
@@ -878,7 +878,7 @@
             {
                 "id": "1-03-10-01-00",
                 "name": "banana",
-                "icon": "🍌",
+                "icon": "banana",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -889,7 +889,7 @@
             {
                 "id": "1-03-10-01-01",
                 "name": "Bronze banana",
-                "icon": "🍌",
+                "icon": "banana",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -900,7 +900,7 @@
             {
                 "id": "1-03-10-01-02",
                 "name": "Silver banana",
-                "icon": "🍌",
+                "icon": "banana",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -911,7 +911,7 @@
             {
                 "id": "1-03-10-01-03",
                 "name": "Gold banana",
-                "icon": "🍌",
+                "icon": "banana",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -922,7 +922,7 @@
             {
                 "id": "1-03-10-02-00",
                 "name": "coconut",
-                "icon": "🥥",
+                "icon": "coconut",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -933,7 +933,7 @@
             {
                 "id": "1-03-10-02-01",
                 "name": "Bronze coconut",
-                "icon": "🥥",
+                "icon": "coconut",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -944,7 +944,7 @@
             {
                 "id": "1-03-10-02-02",
                 "name": "Silver coconut",
-                "icon": "🥥",
+                "icon": "coconut",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -955,7 +955,7 @@
             {
                 "id": "1-03-10-02-03",
                 "name": "Gold coconut",
-                "icon": "🥥",
+                "icon": "coconut",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -966,7 +966,7 @@
             {
                 "id": "1-03-10-03-00",
                 "name": "mango",
-                "icon": "🥭",
+                "icon": "mango",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -977,7 +977,7 @@
             {
                 "id": "1-03-10-03-01",
                 "name": "Bronze mango",
-                "icon": "🥭",
+                "icon": "mango",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -988,7 +988,7 @@
             {
                 "id": "1-03-10-03-02",
                 "name": "Silver mango",
-                "icon": "🥭",
+                "icon": "mango",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -999,7 +999,7 @@
             {
                 "id": "1-03-10-03-03",
                 "name": "Gold mango",
-                "icon": "🥭",
+                "icon": "mango",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -1010,7 +1010,7 @@
             {
                 "id": "1-03-10-03-10",
                 "name": "magic mango",
-                "icon": "🥭",
+                "icon": "magic mango",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -1021,7 +1021,7 @@
             {
                 "id": "1-03-10-03-11",
                 "name": "Bronze magic mango",
-                "icon": "🥭",
+                "icon": "magic mango",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -1032,7 +1032,7 @@
             {
                 "id": "1-03-10-03-12",
                 "name": "Silver magic mango",
-                "icon": "🥭",
+                "icon": "magic mango",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -1043,7 +1043,7 @@
             {
                 "id": "1-03-10-03-13",
                 "name": "Gold magic mango",
-                "icon": "🥭",
+                "icon": "magic mango",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -1054,7 +1054,7 @@
             {
                 "id": "1-03-10-05-00",
                 "name": "pineapple",
-                "icon": "🍍",
+                "icon": "pineapple",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -1065,7 +1065,7 @@
             {
                 "id": "1-03-10-05-01",
                 "name": "bronze pineapple",
-                "icon": "🍍",
+                "icon": "pineapple",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -1076,7 +1076,7 @@
             {
                 "id": "1-03-10-05-02",
                 "name": "silver pineapple",
-                "icon": "🍍",
+                "icon": "pineapple",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -1087,7 +1087,7 @@
             {
                 "id": "1-03-10-05-03",
                 "name": "gold pineapple",
-                "icon": "🍍",
+                "icon": "pineapple",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Tropical",
@@ -1098,7 +1098,7 @@
             {
                 "id": "1-03-99-99-91",
                 "name": "Bronze error",
-                "icon": "❌",
+                "icon": "error",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Error",
@@ -1109,7 +1109,7 @@
             {
                 "id": "1-03-99-99-92",
                 "name": "Silver error",
-                "icon": "❌",
+                "icon": "error",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Error",
@@ -1120,7 +1120,7 @@
             {
                 "id": "1-03-99-99-93",
                 "name": "Gold error",
-                "icon": "❌",
+                "icon": "error",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Error",
@@ -1131,7 +1131,7 @@
             {
                 "id": "1-03-99-99-99",
                 "name": "error",
-                "icon": "❌",
+                "icon": "error",
                 "type": "InventoryItem",
                 "subtype": "HarvestedItem",
                 "category": "Error",
@@ -1144,7 +1144,7 @@
             {
                 "id": "1-05-01-01-00",
                 "name": "bench blueprint",
-                "icon": "🪑",
+                "icon": "bench",
                 "type": "InventoryItem",
                 "subtype": "Blueprint",
                 "category": "Normal",
@@ -1156,7 +1156,7 @@
             {
                 "id": "1-05-01-02-00",
                 "name": "flamingo blueprint",
-                "icon": "🦩",
+                "icon": "flamingo",
                 "type": "InventoryItem",
                 "subtype": "Blueprint",
                 "category": "Normal",
@@ -1168,7 +1168,7 @@
             {
                 "id": "1-05-01-03-00",
                 "name": "construction sign blueprint",
-                "icon": "🚧",
+                "icon": "construction sign",
                 "type": "InventoryItem",
                 "subtype": "Blueprint",
                 "category": "Normal",
@@ -1180,7 +1180,7 @@
             {
                 "id": "1-05-01-04-00",
                 "name": "potted plant blueprint",
-                "icon": "🪴",
+                "icon": "potted plant",
                 "type": "InventoryItem",
                 "subtype": "Blueprint",
                 "category": "Normal",
@@ -1192,7 +1192,7 @@
             {
                 "id": "1-05-01-05-00",
                 "name": "goose blueprint",
-                "icon": "🪿",
+                "icon": "goose",
                 "type": "InventoryItem",
                 "subtype": "Blueprint",
                 "category": "Normal",
@@ -1204,7 +1204,7 @@
             {
                 "id": "1-05-99-99-99",
                 "name": "error",
-                "icon": "❌",
+                "icon": "error",
                 "type": "InventoryItem",
                 "subtype": "Blueprint",
                 "category": "Error",
@@ -1221,7 +1221,7 @@
                 "id": "2-01-01-00-00",
                 "name": "Basic Shovel",
                 "type": "Shovel",
-                "icon": "🪓",
+                "icon": "shovel",
                 "description": "Error",
                 "value": 0,
                 "level": 0
@@ -1230,7 +1230,7 @@
                 "id": "2-01-02-00-00",
                 "name": "Super Shovel",
                 "type": "Shovel",
-                "icon": "🪓",
+                "icon": "shovel",
                 "description": "Error",
                 "value": 0,
                 "level": 0

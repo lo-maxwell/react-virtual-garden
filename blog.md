@@ -381,6 +381,14 @@
 Guest mode: Should have a level/xp/money etc cap, and some warnings that guest mode is local only; allow users to port their guest mode account into an online account (with the cap)
 
 TODO:
+
+Background/border color of item displays is broken
+
+Landing/loading pages for login/register - inform user not to leave the page
+
+Updated home page
+
+
 Add examples of how to write queries for select/insert/update/delete lambdas
 SQS queue for rate limiting between backend and lambda?
 Fix guest mode banners
@@ -481,3 +489,24 @@ Fertility - Soil nutrient levels, determines crop yields and quality rating
 Structure - Soil physical health, determines grow speed and natural disaster resistance
 Biodiversity - Soil biological health, determines xp earned and pest resistance
 Growing certain crops increases/decreases these respectively
+
+Roadmap
+Daily login bonus - should be easy to implement and fun gambling aspect/retention policy
+Goose Farm - Have to involve geese in some way besides images (?) but keep it simple farming game still
+Goose object - new type of object, has stats, each stat varies between geese
+Categorizations for appearance and base stats/general growth power but since each stat is goose dependent we need to store in database
+Gain geese by growing them - can have "goose seed" item
+Geese gain bonuses when grown near plants
+Geese lose bonuses when grown near other geese
+Geese go to a separate inventory, with a cap on how many you can have at once, can delete to make space
+If at cap, cannot plant more goose seeds
+If not at cap, plants have a small chance to turn into geese when harvested, giving major stat boosts depending on plant value/type
+Stats are used in beauty contest, which is a global ranking of how well your goose's stats match some criteria
+Thus it is useful to have many types of stats (all rounder, extremely high power, high intelligence + charisma etc)
+1 goose egg per day from daily login bonus
+maximum 7 geese eggs in inventory
+holiday events can give holiday geese eggs which do not use regular slots (the holiday geese do use slots)
+
+for the sake of mvp:
+geese are categorized by color at first, no actual plant gooses, they just convert into that color
+beauty contest is always highest x stat or 2 stats
