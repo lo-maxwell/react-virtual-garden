@@ -82,9 +82,9 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
 
         return <div className="max-h-[60vh] overflow-y-auto">
             {chunkedIcons.map((iconGroup, index) => (
-            <div key={index} className="flex flex-row mx-4 my-4"> {/* Flexbox for horizontal alignment */}
+            <div key={index} className="flex flex-row mx-4 my-4 gap-x-4 "> {/* Flexbox for horizontal alignment */}
               {iconGroup.map((iconOption) => (
-                <IconButton key={iconOption.getName() + iconOption.getIcon()} icon={iconOption.getName()} onClickFunction={() => onIconClick(iconOption)} bgColor={`gray-300`} borderColor={`coffee-700`} textSize={"text-8xl"} elementSize={"100"}/>
+                <IconButton key={iconOption.getName() + iconOption.getIcon()} icon={iconOption.getName()} onClickFunction={() => onIconClick(iconOption)} bgColor={`bg-blue-300`} borderColor={`border-2 border-coffee-700`} textSize={"text-8xl"} elementSize={"100"}/>
               ))}
             </div>
           ))}
@@ -94,7 +94,7 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
     
 	return (
         <span className="icon-selector">
-            <IconButton icon={iconIndex} onClickFunction={showAllIconsWindow} bgColor={`gray-300`} borderColor={`coffee-700`} textSize={"text-4xl"} elementSize={"12"}/>
+            <IconButton icon={iconIndex} onClickFunction={showAllIconsWindow} bgColor={`bg-blue-300`} borderColor={`border border-2 border-coffee-700`} textSize={"text-4xl"} elementSize={"12"}/>
             <PopupWindow showWindow={showAllIcons} setShowWindow={setShowAllIcons}>
                 <div className="w-max bg-reno-sand-200 text-black p-8 rounded-lg shadow-md justify-between items-center">
                     <div className="text-2xl text-semibold"> Select a new icon: </div>

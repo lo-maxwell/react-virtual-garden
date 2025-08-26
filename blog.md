@@ -327,7 +327,7 @@
 
 ## Day 32
 
-### AWS Database setup - In progress
+### AWS Database setup
   * Create aws rds instance
   * Configure security/allowed routes with EC2
   * Get connection details (endpoint, port, username/password, database name)
@@ -350,7 +350,7 @@
   * Run ssh command in terminal to enable port forwarding from localhost to rds
   * Now able to connect to rds with pgadmin, psql, or environment variables in webapp
 
-### Create Lambda + API Gateway - On Hold
+### Create Lambda + API Gateway
   * Lambda function that exposes http/rest endpoints, accessible by frontend
   * Has access to private vpc, allowing querying of rds
   * Frontend sends http request that triggers lambda function, which performs database queries and returns json data
@@ -377,6 +377,25 @@
 
 ### Building infra for easier modification of items
   * Created some csvs to store item data, might be easier to write a script to parse the csv into json than to parse the csv from client side
+
+
+## Day 35
+
+### Added Toolbox and first tool
+  * Toolbox contains new tool items, shovel item can be used to destroy plants before they are finished growing (to remove them permanently, freeing up space)
+  * Added additional infra around database connections and json loading of tool data
+
+## Day 36
+
+### More ui updates
+  * Various fixes to tooltips, ui display of destroying items, added infrastructure for switching from emoji string icons to svgs
+  * Added front page banner
+  * Various login panel updates
+
+## Day 37
+
+### Adding userEvents - In progress
+  * Will be used for daily login reward
 
 Guest mode: Should have a level/xp/money etc cap, and some warnings that guest mode is local only; allow users to port their guest mode account into an online account (with the cap)
 
