@@ -1,8 +1,8 @@
-# **Virtual Garden Design Overview**
+# **Goose Farm Design Overview**
 
 ## Project Overview
 
-The Virtual Garden is a 2D grid-based farming simulator that allows users to create and manage their own gardens. Users can plant seeds, place decorations, and harvest crops to expand their land and customize their gardening experience.
+Goose Farm is a 2D grid-based farming simulator that allows users to create and manage their own gardens. Users can plant seeds, place decorations, and harvest crops to expand their land and customize their gardening experience.
 
 ## Technologies Used
 
@@ -30,4 +30,5 @@ The Virtual Garden is a 2D grid-based farming simulator that allows users to cre
 ## In Progress
 
 - Redesigining UI components for a better user experience
+- Adding geese (sorry, they're only here in spirit right now)
 

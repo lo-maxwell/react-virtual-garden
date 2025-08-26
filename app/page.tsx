@@ -39,9 +39,19 @@ const HomePage = () => {
           </button>
         </div>
       </div>
-        <div className="mx-4 my-4">The home page isn&apos;t done yet! Check out these other pages in the meantime.</div>
-
-        <div className="mx-4 ">
+        <p className="mx-4 my-4 text-2xl font-normal text-black pointer-events-auto select-auto">
+          Check us out on{" "}
+          <a
+            href="https://github.com/lo-maxwell/react-virtual-garden/blob/main/design-doc.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 text-2xl text-blue-600 underline pointer-events-auto select-auto"
+          >
+            Github
+          </a>
+          .
+        </p>
+        {/* <div className="mx-4 ">
           <Link
             href={"/garden"}
           >
@@ -68,7 +78,7 @@ const HomePage = () => {
           >
           <p className="inline-block">Go to Login Page</p>
           </Link>
-        </div>
+        </div> */}
 
       </div>
     </>
