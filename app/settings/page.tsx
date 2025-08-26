@@ -106,7 +106,7 @@ const LoginPage: React.FC = () => {
         <div className="mx-4">This is the settings page.</div>
         <div className={`mx-4 ${messageColor}`}>{message}</div>
 		    <button onClick={syncAccountObjects} disabled={syncing} className="block w-full text-left py-2 px-4 hover:bg-[#d0cecc] whitespace-nowrap">{getSyncAccountObjectsButtonText()}</button>
-        <button onClick={toggleDisplayEmojiIcons} disabled={syncing} className="block w-full text-left py-2 px-4 hover:bg-[#d0cecc] whitespace-nowrap">{getToggleDisplayEmojiIconsButtonText()}</button>
+        {/* <button onClick={toggleDisplayEmojiIcons} disabled={syncing} className="block w-full text-left py-2 px-4 hover:bg-[#d0cecc] whitespace-nowrap">{getToggleDisplayEmojiIconsButtonText()}</button> */}
       </div>
     </>
   );

@@ -118,7 +118,7 @@ class User {
 	}
 
 	static generateNewUserWithId(firebaseUid: string): User {
-		return new User(firebaseUid, this.getDefaultUserName(), 'apple');
+		return new User(firebaseUid, this.getDefaultUserName(), 'goose');
 	}
 
 	static getDefaultUserName(): string {
@@ -283,6 +283,7 @@ class User {
 	isIconUnlocked(iconOption: Icon, isEmoji: boolean) {
 		if (isEmoji) {
 			if (iconOption.getName() === 'apple') return true;
+			if (iconOption.getName() === 'goose') return true;
 			if (iconOption.getName() === 'error') return false;
 			const template = itemTemplateFactory.getInventoryItemTemplateByName(iconOption.getName());
 			if (!template) return false;
