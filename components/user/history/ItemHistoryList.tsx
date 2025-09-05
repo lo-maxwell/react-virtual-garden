@@ -1,5 +1,6 @@
 import { useUser } from "@/app/hooks/contexts/UserContext";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
+import RawIconDisplay from "../icon/RawIconDisplay";
 
 const ItemHistoryListComponent = ({}) => {
 	//TODO: ItemHistoryComponent that looks more like square bubbles with information about each plant, ie almanac
@@ -12,7 +13,8 @@ const ItemHistoryListComponent = ({}) => {
 				if (history.getItemData().subtype === ItemSubtypes.HARVESTED.name) {
 					return (
 						<div key={history.getItemData().name + index}>
-							{history.getItemData().name} {history.getItemData().icon}: {history.getQuantity()}
+							<RawIconDisplay icon={history.getItemData().icon} width={6} height={6}/>
+							{history.getItemData().name}: {history.getQuantity()}
 						</div>
 					);
 				} else if (history.getItemData().subtype === ItemSubtypes.DECORATION.name) {
