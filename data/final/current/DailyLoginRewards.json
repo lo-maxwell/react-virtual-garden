@@ -1,0 +1,32 @@
+{
+	"defaultRewards": {
+	  "normal": {
+		"maxQuantity": 3,
+		"maxItems": 3,
+		"items": [
+		  { "id": "1-01-09-01-00", "name": "apple seed", "quantity": 20 },
+		  { "id": "1-01-10-01-00", "name": "banana seed", "quantity": 6 },
+		  { "id": "1-01-01-01-00", "name": "garlic seed", "quantity": 2 },
+		  { "id": "1-01-01-06-00", "name": "onion seed", "quantity": 2 },
+		  { "id": "1-01-09-02-00", "name": "cherry seed", "quantity": 1 },
+		  { "id": "1-01-09-03-00", "name": "peach seed", "quantity": 1 },
+		  { "id": "1-01-10-02-00", "name": "coconut seed", "quantity": 1 },
+		  { "id": "1-01-10-03-00", "name": "mango seed", "quantity": 1 }
+		]
+	  },
+	  "weeklyBonus": {
+		"maxQuantity": 2,
+		"maxItems": 5,
+		"items": [
+		  { "id": "1-01-09-01-00", "name": "apple seed", "quantity": 50 },
+		  { "id": "1-01-10-01-00", "name": "banana seed", "quantity": 16 },
+		  { "id": "1-01-01-01-00", "name": "garlic seed", "quantity": 6 },
+		  { "id": "1-01-01-06-00", "name": "onion seed", "quantity": 6 },
+		  { "id": "1-01-09-02-00", "name": "cherry seed", "quantity": 4 },
+		  { "id": "1-01-09-03-00", "name": "peach seed", "quantity": 3 },
+		  { "id": "1-01-10-02-00", "name": "coconut seed", "quantity": 2 },
+		  { "id": "1-01-10-03-00", "name": "mango seed", "quantity": 2 }
+		]
+	  }
+	}
+  }

@@ -1,0 +1,310 @@
+
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
+import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
+import { getRandomInt } from "@/models/utility/RandomNumber";
+import { v4 as uuidv4 } from "uuid";
+import { EventReward } from "../EventReward";
+import { RewardGenerator } from "../RewardGenerator";
+import { dailyLoginRewardRepository } from "./DailyLoginRewardRepository";
+
+export class DailyLoginRewardFactory extends RewardGenerator {
+	
+	/**
+	 * An object with various functions for creating reward buckets within a certain value range
+	 * @rewardItems the list of possible items that this generator can give out
+	 * @maxQuantity the maximum quantity of a single item in a single reward
+	 */
+	constructor(streak: number, rewardItems: InventoryItemList = DailyLoginRewardFactory.getDefaultRewardItems(streak), maxQuantity: number = DailyLoginRewardFactory.getDefaultMaxQuantity(streak), maxItems: number = DailyLoginRewardFactory.getDefaultMaxItems(streak)) {
+		super(rewardItems, maxQuantity, maxItems);
+	}
+
+	static getDefaultRewardItems(streak: number): InventoryItemList {
+		const config = dailyLoginRewardRepository.getDailyLoginConfig();
+		const rewardSet = streak % 7 === 0 ? config.defaultRewards.weeklyBonus : config.defaultRewards.normal;
+
+		let result = new InventoryItemList();
+		for (const itemConfig of rewardSet.items) {
+			let itemTemplate = itemTemplateFactory.getInventoryTemplateById(itemConfig.id);
+			if (!itemTemplate) throw new Error(`Cannot find item template for ID: ${itemConfig.id}`);
+			result.addItem(itemTemplate, itemConfig.quantity);
+		}
+		
+		return result;
+	}
+
+	static getDefaultMaxQuantity(streak: number): number {
+		const config = dailyLoginRewardRepository.getDailyLoginConfig();
+		const rewardSet = streak % 7 === 0 ? config.defaultRewards.weeklyBonus : config.defaultRewards.normal;
+		return rewardSet.maxQuantity;
+	}
+
+	static getDefaultMaxItems(streak: number): number {
+		const config = dailyLoginRewardRepository.getDailyLoginConfig();
+		const rewardSet = streak % 7 === 0 ? config.defaultRewards.weeklyBonus : config.defaultRewards.normal;
+		return rewardSet.maxItems;
+	}
+
+	/**
+	 * Generate the default gold reward amount for a daily login.
+	 * If streak is a multiple of 7, returns 450 + rand(1,100) ~= 500
+	 * Otherwise returns 200 + rand(1,100) ~= 250
+	 * @streak the streak of the daily login reward
+	*/
+	static getDefaultGoldReward(streak: number): number {
+		if (streak % 7 == 0) return 450 + getRandomInt(1, 100);
+		return 200 + getRandomInt(1, 100);
+	}
+
+	/**
+	 * Generates an EventReward object, which contains a list of items and their quantities, as well as an amount of gold,
+	 * meant to be given to the player.
+	 * The total number of bundles will be less than this.maxItems.
+	 * There will be at most this.maxQuantity number of each bundle.
+	 * The list of items is generated from this.rewardItems, using the quantity on each item.
+	 * @userId the user id to set in the EventReward
+	 * @inventoryId the inventory id to set in the EventReward
+	 * @gold the amount of gold to set in the EventReward
+	 * @streak the streak to set in the EventReward
+	 * @message the message to set in the EventReward
+	 */
+	 createRewardBucket(
+		userId: string,
+		inventoryId: string,
+		streak: number,
+		gold: number,
+		message: string = ""
+	): EventReward {
+		const reward = new EventReward({
+			userId,
+			inventoryId,
+			streak,
+			gold,
+			message,
+		});
+	
+		const generatedItems = new InventoryItemList();
+	
+		// Precompute batches: each rewardItem entry is one batch type
+		const rewardBatches = this.rewardItems.getAllItems().filter((item: any) => item.getQuantity() > 0).map((item: any) => {
+			return {
+				itemTemplate: item.itemData,
+				batchSize: item.getQuantity(), // batch = all quantity from rewardItems
+			};
+		});
+	
+		// Helpers
+		const getStack = (itemTemplate: any) =>
+			generatedItems.getAllItems().find((stack: any) => stack.itemData.id === itemTemplate.id);
+	
+		const getBatchCount = (itemTemplate: any, batchSize: number) => {
+			if (batchSize <= 0) return 0; // prevent division by zero
+			return Math.floor((getStack(itemTemplate)?.getQuantity() ?? 0) / batchSize);
+		};
+	
+		const canAddBatch = (itemTemplate: any, batchSize: number) =>
+			getBatchCount(itemTemplate, batchSize) < this.maxQuantity;
+	
+		const getTotalBatchCount = () =>
+			generatedItems.getAllItems().reduce(
+				(total: number, stack: any) => {
+					const batchSize = rewardBatches.find(b => b.itemTemplate.id === stack.itemData.id)?.batchSize ?? 1;
+					return total + Math.floor(stack.getQuantity() / batchSize);
+				},
+				0
+			);
+	
+		// Randomly fill bucket up to maxItems (total batches)
+		while (getTotalBatchCount() < this.maxItems && rewardBatches.length > 0) {
+			const batchIndex = Math.floor(Math.random() * rewardBatches.length);
+			const { itemTemplate, batchSize } = rewardBatches[batchIndex];
+	
+			if (canAddBatch(itemTemplate, batchSize)) {
+				generatedItems.addItem(itemTemplate, batchSize);
+			} else {
+				// If we've maxed out this batch type, remove it from eligibility
+				rewardBatches.splice(batchIndex, 1);
+			}
+		}
+	
+		reward.setItems(generatedItems);
+		return reward;
+	}	
+
+	//  createRewardBucket(
+	// 	userId: string,
+	// 	inventoryId: string,
+	// 	streak: number,
+	// 	gold: number,
+	// 	targetValue: number,
+	// 	message: string = ""
+	// ): EventReward {
+	// 	const reward = new EventReward({
+	// 		userId,
+	// 		inventoryId,
+	// 		streak,
+	// 		gold,
+	// 		message,
+	// 	});
+	
+	// 	const generatedItems = new InventoryItemList();
+	
+	// 	// Snapshot of all available item templates (assumes each has a stable id and numeric value)
+	// 	const availableItemTemplates = this.rewardItems.getAllItems()
+	// 		.map((i: any) => i.itemData)
+	// 		.filter((itemTemplate: any) => typeof itemTemplate?.value === "number" && itemTemplate.value > 0);
+	
+	// 	// Helpers
+	// 	const getStack = (itemTemplate: any) =>
+	// 		generatedItems.getAllItems().find((stack: any) => stack.itemData.id === itemTemplate.id);
+	
+	// 	const getQuantity = (itemTemplate: any) =>
+	// 		(getStack(itemTemplate)?.getQuantity() ?? 0);
+	
+	// 	const canAddOneMore = (itemTemplate: any) =>
+	// 		getQuantity(itemTemplate) < this.maxQuantity;
+	
+	// 	const getDistinctItemCount = () =>
+	// 		generatedItems.getAllItems().length;
+	
+	// 	const getTotalValue = () =>
+	// 		generatedItems.getAllItems().reduce(
+	// 			(sum: number, stack: any) => sum + stack.itemData.value * stack.quantity,
+	// 			0
+	// 		);
+	
+	// 	const itemsByValueDescending = [...availableItemTemplates].sort((a, b) => b.value - a.value);
+	
+	// 	// Upper bound check: even the best case?
+	// 	const bestPossibleWithLimits = (() => {
+	// 		let possibleValue = 0;
+	// 		let stackCount = 0;
+	// 		for (const itemTemplate of itemsByValueDescending) {
+	// 			if (stackCount >= this.maxItems) break;
+	// 			possibleValue += itemTemplate.value * this.maxQuantity;
+	// 			stackCount += 1;
+	// 		}
+	// 		return possibleValue;
+	// 	})();
+	
+	// 	// Pick 1 unit at a time trying to stay close to 100% of target.
+	// 	const tryBuildRandom = (maxSteps = 10_000): boolean => {
+	// 		let steps = 0;
+	// 		while (getTotalValue() < targetValue && steps++ < maxSteps) {
+	// 			const remainingValue = targetValue - getTotalValue();
+	
+	// 			// What’s eligible right now?
+	// 			const canAddNewStack = getDistinctItemCount() < this.maxItems;
+	// 			const eligibleItems = availableItemTemplates.filter(itemTemplate =>
+	// 				(canAddNewStack || getQuantity(itemTemplate) > 0) &&
+	// 				canAddOneMore(itemTemplate)
+	// 			);
+	
+	// 			if (eligibleItems.length === 0) break; // stuck in this attempt
+	
+	// 			// Prefer items that don’t overshoot; otherwise pick the smallest overshoot.
+	// 			const underOrEqualToRemaining = eligibleItems.filter(itemTemplate => itemTemplate.value <= remainingValue);
+	// 			let chosenItemTemplate: any;
+	
+	// 			if (underOrEqualToRemaining.length > 0) {
+	// 				// Bias toward higher values but keep some randomness
+	// 				const sortedCandidates = underOrEqualToRemaining.sort((a, b) => b.value - a.value);
+	// 				const candidatePool = sortedCandidates.slice(0, Math.min(3, sortedCandidates.length)); // top-3 variety
+	// 				chosenItemTemplate = candidatePool[Math.floor(Math.random() * candidatePool.length)];
+	// 			} else {
+	// 				// All candidates overshoot; pick the smallest single-item overshoot
+	// 				chosenItemTemplate = eligibleItems.reduce((best, itemTemplate) => {
+	// 					const bestOvershoot = best ? best.value - remainingValue : Number.POSITIVE_INFINITY;
+	// 					const thisOvershoot = itemTemplate.value - remainingValue;
+	// 					return thisOvershoot < bestOvershoot ? itemTemplate : best;
+	// 				}, null as any);
+	// 			}
+	
+	// 			// Add exactly ONE unit (so overshoot is at most one item’s value)
+	// 			if (chosenItemTemplate && canAddOneMore(chosenItemTemplate)) {
+	// 				generatedItems.addItem(chosenItemTemplate, 1);
+	// 			} else {
+	// 				break; // nothing actionable
+	// 			}
+	// 		}
+	// 		return getTotalValue() >= targetValue;
+	// 	};
+	
+	// 	// Deterministic greedy fallback that prefers higher-value items (guarantees success if feasible)
+	// 	const buildGreedyHighValue = () => {
+	// 		// Clear and rebuild
+	// 		const freshItemList = new InventoryItemList();
+	
+	// 		const tryAddOne = (itemTemplate: any) => {
+	// 			const existingStack = freshItemList.getAllItems().find((stack: any) => stack.itemData.id === itemTemplate.id);
+	// 			if (!existingStack && freshItemList.getAllItems().length >= this.maxItems) return false;
+	// 			const existingQuantity = existingStack?.getQuantity() ?? 0;
+	// 			if (existingQuantity >= this.maxQuantity) return false;
+	// 			freshItemList.addItem(itemTemplate, 1);
+	// 			return true;
+	// 		};
+	
+	// 		let currentValue = 0;
+	// 		outer: while (currentValue < targetValue) {
+	// 			let progressed = false;
+	// 			for (const itemTemplate of itemsByValueDescending) {
+	// 				if (currentValue >= targetValue) break outer;
+	// 				if (tryAddOne(itemTemplate)) {
+	// 					currentValue += itemTemplate.value;
+	// 					progressed = true;
+	// 					if (currentValue >= targetValue) break outer;
+	// 				}
+	// 			}
+	// 			if (!progressed) break; // cannot add anything else
+	// 		}
+	
+	// 		return { list: freshItemList, value: currentValue };
+	// 	};
+	
+	// 	// 1) Random pass for variety, respecting limits strictly
+	// 	const maxRandomAttempts = 5;
+	// 	let success = false;
+	// 	for (let attempt = 0; attempt < maxRandomAttempts && !success; attempt++) {
+	// 		if (generatedItems.getAllItems().length) {
+	// 			generatedItems.deleteAll();
+	// 		}
+	
+	// 		// Shuffle available a bit each attempt for variety
+	// 		for (let i = availableItemTemplates.length - 1; i > 0; i--) {
+	// 			const j = Math.floor(Math.random() * (i + 1));
+	// 			[availableItemTemplates[i], availableItemTemplates[j]] = [availableItemTemplates[j], availableItemTemplates[i]];
+	// 		}
+	// 		success = tryBuildRandom();
+	// 	}
+	
+	// 	// 2) If random couldn’t reach target but it’s theoretically possible, greedily upgrade with high-value bias
+	// 	if (!success && bestPossibleWithLimits >= targetValue) {
+	// 		const { list: greedyList, value: greedyValue } = buildGreedyHighValue();
+	
+	// 		if (greedyValue >= targetValue) {
+	// 			reward.setItems(greedyList);
+	// 			return reward;
+	// 		}
+	// 	}
+	
+	// 	// 3) If even the best case cannot reach target, return the best possible pack (maximizes value under limits)
+	// 	if (getTotalValue() < targetValue && bestPossibleWithLimits < targetValue) {
+	// 		const bestEffortList = new InventoryItemList();
+	// 		let usedStacks = 0;
+	// 		for (const itemTemplate of itemsByValueDescending) {
+	// 			if (usedStacks >= this.maxItems) break;
+	// 			const qty = this.maxQuantity;
+	// 			if (qty > 0) {
+	// 				bestEffortList.addItem(itemTemplate, qty);
+	// 				usedStacks += 1;
+	// 			}
+	// 		}
+	// 		reward.setItems(bestEffortList);
+	// 		return reward;
+	// 	}
+	
+	// 	// 4) Otherwise, random succeeded; just attach what we built.
+	// 	reward.setItems(generatedItems);
+	// 	return reward;
+	// }	
+	
+}

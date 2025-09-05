@@ -4,4 +4,4 @@
 
 (But only the garden, store, and user pages work right now)
 
-## See https://github.com/lo-maxwell/react-virtual-garden/blob/main/design-doc.md
+## See https://github.com/lo-maxwell/react-virtual-garden/blob/main/design-doc.md for implementation details.

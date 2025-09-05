@@ -26,7 +26,7 @@ export abstract class InventoryItem extends Item {
 	protected quantity: number;
 	
 	constructor(inventoryItemId: string, itemData: InventoryItemTemplate, quantity: number) {
-		super();
+		super(itemData);
 		this.inventoryItemId = inventoryItemId;
 		this.itemData = itemData;
 		this.quantity = quantity;

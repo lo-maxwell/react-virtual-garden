@@ -1,8 +1,17 @@
 import { invokeLambda, parseRows } from "@/backend/lambda/invokeLambda";
+import inventoryItemRepository from "@/backend/repositories/items/inventoryItem/inventoryItemRepository";
+import inventoryRepository from "@/backend/repositories/itemStore/inventory/inventoryRepository";
 import userEventRepository from "@/backend/repositories/user/userEventRepository";
+import { DailyLoginRewardFactory } from "@/models/events/dailyLogin/DailyLoginRewardFactory";
+import { EventRewardInterface } from "@/models/events/EventReward";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
+import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
 import { UserEvent, UserEventEntity } from "@/models/user/userEvents/UserEvent";
+import { getRandomInt } from "@/models/utility/RandomNumber";
+import { plusDays } from "@/utils/time/dateUtils";
 import assert from "assert";
 import { PoolClient } from "pg";
+import { updateGold } from "../../inventory/inventoryService";
 import { transactionWrapper } from "../../utility/utility";
 
 /**
@@ -178,7 +187,7 @@ import { transactionWrapper } from "../../utility/utility";
 			const userEventResult = await invokeLambda('garden-select', payload);
 			// Check if result is valid
 			if (!userEventResult) {
-				throw new Error(`Could not find userEvent with user: ${userEvent.getUser()} and event type: ${userEvent.getEventType()}`);
+				throw new Error(`Could not select userEvent with user: ${userEvent.getUser()} and event type: ${userEvent.getEventType()}`);
 			}
 			const userEventEntityResult = parseRows<UserEventEntity[]>(userEventResult[0]);
 			assert(userEventRepository.validateUserEventEntity(userEventEntityResult));
@@ -206,6 +215,119 @@ import { transactionWrapper } from "../../utility/utility";
 	}
 }
 
-export async function claimDailyReward() {
+export async function claimDailyReward(userId: string, inventoryId: string, client?: PoolClient): Promise<EventRewardInterface> {
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+			let items = new InventoryItemList();
+			let rewardGold = 0;
+			let rewardMessage = '';
+			let eventEntity = await getUserEventEntityFromDatabase(new UserEvent(userId, "DAILYLOGIN"));
+			let eventInstance: UserEvent;
+			if (eventEntity) {
+				eventInstance = userEventRepository.makeUserEventObject(eventEntity);
+			} else {
+				eventInstance = new UserEvent(userId, "DAILYLOGIN");
+			}
+			if (eventEntity) {
+				// If the event already existed, check that it was at least 1 day ago
+				const nextAvailable = plusDays(new Date(eventEntity.last_occurrence), 1);
+				const now = new Date();
+			  
+				if (nextAvailable > now) {
+				  const msRemaining = nextAvailable.getTime() - now.getTime();
+			  
+				  // Break down into hours, minutes, seconds
+				  const hours = Math.floor(msRemaining / (1000 * 60 * 60));
+				  const minutes = Math.floor((msRemaining % (1000 * 60 * 60)) / (1000 * 60));
+				  const seconds = Math.floor((msRemaining % (1000 * 60)) / 1000);
+			  
+				  throw new Error(
+					`Daily login reward is not ready. Try again in ${hours}h ${minutes}m ${seconds}s`
+				  );
+				}
+			}
 
+			eventInstance.setStreak(eventInstance.getStreak() + 1);
+			eventInstance.setLastOccurence(new Date(Date.now()));
+			let streak = eventInstance.getStreak();
+			const dailyLoginRewardGenerator = new DailyLoginRewardFactory(streak);
+			rewardGold = DailyLoginRewardFactory.getDefaultGoldReward(streak);
+			const rewardBucket = dailyLoginRewardGenerator.createRewardBucket(userId, inventoryId, streak, rewardGold, rewardMessage);
+
+			// TODO: Replace with reward bucket
+			const appleSeedTemplate = itemTemplateFactory.getInventoryItemTemplateByName("apple seed");
+			assert(appleSeedTemplate);
+			items.addItem(appleSeedTemplate, 100);
+			await upsertUserEventInDatabase(eventInstance, client);
+			await updateGold(inventoryId, userId, rewardGold, false, client);
+			// TODO: Add items
+			// await inventoryItemRepository.addInventoryItem(inventoryId, items.getAllItems()[0], client);
+
+			let reward: EventRewardInterface = {
+				userId: userId,
+				inventoryId: inventoryId,
+				streak: eventInstance.getStreak(),
+				items: items,
+				gold: rewardGold,
+				message: rewardMessage
+			};
+			return reward;
+		} catch (error) {
+			console.error('Error fetching userEventEntity from Lambda:', error);
+			throw error;
+		}
+	} else {
+		let items = new InventoryItemList();
+		let rewardGold = 0;
+		let rewardMessage = '';
+		let eventEntity = await userEventRepository.getUserEvent(userId, "DAILYLOGIN");
+		let eventInstance: UserEvent;
+		if (eventEntity) {
+			eventInstance = userEventRepository.makeUserEventObject(eventEntity);
+		} else {
+			eventInstance = new UserEvent(userId, "DAILYLOGIN");
+		}
+		
+		if (eventEntity) {
+			// If the event already existed, check that it was at least 1 day ago
+			const nextAvailable = plusDays(new Date(eventEntity.last_occurrence), 1);
+			const now = new Date();
+		  
+			if (nextAvailable > now) {
+			  const msRemaining = nextAvailable.getTime() - now.getTime();
+		  
+			  // Break down into hours, minutes, seconds
+			  const hours = Math.floor(msRemaining / (1000 * 60 * 60));
+			  const minutes = Math.floor((msRemaining % (1000 * 60 * 60)) / (1000 * 60));
+			  const seconds = Math.floor((msRemaining % (1000 * 60)) / 1000);
+		  
+			  throw new Error(
+				`Daily login reward is not ready. Try again in ${hours}h ${minutes}m ${seconds}s`
+			  );
+			}
+		}
+		
+		eventInstance.setStreak(eventInstance.getStreak() + 1);
+		eventInstance.setLastOccurence(new Date(Date.now()));
+		let streak = eventInstance.getStreak();
+		rewardGold = Math.min(10, streak) * 50 + getRandomInt(1, 50);
+
+		// TODO: Replace with reward bucket
+		const appleSeedTemplate = itemTemplateFactory.getInventoryItemTemplateByName("apple seed");
+		assert(appleSeedTemplate);
+		items.addItem(appleSeedTemplate, 100);
+		await userEventRepository.createOrUpdateUserEvent(eventInstance, client);
+		await inventoryRepository.updateInventoryGold(inventoryId, rewardGold, client);
+		await inventoryItemRepository.addInventoryItem(inventoryId, items.getAllItems()[0], client);
+
+		let reward: EventRewardInterface = {
+			userId: userId,
+			inventoryId: inventoryId,
+			streak: eventInstance.getStreak(),
+			items: items,
+			gold: rewardGold,
+			message: rewardMessage
+		};
+		return reward;
+	}
 }
