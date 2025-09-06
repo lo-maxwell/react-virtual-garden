@@ -4,7 +4,7 @@ import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
 import { getRandomInt } from "@/models/utility/RandomNumber";
 import { v4 as uuidv4 } from "uuid";
 import { EventReward } from "../EventReward";
-import { RewardGenerator } from "../RewardGenerator";
+import { RewardGenerator } from "@/models/events/RewardGenerator";
 import { dailyLoginRewardRepository } from "./DailyLoginRewardRepository";
 
 export class DailyLoginRewardFactory extends RewardGenerator {
