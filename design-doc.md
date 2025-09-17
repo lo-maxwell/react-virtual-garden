@@ -29,6 +29,6 @@ Goose Farm is a 2D grid-based farming simulator that allows users to create and 
 
 ## In Progress
 
-- Redesigining UI components for a better user experience
+- Redesigning UI components for a better user experience
 - Adding geese (sorry, they're only here in spirit right now)
 

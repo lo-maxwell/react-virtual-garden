@@ -25,6 +25,9 @@ class IconEmojiFactory {
 		this.Icons['Tools'] = icons.Tools.map((iconObject: any) =>
 		  {return new Icon(iconObject.name, iconObject.icon);}
 		);
+		this.Icons['Other'] = icons.Other.map((iconObject: any) =>
+		  {return new Icon(iconObject.name, iconObject.icon);}
+		);
 	  }
 
 	getIconCategories() {

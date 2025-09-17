@@ -24,7 +24,7 @@ export abstract class PlacedItem extends Item {
 	protected status: string;
 
 	constructor(placedItemId: string, itemData: PlacedItemTemplate, status: string) {
-		super();
+		super(itemData);
 		this.placedItemId = placedItemId;
 		this.itemData = itemData;
 		this.status = status;

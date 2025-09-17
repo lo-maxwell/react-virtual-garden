@@ -111,19 +111,19 @@ class InventoryItemRepository {
 	/**
 	 * Begins a transaction if there is not already one. Creates a new inventoryItem row.
 	 * On error, rolls back.
-	 * @ownerId the id of the owner of this inventoryItem. If the owner cannot be found, fails.
+	 * @inventoryId the id of the owner of this inventoryItem. If the owner cannot be found, fails.
 	 * @inventoryItem the inventoryItem used to create this object
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns an InventoryItemEntity with the corresponding data if success, null if failure (or throws error)
 	 */
-	async createInventoryItem(ownerId: string, inventoryItem: InventoryItem, client?: PoolClient): Promise<InventoryItemEntity> {
+	async createInventoryItem(inventoryId: string, inventoryItem: InventoryItem, client?: PoolClient): Promise<InventoryItemEntity> {
 		
 		const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {
 
 			const existingItemResult = await client.query<InventoryItemEntity>(
 				`SELECT id, owner, identifier, quantity FROM inventory_items 
 				WHERE id = $1 OR (owner = $2 AND identifier = $3)`, 
-				[inventoryItem.getInventoryItemId(), ownerId, inventoryItem.itemData.id]
+				[inventoryItem.getInventoryItemId(), inventoryId, inventoryItem.itemData.id]
 			);
 
 			if (existingItemResult.rows.length > 0) {
@@ -136,7 +136,7 @@ class InventoryItemRepository {
 				ON CONFLICT (id) 
 				DO NOTHING
 				RETURNING id, owner, identifier, quantity`,
-				[inventoryItem.getInventoryItemId(), ownerId, inventoryItem.itemData.id, inventoryItem.getQuantity()]
+				[inventoryItem.getInventoryItemId(), inventoryId, inventoryItem.itemData.id, inventoryItem.getQuantity()]
 			);
 
 			// Check if result is valid
@@ -154,12 +154,12 @@ class InventoryItemRepository {
 	/**
 	 * Adds an item to the database. If the item already exists, adds to its quantity. Otherwise, creates a new item row. Begins a transaction if there is not already one. 
 	 * On error, rolls back.
-	 * @ownerId the id of the owner of this inventoryItem. If the owner cannot be found, fails.
+	 * @inventoryId the id of the owner of this inventoryItem, ie the inventory. If the owner cannot be found, fails.
 	 * @inventoryItem the inventoryItem used to create this object
 	 * @client the pool client that this is nested within, or null if it should create its own transaction.
 	 * @returns a InventoryItemEntity with the corresponding data if success, null if failure (or throws error)
 	 */
-	async addInventoryItem(ownerId: string, inventoryItem: InventoryItem, client?: PoolClient): Promise<InventoryItemEntity> {
+	async addInventoryItem(inventoryId: string, inventoryItem: InventoryItem, client?: PoolClient): Promise<InventoryItemEntity> {
 		if (inventoryItem.getQuantity() < 0) {
 			throw new Error(`Cannot add inventory item with quantity ${inventoryItem.getQuantity()}`);
 		}
@@ -169,7 +169,7 @@ class InventoryItemRepository {
 		
 		const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {
 			// Check if the inventoryItem already exists
-			const existingInventoryItemResult = await this.getInventoryItemByOwnerId(ownerId, inventoryItem.itemData.id);
+			const existingInventoryItemResult = await this.getInventoryItemByOwnerId(inventoryId, inventoryItem.itemData.id);
 
 			if (existingInventoryItemResult) {
 				// InventoryItem already exists
@@ -181,7 +181,7 @@ class InventoryItemRepository {
 				// return makeInventoryItemObject(updateResult); 
 			}
 			
-			const result = await this.createInventoryItem(ownerId, inventoryItem, client);
+			const result = await this.createInventoryItem(inventoryId, inventoryItem, client);
 
 			// Check if result is valid
 			if (!result) {
@@ -342,24 +342,24 @@ class InventoryItemRepository {
 
 	/**
 	 * Deletes the specified inventoryItem from the database. Returns the deleted row.
-	 * @ownerId the id of the owner
+	 * @inventoryId the id of the owner
 	 * @identifier the item template id
 	 * @returns a InventoryItemEntity with the new data on success (or throws error)
 	 */
-	async deleteInventoryItemByOwnerId(ownerId: string, identifier: string, client?: PoolClient): Promise<InventoryItemEntity> {
+	async deleteInventoryItemByOwnerId(inventoryId: string, identifier: string, client?: PoolClient): Promise<InventoryItemEntity> {
 		const innerFunction = async (client: PoolClient): Promise<InventoryItemEntity> => {
 			// Lock the row for update
 			const lockResult = await client.query<{id: string, current_quantity: number}>(
 				'SELECT id, quantity AS current_quantity FROM inventory_items WHERE owner = $1 AND identifier = $2 FOR UPDATE',
-				[ownerId, identifier]
+				[inventoryId, identifier]
 			);
 
 			if (lockResult.rows.length === 0) {
-				throw new Error(`InventoryItem not found for ownerId: ${ownerId}`);
+				throw new Error(`InventoryItem not found for ownerId: ${inventoryId}`);
 			}
 			const deleteResult = await client.query<InventoryItemEntity>(
 				'DELETE FROM inventory_items WHERE owner = $1 AND identifier = $2 RETURNING id, owner, identifier, quantity',
-				[ownerId, identifier]
+				[inventoryId, identifier]
 			);
 
 			return deleteResult.rows[0];

@@ -4,8 +4,8 @@
       "tableName": "inventory_items",
       "columnsToWrite": ["owner", "identifier", "quantity"],
       "values": [
-        ["some-user-uuid", "apple", 5],
-        ["some-user-uuid", "orange", 10]
+        ["some-inventory-id", "apple", 5],
+        ["some-inventory-id", "orange", 10]
       ],
       "conflictColumns": ["owner", "identifier"],
       "updateQuery": {
@@ -22,7 +22,7 @@
         "tableName": "store_items",
         "columnsToWrite": ["owner","identifier", "quantity"],
         "values": [
-          ["some-user-uuid","blue-potion", 50]
+          ["some-inventory-id","blue-potion", 50]
         ],
         "conflictColumns": ["owner", "identifier"],
         "updateQuery": {

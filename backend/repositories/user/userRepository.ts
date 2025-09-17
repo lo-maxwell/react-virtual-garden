@@ -5,6 +5,7 @@ import LevelSystem from "@/models/level/LevelSystem";
 import { ActionHistoryList } from "@/models/user/history/ActionHistoryList";
 import { ItemHistoryList } from "@/models/user/history/ItemHistoryList";
 import User, { UserEntity } from "@/models/user/User";
+import { UserEvent } from "@/models/user/userEvents/UserEvent";
 import assert from "assert";
 import { PoolClient } from 'pg';
 
@@ -21,10 +22,10 @@ class UserRepository {
 		return true;
 	}
 
-	makeUserObject(userEntity: UserEntity, levelSystem: LevelSystem, actionHistoryList: ActionHistoryList, itemHistoryList: ItemHistoryList, toolbox: Toolbox): User {
+	makeUserObject(userEntity: UserEntity, levelSystem: LevelSystem, actionHistoryList: ActionHistoryList, itemHistoryList: ItemHistoryList, toolbox: Toolbox, userEvents: Map<string, UserEvent>): User {
 		assert(this.validateUserEntity(userEntity), 'UserEntity validation failed');
 
-		return new User(userEntity.id, userEntity.username, userEntity.icon, levelSystem, itemHistoryList, actionHistoryList, toolbox);
+		return new User(userEntity.id, userEntity.username, userEntity.icon, levelSystem, itemHistoryList, actionHistoryList, toolbox, userEvents);
 	}
 
 	/**

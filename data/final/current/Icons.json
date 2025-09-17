@@ -89,6 +89,12 @@
                 "name": "shovel",
                 "icon": "🪓"
             }
+        ],
+        "Other": [
+            {
+                "name": "reward",
+                "icon": "🎁"
+            }
         ]
     }
 }

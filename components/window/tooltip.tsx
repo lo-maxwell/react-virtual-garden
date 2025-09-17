@@ -1,7 +1,8 @@
 'use client'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+export type ForceVisibleMode = "OFF" | "ON" | "DEFAULT" | "INVERSE";
 
-const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVisible = '', boxWidth = '20vw' }: { children: React.ReactNode, content: React.ReactNode, position: string, backgroundColor: string, forceVisible: string, boxWidth: string}) => {
+const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVisible = 'DEFAULT', boxWidth = '20vw', onMouseEnter, onMouseLeave }: { children: React.ReactNode, content: React.ReactNode, position: string, backgroundColor: string, forceVisible?: ForceVisibleMode, boxWidth: string, onMouseEnter?: () => void, onMouseLeave?: () => void}) => {
   const [visible, setVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const [tooltipWidth, setTooltipWidth] = useState(boxWidth); // Default value
@@ -86,11 +87,23 @@ const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVi
         setCoords({ top: tooltipTop, left: tooltipLeft });
       }
     }, 10); // Ensure tooltip is rendered before measuring
+
+    if (onMouseEnter) onMouseEnter();
   };
 
   const hideTooltip = () => {
     setVisible(false);
+    if (onMouseLeave) onMouseLeave();
   };
+
+  const shouldShow =
+    forceVisible === "ON"
+      ? true
+      : forceVisible === "OFF"
+      ? false
+      : forceVisible === "INVERSE"
+      ? !visible
+      : visible; // DEFAULT
 
   return (
     <div
@@ -100,7 +113,7 @@ const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVi
     >
       {children}
       {/* ON = always show, OFF = never show, other = show if moused over */}
-      {(forceVisible === 'ON' || (visible && forceVisible !== 'OFF')) && (
+      {shouldShow && (
         <div
           ref={tooltipRef}
           className={`fixed z-10 px-2 py-1 text-sm text-purple-800 text-semibold ${backgroundColor} rounded shadow-lg

@@ -396,19 +396,22 @@
 
 ### Adding userEvents - In progress
   * Will be used for daily login reward
+  * Added infrastructure for various user events stored in database
+  * Added DailyLoginReward event
 
-Guest mode: Should have a level/xp/money etc cap, and some warnings that guest mode is local only; allow users to port their guest mode account into an online account (with the cap)
+### Adding eventRewards - In progress
+  * Stores the actual rewards received
+  * Not currently stored in database
+
+### Added Daily Login Button on garden page
+  * Creates an eventReward and adds it to the user's inventory
+  * Claimable once per day
 
 TODO:
 
-Background/border color of item displays is broken
 
 Landing/loading pages for login/register - inform user not to leave the page
 
-Updated home page
-
-
-Add examples of how to write queries for select/insert/update/delete lambdas
 SQS queue for rate limiting between backend and lambda?
 Fix guest mode banners
 

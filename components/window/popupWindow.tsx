@@ -21,7 +21,7 @@ export function PopupWindow({children, showWindow, setShowWindow}: {children: Re
 	}, [showWindow]); // Only re-run the effect if showWindow changes
 
 	return (
-		<span className={`${showWindow ? `` : `hidden`} fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 `}>
+		<span className={`${showWindow ? `` : `hidden`} fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50`}>
 			<span className="children-window">
 				{children}
 			</span>

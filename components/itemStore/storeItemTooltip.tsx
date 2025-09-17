@@ -131,7 +131,7 @@ const StoreItemTooltip = ({ children, item, store }: { children: React.ReactNode
 
 	return (
 		<div className="w-full">
-			<Tooltip content={RenderItemTooltipInfo()} position="top" backgroundColor={getBackgroundColor()} forceVisible={""} boxWidth={"300px"}>
+			<Tooltip content={RenderItemTooltipInfo()} position="top" backgroundColor={getBackgroundColor()} boxWidth={"300px"}>
 				{children}
 			</Tooltip>
 		</div>

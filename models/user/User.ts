@@ -80,6 +80,7 @@ class User {
 				hydratedUserEvents
 			);
 		} catch (err) {
+			
 			console.error(plainObject);
 			console.error('Error creating User from plainObject:', err);
             return new User("999999999999999999999999999", "Error User", "error");

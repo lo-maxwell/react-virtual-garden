@@ -16,9 +16,17 @@ class UserEventRepository {
 	 * Ensures that the object is of type UserEventEntity, ie. that it contains a user, event type, last occurrence, and streak
 	 */
 	validateUserEventEntity(userEventEntity: any): boolean {
-		if (!userEventEntity || (typeof userEventEntity.user !== 'string') || !UserEvent.isUserEventType(userEventEntity.event_type) || !(userEventEntity.last_occurrence instanceof Date) || (typeof userEventEntity.streak !== 'number')) {
+		if (!userEventEntity || (typeof userEventEntity.owner !== 'string') || !UserEvent.isUserEventType(userEventEntity.event_type) || (typeof userEventEntity.streak !== 'number')) {
 			console.error(userEventEntity);
 			throw new Error(`Invalid types while creating UserEvent from UserEventEntity`);
+		}
+		// Ensure last_occurrence is a valid date string or Date object
+		if (!userEventEntity.last_occurrence) {
+			throw new Error(`last_occurrence is missing from UserEventEntity`);
+		}
+		const lastOccurrenceDate = new Date(userEventEntity.last_occurrence);
+		if (isNaN(lastOccurrenceDate.getTime())) {
+			throw new Error(`Invalid last_occurrence date in UserEventEntity: ${userEventEntity.last_occurrence}`);
 		}
 		return true;
 	}
@@ -26,7 +34,18 @@ class UserEventRepository {
 	makeUserEventObject(userEventEntity: UserEventEntity): UserEvent {
 		assert(this.validateUserEventEntity(userEventEntity), 'UserEventEntity validation failed');
 
-		return new UserEvent(userEventEntity.user, userEventEntity.event_type as UserEventType, userEventEntity.last_occurrence, userEventEntity.streak);
+		const lastOccurrenceDate = new Date(userEventEntity.last_occurrence);
+		return new UserEvent(userEventEntity.owner, userEventEntity.event_type as UserEventType, lastOccurrenceDate, userEventEntity.streak);
+	}
+
+	makeUserEventMapObject(userEventEntityList: UserEventEntity[]): Map<string, UserEvent> {
+		const userEventMap = new Map<string, UserEvent>();
+		userEventEntityList.forEach(userEventEntity => {
+			this.validateUserEventEntity(userEventEntity);
+			const userEvent = this.makeUserEventObject(userEventEntity);
+			userEventMap.set(userEvent.getEventType(), userEvent);
+		});
+		return userEventMap;
 	}
 
 	/**
@@ -56,7 +75,7 @@ class UserEventRepository {
 	}
 
 	async getUserEvent(userId: string, eventType: UserEventType): Promise<UserEventEntity | null> {
-		const result = await query<UserEventEntity>('SELECT * FROM user_events WHERE user = $1 && event_type = $2', [userId, eventType]);
+		const result = await query<UserEventEntity>('SELECT * FROM user_events WHERE owner = $1 && event_type = $2', [userId, eventType]);
 		// If no rows are returned, return null
 		if (!result || result.rows.length === 0) return null;
 		// Return the first item found
@@ -78,12 +97,12 @@ class UserEventRepository {
 
 			if (existingUserEventResult) {
 				// User already exists
-				console.warn(`UserEvent already exists for user: ${existingUserEventResult.user} and event type: ${existingUserEventResult.event_type}`);
+				console.warn(`UserEvent already exists for owner: ${existingUserEventResult.owner} and event type: ${existingUserEventResult.event_type}`);
 				return existingUserEventResult;
 			}
 
 			const userEventResult = await client.query<UserEventEntity>(
-				'INSERT INTO user_events (user, event_type, last_occurrence, streak) VALUES ($1, $2, $3, $4) RETURNING *',
+				'INSERT INTO user_events (owner, event_type, last_occurrence, streak) VALUES ($1, $2, $3, $4) RETURNING *',
 				[userEvent.getUser(), userEvent.getEventType(), userEvent.getLastOccurrence(), userEvent.getStreak()]
 			);
 
@@ -111,12 +130,12 @@ class UserEventRepository {
 				// User already exists
 				result = await this.updateUserEvent(userEvent);
 				if (!result) {
-					throw new Error(`Error updating userEvent for user: ${existingUserEventResult.user} and event type: ${existingUserEventResult.event_type}`);
+					throw new Error(`Error updating userEvent for owner: ${existingUserEventResult.owner} and event type: ${existingUserEventResult.event_type}`);
 				}
 			} else {
 				result = await this.createUserEvent(userEvent, client);
 				if (!result) {
-					throw new Error(`Error creating userEvent for user: ${userEvent.getUser()} and event type: ${userEvent.getEventType()}`);
+					throw new Error(`Error creating userEvent for owner: ${userEvent.getUser()} and event type: ${userEvent.getEventType()}`);
 				}
 			}
 
@@ -135,7 +154,7 @@ class UserEventRepository {
 	 */
 	async updateUserEvent(userEvent: UserEvent): Promise<UserEventEntity> {
 		const userEventResult = await query<UserEventEntity>(
-			'UPDATE user_events SET last_occurrence = $1, streak = $2 WHERE user = $3 && event_type = $4 RETURNING *',
+			'UPDATE user_events SET last_occurrence = $1, streak = $2 WHERE owner = $3 && event_type = $4 RETURNING *',
 			[userEvent.getLastOccurrence(), userEvent.getStreak(), userEvent.getUser(), userEvent.getEventType()]
 			);
 

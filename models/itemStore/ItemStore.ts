@@ -59,7 +59,7 @@ export class ItemStore {
 	 * @quantity Positive integer amount of item being added.
      * @returns InventoryTransactionResponse containing the added item or an error message.
      */
-	 gainItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
+	gainItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
 		const response = this.addItem(item, quantity);
 		return response;
 	}
