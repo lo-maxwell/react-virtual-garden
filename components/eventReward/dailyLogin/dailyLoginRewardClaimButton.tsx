@@ -121,45 +121,63 @@ const DailyLoginRewardClaimButton = () => {
     }
 
     function renderPopupWindowDisplay() {
-        return eventReward ? (
-            <>
-            <div className="text-xl">{`Day: ${eventReward.getStreak()}`}</div>
-            {eventReward.getStreak() % 7 == 0 ? (
-                <div className="text-xl">{`7-Day Streak Bonus!`}</div> )
-                : <></>
-            }
-            <div className="text-2xl my-2">You Recieved: </div>
-            <div className="text-xl mb-2">{eventReward.getGold()} gold</div>
-            {renderItemRewards()}
-            <button
-            className="mx-auto mt-4 block 
-                        border-4 border-yellow-500 
-                        bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 
-                        text-white font-bold drop-shadow-md 
-                        px-6 py-3 rounded-xl 
-                        hover:from-yellow-500 hover:to-orange-500 
-                        hover:scale-105 transition"
-            onClick={() => closeWindowAndRefresh(false)}
-            > Claim Reward </button>
-            </>
-        ) : (
-            <>
-            <div className="text-xl mb-2">Daily login reward already claimed today.</div>
-            <button
-            className="mx-auto mt-4 block 
-                        border-2 border-gray-400 
-                        bg-gray-200 
-                        text-gray-700 font-medium 
-                        px-6 py-3 rounded-lg 
-                        hover:bg-gray-300 hover:text-gray-900 
-                        transition"
-            onClick={() => closeWindowAndRefresh(false)}
-            >
-            Exit
-            </button>
-            </>
-        )
-            
+        return <> { isLoading ? (
+                <div className="text-xl mb-2">Calculating daily login reward...</div>
+            ) : apiError ? (
+                <>
+                <div className="text-xl mb-2 text-red-500">{apiError}</div>
+                <button
+                className="mx-auto mt-4 block 
+                            border-2 border-gray-400 
+                            bg-gray-200 
+                            text-gray-700 font-medium 
+                            px-6 py-3 rounded-lg 
+                            hover:bg-gray-300 hover:text-gray-900 
+                            transition"
+                onClick={() => closeWindowAndRefresh(false)}
+                >
+                Exit
+                </button>
+                </>
+            ) : eventReward ? (
+                <>
+                <div className="text-xl">{`Day: ${eventReward.getStreak()}`}</div>
+                {eventReward.getStreak() % 7 == 0 ? (
+                    <div className="text-xl">{`7-Day Streak Bonus!`}</div> )
+                    : <></>
+                }
+                <div className="text-2xl my-2">You Recieved: </div>
+                <div className="text-xl mb-2">{eventReward.getGold()} gold</div>
+                {renderItemRewards()}
+                <button
+                className="mx-auto mt-4 block 
+                            border-4 border-yellow-500 
+                            bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 
+                            text-white font-bold drop-shadow-md 
+                            px-6 py-3 rounded-xl 
+                            hover:from-yellow-500 hover:to-orange-500 
+                            hover:scale-105 transition"
+                onClick={() => closeWindowAndRefresh(false)}
+                > Claim Reward </button>
+                </>
+            ) : (
+                <>
+                <div className="text-xl mb-2">Daily login reward already claimed today.</div>
+                <button
+                className="mx-auto mt-4 block 
+                            border-2 border-gray-400 
+                            bg-gray-200 
+                            text-gray-700 font-medium 
+                            px-6 py-3 rounded-lg 
+                            hover:bg-gray-300 hover:text-gray-900 
+                            transition"
+                onClick={() => closeWindowAndRefresh(false)}
+                >
+                Exit
+                </button>
+                </>
+            )}
+        </>
     }
     
     return (
@@ -167,15 +185,11 @@ const DailyLoginRewardClaimButton = () => {
             <DailyLoginRewardClaimTooltip>
         	    <IconButton icon={"reward"} onClickFunction={showWindowHandler} bgColor={canClaim ? `bg-blue-300` : `bg-gray-400`} borderColor={`border border-2 border-coffee-700`} textSize={"text-4xl"} elementSize={"12"} disabled={!canClaim || isLoading}/>
             </DailyLoginRewardClaimTooltip>
-            <PopupWindow showWindow={showWindow} setShowWindow={closeWindowAndRefresh}>
+            {/* Disable leaving the popup by clicking outside */}
+            <PopupWindow showWindow={showWindow} setShowWindow={() => {}}> 
                 <div className="w-max bg-reno-sand-200 text-black p-8 rounded-lg shadow-md justify-between items-center">
                     <div className="text-2xl mb-2 text-black">{`Daily Login Bonus`}</div>
-                    {isLoading ? (
-                        <div className="text-xl mb-2">Calculating daily login reward...</div>
-                    ) : apiError ? (
-                        <div className="text-xl mb-2 text-red-500">{apiError}</div>
-                    ) : renderPopupWindowDisplay()
-                    }
+                    {renderPopupWindowDisplay()}
                     </div>
             </PopupWindow>
 			</>
