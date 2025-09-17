@@ -28,7 +28,7 @@ const allowedTables = {
   users: ["id", "username", "password_hash", "password_salt", "icon"], //Disallow password hash/salt select statements?
   toolboxes: ["id", "owner"],
   tools: ["id", "owner", "identifier"],
-  userEvents: ["id", "user", "event_type", "last_occurrence", "streak"],
+  user_events: ["id", "owner", "event_type", "last_occurrence", "streak"],
   // Add more tables and their columns as needed
 };
 
@@ -48,15 +48,25 @@ const constructUpdateQuery = (tableName, values, conditions, numExistingParams) 
         if (!allowedUpdateOperators.includes(values[key].operator)) {
           throw new Error(`Invalid operator: ${values[key].operator}`);
         }
-        queryParams.push(values[key].value);
-        return `${key} = EXCLUDED.${key} ${values[key].operator} $${queryParams.length + numExistingParams}`;
+        if (values[key].hasOwnProperty('value')) {
+          queryParams.push(values[key].value);
+          return `${key} = EXCLUDED.${key} ${values[key].operator} $${queryParams.length + numExistingParams}`;
+        } else {
+          // If no specific value for the operator, use the original + excluded
+          return `${key} = ${tableName}.${key} ${values[key].operator} EXCLUDED.${key}`;
+        }
       } else if (typeof values[key] === 'object' && values[key].operator) {
         // Not excluded + operator -> new value is original with operator applied
         if (!allowedUpdateOperators.includes(values[key].operator)) {
           throw new Error(`Invalid operator: ${values[key].operator}`);
         }
-        queryParams.push(values[key].value);
-        return `${key} = ${tableName}.${key} ${values[key].operator} $${queryParams.length + numExistingParams}`; // Use parameterized query
+        if (values[key].hasOwnProperty('value')) {
+          queryParams.push(values[key].value);
+          return `${key} = ${tableName}.${key} ${values[key].operator} $${queryParams.length + numExistingParams}`; // Use parameterized query
+        } else {
+          // If no specific value for the operator, use the original + excluded
+          return `${key} = ${tableName}.${key} ${values[key].operator} EXCLUDED.${key}`;
+        }
       } else if (values[key].excluded === true) {
         // Excluded + no operator -> new value is excluded value
         return `${key} = EXCLUDED.${key}`;
