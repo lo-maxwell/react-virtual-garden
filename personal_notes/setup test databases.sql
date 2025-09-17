@@ -348,12 +348,12 @@ BEGIN
     ) THEN
 		CREATE TABLE IF NOT EXISTS user_events (
 			id SERIAL PRIMARY KEY,  -- Generate a UUID by default
-			user VARCHAR(28) NOT NULL,            -- user ID (foreign key from the 'users' table)
+			owner VARCHAR(28) NOT NULL,            -- user ID (foreign key from the 'users' table)
 			event_type VARCHAR(255) NOT NULL,
 			last_occurrence TIMESTAMP NOT NULL,
 			streak INT DEFAULT 0,
-			FOREIGN KEY (user) REFERENCES users(id),  -- Establishing relationship with 'users' table
-			UNIQUE (user, event_type)
+			FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table
+			UNIQUE (owner, event_type)
 		);
 		table_created := TRUE;
 	END IF;

@@ -53,7 +53,7 @@ const ToolTooltip = ({ children, tool }: { children: React.ReactNode, tool: Tool
 
 	return (
 		<div>
-			<Tooltip content={RenderItemTooltipInfo()} position="top" backgroundColor={getBackgroundColor()} forceVisible={""} boxWidth={'20vw'}>
+			<Tooltip content={RenderItemTooltipInfo()} position="top" backgroundColor={getBackgroundColor()} boxWidth={'20vw'}>
 				{children}
 			</Tooltip>
 		</div>

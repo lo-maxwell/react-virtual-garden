@@ -1,8 +1,8 @@
 {
 	"defaultRewards": {
 	  "normal": {
-		"maxQuantity": 3,
-		"maxItems": 3,
+		"maxQuantity": 1,
+		"maxItems": 2,
 		"items": [
 		  { "id": "1-01-09-01-00", "name": "apple seed", "quantity": 20 },
 		  { "id": "1-01-10-01-00", "name": "banana seed", "quantity": 6 },
@@ -16,7 +16,7 @@
 	  },
 	  "weeklyBonus": {
 		"maxQuantity": 2,
-		"maxItems": 5,
+		"maxItems": 4,
 		"items": [
 		  { "id": "1-01-09-01-00", "name": "apple seed", "quantity": 50 },
 		  { "id": "1-01-10-01-00", "name": "banana seed", "quantity": 16 },

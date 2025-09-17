@@ -25,6 +25,9 @@ class IconEmojiRepository {
 		this.Icons['Tools'] = iconData.Icons.Tools.map((iconObject: any) =>
 		{return new Icon(iconObject.name, iconObject.icon);}
 		);
+		this.Icons['Other'] = iconData.Icons.Other.map((iconObject: any) =>
+		{return new Icon(iconObject.name, iconObject.icon);}
+		);
 	  }
 
 	getIconCategories() {

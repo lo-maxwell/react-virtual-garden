@@ -8,7 +8,7 @@ import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplat
 import { PlantTemplate } from "@/models/items/templates/models/PlacedItemTemplates/PlantTemplate";
 import React, { useEffect, useState } from "react";
 import colors from "../colors/colors";
-import Tooltip from "../window/tooltip";
+import Tooltip, { ForceVisibleMode } from "../window/tooltip";
 import { HarvestedItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
 import { Tool } from "@/models/items/tools/Tool";
 import RawIconDisplay from "../user/icon/RawIconDisplay";
@@ -232,15 +232,15 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 
 	// const showTooltip = plot.getItemSubtype() === ItemSubtypes.GROUND.name ? 'OFF' : '';
 
-	const shouldShowTooltip = () => {
+	const shouldShowTooltip: () => ForceVisibleMode = () => {
 		if (plot.getItemSubtype() === ItemSubtypes.DECORATION.name || plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
-			return '';
+			return 'DEFAULT';
 		}
 		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name && selectedItem && !(selectedItem instanceof Tool) && (selectedItem.itemData.subtype === ItemSubtypes.SEED.name)) {
-			return '';
+			return 'DEFAULT';
 		}
 		if (plot.getItemSubtype() === ItemSubtypes.GROUND.name && selectedItem && !(selectedItem instanceof Tool) && (selectedItem.itemData.subtype === ItemSubtypes.BLUEPRINT.name)) {
-			return '';
+			return 'DEFAULT';
 		}
 
 		return 'OFF';

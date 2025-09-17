@@ -1,8 +1,8 @@
 import { UserEventType, UserEventTypes } from "./UserEventTypes";
 
 export interface UserEventEntity {
-	user: string;
-	event_type: string;
+	owner: string;
+	event_type: UserEventType;
 	last_occurrence: Date;
 	streak: number;
 }
@@ -41,10 +41,10 @@ export class UserEvent {
 				throw new Error('Invalid user property in plainObject for UserEvent');
 			}
 
-			if (!this.isUserEventType(event_type)) {
+			if (!UserEvent.isUserEventType(event_type)) {
 				throw new Error('Invalid event_type property');
 			}
-		
+	
 			const date =
 				last_occurrence instanceof Date
 				? last_occurrence
@@ -57,12 +57,12 @@ export class UserEvent {
 			if (typeof streak !== 'number') {
 				throw new Error('Invalid streak property');
 			}
-		
+	
 			return new UserEvent(user, event_type, date, streak);
 		} catch (err) {
 			console.error(plainObject);
 			console.error('Error creating UserEvent from plainObject:', err);
-            return this.generateErrorUserEvent("-1");
+            return UserEvent.generateErrorUserEvent("-1");
 		}
 	}
 
@@ -83,6 +83,11 @@ export class UserEvent {
 		return this.event_type;
 	}
 
+	setEventType(newEventType: UserEventType): UserEventType {
+		this.event_type = newEventType;
+		return this.event_type;
+	}
+
 	getLastOccurrence(): Date {
 		return this.last_occurrence;
 	}
@@ -99,6 +104,15 @@ export class UserEvent {
 	setStreak(newQuantity: number): number {
 		this.streak = Math.max(0, newQuantity);
 		return this.streak;
+	}
+
+	/**
+	 * Returns the time passed since the last occurrence of the event in milliseconds
+	 * @param currentTime - The current time to compare against the last occurrence
+	 * @returns The time passed since the last occurrence in milliseconds
+	 */
+	eventTimePassed(currentTime: Date = new Date(Date.now())): number {
+		return (currentTime.getTime() - this.last_occurrence.getTime());
 	}
 
 }

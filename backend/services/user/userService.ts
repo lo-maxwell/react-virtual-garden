@@ -4,6 +4,7 @@ import toolboxRepository from "@/backend/repositories/itemStore/toolbox/toolboxR
 import levelRepository from "@/backend/repositories/level/levelRepository";
 import actionHistoryRepository from "@/backend/repositories/user/actionHistoryRepository";
 import itemHistoryRepository from "@/backend/repositories/user/itemHistoryRepository";
+import userEventRepository from "@/backend/repositories/user/userEventRepository";
 import userRepository from "@/backend/repositories/user/userRepository";
 import HistoryComponent from "@/components/user/history/History";
 import { ToolEntity } from "@/models/items/tools/Tool";
@@ -12,6 +13,7 @@ import LevelSystem, { LevelSystemEntity } from "@/models/level/LevelSystem";
 import { ActionHistoryEntity } from "@/models/user/history/actionHistory/ActionHistory";
 import { ItemHistoryEntity } from "@/models/user/history/itemHistory/ItemHistory";
 import User, { UserEntity } from "@/models/user/User";
+import { UserEventEntity } from "@/models/user/userEvents/UserEvent";
 import { assert } from "console";
 import { PoolClient } from "pg";
 import { transactionWrapper } from "../utility/utility";
@@ -780,7 +782,24 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 							}
 						},
 						"limit": 1
-					}
+					},
+					{
+						"returnColumns": [
+							"id", 
+							"owner",
+							"event_type", 
+							"last_occurrence", 
+							"streak"
+						],
+						"tableName": "user_events",
+						"conditions": {
+							"owner": {
+								"operator": "=",
+								"value": userId
+							}
+						},
+						"limit": 1000
+					},
 				]
 			  }
 			const userResult = await invokeLambda('garden-select', payload);
@@ -799,6 +818,8 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 			assert(Array.isArray(itemHistoryEntityListResult));
 			const toolboxEntityResult = parseRows<ToolboxEntity[]>(userResult[4])[0];
 			assert(toolboxRepository.validateToolboxEntity(toolboxEntityResult));
+			const userEventEntityResults = parseRows<UserEventEntity[]>(userResult[5]);
+			assert(Array.isArray(userEventEntityResults));
 			const actionHistories = actionHistoryEntityListResult.map((actionHistoryEntity) => actionHistoryRepository.makeActionHistoryObject(actionHistoryEntity));
 			const actionHistoryList = actionHistoryRepository.makeActionHistoryListObject(actionHistories);
 			const itemHistories = itemHistoryEntityListResult.map((itemHistoryEntity) => itemHistoryRepository.makeItemHistoryObject(itemHistoryEntity));
@@ -828,7 +849,10 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 			const toolsInstance = toolRepository.makeToolObjectBatch(toolsEntity);
 			const toolboxInstance = await toolboxRepository.makeToolboxObject(toolboxEntityResult, toolsInstance);
 
-			const userObject = userRepository.makeUserObject(userEntityResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance);
+
+			const userEvents = userEventRepository.makeUserEventMapObject(userEventEntityResults);
+
+			const userObject = userRepository.makeUserObject(userEntityResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance, userEvents);
 			return userObject.toPlainObject();
 		} catch (error) {
 			console.error('Error fetching user from Lambda:', error);
@@ -864,7 +888,11 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 				const tools = toolRepository.makeToolObjectBatch(toolEntities);
 				toolboxInstance = await toolboxRepository.makeToolboxObject(toolboxEntity, tools);
 			}
-			const userInstance = userRepository.makeUserObject(userResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance);
+
+			const userEventList = await userEventRepository.getUserEventsByUserId(userResult.id);
+			const userEvents = userEventRepository.makeUserEventMapObject(userEventList);
+
+			const userInstance = userRepository.makeUserObject(userResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance, userEvents);
 	
 			return userInstance.toPlainObject();
 		}

@@ -6,6 +6,8 @@ import { v4 as uuidv4 } from "uuid";
 import { EventReward } from "../EventReward";
 import { RewardGenerator } from "../RewardGenerator";
 import { dailyLoginRewardRepository } from "./DailyLoginRewardRepository";
+import { UserEvent } from "@/models/user/userEvents/UserEvent";
+import { UserEventTypes } from "@/models/user/userEvents/UserEventTypes";
 
 export class DailyLoginRewardFactory extends RewardGenerator {
 	
@@ -55,6 +57,53 @@ export class DailyLoginRewardFactory extends RewardGenerator {
 		return 200 + getRandomInt(1, 100);
 	}
 
+	/**
+	 * Returns the number of milliseconds until the next UTC-7 midnight.
+	 */
+	static getDefaultTimeBetweenRewards(): number {
+		const now = new Date(Date.now());
+
+		// Helper to get a Date object at midnight UTC-7 for a given date
+		const getMidnightUtcMinus7 = (date: Date): Date => {
+			const d = new Date(date);
+			d.setUTCHours(7, 0, 0, 0); // 7:00 UTC is 00:00 UTC-7
+			return d;
+		};
+
+		const currentDayMidnight = getMidnightUtcMinus7(now);
+		const nextMidnight = (now.getTime() < currentDayMidnight.getTime())
+			? currentDayMidnight
+			: getMidnightUtcMinus7(new Date(now.getTime() + 24 * 60 * 60 * 1000)); // Add 24 hours to get next day
+
+		return nextMidnight.getTime() - now.getTime();
+	}
+
+	/**
+	 * Checks if the user can claim a reward based on the current time and the event
+	 * @param currentTime - The current time to compare against the last occurrence
+	 * @param event - The event to check
+	 * @returns True if the user can claim a reward, false otherwise
+	 */
+	static canClaimReward(currentTime: Date = new Date(Date.now()), event: UserEvent): boolean {
+		if (event.getEventType() !== UserEventTypes.DAILY.name) return false;
+		// return true; // for testing purposes
+		return currentTime.getTime() > event.getLastOccurrence().getTime() + 10000;
+		const lastClaimDate = event.getLastOccurrence();
+
+		// Helper to get a Date object at midnight UTC-7 for a given date
+		const getMidnightUtcMinus7 = (date: Date): Date => {
+			const d = new Date(date);
+			d.setUTCHours(7, 0, 0, 0); // 7:00 UTC is 00:00 UTC-7
+			return d;
+		};
+
+		const currentDayUtcMinus7 = getMidnightUtcMinus7(currentTime);
+		const lastClaimDayUtcMinus7 = getMidnightUtcMinus7(lastClaimDate);
+
+		// If the current day (UTC-7) is after the last claim day (UTC-7), a new day has started.
+		return currentDayUtcMinus7.getTime() > lastClaimDayUtcMinus7.getTime();
+	}
+	
 	/**
 	 * Generates an EventReward object, which contains a list of items and their quantities, as well as an amount of gold,
 	 * meant to be given to the player.

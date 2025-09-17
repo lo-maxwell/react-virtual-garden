@@ -370,6 +370,13 @@ export async function getInventoryFromDatabase(inventoryId: string, userId: stri
 	}
 }
 
+/**
+ * Fetch the inventory Entity from database. If it cannot be found, throws an error.
+ * @param inventoryId - the id of the inventory to fetch
+ * @param userId - the id of the owner of the inventory
+ * @param client - optional poolclient
+ * @returns - Promise<InventoryEntity> of the fetched inventory
+ */
 export async function getInventoryEntity(inventoryId: string, userId: string, client?: PoolClient): Promise<InventoryEntity> {
 	if (process.env.USE_DATABASE === 'LAMBDA') { //TODO: TEST
 		try {

@@ -1,6 +1,4 @@
 import dailyLoginData from '@/data/final/current/DailyLoginRewards.json';
-import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
-import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
 
 interface RewardConfigItem {
     id: string;

@@ -7,7 +7,7 @@ import InventoryItemComponent from "../inventory/inventoryItem";
 import DropdownMenu from "../lists/DropdownMenu";
 import StoreItemComponent from "./storeItem";
 
-const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultiplier, maxHeightPercentage, initialSubtypeFilter, initialCategoryFilter}: {itemStore: Store | Inventory, onInventoryItemClickFunction: (arg: any) => void, costMultiplier: number, maxHeightPercentage: number, initialSubtypeFilter: ItemSubtype | null, initialCategoryFilter: string | null}) => {
+const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultiplier, maxHeightPercentage, displayFilter, initialSubtypeFilter, initialCategoryFilter}: {itemStore: Store | Inventory, onInventoryItemClickFunction: (arg: any) => void, costMultiplier: number, maxHeightPercentage: number, displayFilter: boolean, initialSubtypeFilter: ItemSubtype | null, initialCategoryFilter: string | null}) => {
 	const [subtypeFilter, setSubtypeFilter] = useState<ItemSubtype | null>(initialSubtypeFilter);
 	const [categoryFilter, setCategoryFilter] = useState<string | null>(initialCategoryFilter);
 	const {selectedItem, owner} = useSelectedItem();
@@ -23,6 +23,7 @@ const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultip
 	}
 
 	const RenderSubtypeFilter = () => {
+		if (!displayFilter) return <></>;
 		const subtypes = itemStore.getAllSubtypes();
 		const selectSubtypeFilter = (value: string | null) => {
 			if (value) {
@@ -68,6 +69,7 @@ const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultip
 
 
 	const RenderCategoryFilter = () => {
+		if (!displayFilter) return <></>;
 		if (!subtypeFilter) return <></>;
 		const categories = itemStore.getAllCategories(subtypeFilter);
 		const selectCategoryFilter = (value: string | null) => {
@@ -92,7 +94,7 @@ const ItemStoreComponent = ({itemStore, onInventoryItemClickFunction, costMultip
 			if (itemStore instanceof Store) {
 				return <div>{`${(itemStore as Store).getStoreName()} is out of stock. Come back later!`}</div>
 			}
-			return <div>{`This seems to be empty...`}</div>
+			return <></>
 		}
 		return getItemList().map((item, itemIndex) => {
 			//Do not display items with 0 quantity

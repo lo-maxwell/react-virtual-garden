@@ -8,6 +8,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import ToolboxComponent from "./toolbox/toolbox";
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
+import EventRewardPopupWindow from "../eventReward/eventRewardPopupWindow";
+import { EventReward } from "@/models/events/EventReward";
+import DailyLoginRewardClaimButton from "../eventReward/dailyLogin/dailyLoginRewardClaimButton";
 
 const UserProfileComponent = () => {
 	const { user } = useUser();
@@ -52,7 +55,8 @@ const UserProfileComponent = () => {
 		<span className={`ml-4 ${getUsernameFontSize()} ${colors.user.usernameTextColor}`}>{user.getUsername()}</span>
 	</div>
 	<div className="mx-4 my-4"><LevelSystemComponent level={displayLevel} currentExp={displayCurrentExp} expToLevelUp={displayExpToLevelUp} /></div>
-	<div><ToolboxComponent toolbox={user.getToolbox()} onToolClickFunction={toggleSelectedItem} maxHeightPercentage={100}/></div>
+	<div className="my-4"><ToolboxComponent toolbox={user.getToolbox()} onToolClickFunction={toggleSelectedItem} maxHeightPercentage={100}/></div>
+	<div className="my-4 inline-flex"><DailyLoginRewardClaimButton/></div>
 	<div className={`${showDebugOptions >= 3 ? `` : `hidden`}`}>
 		<GardenDebugOptions/>
 	</div>

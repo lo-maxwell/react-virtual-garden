@@ -12,7 +12,7 @@ const InventoryComponent = ({onInventoryItemClickFunction, costMultiplier, force
 			{/* TODO: Replace with inventory.getOwnerName() and update owner name whenever username changes */}
 			<div>{user.getUsername()}{"'s Inventory"}</div>
 			<div data-testid="current-gold">Gold: {inventory.getGold()}</div>
-			<ItemStoreComponent itemStore={inventory} onInventoryItemClickFunction={onInventoryItemClickFunction} costMultiplier={costMultiplier} maxHeightPercentage={60} initialSubtypeFilter={null} initialCategoryFilter={null}/>
+			<ItemStoreComponent itemStore={inventory} onInventoryItemClickFunction={onInventoryItemClickFunction} costMultiplier={costMultiplier} maxHeightPercentage={60} displayFilter={true} initialSubtypeFilter={null} initialCategoryFilter={null}/>
 		</div>
 		</>
 	);

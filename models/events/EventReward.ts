@@ -1,15 +1,18 @@
 import { InventoryItemList } from "../itemStore/InventoryItemList";
+import { UserEventType, UserEventTypes } from "../user/userEvents/UserEventTypes";
 
 export interface EventRewardInterface {
+	eventType: UserEventType;
 	userId: string;
 	inventoryId: string;
 	streak: number;
-	items: InventoryItemList;
+ 	items: any; //InventoryItemListPlainObject
 	gold: number;
 	message: string;
 }
 
 export class EventReward implements EventRewardInterface{
+	eventType: UserEventType = UserEventTypes.ERROR.name;
 	userId = "";
 	inventoryId = "";
 	streak = 0;
@@ -19,6 +22,58 @@ export class EventReward implements EventRewardInterface{
 
 	constructor(init?: Partial<EventRewardInterface>) {
 	  Object.assign(this, init);
+	}
+
+	static fromPlainObject(plainObject: any): EventReward {
+		try {
+			// Validate plainObject structure
+			if (!plainObject || typeof plainObject !== 'object') {
+				throw new Error('Invalid plainObject structure for EventReward');
+			}
+			
+			const { eventType, userId, inventoryId, streak, items, gold, message } = plainObject;
+			
+			// Perform additional type checks if necessary
+			if (typeof userId !== 'string' || typeof inventoryId !== 'string' || 
+				typeof streak !== 'number' || typeof gold !== 'number' || 
+				typeof message !== 'string') {
+				throw new Error('Invalid property types in plainObject for EventReward');
+			}
+			
+			const itemsInstance = items ? InventoryItemList.fromPlainObject(items) : new InventoryItemList();
+			
+			return new EventReward({
+				eventType: eventType || UserEventTypes.ERROR.name,
+				userId,
+				inventoryId,
+				streak,
+				gold,
+				message
+			}).setItems(itemsInstance);
+		} catch (error) {
+			console.error('Error creating EventReward from plainObject:', error);
+			return new EventReward();
+		}
+	}
+
+	toPlainObject(): any {
+		return {
+			eventType: this.eventType,
+			userId: this.userId,
+			inventoryId: this.inventoryId,
+			streak: this.streak,
+			items: this.items.toPlainObject(),
+			gold: this.gold,
+			message: this.message
+		};
+	}
+
+	getEventType(): UserEventType {
+		return this.eventType;
+	}
+
+	setEventType(newEventType: UserEventType) {
+		this.eventType = newEventType;
 	}
 
 	getUserId(): string {
@@ -51,6 +106,7 @@ export class EventReward implements EventRewardInterface{
 
 	setItems(items: InventoryItemList) {
 		this.items = items;
+		return this; // Return this for method chaining
 	}
 
 	getGold(): number {
