@@ -42,7 +42,8 @@ const DailyLoginRewardClaimButton = () => {
         // updateInventoryForceRefreshKey();
     }
 
-    const canClaim = guestMode ? false : (dailyLoginEvent ? DailyLoginRewardFactory.canClaimReward(new Date(Date.now()), dailyLoginEvent) : true);
+    
+    const canClaim = process.env.NEXT_PUBLIC_DAILY_LOGIN_OVERRIDE === 'true' ? true : (guestMode ? false : (dailyLoginEvent ? DailyLoginRewardFactory.canClaimReward(new Date(Date.now()), dailyLoginEvent) : true));
     const timeUntilNextClaim = DailyLoginRewardFactory.getDefaultTimeBetweenRewards();
 
     const fetchDailyLoginReward = async () => {

@@ -87,7 +87,10 @@ export class DailyLoginRewardFactory extends RewardGenerator {
 	static canClaimReward(currentTime: Date = new Date(Date.now()), event: UserEvent): boolean {
 		if (event.getEventType() !== UserEventTypes.DAILY.name) return false;
 		// return true; // for testing purposes
-		return currentTime.getTime() > event.getLastOccurrence().getTime() + 10000;
+		if (process.env.DAILY_LOGIN_OVERRIDE === 'true') {
+			return currentTime.getTime() > event.getLastOccurrence().getTime() + 10000;
+		}
+		
 		const lastClaimDate = event.getLastOccurrence();
 
 		// Helper to get a Date object at midnight UTC-7 for a given date

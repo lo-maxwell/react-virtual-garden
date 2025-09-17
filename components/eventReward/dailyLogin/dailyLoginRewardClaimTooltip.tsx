@@ -26,7 +26,7 @@ const DailyLoginRewardClaimTooltip = ({ children }: { children: React.ReactNode}
 		setDailyLoginEvent(dailyLoginEvent || null);
 	}, [user]);
 
-    const canClaim = dailyLoginEvent ? DailyLoginRewardFactory.canClaimReward(new Date(Date.now()), dailyLoginEvent) : true;
+    const canClaim = process.env.NEXT_PUBLIC_DAILY_LOGIN_OVERRIDE === 'true' ? true : (guestMode ? false : (dailyLoginEvent ? DailyLoginRewardFactory.canClaimReward(new Date(Date.now()), dailyLoginEvent) : true));
     const timeUntilNextClaim = DailyLoginRewardFactory.getDefaultTimeBetweenRewards();
 
     const buttonText = guestMode ? `This feature is not available in guest mode.` : (canClaim ? "Claim Daily Login" : `Daily Login claimed today, next available in ${formatTime(timeUntilNextClaim)}`);
