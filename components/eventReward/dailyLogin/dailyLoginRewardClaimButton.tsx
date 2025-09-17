@@ -44,7 +44,6 @@ const DailyLoginRewardClaimButton = () => {
 
     
     const canClaim = process.env.NEXT_PUBLIC_DAILY_LOGIN_OVERRIDE === 'true' ? true : (guestMode ? false : (dailyLoginEvent ? DailyLoginRewardFactory.canClaimReward(new Date(Date.now()), dailyLoginEvent) : true));
-    const timeUntilNextClaim = DailyLoginRewardFactory.getDefaultTimeBetweenRewards();
 
     const fetchDailyLoginReward = async () => {
         toggleSelectedItem(null);

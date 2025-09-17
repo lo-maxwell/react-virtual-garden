@@ -66,7 +66,11 @@ export class DailyLoginRewardFactory extends RewardGenerator {
 		// Helper to get a Date object at midnight UTC-7 for a given date
 		const getMidnightUtcMinus7 = (date: Date): Date => {
 			const d = new Date(date);
-			d.setUTCHours(7, 0, 0, 0); // 7:00 UTC is 00:00 UTC-7
+			// To get the midnight of the *current* UTC-7 day, we need to consider the UTC-7 date components.
+			// Get the current date in UTC, then subtract the offset to align to UTC-7 "day boundary"
+			d.setUTCHours(d.getUTCHours() - 7); // Temporarily adjust to 'UTC-7' interpretation of day
+			d.setUTCHours(0, 0, 0, 0); // Set to midnight UTC
+			d.setUTCHours(d.getUTCHours() + 7); // Adjust back to original UTC-7 offset for final representation
 			return d;
 		};
 
@@ -96,7 +100,11 @@ export class DailyLoginRewardFactory extends RewardGenerator {
 		// Helper to get a Date object at midnight UTC-7 for a given date
 		const getMidnightUtcMinus7 = (date: Date): Date => {
 			const d = new Date(date);
-			d.setUTCHours(7, 0, 0, 0); // 7:00 UTC is 00:00 UTC-7
+			// To get the midnight of the *current* UTC-7 day, we need to consider the UTC-7 date components.
+			// Get the current date in UTC, then subtract the offset to align to UTC-7 "day boundary"
+			d.setUTCHours(d.getUTCHours() - 7); // Temporarily adjust to 'UTC-7' interpretation of day
+			d.setUTCHours(0, 0, 0, 0); // Set to midnight UTC
+			d.setUTCHours(d.getUTCHours() + 7); // Adjust back to original UTC-7 offset for final representation
 			return d;
 		};
 

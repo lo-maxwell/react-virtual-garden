@@ -12,7 +12,7 @@ const formatTime = (ms: number) => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    return `${hours.toString()} hours, ${minutes.toString()} minutes.`;
 }
 
 const DailyLoginRewardClaimTooltip = ({ children }: { children: React.ReactNode}) => {
@@ -29,7 +29,7 @@ const DailyLoginRewardClaimTooltip = ({ children }: { children: React.ReactNode}
     const canClaim = process.env.NEXT_PUBLIC_DAILY_LOGIN_OVERRIDE === 'true' ? true : (guestMode ? false : (dailyLoginEvent ? DailyLoginRewardFactory.canClaimReward(new Date(Date.now()), dailyLoginEvent) : true));
     const timeUntilNextClaim = DailyLoginRewardFactory.getDefaultTimeBetweenRewards();
 
-    const buttonText = guestMode ? `This feature is not available in guest mode.` : (canClaim ? "Claim Daily Login" : `Daily Login claimed today, next available in ${formatTime(timeUntilNextClaim)}`);
+    const buttonText = guestMode ? `This feature is not available in guest mode.` : (canClaim ? "Claim Daily Login" : `Daily Login already claimed today! Next available in ${formatTime(timeUntilNextClaim)}`);
 
 	const RenderItemTooltipInfo = () => {
 		return <div className={`text-xl text-black`}>{buttonText}</div>;
