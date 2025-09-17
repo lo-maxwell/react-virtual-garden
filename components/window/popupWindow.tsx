@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 
 export function PopupWindow({children, showWindow, setShowWindow}: {children: React.ReactNode, showWindow: boolean, setShowWindow: Function}) {
 	const handleClickOutside = (event: any) => {
+		if (!showWindow) return;
 		const target = event.target as HTMLElement;
 		const configElement = document.querySelector('.children-window');
 		// Check if the click occurred outside the target element

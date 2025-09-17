@@ -4,20 +4,18 @@ import ItemStoreComponent from "@/components/itemStore/itemStore";
 import IconButton from "@/components/user/icon/IconButton";
 import { PopupWindow } from "@/components/window/popupWindow";
 import { DailyLoginRewardFactory } from "@/models/events/dailyLogin/DailyLoginRewardFactory";
-import { DailyLoginRewardRepository } from "@/models/events/dailyLogin/DailyLoginRewardRepository";
 import { EventReward } from "@/models/events/EventReward";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { UserEventTypes } from "@/models/user/userEvents/UserEventTypes";
 import { useEffect, useState } from "react";
 import { UserEvent } from "@/models/user/userEvents/UserEvent";
 import { makeApiRequest } from "@/utils/api/api";
-import { handleDailyLoginApiResponse, syncUserInventory } from "./dailyLoginRewardClaimFunctions";
-import { useDispatch } from "react-redux";
-import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
+import { handleDailyLoginApiResponse} from "./dailyLoginRewardClaimFunctions";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { saveUser } from "@/utils/localStorage/user";
 import DailyLoginRewardClaimTooltip from "./dailyLoginRewardClaimTooltip";
 import { useAccount } from "@/app/hooks/contexts/AccountContext";
+import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 
 
 const DailyLoginRewardClaimButton = () => {
@@ -28,35 +26,27 @@ const DailyLoginRewardClaimButton = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [apiError, setApiError] = useState<string | null>(null);
     const {user, reloadUser} = useUser();
+    const { selectedItem, toggleSelectedItem } = useSelectedItem();
     const {inventory, reloadInventory, updateInventoryForceRefreshKey} = useInventory();
-	const dispatch = useDispatch();
     
     const showWindowHandler = () => {
         setShowWindow(true);
         fetchDailyLoginReward();
     }
 
-    const closeWindowAndRefresh = () => {
-        setShowWindow(false);
+    const closeWindowAndRefresh = (val: boolean) => {
+        setShowWindow(val);
         reloadUser();
         reloadInventory();
-        updateInventoryForceRefreshKey();
+        toggleSelectedItem(null);
+        // updateInventoryForceRefreshKey();
     }
 
     const canClaim = guestMode ? false : (dailyLoginEvent ? DailyLoginRewardFactory.canClaimReward(new Date(Date.now()), dailyLoginEvent) : true);
     const timeUntilNextClaim = DailyLoginRewardFactory.getDefaultTimeBetweenRewards();
 
-    const formatTime = (ms: number) => {
-        const totalSeconds = Math.floor(ms / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-
-    const buttonText = canClaim ? "Claim Daily Login" : `Daily Login claimed today, next available in ${formatTime(timeUntilNextClaim)}`;
-
     const fetchDailyLoginReward = async () => {
+        toggleSelectedItem(null);
         if (!canClaim) {
             setEventReward(null);
             return;
@@ -79,17 +69,6 @@ const DailyLoginRewardClaimButton = () => {
             // Update the daily login event state
             const updatedEvent = user.getEvent(UserEventTypes.DAILY.name);
             setDailyLoginEvent(updatedEvent || null);
-
-            // const newItems = reward.getItems().getAllItems().map((item) => item.itemData.id);
-
-            // inventory.getAllItems().forEach((item) => {
-            //     if (newItems.includes(item.itemData.id)) {
-            //         dispatch(setItemQuantity({ 
-            //             inventoryItemId: item.getInventoryItemId(), 
-            //             quantity: item.getQuantity()
-            //         }));
-            //     }
-            // })
             
             saveUser(user);
             saveInventory(inventory);
@@ -159,7 +138,7 @@ const DailyLoginRewardClaimButton = () => {
                         px-6 py-3 rounded-xl 
                         hover:from-yellow-500 hover:to-orange-500 
                         hover:scale-105 transition"
-            onClick={closeWindowAndRefresh}
+            onClick={() => closeWindowAndRefresh(false)}
             > Claim Reward </button>
             </>
         ) : (
@@ -173,7 +152,7 @@ const DailyLoginRewardClaimButton = () => {
                         px-6 py-3 rounded-lg 
                         hover:bg-gray-300 hover:text-gray-900 
                         transition"
-            onClick={closeWindowAndRefresh}
+            onClick={() => closeWindowAndRefresh(false)}
             >
             Exit
             </button>
