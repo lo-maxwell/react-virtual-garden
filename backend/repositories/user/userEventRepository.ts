@@ -1,5 +1,6 @@
 import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
+import { EventReward, EventRewardEntity } from "@/models/events/EventReward";
 import Toolbox from "@/models/itemStore/toolbox/tool/Toolbox";
 import LevelSystem from "@/models/level/LevelSystem";
 import { ActionHistoryList } from "@/models/user/history/ActionHistoryList";
@@ -9,6 +10,8 @@ import { UserEvent, UserEventEntity } from "@/models/user/userEvents/UserEvent";
 import { UserEventType } from "@/models/user/userEvents/UserEventTypes";
 import assert from "assert";
 import { PoolClient } from 'pg';
+import eventRewardRepository from "../events/eventRewardRepository";
+import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
 
 class UserEventRepository {
 
@@ -31,11 +34,22 @@ class UserEventRepository {
 		return true;
 	}
 
-	makeUserEventObject(userEventEntity: UserEventEntity): UserEvent {
+	/**
+	 * Creates a UserEvent object from a UserEventEntity and optionally an EventRewardEntity and InventoryItemList.
+	 * @param userEventEntity The entity containing user event data.
+	 * @param eventRewardEntity Optional entity containing event reward data.
+	 * @param rewardItems Optional list of inventory items associated with the reward.
+	 * @returns A UserEvent object.
+	 */
+	makeUserEventObject(userEventEntity: UserEventEntity, eventRewardEntity?: EventRewardEntity, rewardItems?: InventoryItemList): UserEvent {
 		assert(this.validateUserEventEntity(userEventEntity), 'UserEventEntity validation failed');
-
+		let eventRewardInstance: EventReward | null = null;
+		if (eventRewardEntity) {
+			eventRewardInstance = eventRewardRepository.makeEventRewardObject(userEventEntity, eventRewardEntity, rewardItems);
+		}
+		
 		const lastOccurrenceDate = new Date(userEventEntity.last_occurrence);
-		return new UserEvent(userEventEntity.owner, userEventEntity.event_type as UserEventType, lastOccurrenceDate, userEventEntity.streak);
+		return new UserEvent(userEventEntity.owner, userEventEntity.event_type as UserEventType, lastOccurrenceDate, userEventEntity.streak, eventRewardInstance);
 	}
 
 	makeUserEventMapObject(userEventEntityList: UserEventEntity[]): Map<string, UserEvent> {

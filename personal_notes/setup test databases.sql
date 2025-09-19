@@ -358,3 +358,51 @@ BEGIN
 		table_created := TRUE;
 	END IF;
 END $$;
+
+--Event Rewards
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'event_rewards'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS event_rewards (
+			id SERIAL PRIMARY KEY,  -- Generate a UUID by default
+			owner INTEGER NOT NULL,            -- event id (foreign key from the 'user_events' table)
+			inventory UUID,
+			gold INT DEFAULT 0,
+			message TEXT,
+			FOREIGN KEY (owner) REFERENCES user_events(id),  -- Establishing relationship with 'user_events' table
+			FOREIGN KEY (inventory) REFERENCES inventories(id), -- Establishing relationship with 'inventories' table
+			UNIQUE (owner)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Event Reward Items
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'event_reward_items'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS event_reward_items (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner INTEGER NOT NULL,            -- event reward id (foreign key from the 'event_rewards' table)
+			identifier CHAR(13) NOT NULL,      -- Template reference (could be a foreign key if related to another table)
+			quantity INTEGER NOT NULL CHECK (quantity >= 0), 		   -- Quantity
+			FOREIGN KEY (owner) REFERENCES event_rewards(id),  -- Establishing relationship with 'event_rewards' table
+			UNIQUE (owner, identifier)
+		);
+		table_created := TRUE;
+	END IF;
+END $$;

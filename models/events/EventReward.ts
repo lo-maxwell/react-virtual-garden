@@ -11,7 +11,22 @@ export interface EventRewardInterface {
 	message: string;
 }
 
-export class EventReward implements EventRewardInterface{
+export interface EventRewardEntity {
+	id: number;
+	owner: number;
+	inventory?: string;
+	gold: number;
+	message?: string;
+}
+
+export interface EventRewardItemEntity {
+	id: string;
+	owner: number;
+	identifier: string;
+	quantity: number;
+}
+
+export class EventReward implements EventRewardInterface {
 	eventType: UserEventType = UserEventTypes.ERROR.name;
 	userId = "";
 	inventoryId = "";
@@ -66,6 +81,10 @@ export class EventReward implements EventRewardInterface{
 			gold: this.gold,
 			message: this.message
 		};
+	}
+
+	static getDefaultEventReward(): EventReward {
+		return new EventReward();
 	}
 
 	getEventType(): UserEventType {

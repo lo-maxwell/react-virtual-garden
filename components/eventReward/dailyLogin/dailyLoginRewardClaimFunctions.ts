@@ -16,7 +16,7 @@ import { saveUser } from "@/utils/localStorage/user";
  */
 export function handleDailyLoginApiResponse(user: User, inventory: Inventory, eventRewardInterface: EventRewardInterface): UserEvent {
 	let eventReward = EventReward.fromPlainObject(eventRewardInterface);
-	let userEvent: UserEvent = new UserEvent(user.getUserId(), eventReward.getEventType(), new Date(Date.now()), eventReward.getStreak());
+	let userEvent: UserEvent = new UserEvent(user.getUserId(), eventReward.getEventType(), new Date(Date.now()), eventReward.getStreak(), eventReward);
 	if (userEvent.getEventType() !== UserEventTypes.DAILY.name) {
 		console.error(userEvent);
 		console.error(`Error: invalid userEvent input for handleDailyLoginApiResponse`);

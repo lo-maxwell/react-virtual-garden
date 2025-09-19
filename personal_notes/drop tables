@@ -1,3 +1,4 @@
+DELETE FROM event_rewards;
 DELETE FROM user_events;
 DELETE FROM tools;
 DELETE FROM toolboxes;
@@ -14,6 +15,7 @@ DELETE FROM plots;
 DELETE FROM gardens;
 DELETE FROM users;
 
+DROP TABLE IF EXISTS event_rewards CASCADE;
 DROP TABLE IF EXISTS user_events CASCADE;
 DROP TABLE IF EXISTS tools CASCADE;
 DROP TABLE IF EXISTS toolboxes CASCADE;

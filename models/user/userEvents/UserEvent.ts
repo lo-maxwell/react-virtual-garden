@@ -1,6 +1,8 @@
+import { EventReward } from "@/models/events/EventReward";
 import { UserEventType, UserEventTypes } from "./UserEventTypes";
 
 export interface UserEventEntity {
+	id: number;
 	owner: string;
 	event_type: UserEventType;
 	last_occurrence: Date;
@@ -13,12 +15,21 @@ export class UserEvent {
 	private event_type: UserEventType;
 	private last_occurrence: Date;
 	private streak: number;
+	private event_reward: EventReward;
 
-	constructor(user: string, event_type: UserEventType, last_occurrence: Date = new Date(Date.now()), streak: number = 0) {
+	constructor(user: string, event_type: UserEventType, last_occurrence: Date = new Date(Date.now()), streak: number = 0, event_reward: EventReward | null = null) {
 		this.user = user;
 		this.event_type = event_type;
 		this.last_occurrence = last_occurrence;
 		this.streak = streak;
+		this.event_reward = event_reward || new EventReward({
+			eventType: event_type || UserEventTypes.ERROR.name,
+			userId: user,
+			inventoryId: "error",
+			streak,
+			gold: 0,
+			message: ""
+		});
 	}
 
 	static generateErrorUserEvent(user: string): UserEvent {
@@ -35,7 +46,7 @@ export class UserEvent {
             if (!plainObject || typeof plainObject !== 'object') {
                 throw new Error('Invalid plainObject structure for UserEvent');
             }
-			const { user, event_type, last_occurrence, streak } = plainObject;
+			const { user, event_type, last_occurrence, streak, event_reward } = plainObject;
 			// Perform additional type checks if necessary
 			if (typeof user !== 'string') {
 				throw new Error('Invalid user property in plainObject for UserEvent');
@@ -57,8 +68,10 @@ export class UserEvent {
 			if (typeof streak !== 'number') {
 				throw new Error('Invalid streak property');
 			}
+
+			const hydratedEventReward = EventReward.fromPlainObject(event_reward);
 	
-			return new UserEvent(user, event_type, date, streak);
+			return new UserEvent(user, event_type, date, streak, hydratedEventReward);
 		} catch (err) {
 			console.error(plainObject);
 			console.error('Error creating UserEvent from plainObject:', err);
@@ -72,6 +85,7 @@ export class UserEvent {
 			event_type: this.event_type,
 			last_occurrence: this.last_occurrence,
 			streak: this.streak,
+			event_reward: this.event_reward.toPlainObject()
 		};
 	}
 
@@ -104,6 +118,18 @@ export class UserEvent {
 	setStreak(newQuantity: number): number {
 		this.streak = Math.max(0, newQuantity);
 		return this.streak;
+	}
+
+	getEventReward(): EventReward {
+		return this.event_reward;
+	}
+
+	/** 
+	 * For overwriting the entire reward. Generally, use getEventReward() and modify that object instead.
+	 */
+	setEventReward(newEventReward: EventReward): EventReward {
+		this.event_reward = newEventReward;
+		return this.event_reward;
 	}
 
 	/**

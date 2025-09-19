@@ -14,6 +14,9 @@ import { getInventoryEntity, updateGold } from "../../inventory/inventoryService
 import { transactionWrapper } from "../../utility/utility";
 import { upsertInventoryItems } from "../../inventory/inventoryItem/inventoryItemService";
 import User from "@/models/user/User";
+import { v4 as uuidv4 } from 'uuid';
+
+//TODO: Add EventReward and EventRewardItems to this
 
 /**
  * Inserts a userEvent into the database. Does nothing if a userEvent with the same user and event_type already exists.
@@ -23,7 +26,7 @@ import User from "@/models/user/User";
  export async function createUserEventInDatabase(userEvent: UserEvent, client?: PoolClient): Promise<boolean> {
 	if (process.env.USE_DATABASE === 'LAMBDA') {
 		try {
-			const payload = {
+			const payload: any = {
 				"queries": [
 					{
 						"tableName": "user_events",
@@ -55,6 +58,72 @@ import User from "@/models/user/User";
 				]
 			};
 
+			if (userEvent.getEventReward()) {
+				const eventReward = userEvent.getEventReward()!;
+				const eventRewardId = uuidv4();
+				payload.queries.push(
+					{
+						"tableName": "event_rewards",
+						"columnsToWrite": [
+							"id",
+							"owner",
+							"inventory_id",
+							"event_type",
+							"streak",
+							"gold",
+							"message"
+						],
+						"values": [
+							[
+								eventRewardId,
+								eventReward.getUserId(),
+								eventReward.getInventoryId(),
+								eventReward.getEventType(),
+								eventReward.getStreak(),
+								eventReward.getGold(),
+								eventReward.getMessage()
+							]
+						],
+						"conflictColumns": [
+							"id"
+						],
+						"returnColumns": [
+							"id"
+						]
+					}
+				);
+
+				const rewardItems = eventReward.getItems().getAllItems();
+				if (rewardItems.length > 0) {
+					const itemValues = rewardItems.map(item => [
+						item.getInventoryItemId(),
+						eventReward.getUserId(),
+						item.itemData.id,
+						item.getQuantity(),
+						eventRewardId
+					]);
+					payload.queries.push(
+						{
+							"tableName": "event_reward_items",
+							"columnsToWrite": [
+								"id",
+								"owner",
+								"identifier",
+								"quantity",
+								"event_reward_id"
+							],
+							"values": itemValues,
+							"conflictColumns": [
+								"id"
+							],
+							"returnColumns": [
+								"id"
+							]
+						}
+					);
+				}
+			}
+
 			const insertResult = await invokeLambda('garden-insert', payload);
 			// Check if result is valid
 			if (!insertResult) {
@@ -62,9 +131,23 @@ import User from "@/models/user/User";
 			}
 			const userEventResult = parseRows<string[]>(insertResult[0]);
 
-			// Check for discrepancies
+			// Check for discrepancies for userEvent
 			if (userEventResult.length !== 1) {
 				console.warn(`Expected 1 userEvent to be created, but got ${userEventResult.length}`);
+			}
+
+			if (userEvent.getEventReward()) {
+				const eventRewardResult = parseRows<string[]>(insertResult[1]);
+				if (eventRewardResult.length !== 1) {
+					console.warn(`Expected 1 eventReward to be created, but got ${eventRewardResult.length}`);
+				}
+				const rewardItems = userEvent.getEventReward()!.getItems().getAllItems();
+				if (rewardItems.length > 0) {
+					const eventRewardItemsResult = parseRows<string[]>(insertResult[2]);
+					if (eventRewardItemsResult.length !== rewardItems.length) {
+						console.warn(`Expected ${rewardItems.length} eventRewardItems to be created, but got ${eventRewardItemsResult.length}`);
+					}
+				}
 			}
 			return true;
 		} catch (error) {
