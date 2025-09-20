@@ -1,4 +1,4 @@
-import { invokeLambda, parseRows } from "@/backend/lambda/invokeLambda";
+import { invokeLambda, parseRows, parseRowsAllowNull } from "@/backend/lambda/invokeLambda";
 import toolRepository from "@/backend/repositories/items/tool/toolRepository";
 import toolboxRepository from "@/backend/repositories/itemStore/toolbox/toolboxRepository";
 import levelRepository from "@/backend/repositories/level/levelRepository";
@@ -876,9 +876,9 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 				]
 			}
 			const eventRewardResult = await invokeLambda('garden-select', event_reward_payload);
-			const eventRewardEntities = parseRows<EventRewardEntity[]>(eventRewardResult[0]);
+			const eventRewardEntities = parseRowsAllowNull<EventRewardEntity[]>(eventRewardResult[0]);
 
-			const eventRewardIds: string[] = eventRewardEntities.map((val) => val.id);
+			const eventRewardIds: string[] = eventRewardEntities ? eventRewardEntities.map((val) => val.id) : [];
 			const event_reward_item_payload = {
 				"queries": [
 					{
@@ -900,8 +900,8 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 				]
 			}
 			const eventRewardItemResult = await invokeLambda('garden-select', event_reward_item_payload);
-			const eventRewardItemEntities = parseRows<EventRewardItemEntity[]>(eventRewardItemResult[0]);
-			const updatedUserEvents = userEventRepository.makeUserEventMapObject(userEventEntityResults, eventRewardEntities, eventRewardItemEntities);
+			const eventRewardItemEntities = parseRowsAllowNull<EventRewardItemEntity[]>(eventRewardItemResult[0]);
+			const updatedUserEvents = userEventRepository.makeUserEventMapObject(userEventEntityResults, eventRewardEntities ? eventRewardEntities : undefined, eventRewardItemEntities ? eventRewardItemEntities : undefined);
 
 			const userObject = userRepository.makeUserObject(userEntityResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance, updatedUserEvents);
 			return userObject.toPlainObject();

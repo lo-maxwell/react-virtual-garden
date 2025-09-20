@@ -38,3 +38,12 @@ export function parseRows<T = any>(result: any): T {
     }
     return result.rows;
 }
+
+export function parseRowsAllowNull<T = any>(result: any): T | null {
+    if (!result || !result.rows) {
+        console.warn(result);
+        console.warn(`Failed to parse result: no result or rows returned`);
+        return null;
+    }
+    return result.rows;
+}
