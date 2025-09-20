@@ -1,7 +1,9 @@
 import { InventoryItemList } from "../itemStore/InventoryItemList";
 import { UserEventType, UserEventTypes } from "../user/userEvents/UserEventTypes";
+import { v4 as uuidv4 } from 'uuid';
 
 export interface EventRewardInterface {
+	id: string;
 	eventType: UserEventType;
 	userId: string;
 	inventoryId: string;
@@ -11,7 +13,23 @@ export interface EventRewardInterface {
 	message: string;
 }
 
-export class EventReward implements EventRewardInterface{
+export interface EventRewardEntity {
+	id: string;
+	owner: string;
+	inventory?: string;
+	gold: number;
+	message?: string;
+}
+
+export interface EventRewardItemEntity {
+	id: string;
+	owner: string;
+	identifier: string;
+	quantity: number;
+}
+
+export class EventReward implements EventRewardInterface {
+	id: string;
 	eventType: UserEventType = UserEventTypes.ERROR.name;
 	userId = "";
 	inventoryId = "";
@@ -22,6 +40,7 @@ export class EventReward implements EventRewardInterface{
 
 	constructor(init?: Partial<EventRewardInterface>) {
 	  Object.assign(this, init);
+	  this.id = init?.id || uuidv4();
 	}
 
 	static fromPlainObject(plainObject: any): EventReward {
@@ -31,7 +50,7 @@ export class EventReward implements EventRewardInterface{
 				throw new Error('Invalid plainObject structure for EventReward');
 			}
 			
-			const { eventType, userId, inventoryId, streak, items, gold, message } = plainObject;
+			const { id, eventType, userId, inventoryId, streak, items, gold, message } = plainObject;
 			
 			// Perform additional type checks if necessary
 			if (typeof userId !== 'string' || typeof inventoryId !== 'string' || 
@@ -43,6 +62,7 @@ export class EventReward implements EventRewardInterface{
 			const itemsInstance = items ? InventoryItemList.fromPlainObject(items) : new InventoryItemList();
 			
 			return new EventReward({
+				id: id || uuidv4(),
 				eventType: eventType || UserEventTypes.ERROR.name,
 				userId,
 				inventoryId,
@@ -58,6 +78,7 @@ export class EventReward implements EventRewardInterface{
 
 	toPlainObject(): any {
 		return {
+			id: this.id,
 			eventType: this.eventType,
 			userId: this.userId,
 			inventoryId: this.inventoryId,
@@ -66,6 +87,19 @@ export class EventReward implements EventRewardInterface{
 			gold: this.gold,
 			message: this.message
 		};
+	}
+
+	static getDefaultEventReward(): EventReward {
+		return new EventReward();
+	}
+
+	getId(): string {
+		return this.id;
+	}
+
+	setId(newId: string): string {
+		this.id = newId;
+		return this.id;
 	}
 
 	getEventType(): UserEventType {

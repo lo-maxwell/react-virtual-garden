@@ -1,28 +1,43 @@
+import { EventReward } from "@/models/events/EventReward";
 import { UserEventType, UserEventTypes } from "./UserEventTypes";
+import { v4 as uuidv4 } from 'uuid';
 
 export interface UserEventEntity {
+	id: string;
 	owner: string;
 	event_type: UserEventType;
-	last_occurrence: Date;
 	streak: number;
+	created_at: Date;
 }
 
 export class UserEvent {
 
+	private id: string;
 	private user: string;
 	private event_type: UserEventType;
-	private last_occurrence: Date;
+	private created_at: Date;
 	private streak: number;
+	private event_reward: EventReward;
 
-	constructor(user: string, event_type: UserEventType, last_occurrence: Date = new Date(Date.now()), streak: number = 0) {
+	constructor(id: string | null = null, user: string, event_type: UserEventType, created_at: Date = new Date(Date.now()), streak: number = 0, event_reward: EventReward | null = null) {
+		this.id = id || uuidv4();
 		this.user = user;
 		this.event_type = event_type;
-		this.last_occurrence = last_occurrence;
+		this.created_at = created_at;
 		this.streak = streak;
+		this.event_reward = event_reward || new EventReward({
+			eventType: event_type || UserEventTypes.ERROR.name,
+			userId: user,
+			inventoryId: "error",
+			streak,
+			gold: 0,
+			message: ""
+		});
 	}
 
 	static generateErrorUserEvent(user: string): UserEvent {
-		return new UserEvent(user, "ERROR");
+		const errorEvent = new UserEvent(uuidv4(), user, "ERROR");
+		return errorEvent;
 	}
 
 	static isUserEventType(value: any): value is UserEventType {
@@ -35,7 +50,7 @@ export class UserEvent {
             if (!plainObject || typeof plainObject !== 'object') {
                 throw new Error('Invalid plainObject structure for UserEvent');
             }
-			const { user, event_type, last_occurrence, streak } = plainObject;
+			const { id, user, event_type, created_at, streak, event_reward } = plainObject;
 			// Perform additional type checks if necessary
 			if (typeof user !== 'string') {
 				throw new Error('Invalid user property in plainObject for UserEvent');
@@ -46,19 +61,22 @@ export class UserEvent {
 			}
 	
 			const date =
-				last_occurrence instanceof Date
-				? last_occurrence
-				: new Date(last_occurrence);
+				created_at instanceof Date
+				? created_at
+				: new Date(created_at);
 	
 			if (isNaN(date.getTime())) {
-				throw new Error('Invalid last_occurrence property');
+				throw new Error('Invalid created_at property');
 			}
 	
 			if (typeof streak !== 'number') {
 				throw new Error('Invalid streak property');
 			}
+
+			const hydratedEventReward = EventReward.fromPlainObject(event_reward);
 	
-			return new UserEvent(user, event_type, date, streak);
+			const instance = new UserEvent(id, user, event_type, date, streak, hydratedEventReward);
+			return instance;
 		} catch (err) {
 			console.error(plainObject);
 			console.error('Error creating UserEvent from plainObject:', err);
@@ -68,11 +86,17 @@ export class UserEvent {
 
 	toPlainObject(): any {
 		return {
+			id: this.id,
 			user: this.user,
 			event_type: this.event_type,
-			last_occurrence: this.last_occurrence,
+			created_at: this.created_at.toISOString(),
 			streak: this.streak,
-		};
+			event_reward: this.event_reward.toPlainObject()
+		}
+	}
+
+	getId(): string {
+		return this.id;
 	}
 
 	getUser(): string {
@@ -83,36 +107,39 @@ export class UserEvent {
 		return this.event_type;
 	}
 
-	setEventType(newEventType: UserEventType): UserEventType {
-		this.event_type = newEventType;
-		return this.event_type;
-	}
-
-	getLastOccurrence(): Date {
-		return this.last_occurrence;
-	}
-
-	setLastOccurence(newTimestamp: Date = new Date(Date.now())): Date {
-		this.last_occurrence = newTimestamp;
-		return this.last_occurrence;
-	}
-
 	getStreak(): number {
 		return this.streak;
 	}
 
-	setStreak(newQuantity: number): number {
-		this.streak = Math.max(0, newQuantity);
-		return this.streak;
+	getEventReward(): EventReward {
+		return this.event_reward;
 	}
 
-	/**
-	 * Returns the time passed since the last occurrence of the event in milliseconds
-	 * @param currentTime - The current time to compare against the last occurrence
-	 * @returns The time passed since the last occurrence in milliseconds
-	 */
-	eventTimePassed(currentTime: Date = new Date(Date.now())): number {
-		return (currentTime.getTime() - this.last_occurrence.getTime());
+	setId(id: string) {
+		this.id = id;
 	}
 
+	setUser(user: string) {
+		this.user = user;
+	}
+
+	setEventType(event_type: UserEventType) {
+		this.event_type = event_type;
+	}
+
+	setStreak(streak: number) {
+		this.streak = streak;
+	}
+
+	setEventReward(event_reward: EventReward) {
+		this.event_reward = event_reward;
+	}
+
+	getCreatedAt(): Date {
+		return this.created_at;
+	}
+
+	setCreatedAt(created_at: Date) {
+		this.created_at = created_at;
+	}
 }

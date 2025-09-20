@@ -28,7 +28,9 @@ const allowedTables = {
   users: ["id", "username", "password_hash", "password_salt", "icon"], //Disallow password hash/salt select statements?
   toolboxes: ["id", "owner"],
   tools: ["id", "owner", "identifier"],
-  user_events: ["id", "owner", "event_type", "last_occurrence", "streak"],
+  user_events: ["id", "owner", "event_type", "streak", "created_at"],
+  event_rewards: ["id", "owner", "inventory", "gold", "message"],
+  event_reward_items: ["id", "owner", "identifier", "quantity"],
   // Add more tables and their columns as needed
 };
 
@@ -50,7 +52,7 @@ export const handler = async (event) => {
 
   // Helper function to process a single query
   const processQuery = async (query) => {
-    const { returnColumns, tableName, conditions, limit } = query;
+    const { returnColumns, tableName, conditions, limit, orderBy } = query;
 
     // Validate returnColumns
     if (!Array.isArray(returnColumns) || returnColumns.length === 0) {
@@ -113,7 +115,23 @@ export const handler = async (event) => {
         queryString += ` WHERE ${conditionStrings.join(' AND ')}`;
     }
 
-    // Add LIMIT clause after WHERE
+    // Add ORDER BY clause
+    if (orderBy && Array.isArray(orderBy) && orderBy.length > 0) {
+      const orderStrings = orderBy.map(order => {
+        const { column, direction } = order;
+        if (!allowedTables[tableName].includes(column)) {
+          throw new Error(`Invalid column: ${column} for table: ${tableName} in orderBy clause`);
+        }
+        const upperDirection = direction.toUpperCase();
+        if (upperDirection !== 'ASC' && upperDirection !== 'DESC') {
+          throw new Error(`Invalid direction: ${direction} for column: ${column} in orderBy clause`);
+        }
+        return `${column} ${upperDirection}`;
+      });
+      queryString += ` ORDER BY ${orderStrings.join(', ')}`;
+    }
+
+    // Add LIMIT clause after WHERE (and ORDER BY if present)
     queryString += ` LIMIT ${queryLimit};`;
 
     try {

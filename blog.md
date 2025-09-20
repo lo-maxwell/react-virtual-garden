@@ -407,8 +407,14 @@
   * Creates an eventReward and adds it to the user's inventory
   * Claimable once per day
 
+## Day 38
+
+### Stored userEvents, eventRewards, eventRewardItems in database
+  * Underlying object only uses the most recently occurring event, but we log all events in database for future use
+
 TODO:
 
+Decorations should refresh selected item after running out of quantity
 
 Landing/loading pages for login/register - inform user not to leave the page
 
