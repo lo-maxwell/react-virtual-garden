@@ -12,7 +12,9 @@ import { UserEventType } from "@/models/user/userEvents/UserEventTypes";
 import assert from "assert";
 import { PoolClient } from "pg";
 import { v4 as uuidv4 } from 'uuid';
-
+/**
+ * Not implemented for non lambda
+ */
 class EventRewardRepository {
 
 	/**
