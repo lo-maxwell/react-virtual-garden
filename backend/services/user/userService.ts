@@ -17,6 +17,7 @@ import { UserEventEntity } from "@/models/user/userEvents/UserEvent";
 import { assert } from "console";
 import { PoolClient } from "pg";
 import { transactionWrapper } from "../utility/utility";
+import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventReward";
 
 
 /**
@@ -788,8 +789,8 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 							"id", 
 							"owner",
 							"event_type", 
-							"last_occurrence", 
-							"streak"
+							"streak",
+							"created_at"
 						],
 						"tableName": "user_events",
 						"conditions": {
@@ -798,8 +799,8 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 								"value": userId
 							}
 						},
-						"limit": 1000
-					},
+						"limit": 1000000
+					}
 				]
 			  }
 			const userResult = await invokeLambda('garden-select', payload);
@@ -851,8 +852,58 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 
 
 			const userEvents = userEventRepository.makeUserEventMapObject(userEventEntityResults);
+			const userEventIds: string[] = Array.from(userEvents.values()).map(userEvent => userEvent.getId());
 
-			const userObject = userRepository.makeUserObject(userEntityResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance, userEvents);
+			const event_reward_payload = {
+				"queries": [
+					{
+						"returnColumns": [
+							"id",
+							"owner",
+							"inventory",
+							"gold", 
+							"message"
+						],
+						"tableName": "event_rewards",
+						"conditions": {
+							"owner": {
+								"operator": "IN",
+								"value": userEventIds
+							}
+						},
+						"limit": 1000000
+					}
+				]
+			}
+			const eventRewardResult = await invokeLambda('garden-select', event_reward_payload);
+			const eventRewardEntities = parseRows<EventRewardEntity[]>(eventRewardResult[0]);
+
+			const eventRewardIds: string[] = eventRewardEntities.map((val) => val.id);
+			const event_reward_item_payload = {
+				"queries": [
+					{
+						"returnColumns": [
+							"id",
+							"owner",
+							"identifier",
+							"quantity"
+						],
+						"tableName": "event_reward_items",
+						"conditions": {
+							"owner": {
+								"operator": "IN",
+								"value": eventRewardIds
+							}
+						},
+						"limit": 1000000
+					}
+				]
+			}
+			const eventRewardItemResult = await invokeLambda('garden-select', event_reward_item_payload);
+			const eventRewardItemEntities = parseRows<EventRewardItemEntity[]>(eventRewardItemResult[0]);
+			const updatedUserEvents = userEventRepository.makeUserEventMapObject(userEventEntityResults, eventRewardEntities, eventRewardItemEntities);
+
+			const userObject = userRepository.makeUserObject(userEntityResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance, updatedUserEvents);
 			return userObject.toPlainObject();
 		} catch (error) {
 			console.error('Error fetching user from Lambda:', error);

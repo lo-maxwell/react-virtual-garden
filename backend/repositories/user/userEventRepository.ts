@@ -1,6 +1,6 @@
 import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
-import { EventReward, EventRewardEntity } from "@/models/events/EventReward";
+import { EventReward, EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventReward";
 import Toolbox from "@/models/itemStore/toolbox/tool/Toolbox";
 import LevelSystem from "@/models/level/LevelSystem";
 import { ActionHistoryList } from "@/models/user/history/ActionHistoryList";
@@ -12,6 +12,8 @@ import assert from "assert";
 import { PoolClient } from 'pg';
 import eventRewardRepository from "../events/eventRewardRepository";
 import { InventoryItemList } from "@/models/itemStore/InventoryItemList";
+import { v4 as uuidv4 } from 'uuid';
+import eventRewardItemRepository from "../events/eventRewardItemRepository";
 
 class UserEventRepository {
 
@@ -19,17 +21,18 @@ class UserEventRepository {
 	 * Ensures that the object is of type UserEventEntity, ie. that it contains a user, event type, last occurrence, and streak
 	 */
 	validateUserEventEntity(userEventEntity: any): boolean {
-		if (!userEventEntity || (typeof userEventEntity.owner !== 'string') || !UserEvent.isUserEventType(userEventEntity.event_type) || (typeof userEventEntity.streak !== 'number')) {
+		if (!userEventEntity || (typeof userEventEntity.id !== 'string') || (typeof userEventEntity.owner !== 'string') || !UserEvent.isUserEventType(userEventEntity.event_type) || (typeof userEventEntity.streak !== 'number')) {
 			console.error(userEventEntity);
 			throw new Error(`Invalid types while creating UserEvent from UserEventEntity`);
 		}
-		// Ensure last_occurrence is a valid date string or Date object
-		if (!userEventEntity.last_occurrence) {
-			throw new Error(`last_occurrence is missing from UserEventEntity`);
+		// Ensure created_at is a valid date string or Date object
+		if (!userEventEntity.created_at) {
+			console.error(userEventEntity);
+			throw new Error(`created_at is missing from UserEventEntity`);
 		}
-		const lastOccurrenceDate = new Date(userEventEntity.last_occurrence);
-		if (isNaN(lastOccurrenceDate.getTime())) {
-			throw new Error(`Invalid last_occurrence date in UserEventEntity: ${userEventEntity.last_occurrence}`);
+		const createdAtDate = new Date(userEventEntity.created_at);
+		if (isNaN(createdAtDate.getTime())) {
+			throw new Error(`Invalid created_at date in UserEventEntity: ${userEventEntity.created_at}`);
 		}
 		return true;
 	}
@@ -48,16 +51,50 @@ class UserEventRepository {
 			eventRewardInstance = eventRewardRepository.makeEventRewardObject(userEventEntity, eventRewardEntity, rewardItems);
 		}
 		
-		const lastOccurrenceDate = new Date(userEventEntity.last_occurrence);
-		return new UserEvent(userEventEntity.owner, userEventEntity.event_type as UserEventType, lastOccurrenceDate, userEventEntity.streak, eventRewardInstance);
+		const createdAtDate = new Date(userEventEntity.created_at);
+		return new UserEvent(userEventEntity.id, userEventEntity.owner, userEventEntity.event_type as UserEventType, createdAtDate, userEventEntity.streak, eventRewardInstance);
 	}
 
-	makeUserEventMapObject(userEventEntityList: UserEventEntity[]): Map<string, UserEvent> {
+	makeUserEventMapObject(userEventEntityList: UserEventEntity[], eventRewardEntityList?: EventRewardEntity[], eventRewardItemEntityList?: EventRewardItemEntity[]): Map<string, UserEvent> {
 		const userEventMap = new Map<string, UserEvent>();
 		userEventEntityList.forEach(userEventEntity => {
 			this.validateUserEventEntity(userEventEntity);
-			const userEvent = this.makeUserEventObject(userEventEntity);
-			userEventMap.set(userEvent.getEventType(), userEvent);
+
+			const eventType = userEventEntity.event_type;
+			const existingEvent = userEventMap.get(eventType);
+
+			// If there's an existing event and the new event is NOT more recent, skip processing
+			if (existingEvent && new Date(userEventEntity.created_at).getTime() <= existingEvent.getCreatedAt().getTime()) {
+				return; // Skip to the next entity
+			}
+
+			// If we reach here, either there's no existing event, or the new event is more recent
+			let correspondingEventRewardEntity: EventRewardEntity | undefined = undefined;
+			let rewardItemsForEvent: InventoryItemList | undefined = undefined;
+
+			// Find the corresponding eventRewardEntity
+			if (eventRewardEntityList) {
+				correspondingEventRewardEntity = eventRewardEntityList.find(
+					(rewardEntity) => rewardEntity.owner === userEventEntity.id
+				);
+			}
+
+			// If an eventRewardEntity is found, find its items and make the InventoryItemList
+			if (correspondingEventRewardEntity && eventRewardItemEntityList) {
+				const filteredEventRewardItems = eventRewardItemEntityList.filter(
+					(itemEntity) => itemEntity.owner === correspondingEventRewardEntity!.id
+				);
+				rewardItemsForEvent = eventRewardItemRepository.makeEventRewardItemObjectBatch(filteredEventRewardItems);
+			}
+
+			// Now, create the final UserEvent object with all reward details
+			const finalUserEvent = this.makeUserEventObject(
+				userEventEntity,
+				correspondingEventRewardEntity,
+				rewardItemsForEvent
+			);
+
+			userEventMap.set(finalUserEvent.getEventType(), finalUserEvent);
 		});
 		return userEventMap;
 	}
@@ -116,8 +153,8 @@ class UserEventRepository {
 			}
 
 			const userEventResult = await client.query<UserEventEntity>(
-				'INSERT INTO user_events (owner, event_type, last_occurrence, streak) VALUES ($1, $2, $3, $4) RETURNING *',
-				[userEvent.getUser(), userEvent.getEventType(), userEvent.getLastOccurrence(), userEvent.getStreak()]
+				'INSERT INTO user_events (owner, event_type, streak, created_at) VALUES ($1, $2, $3, $4) RETURNING *',
+				[userEvent.getUser(), userEvent.getEventType(), userEvent.getStreak(), userEvent.getCreatedAt()]
 			);
 
 			// Check if result is valid
@@ -168,9 +205,9 @@ class UserEventRepository {
 	 */
 	async updateUserEvent(userEvent: UserEvent): Promise<UserEventEntity> {
 		const userEventResult = await query<UserEventEntity>(
-			'UPDATE user_events SET last_occurrence = $1, streak = $2 WHERE owner = $3 && event_type = $4 RETURNING *',
-			[userEvent.getLastOccurrence(), userEvent.getStreak(), userEvent.getUser(), userEvent.getEventType()]
-			);
+			'UPDATE user_events SET streak = $1, created_at = $2 WHERE id = $3 RETURNING *',
+			[userEvent.getStreak(), userEvent.getCreatedAt(), userEvent.getId()]
+		);
 
 		// Check if result is valid
 		if (!userEventResult || userEventResult.rows.length === 0) {

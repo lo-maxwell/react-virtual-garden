@@ -6,6 +6,7 @@ import { UserEventTypes } from "@/models/user/userEvents/UserEventTypes";
 import { makeApiRequest } from "@/utils/api/api";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { saveUser } from "@/utils/localStorage/user";
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Processes an event reward interface and updates the given user.
@@ -16,7 +17,7 @@ import { saveUser } from "@/utils/localStorage/user";
  */
 export function handleDailyLoginApiResponse(user: User, inventory: Inventory, eventRewardInterface: EventRewardInterface): UserEvent {
 	let eventReward = EventReward.fromPlainObject(eventRewardInterface);
-	let userEvent: UserEvent = new UserEvent(user.getUserId(), eventReward.getEventType(), new Date(Date.now()), eventReward.getStreak(), eventReward);
+	let userEvent: UserEvent = new UserEvent(uuidv4(), user.getUserId(), eventReward.getEventType(), new Date(Date.now()), eventReward.getStreak(), eventReward);
 	if (userEvent.getEventType() !== UserEventTypes.DAILY.name) {
 		console.error(userEvent);
 		console.error(`Error: invalid userEvent input for handleDailyLoginApiResponse`);

@@ -19,7 +19,7 @@ class EventRewardRepository {
 	 * Ensures that the object is of type EventRewardEntity, ie. that it contains an id, owner, identifier, and quantity field
 	 */
 	validateEventRewardEntity(eventRewardEntity: any): boolean {
-		if (!eventRewardEntity || (typeof eventRewardEntity.id !== 'number') || (typeof eventRewardEntity.owner !== 'number') || (eventRewardEntity.inventory && typeof eventRewardEntity.inventory !== 'string') || typeof eventRewardEntity.gold !== 'number' || (eventRewardEntity.message && typeof eventRewardEntity.message !== 'string')  ) {
+		if (!eventRewardEntity || (typeof eventRewardEntity.id !== 'string') || (typeof eventRewardEntity.owner !== 'string') || (eventRewardEntity.inventory && typeof eventRewardEntity.inventory !== 'string') || typeof eventRewardEntity.gold !== 'number' || (eventRewardEntity.message && typeof eventRewardEntity.message !== 'string')  ) {
 			console.error(eventRewardEntity);
 			throw new Error(`Invalid types while creating EventReward from EventRewardEntity`);
 		}

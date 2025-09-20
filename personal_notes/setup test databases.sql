@@ -339,24 +339,70 @@ END $$;
 -- Use a DO block for procedural execution
 DO $$
 DECLARE
-    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+    table_exists BOOLEAN := FALSE;
+    id_column_type TEXT;
+    pk_constraint_name TEXT;
 BEGIN
-    -- Check if the table exists in the current schema
+    -- Check if the user_events table exists
     IF NOT EXISTS (
         SELECT FROM information_schema.tables 
         WHERE table_schema = 'public' AND table_name = 'user_events'
     ) THEN
-		CREATE TABLE IF NOT EXISTS user_events (
-			id SERIAL PRIMARY KEY,  -- Generate a UUID by default
-			owner VARCHAR(28) NOT NULL,            -- user ID (foreign key from the 'users' table)
-			event_type VARCHAR(255) NOT NULL,
-			last_occurrence TIMESTAMP NOT NULL,
-			streak INT DEFAULT 0,
-			FOREIGN KEY (owner) REFERENCES users(id),  -- Establishing relationship with 'users' table
-			UNIQUE (owner, event_type)
-		);
-		table_created := TRUE;
-	END IF;
+        -- If table does not exist, create it with UUID ID
+        RAISE NOTICE 'user_events table does not exist, creating it...';
+        CREATE TABLE user_events (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            owner VARCHAR(28) NOT NULL,
+            event_type VARCHAR(255) NOT NULL,
+            streak INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (owner) REFERENCES users(id)
+        );
+        RAISE NOTICE 'user_events table created.';
+    END IF;
+END $$;
+
+-- Add/Remove columns for existing user_events table if needed during migration
+DO $$
+DECLARE
+    table_exists BOOLEAN := FALSE;
+    column_exists BOOLEAN := FALSE;
+BEGIN
+    -- Check if the user_events table exists
+    SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'user_events'
+    ) INTO table_exists;
+
+    IF table_exists THEN
+        -- Remove last_occurrence if it exists
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'user_events'
+              AND column_name = 'last_occurrence'
+        ) INTO column_exists;
+
+        IF column_exists THEN
+            RAISE NOTICE 'Dropping last_occurrence column from user_events.';
+            ALTER TABLE user_events DROP COLUMN last_occurrence;
+        END IF;
+
+        -- Add created_at if it doesn't exist (already handled if table is new, but for migration)
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'user_events'
+              AND column_name = 'created_at'
+        ) INTO column_exists;
+
+        IF NOT column_exists THEN
+            RAISE NOTICE 'Adding created_at column to user_events.';
+            ALTER TABLE user_events ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+        END IF;
+    END IF;
 END $$;
 
 --Event Rewards
@@ -371,8 +417,8 @@ BEGIN
         WHERE table_schema = 'public' AND table_name = 'event_rewards'
     ) THEN
 		CREATE TABLE IF NOT EXISTS event_rewards (
-			id SERIAL PRIMARY KEY,  -- Generate a UUID by default
-			owner INTEGER NOT NULL,            -- event id (foreign key from the 'user_events' table)
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,            -- event id (foreign key from the 'user_events' table)
 			inventory UUID,
 			gold INT DEFAULT 0,
 			message TEXT,
@@ -397,7 +443,7 @@ BEGIN
     ) THEN
 		CREATE TABLE IF NOT EXISTS event_reward_items (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
-			owner INTEGER NOT NULL,            -- event reward id (foreign key from the 'event_rewards' table)
+			owner UUID NOT NULL,            -- event reward id (foreign key from the 'event_rewards' table)
 			identifier CHAR(13) NOT NULL,      -- Template reference (could be a foreign key if related to another table)
 			quantity INTEGER NOT NULL CHECK (quantity >= 0), 		   -- Quantity
 			FOREIGN KEY (owner) REFERENCES event_rewards(id),  -- Establishing relationship with 'event_rewards' table

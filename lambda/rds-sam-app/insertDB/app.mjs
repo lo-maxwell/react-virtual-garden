@@ -28,7 +28,7 @@ const allowedTables = {
   users: ["id", "username", "password_hash", "password_salt", "icon"], //Disallow password hash/salt select statements?
   toolboxes: ["id", "owner"],
   tools: ["id", "owner", "identifier"],
-  user_events: ["id", "owner", "event_type", "last_occurrence", "streak"],
+  user_events: ["id", "owner", "event_type", "streak", "created_at"],
   event_rewards: ["id", "owner", "inventory", "gold", "message"],
   event_reward_items: ["id", "owner", "identifier", "quantity"],
   // Add more tables and their columns as needed

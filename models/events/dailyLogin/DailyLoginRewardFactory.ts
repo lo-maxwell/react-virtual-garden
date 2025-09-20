@@ -92,10 +92,10 @@ export class DailyLoginRewardFactory extends RewardGenerator {
 		if (event.getEventType() !== UserEventTypes.DAILY.name) return false;
 		// return true; // for testing purposes
 		if (process.env.DAILY_LOGIN_OVERRIDE === 'true') {
-			return currentTime.getTime() > event.getLastOccurrence().getTime() + 10000;
+			return currentTime.getTime() > event.getCreatedAt().getTime() + 10000;
 		}
 		
-		const lastClaimDate = event.getLastOccurrence();
+		const lastClaimDate = event.getCreatedAt();
 
 		// Helper to get a Date object at midnight UTC-7 for a given date
 		const getMidnightUtcMinus7 = (date: Date): Date => {
@@ -135,6 +135,7 @@ export class DailyLoginRewardFactory extends RewardGenerator {
 		message: string = ""
 	): EventReward {
 		const reward = new EventReward({
+			eventType: UserEventTypes.DAILY.name,
 			userId,
 			inventoryId,
 			streak,
