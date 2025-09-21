@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { useAccount } from "@/app/hooks/contexts/AccountContext";
 import { useAuth } from "@/app/hooks/contexts/AuthContext";
 import Link from "@/node_modules/next/link";
@@ -7,69 +7,133 @@ import ProfileDisplay from "./profileDisplay";
 import ProfileMenu from "./profileMenu";
 import useClickOutside from "@/app/hooks/common/useClickOutside";
 import { usePathname } from "next/navigation";
+import "./header.css";
 
-export default function Header () {
-	const linkStyle = `text-gray-800 hover:text-blue-600 hover:underline transition-colors duration-200`
-	const activeLinkStyle = `text-blue-600 font-semibold underline`
-	const [isOpen, setIsOpen] = useState(false);
-	const { firebaseUser } = useAuth();
-	const { guestMode } = useAccount();
-	const pathname = usePathname();
+export default function Header() {
+  const linkStyle = `text-gray-800 hover:text-blue-600 hover:underline transition-colors duration-200`;
+  const activeLinkStyle = `text-blue-600 font-semibold underline`;
+  const [isOpen, setIsOpen] = useState(false);
+  const { firebaseUser } = useAuth();
+  const { guestMode } = useAccount();
+  const pathname = usePathname();
 
-	const menuRef = useRef<HTMLDivElement>(null);
-	const buttonRef = useRef<HTMLButtonElement>(null);
-	useClickOutside([menuRef, buttonRef], () => setIsOpen(false));
-  
-	const toggleMenu = () => setIsOpen(!isOpen);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  useClickOutside([menuRef, buttonRef], () => setIsOpen(false));
 
-	const isActive = (path: string) => {
-		return pathname === path;
-	};
+  const toggleMenu = () => setIsOpen(!isOpen);
 
-	const getLinkStyle = (path: string) => {
-		return isActive(path) ? activeLinkStyle : linkStyle;
-	};
+  // Hamburger menu
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const toggleHamMenu = () => setIsMenuOpen(!isMenuOpen);
+  const closeMenu = () => setIsMenuOpen(false);
 
-	const renderLinkOptions = () => {
-		const sharedLinks = (
-		  <>
-			<Link href="/garden" className={getLinkStyle("/garden")}>Garden</Link>
-			<Link href="/store" className={getLinkStyle("/store")}>Store</Link>
-			<Link href="/user" className={getLinkStyle("/user")}>User</Link>
-		  </>
-		);
-	  
-		if (firebaseUser || guestMode) {
-		  return (
-			<>
-			  {sharedLinks}
-			  {guestMode && <Link href="/login" className={getLinkStyle("/login")}>Login</Link>}
-			  <button ref={buttonRef} onClick={toggleMenu} className="text-black">
-				<ProfileDisplay isOpen={isOpen} />
-			  </button>
-			</>
-		  );
-		} else {
-		  return <Link href="/login" className={getLinkStyle("/login")}>Login</Link>;
-		}
-	  };
+  const isActive = (path: string) => {
+    return pathname === path;
+  };
 
-	return (
-		<header className="bg-blue-200 sticky top-0 z-10 w-full items-center justify-between">
-		  <nav className="w-full">
-			<div className="flex items-center justify-between w-full px-4 py-3">
-				{/* Name Button */}
-				<div className="flex-shrink-0">
-					<div className="text-2xl font-bold text-black">Goose Farm</div>
-				</div>
-				<div className="flex items-center space-x-4">
-					{guestMode && <div className={"text-red-600"}>{`[Guest Mode]`}</div>}
-					<Link href="/" className={getLinkStyle("/")}>Home</Link>
-					{renderLinkOptions()}
-				</div>
-				<ProfileMenu menuRef={menuRef} isOpen={isOpen} toggleMenu={toggleMenu}/>
-			</div>
-		  </nav>
-		</header>
-	  );
+  const getLinkStyle = (path: string) => {
+    return isActive(path) ? activeLinkStyle : linkStyle;
+  };
+
+  const renderLinkOptions = () => {
+    const sharedLinks = (
+      <>
+        <Link
+          href="/garden"
+          className={getLinkStyle("/garden")}
+          onClick={closeMenu}
+        >
+          Garden
+        </Link>
+        <Link
+          href="/store"
+          className={getLinkStyle("/store")}
+          onClick={closeMenu}
+        >
+          Store
+        </Link>
+        <Link
+          href="/user"
+          className={getLinkStyle("/user")}
+          onClick={closeMenu}
+        >
+          User
+        </Link>
+      </>
+    );
+
+    if (firebaseUser || guestMode) {
+      return (
+        <>
+          {sharedLinks}
+          {guestMode && (
+            <Link
+              href="/login"
+              className={getLinkStyle("/login")}
+              onClick={closeMenu}
+            >
+              Login
+            </Link>
+          )}
+          <button ref={buttonRef} onClick={toggleMenu} className="text-black">
+            <ProfileDisplay isOpen={isOpen} />
+          </button>
+        </>
+      );
+    } else {
+      return (
+        <Link
+          href="/login"
+          className={getLinkStyle("/login")}
+          onClick={closeMenu}
+        >
+          Login
+        </Link>
+      );
+    }
+  };
+
+  return (
+    <header className="bg-blue-200 sticky top-0 z-10 w-full items-center justify-between">
+      <nav className="w-full">
+        <div className="flex items-center justify-between w-full px-4 py-3">
+          {/* Name Button */}
+          <div className="flex-shrink-0">
+            <div className="text-2xl font-bold text-black">Goose Farm</div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            {guestMode && (
+              <div
+                className={"text-red-600 items-center"}
+              >{`[Guest Mode]`}</div>
+            )}
+            <div className="mobile-nav flex items-center">
+              <button className="menu-toggle" onClick={toggleHamMenu}>
+                ☰
+              </button>
+              <div
+                className={`nav-links items-center ${isMenuOpen ? "open" : ""}`}
+              >
+                <Link
+                  href="/"
+                  className={getLinkStyle("/")}
+                  onClick={closeMenu}
+                >
+                  Home
+                </Link>
+                {renderLinkOptions()}
+              </div>
+              <ProfileMenu
+                menuRef={menuRef}
+                isOpen={isOpen}
+                toggleMenu={toggleMenu}
+              />
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+  );
 }
