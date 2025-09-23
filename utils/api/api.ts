@@ -1,5 +1,6 @@
 import { auth } from "../firebase/firebaseConfig";
-  
+import { ApiErrorCodes } from "./error/apiErrorCodes";
+
 export async function makeApiRequest(
 	method: string,
 	apiRoute: string,
@@ -8,41 +9,38 @@ export async function makeApiRequest(
   ): Promise<any> {
 	try {
 	  let idToken: string | null = null;
-	  
+  
 	  if (authRequired && auth?.currentUser) {
-		// Only get the token if we have a user and auth is required
 		idToken = await auth.currentUser.getIdToken();
 	  }
   
-	  // Create headers
-	  const headers: HeadersInit = {
-		'Content-Type': 'application/json',
-	  };
+	  const headers: HeadersInit = { "Content-Type": "application/json" };
+	  if (idToken) headers["Authorization"] = `Bearer ${idToken}`;
   
-	  if (idToken) {
-		headers['Authorization'] = `Bearer ${idToken}`;
-	  }
-  
-	  // Create options for the fetch request
-	  const options: RequestInit = {
-		method,
-		headers,
-	  };
-
-	  // Add body for non-GET requests
-	  if (method !== 'GET') {
-		options.body = JSON.stringify(data);
-	  }
+	  const options: RequestInit = { method, headers };
+	  if (method !== "GET") options.body = JSON.stringify(data);
   
 	  const response = await fetch(apiRoute, options);
+	  const json = await response.json();
   
 	  if (!response.ok) {
-		throw new Error(`Failed to fetch ${apiRoute}`);
+		// Use backend error if available
+		const message = json?.error?.message || `HTTP error! status: ${response.status}`;
+		const code = json?.error?.code || ApiErrorCodes.API_ERROR;
+		throw { message, code }; // throw a structured object
 	  }
-  
-	  return await response.json();
-	} catch (error) {
-	  console.error("Error making API request:", error);
-	  throw error;
+	
+	  return json; // success case
+	} catch (err: any) {
+	  console.error("API request error:", err);
+	
+	  // Normalize all errors to your ApiErrorCodes structure
+	  return {
+		success: false,
+		error: {
+		  code: err.code || ApiErrorCodes.API_ERROR,
+		  message: err.message || "Unknown error occurred",
+		},
+	  };
 	}
-  }
+}

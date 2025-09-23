@@ -57,13 +57,19 @@ const DailyLoginRewardClaimButton = () => {
         try {
             const apiRoute = `/api/user/${user.getUserId()}/events/dailyLogin`;
             const data = { inventoryId: inventory.getInventoryId() };
-            const result = await makeApiRequest('PATCH', apiRoute, data, true);
+            const apiResponse = await makeApiRequest('PATCH', apiRoute, data, true);
             
-            handleDailyLoginApiResponse(user, inventory, result);
+            if (!apiResponse.success) {
+                setApiError(apiResponse.error?.message || 'Failed to fetch daily login reward. Please try again later.');
+                setEventReward(null);
+                return;
+            }
+
+            handleDailyLoginApiResponse(user, inventory, apiResponse.data);
 
 
             // Convert the result to an EventReward object
-            const reward = EventReward.fromPlainObject(result);
+            const reward = EventReward.fromPlainObject(apiResponse.data);
             setEventReward(reward);
             
             // Update the daily login event state

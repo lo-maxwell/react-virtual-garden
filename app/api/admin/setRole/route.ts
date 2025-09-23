@@ -1,6 +1,8 @@
 import { setAdmin } from "@/backend/services/admin/adminService";
 import { verifyToken } from "@/utils/firebase/authUtils";
 import { NextResponse } from "next/server";
+import { ApiErrorCodes } from "@/utils/api/error/apiErrorCodes";
+import { ApiResponse } from "@/utils/api/apiResponse";
 
 export async function PATCH(request: Request) {
 	try {
@@ -8,12 +10,12 @@ export async function PATCH(request: Request) {
 		const decodedToken = await verifyToken(request.headers.get('Authorization'));
 		const firebaseUid = decodedToken.uid;  // Extract UID from the decoded token
 		if (decodedToken.role !== 'admin') {
-			throw new Error('Forbidden: Admins only');
+			return NextResponse.json({ success: false, error: { code: ApiErrorCodes.FORBIDDEN, message: "Forbidden: Admins only" } }, { status: 403 });
 		  }
-	  const {targetEmail} = await request.json();
-	  const result = await setAdmin(firebaseUid, targetEmail);
-	  return NextResponse.json(result, {status: 200});
+		const {targetEmail} = await request.json();
+		const result = await setAdmin(firebaseUid, targetEmail);
+		return ApiResponse.success(result);
 	} catch (error) {
-	  return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+		return ApiResponse.fromError(error);
 	}
   }
