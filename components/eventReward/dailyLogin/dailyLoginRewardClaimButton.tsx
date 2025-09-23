@@ -39,7 +39,6 @@ const DailyLoginRewardClaimButton = () => {
         reloadUser();
         reloadInventory();
         toggleSelectedItem(null);
-        // updateInventoryForceRefreshKey();
     }
 
     
@@ -65,11 +64,9 @@ const DailyLoginRewardClaimButton = () => {
                 return;
             }
 
-            handleDailyLoginApiResponse(user, inventory, apiResponse.data);
+            const userEvent = handleDailyLoginApiResponse(user, inventory, apiResponse.data);
 
-
-            // Convert the result to an EventReward object
-            const reward = EventReward.fromPlainObject(apiResponse.data);
+            const reward = userEvent.getEventReward();
             setEventReward(reward);
             
             // Update the daily login event state

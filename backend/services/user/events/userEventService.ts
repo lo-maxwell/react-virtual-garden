@@ -569,10 +569,10 @@ export async function getUserEventFromDatabase(userEvent: UserEvent, client?: Po
 				throw new Error(`Could not select userEvent with owner: ${userEvent.getUser()} and event type: ${userEvent.getEventType()}`);
 			}
 			const userEventEntityResult = parseRows<UserEventEntity[]>(userEventResult[0]);
-			if (userEventEntityResult.length > 1) {
+			if (userEventEntityResult && userEventEntityResult.length > 1) {
 				console.warn(`Expected 1 userEvent to be fetched, but got ${userEventEntityResult.length}`);
 			}
-			if (userEventEntityResult.length == 0) return null;
+			if (!userEventEntityResult || userEventEntityResult.length == 0) return null;
 
 			assert(userEventRepository.validateUserEventEntity(userEventEntityResult[0]));
 			

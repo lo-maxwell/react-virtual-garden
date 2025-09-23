@@ -1,8 +1,6 @@
 import { UserEvent } from "@/models/user/userEvents/UserEvent";
 import { getUserEventFromDatabase, claimDailyReward } from "@/backend/services/user/events/userEventService";
 import { verifyToken } from "@/utils/firebase/authUtils";
-import { NextResponse } from "next/server";
-import { ApiErrorCodes } from "@/utils/api/error/apiErrorCodes";
 import { ApiResponse } from "@/utils/api/apiResponse";
 
 export async function GET(request: Request, { params }: { params: { userId: string } }) {

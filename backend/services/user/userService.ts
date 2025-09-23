@@ -1,4 +1,4 @@
-import { invokeLambda, parseRows, parseRowsAllowNull } from "@/backend/lambda/invokeLambda";
+import { invokeLambda, parseRows } from "@/backend/lambda/invokeLambda";
 import toolRepository from "@/backend/repositories/items/tool/toolRepository";
 import toolboxRepository from "@/backend/repositories/itemStore/toolbox/toolboxRepository";
 import levelRepository from "@/backend/repositories/level/levelRepository";
@@ -853,54 +853,60 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 
 			const userEvents = userEventRepository.makeUserEventMapObject(userEventEntityResults);
 			const userEventIds: string[] = Array.from(userEvents.values()).map(userEvent => userEvent.getId());
-
-			const event_reward_payload = {
-				"queries": [
-					{
-						"returnColumns": [
-							"id",
-							"owner",
-							"inventory",
-							"gold", 
-							"message"
-						],
-						"tableName": "event_rewards",
-						"conditions": {
-							"owner": {
-								"operator": "IN",
-								"value": userEventIds
+			let eventRewardEntities;
+			let eventRewardItemEntities;
+			if (userEventIds.length > 0) {
+				const event_reward_payload = {
+					"queries": [
+						{
+							"returnColumns": [
+								"id",
+								"owner",
+								"inventory",
+								"gold", 
+								"message"
+							],
+							"tableName": "event_rewards",
+							"conditions": {
+								"owner": {
+									"operator": "IN",
+									"value": userEventIds
+								}
+							},
+							"limit": 1000000
+						}
+					]
+				}
+				const eventRewardResult = await invokeLambda('garden-select', event_reward_payload);
+				eventRewardEntities = parseRows<EventRewardEntity[]>(eventRewardResult[0]);
+	
+				const eventRewardIds: string[] = eventRewardEntities ? eventRewardEntities.map((val) => val.id) : [];
+				if (eventRewardIds.length > 0) {
+					const event_reward_item_payload = {
+						"queries": [
+							{
+								"returnColumns": [
+									"id",
+									"owner",
+									"identifier",
+									"quantity"
+								],
+								"tableName": "event_reward_items",
+								"conditions": {
+									"owner": {
+										"operator": "IN",
+										"value": eventRewardIds
+									}
+								},
+								"limit": 1000000
 							}
-						},
-						"limit": 1000000
+						]
 					}
-				]
+					const eventRewardItemResult = await invokeLambda('garden-select', event_reward_item_payload);
+					eventRewardItemEntities = parseRows<EventRewardItemEntity[]>(eventRewardItemResult[0]);
+				}
 			}
-			const eventRewardResult = await invokeLambda('garden-select', event_reward_payload);
-			const eventRewardEntities = parseRowsAllowNull<EventRewardEntity[]>(eventRewardResult[0]);
-
-			const eventRewardIds: string[] = eventRewardEntities ? eventRewardEntities.map((val) => val.id) : [];
-			const event_reward_item_payload = {
-				"queries": [
-					{
-						"returnColumns": [
-							"id",
-							"owner",
-							"identifier",
-							"quantity"
-						],
-						"tableName": "event_reward_items",
-						"conditions": {
-							"owner": {
-								"operator": "IN",
-								"value": eventRewardIds
-							}
-						},
-						"limit": 1000000
-					}
-				]
-			}
-			const eventRewardItemResult = await invokeLambda('garden-select', event_reward_item_payload);
-			const eventRewardItemEntities = parseRowsAllowNull<EventRewardItemEntity[]>(eventRewardItemResult[0]);
+			
 			const updatedUserEvents = userEventRepository.makeUserEventMapObject(userEventEntityResults, eventRewardEntities ? eventRewardEntities : undefined, eventRewardItemEntities ? eventRewardItemEntities : undefined);
 
 			const userObject = userRepository.makeUserObject(userEntityResult, levelSystemInstance, actionHistoryList, itemHistoryList, toolboxInstance, updatedUserEvents);
