@@ -69,6 +69,12 @@ const DailyLoginRewardClaimButton = () => {
         reloadUser();
         reloadInventory();
         toggleSelectedItem(null);
+        setEventReward(null);
+        setShowClaimedRewardScreen(false);
+        if (process.env.NEXT_PUBLIC_DAILY_LOGIN_OVERRIDE === 'true') {
+            // In override mode, immediately re-fetch the previous event to update canClaim
+            fetchDailyLoginEvent();
+        }
     }
 
     
@@ -204,13 +210,7 @@ const DailyLoginRewardClaimButton = () => {
                             hover:from-yellow-500 hover:to-orange-500 
                             hover:scale-105 transition"
                 onClick={() => {
-                    setEventReward(null);
-                    setShowClaimedRewardScreen(false);
-                    if (process.env.NEXT_PUBLIC_DAILY_LOGIN_OVERRIDE === 'true') {
-                        // In override mode, immediately re-fetch the previous event to update canClaim
-                        fetchDailyLoginEvent();
-                    }
-                    setShowWindow(false);
+                    closeWindowAndRefresh(false);
                 }}
                 > Awesome! </button>
                 </>

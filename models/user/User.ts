@@ -125,7 +125,7 @@ class User {
 	}
 
 	static getDefaultUserName(): string {
-		return "Unknown Farmer";
+		return "Goose Farmer";
 	}
 
 	getUserId(): string {
