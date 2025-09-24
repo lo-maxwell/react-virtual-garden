@@ -17,6 +17,7 @@ import User from "@/models/user/User";
 import { v4 as uuidv4 } from 'uuid';
 import eventRewardRepository from "@/backend/repositories/events/eventRewardRepository";
 import eventRewardItemRepository from "@/backend/repositories/events/eventRewardItemRepository";
+import { UserEventType } from "@/models/user/userEvents/UserEventTypes";
 
 //TODO: Add EventReward and EventRewardItems to this
 
@@ -385,9 +386,12 @@ import eventRewardItemRepository from "@/backend/repositories/events/eventReward
 }
 
 /**
+ * Get a user event entity from the database, does not include event rewards
+ * @param userId the user id
+ * @eventType the event type
  * @returns a userEventEntity, or null
  */
- export async function getUserEventEntityByUserIdAndEventType(userEvent: UserEvent, client?: PoolClient): Promise<UserEventEntity | null> {
+ export async function getUserEventEntityByUserIdAndEventType(userId: string, eventType: UserEventType, client?: PoolClient): Promise<UserEventEntity | null> {
 	if (process.env.USE_DATABASE === 'LAMBDA') {
 		try {
 			// Call Lambda function with userEvent as payload
@@ -406,11 +410,11 @@ import eventRewardItemRepository from "@/backend/repositories/events/eventReward
 						"conditions": {
 							"owner": {
 								"operator": "=",
-								"value": userEvent.getUser()
+								"value": userId
 							},
 							"event_type": {
 								"operator": "=",
-								"value": userEvent.getEventType()
+								"value": eventType
 							}
 						},
 						"orderBy": [
@@ -423,7 +427,7 @@ import eventRewardItemRepository from "@/backend/repositories/events/eventReward
 			const userEventResult = await invokeLambda('garden-select', payload);
 			// Check if result is valid
 			if (!userEventResult) {
-				throw new Error(`Could not select userEvent with owner: ${userEvent.getUser()} and event type: ${userEvent.getEventType()}`);
+				throw new Error(`Could not select userEvent with owner: ${userId} and event type: ${eventType}`);
 			}
 			const userEventEntityResult = parseRows<UserEventEntity[]>(userEventResult[0]);
 			if (userEventEntityResult.length > 1) {
@@ -439,10 +443,10 @@ import eventRewardItemRepository from "@/backend/repositories/events/eventReward
 	} else {
 		const innerFunction = async (client: PoolClient) => {
 			//Create user
-			const userEventResult = await userEventRepository.getUserEvent(userEvent.getUser(), userEvent.getEventType());
+			const userEventResult = await userEventRepository.getUserEvent(userId, eventType);
 			// Check if result is valid
 			if (!userEventResult) {
-				throw new Error(`Could not find userEvent with owner: ${userEvent.getUser()} and event type: ${userEvent.getEventType()}`);
+				throw new Error(`Could not find userEvent with owner: ${userId} and event type: ${eventType}`);
 			}
 			return userEventResult;
 		}
@@ -451,132 +455,13 @@ import eventRewardItemRepository from "@/backend/repositories/events/eventReward
 	}
 }
 
-/**
- * @returns a userEvent, or null
- */
-export async function getUserEventFromDatabase(userEvent: UserEvent, client?: PoolClient): Promise<UserEvent | null> {
-	if (process.env.USE_DATABASE === 'LAMBDA') {
-		try {
-			// Call Lambda function with userEvent as payload
-			//SELECT * FROM users WHERE id = $1
-			const payload: any = {
-				"queries": [
-					{
-						"returnColumns": [
-							"id",
-							"owner", 
-							"event_type", 
-							"streak",
-							"created_at"
-						],
-						"tableName": "user_events",
-						"conditions": {
-							"owner": {
-								"operator": "=",
-								"value": userEvent.getUser()
-							},
-							"event_type": {
-								"operator": "=",
-								"value": userEvent.getEventType()
-							}
-						},
-						"orderBy": [
-							{"column": "created_at", "direction": "DESC"}
-						],
-						"limit": 1
-					}
-				]
-			  };
-
-			if (userEvent.getEventReward()) {
-				payload.queries.push(
-					{
-						"returnColumns": [
-							"id",
-							"owner",
-							"inventory",
-							"gold",
-							"message"
-						],
-						"tableName": "event_rewards",
-						"conditions": {
-							"owner": {
-								"operator": "=",
-								"value": userEvent.getId()
-							}
-						}
-					}
-				);
-			}
-
-			const userEventResult = await invokeLambda('garden-select', payload);
-			// Check if result is valid
-			if (!userEventResult) {
-				throw new Error(`Could not select userEvent with owner: ${userEvent.getUser()} and event type: ${userEvent.getEventType()}`);
-			}
-			const userEventEntityResult = parseRows<UserEventEntity[]>(userEventResult[0]);
-			if (userEventEntityResult.length > 1) {
-				console.warn(`Expected 1 userEvent to be fetched, but got ${userEventEntityResult.length}`);
-			}
-			if (userEventEntityResult.length == 0) return null;
-
-			assert(userEventRepository.validateUserEventEntity(userEventEntityResult[0]));
-			
-			let eventRewardEntity: EventRewardEntity | undefined;
-			if (userEvent.getEventReward() && userEventResult[1]) {
-				const eventRewardResult = parseRows<EventRewardEntity[]>(userEventResult[1]);
-				if (eventRewardResult.length > 1) {
-					console.warn(`Expected 1 eventReward to be fetched, but got ${eventRewardResult.length}`);
-				}
-				if (eventRewardResult.length > 0) {
-					eventRewardEntity = eventRewardResult[0];
-
-					// Now fetch event reward items
-					const itemPayload = {
-						"queries": [
-							{
-								"returnColumns": [
-									"id",
-									"owner",
-									"identifier",
-									"quantity"
-								],
-								"tableName": "event_reward_items",
-								"conditions": {
-									"owner": {
-										"operator": "=",
-										"value": eventRewardEntity.id
-									}
-								}
-							}
-						]
-					};
-					const eventRewardItemResult = await invokeLambda('garden-select', itemPayload);
-					if (!eventRewardItemResult) {
-						throw new Error(`Could not select eventRewardItems for eventRewardId: ${eventRewardEntity.id}`);
-					}
-					const eventRewardItemEntities = parseRows<EventRewardItemEntity[]>(eventRewardItemResult[0]);
-					
-					const rewardItems = eventRewardItemRepository.makeEventRewardItemObjectBatch(eventRewardItemEntities);
-					
-					const userEventInstance = userEventRepository.makeUserEventObject(userEventEntityResult[0], eventRewardEntity, rewardItems);
-					return userEventInstance;
-				}
-			}
-			return userEventRepository.makeUserEventObject(userEventEntityResult[0]);
-		} catch (error) {
-			console.error('Error fetching userEvent from Lambda:', error);
-			throw error;
-		}
-	} else {
-		throw new Error(`This is not implemented yet!`);
-	}
-}
 
 /**
+ * Get a user event entity from the database, does not include event rewards
+ * @id the id of the event
  * @returns a userEventEntity, or null
  */
-export async function getUserEventEntityById(id: string, client?: PoolClient): Promise<UserEventEntity | null> {
+ export async function getUserEventEntityById(id: string, client?: PoolClient): Promise<UserEventEntity | null> {
 	if (process.env.USE_DATABASE === 'LAMBDA') {
 		try {
 			const payload = {
@@ -620,6 +505,141 @@ export async function getUserEventEntityById(id: string, client?: PoolClient): P
 	}
 }
 
+/**
+ * Get the most recently created user event by user id and event type
+ * @returns a userEvent plain object or null
+ */
+export async function getUserEventFromDatabase(userId: string, eventType: UserEventType, client?: PoolClient): Promise<any> {
+	if (process.env.USE_DATABASE === 'LAMBDA') {
+		try {
+			// Call Lambda function with userEvent as payload
+			//SELECT * FROM users WHERE id = $1
+			const payload: any = {
+				"queries": [
+					{
+						"returnColumns": [
+							"id",
+							"owner", 
+							"event_type", 
+							"streak",
+							"created_at"
+						],
+						"tableName": "user_events",
+						"conditions": {
+							"owner": {
+								"operator": "=",
+								"value": userId
+							},
+							"event_type": {
+								"operator": "=",
+								"value": eventType
+							}
+						},
+						"orderBy": [
+							{"column": "created_at", "direction": "DESC"}
+						],
+						"limit": 1
+					}
+				]
+			  };
+
+			// Fetch event rewards if a user event entity is found
+			let eventRewardEntity: EventRewardEntity | undefined;
+			let eventRewardItemEntities: EventRewardItemEntity[] = [];
+
+			const userEventResult = await invokeLambda('garden-select', payload);
+			// Check if result is valid
+			if (!userEventResult) {
+				console.warn(`Could not select userEvent with owner: ${userId} and event type: ${eventType}. Returning null.`);
+				return null;
+			}
+			const userEventEntityResult = parseRows<UserEventEntity[]>(userEventResult[0]);
+			if (userEventEntityResult && userEventEntityResult.length > 1) {
+				console.warn(`Expected 1 userEvent to be fetched, but got ${userEventEntityResult.length}`);
+			}
+			if (!userEventEntityResult || userEventEntityResult.length == 0) {
+				console.warn(`No userEvent found for owner: ${userId} and event type: ${eventType}. Returning null.`);
+				return null;
+			}
+
+			assert(userEventRepository.validateUserEventEntity(userEventEntityResult[0]));
+			
+			// If a user event is found, try to fetch its associated event reward
+			if (userEventEntityResult.length > 0) {
+				const fetchedUserEventId = userEventEntityResult[0].id;
+				const eventRewardPayload = {
+					"queries": [
+						{
+							"returnColumns": [
+								"id",
+								"owner",
+								"inventory",
+								"gold",
+								"message"
+							],
+							"tableName": "event_rewards",
+							"conditions": {
+								"owner": {
+									"operator": "=",
+									"value": fetchedUserEventId
+								}
+							},
+							"limit": 1
+						}
+					]
+				};
+				const eventRewardResult = await invokeLambda('garden-select', eventRewardPayload);
+				if (!eventRewardResult) {
+					console.warn(`Could not select eventReward for userEventId: ${fetchedUserEventId}`);
+				} else {
+					const parsedEventRewardResult = parseRows<EventRewardEntity[]>(eventRewardResult[0]);
+					if (parsedEventRewardResult.length > 0) {
+						eventRewardEntity = parsedEventRewardResult[0];
+
+						// If an event reward is found, try to fetch its associated items
+						const eventRewardItemPayload = {
+							"queries": [
+								{
+									"returnColumns": [
+										"id",
+										"owner",
+										"identifier",
+										"quantity"
+									],
+									"tableName": "event_reward_items",
+									"conditions": {
+										"owner": {
+											"operator": "=",
+											"value": eventRewardEntity.id
+										}
+									}
+								}
+							]
+						};
+						const eventRewardItemResult = await invokeLambda('garden-select', eventRewardItemPayload);
+						if (!eventRewardItemResult) {
+							console.warn(`Could not select eventRewardItems for eventRewardId: ${eventRewardEntity.id}`);
+						} else {
+							eventRewardItemEntities = parseRows<EventRewardItemEntity[]>(eventRewardItemResult[0]);
+						}
+					}
+				}
+			}
+
+			const rewardItems = eventRewardItemRepository.makeEventRewardItemObjectBatch(eventRewardItemEntities);
+			
+			const userEventInstance = userEventRepository.makeUserEventObject(userEventEntityResult[0], eventRewardEntity, rewardItems);
+			return userEventInstance.toPlainObject();
+		} catch (error) {
+			console.error('Error fetching userEvent from Lambda:', error);
+			throw error;
+		}
+	} else {
+		throw new Error(`This is not implemented yet!`);
+	}
+}
+
+
 export async function claimDailyReward(userId: string, inventoryId: string, client?: PoolClient): Promise<EventRewardInterface> {
 	const currentTime = Date.now();
 	if (process.env.USE_DATABASE === 'LAMBDA') {
@@ -627,7 +647,7 @@ export async function claimDailyReward(userId: string, inventoryId: string, clie
 			let rewardGold = 0;
 			let rewardMessage = '';
 			let inventoryEntity = await getInventoryEntity(inventoryId, userId, client);
-			let eventEntity = await getUserEventEntityByUserIdAndEventType(new UserEvent(uuidv4(), inventoryEntity.owner, "DAILYLOGIN"));
+			let eventEntity = await getUserEventEntityByUserIdAndEventType(inventoryEntity.owner, "DAILYLOGIN");
 			let eventInstance: UserEvent;
 			if (eventEntity) {
 				eventInstance = userEventRepository.makeUserEventObject(eventEntity);

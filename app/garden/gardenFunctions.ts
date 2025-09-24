@@ -50,7 +50,11 @@ export async function addRowAPI(garden: Garden, user: User) {
   const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`;
   try {
     const result = await makeApiRequest('PATCH', apiRoute, data, true);
-    return result;
+    if (!result.success) {
+      console.error("Error adding row:", result.error);
+      return false;
+    }
+    return result.success;
   } catch (error) {
     console.error(error);
     return false;
@@ -65,7 +69,11 @@ export async function addColumnAPI(garden: Garden, user: User) {
   const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`;
   try {
     const result = await makeApiRequest('PATCH', apiRoute, data, true);
-    return result;
+    if (!result.success) {
+      console.error("Error adding column:", result.error);
+      return false;
+    }
+    return result.success;
   } catch (error) {
     console.error(error);
     return false;
@@ -80,7 +88,11 @@ export async function removeRowAPI(garden: Garden, user: User) {
   const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`;
   try {
     const result = await makeApiRequest('PATCH', apiRoute, data, true);
-    return result;
+    if (!result.success) {
+      console.error("Error removing row:", result.error);
+      return false;
+    }
+    return result.success;
   } catch (error) {
     console.error(error);
     return false;
@@ -95,7 +107,11 @@ export async function removeColumnAPI(garden: Garden, user: User) {
   const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/resize`;
   try {
     const result = await makeApiRequest('PATCH', apiRoute, data, true);
-    return result;
+    if (!result.success) {
+      console.error("Error removing column:", result.error);
+      return false;
+    }
+    return result.success;
   } catch (error) {
     console.error(error);
     return false;
@@ -106,7 +122,11 @@ export async function syncGardenSize(garden: Garden, user: User): Promise<boolea
   const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/size`;
   try {
     const result = await makeApiRequest('GET', apiRoute, {}, true);
-    garden.setGardenSize(result.rows, result.columns);
+    if (!result.success) {
+      console.error("Error syncing garden size:", result.error);
+      return false;
+    }
+    garden.setGardenSize(result.data.rows, result.data.columns);
     return true;
   } catch (error) {
     console.error(error);
@@ -121,17 +141,26 @@ export async function syncUserGardenInventory(user: User, garden: Garden, invent
     // Sync user data
     const userApiRoute = `/api/user/${user.getUserId()}/get`;
     const userResult = await makeApiRequest('GET', userApiRoute, {}, true);
-    saveUser(User.fromPlainObject(userResult));
+    if (!userResult.success) {
+      throw new Error(userResult.error?.message || "Failed to sync user data");
+    }
+    saveUser(User.fromPlainObject(userResult.data));
 
     // Sync garden data
     const gardenApiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/get`;
     const gardenResult = await makeApiRequest('GET', gardenApiRoute, {}, true);
-    saveGarden(Garden.fromPlainObject(gardenResult));
+    if (!gardenResult.success) {
+      throw new Error(gardenResult.error?.message || "Failed to sync garden data");
+    }
+    saveGarden(Garden.fromPlainObject(gardenResult.data));
 
     // Sync inventory data
     const inventoryApiRoute = `/api/user/${user.getUserId()}/inventory/${inventory.getInventoryId()}/get`;
     const inventoryResult = await makeApiRequest('GET', inventoryApiRoute, {}, true);
-    saveInventory(Inventory.fromPlainObject(inventoryResult));
+    if (!inventoryResult.success) {
+      throw new Error(inventoryResult.error?.message || "Failed to sync inventory data");
+    }
+    saveInventory(Inventory.fromPlainObject(inventoryResult.data));
     return true;
   } catch (error) {
     console.error(error);
@@ -150,7 +179,11 @@ export async function plantAllAPI(plantedPlotIds: string[], inventory: Inventory
     const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plantAll`;
     const result = await makeApiRequest('PATCH', apiRoute, data, true);
     console.log('Successfully planted all seeds:', result);
-    return result;
+    if (!result.success) {
+      console.error("Error planting all seeds:", result.error);
+      return false;
+    }
+    return result.success;
   } catch (error) {
     console.error(error);
     return false;
@@ -171,7 +204,11 @@ export async function harvestAllAPI(harvestedPlotIds: string[], inventory: Inven
     const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/harvestAll`;
     const result = await makeApiRequest('PATCH', apiRoute, data, true);
     console.log('Successfully harvested all plants:', result);
-    return result;
+    if (!result.success) {
+      console.error("Error harvesting all plants:", result.error);
+      return false;
+    }
+    return result.success;
   } catch (error) {
     console.error(error);
     return false;
@@ -189,7 +226,11 @@ export async function pickupAllAPI(pickupPlotIds: string[], inventory: Inventory
     const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/pickupAll`;
     const result = await makeApiRequest('PATCH', apiRoute, data, true);
     console.log('Successfully picked up all decorations:', result);
-    return result;
+    if (!result.success) {
+      console.error("Error picking up all decorations:", result.error);
+      return false;
+    }
+    return result.success;
   } catch (error) {
     console.error(error);
     return false;

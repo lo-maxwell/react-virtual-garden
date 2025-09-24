@@ -74,7 +74,11 @@ export const usePlotActions = () => {
 
 			try {
 				const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/plant`;
-				const result = await makeApiRequest('PATCH', apiRoute, data, true);
+				const apiResponse = await makeApiRequest('PATCH', apiRoute, data, true);
+                if (!apiResponse.success) {
+                    throw new Error(apiResponse.error?.message || "Failed to plant seed");
+                }
+                const result: PlacedItemEntity = apiResponse.data as PlacedItemEntity;
 				console.log('Successfully planted seed:', result);
 				return {success: true, displayIcon: plot.getItem().itemData.icon};
 			} catch (error) {
@@ -141,7 +145,11 @@ export const usePlotActions = () => {
 
 			try {
 				const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/place`;
-				const result = await makeApiRequest('PATCH', apiRoute, data, true);
+				const apiResponse = await makeApiRequest('PATCH', apiRoute, data, true);
+                if (!apiResponse.success) {
+                    throw new Error(apiResponse.error?.message || "Failed to place decoration");
+                }
+                const result: PlacedItemEntity = apiResponse.data as PlacedItemEntity;
 				console.log('Successfully placed decoration:', result);
 				return {success: true, displayIcon: plot.getItem().itemData.icon};
 			} catch (error) {
@@ -217,7 +225,12 @@ export const usePlotActions = () => {
 			}
 			try {
 				const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/harvest`;
-				const result: InventoryItemEntity = await makeApiRequest('PATCH', apiRoute, data, true);
+				const apiResponse = await makeApiRequest('PATCH', apiRoute, data, true);
+
+                if (!apiResponse.success) {
+                    throw new Error(apiResponse.error?.message || "Failed to harvest item");
+                }
+                const result: InventoryItemEntity = apiResponse.data as InventoryItemEntity;
 
 				const itemTemplate = itemTemplateFactory.getInventoryTemplateById(result.identifier);
 				if (!itemTemplate) {
@@ -298,8 +311,13 @@ export const usePlotActions = () => {
 			}
 			try {
 				const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/pickup`;
-				const result: InventoryItemEntity = await makeApiRequest('PATCH', apiRoute, data, true);
+				const apiResponse = await makeApiRequest('PATCH', apiRoute, data, true);
 				
+                if (!apiResponse.success) {
+                    throw new Error(apiResponse.error?.message || "Failed to pick up item");
+                }
+                const result: InventoryItemEntity = apiResponse.data as InventoryItemEntity;
+
 				const itemTemplate = itemTemplateFactory.getInventoryTemplateById(result.identifier);
 				if (!itemTemplate) {
 					throw new Error(`Error parsing item template`);
@@ -369,31 +387,36 @@ export const usePlotActions = () => {
 			}
 			try {
 				const apiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/plot/${plot.getPlotId()}/destroy`;
-				const result: PlacedItemEntity = await makeApiRequest('PATCH', apiRoute, data, true);
-				
-				const itemTemplate = itemTemplateFactory.getPlacedTemplateById(result.identifier);
-				if (!itemTemplate) {
-					throw new Error(`Error parsing item template`);
+				const apiResponse = await makeApiRequest('PATCH', apiRoute, data, true);
+					
+                    if (!apiResponse.success) {
+                        throw new Error(apiResponse.error?.message || "Failed to destroy item");
+                    }
+                    const result: PlacedItemEntity = apiResponse.data as PlacedItemEntity;
+					
+					const itemTemplate = itemTemplateFactory.getPlacedTemplateById(result.identifier);
+					if (!itemTemplate) {
+						throw new Error(`Error parsing item template`);
+					}
+					console.log('Successfully destroyed item.');
+					return {success: true, displayIcon: plot.getItem().itemData.icon};
+				} catch (error) {
+					console.error(error);
+					// Rollback the optimistic update
+					const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
+					if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
+					console.warn(`There was an error destroying an item, rolled back`);
+					setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
+					return {success: false, displayIcon: originalIcon};
 				}
-				console.log('Successfully destroyed item.');
-				return {success: true, displayIcon: plot.getItem().itemData.icon};
-			} catch (error) {
-				console.error(error);
-				// Rollback the optimistic update
-				const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
-				if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
-				console.warn(`There was an error destroying an item, rolled back`);
-				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
-				return {success: false, displayIcon: originalIcon};
 			}
+			
+			const toReturn = {
+				uiHelper: uiHelper,
+				apiHelper: apiHelper
+			}
+			return toReturn;
 		}
-		
-		const toReturn = {
-			uiHelper: uiHelper,
-			apiHelper: apiHelper
-		}
-		return toReturn;
-	}
 
 	const doNothing = (plot: Plot, newMessage: string = '') => {
 		const uiHelper = () => {

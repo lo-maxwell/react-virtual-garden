@@ -24,8 +24,11 @@ export async function buyItemAPI (user: User, store: Store, selectedItem: Invent
 		}
         const apiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/buy`;
         const result = await makeApiRequest('PATCH', apiRoute, data, true);
+		if (!result.success) {
+			console.error("Error purchasing item:", result.error);
+			return false;
+		}
 		console.log('Successfully purchased item:', result);
-		
 		return true;
 	  } catch (error) {
 		console.error(error);
@@ -51,6 +54,10 @@ export async function sellItemAPI (user: User, store: Store, selectedItem: Inven
 		}
         const apiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/sell`;
         const result = await makeApiRequest('PATCH', apiRoute, data, true);
+		if (!result.success) {
+			console.error("Error selling item:", result.error);
+			return false;
+		}
 		console.log('Successfully sold item:', result);
 		return true;
 	  } catch (error) {
@@ -66,12 +73,18 @@ export async function syncStoreAndInventory (user: User, store: Store, inventory
         // Sync store data
         const storeApiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/get`;
         const storeResult = await makeApiRequest('GET', storeApiRoute, {}, true);
-		saveStore(Store.fromPlainObject(storeResult));
+        if (!storeResult.success) {
+            throw new Error(storeResult.error?.message || "Failed to sync store");
+        }
+		saveStore(Store.fromPlainObject(storeResult.data));
 
 		// Sync inventory data
         const inventoryApiRoute = `/api/user/${user.getUserId()}/inventory/${inventory.getInventoryId()}/get`;
         const inventoryResult = await makeApiRequest('GET', inventoryApiRoute, {}, true);
-		saveInventory(Inventory.fromPlainObject(inventoryResult));
+        if (!inventoryResult.success) {
+            throw new Error(inventoryResult.error?.message || "Failed to sync inventory");
+        }
+		saveInventory(Inventory.fromPlainObject(inventoryResult.data));
         return true;
       } catch (error) {
         console.error(error);

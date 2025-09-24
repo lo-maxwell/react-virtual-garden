@@ -95,7 +95,11 @@ const createDefaultNewAccount = async (idToken: string): Promise<string> => {
     try {
         const apiRoute = `/api/account/initializeUserObjects`;
         const result = await makeApiRequest('POST', apiRoute, {}, true);
-        return result;
+        if (result.success) {
+            return result.data;
+        } else {
+            throw new Error(result.error?.message || "Failed to create new account");
+        }
     } catch (error) {
         console.error("Error calling API to create new account objects:", error);
         throw error;
@@ -128,8 +132,16 @@ export const fetchAccountObjects = async () => {
     try {
         const apiRoute = `/api/auth/getAccountObjects`;
         const result = await makeApiRequest('GET', apiRoute, {}, true);
-        console.log(result);
-        return result;
+        if (result.success) {
+            console.log(result.data);
+            console.log(result.data.plainUserObject);
+            console.log("plainObject type:", typeof result.data.plainUserObject);
+            console.log("plainObject keys:", result.data.plainUserObject && Object.keys(result.data.plainUserObject));
+            return result.data;
+        } else {
+            console.error("Error calling API to fetch objects:", result.error);
+            throw new Error(result.error?.message || "Failed to fetch account objects");
+        }
     } catch (error) {
         console.error("Error calling API to fetch objects:", error);
         throw error;

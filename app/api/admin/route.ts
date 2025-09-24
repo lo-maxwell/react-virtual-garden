@@ -6,19 +6,21 @@ import User from "@/models/user/User";
 import { verifyToken } from "@/utils/firebase/authUtils";
 import { assert } from "console";
 import { NextResponse } from "next/server";
+import { ApiErrorCodes } from "@/utils/api/error/apiErrorCodes";
+import { ApiResponse } from "@/utils/api/apiResponse";
 //to be obseleted
 export async function POST(request: Request) {
 	try {
 		const decodedToken = await verifyToken(request.headers.get('Authorization'));
 		const firebaseUid = decodedToken.uid;  // Extract UID from the decoded token
 		if (decodedToken.role !== "admin") {
-			return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
+			return NextResponse.json({ success: false, error: { code: ApiErrorCodes.FORBIDDEN, message: "Forbidden: Admins only" } }, { status: 403 });
 		}
 		const { plainUserObject, plainInventoryObject, plainStoreObject, plainGardenObject } = await request.json();
 		const result = await createAccountInDatabase(firebaseUid, User.fromPlainObject(plainUserObject), Inventory.fromPlainObject(plainInventoryObject), Store.fromPlainObject(plainStoreObject), Garden.fromPlainObject(plainGardenObject));
-		return NextResponse.json(result, {status: 201});
+		return ApiResponse.success(result, 201);
 	} catch (error) {
-	 	return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+		return ApiResponse.fromError(error);
 	}
   }
 
@@ -27,12 +29,12 @@ export async function PATCH(request: Request) {
 		const decodedToken = await verifyToken(request.headers.get('Authorization'));
 		const firebaseUid = decodedToken.uid;  // Extract UID from the decoded token
 		if (decodedToken.role !== "admin") {
-			return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
+			return NextResponse.json({ success: false, error: { code: ApiErrorCodes.FORBIDDEN, message: "Forbidden: Admins only" } }, { status: 403 });
 		}
 		const { plainUserObject, plainInventoryObject, plainStoreObject, plainGardenObject, adminPassword } = await request.json();
 		const result = await saveAccountToDatabase(firebaseUid, User.fromPlainObject(plainUserObject), Inventory.fromPlainObject(plainInventoryObject), Store.fromPlainObject(plainStoreObject), Garden.fromPlainObject(plainGardenObject));
-		return NextResponse.json(result, {status: 200});
+		return ApiResponse.success(result);
 	} catch (error) {
-		return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+		return ApiResponse.fromError(error);
 	}
 }

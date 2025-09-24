@@ -157,7 +157,11 @@ const UserPage = () => {
         }
         const apiRoute = `/api/user/${user.getUserId()}/icon`;
         const result = await makeApiRequest('PATCH', apiRoute, data, true);
-        console.log('Successfully posted:', result);
+        if (result.success) {
+          console.log('Successfully posted:', result.data);
+        } else {
+          console.error('Error posting icon:', result.error);
+        }
       } catch (error) {
         console.error(error);
       }
@@ -179,7 +183,11 @@ const UserPage = () => {
         }
         const apiRoute = `/api/user/${user.getUserId()}/username`;
         const result = await makeApiRequest('PATCH', apiRoute, data, true);
-        console.log('Successfully posted:', result);
+        if (result.success) {
+          console.log('Successfully posted:', result.data);
+        } else {
+          console.error('Error posting username:', result.error);
+        }
       } catch (error) {
         console.error(error);
       }

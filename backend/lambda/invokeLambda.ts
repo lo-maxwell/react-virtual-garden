@@ -32,18 +32,18 @@ export async function invokeLambda<T = any>(functionName: string, payload: any):
 }
 
 export function parseRows<T = any>(result: any): T {
-    if (!result || !result.rows) {
-        console.warn(result);
-        throw new Error(`Failed to parse result: no result or rows returned`);
+    if (!result) {
+      throw new Error("Failed to parse result: no result object returned");
     }
-    return result.rows;
-}
-
-export function parseRowsAllowNull<T = any>(result: any): T | null {
-    if (!result || !result.rows) {
-        console.warn(result);
-        console.warn(`Failed to parse result: no result or rows returned`);
-        return null;
+  
+    if (result.error) {
+      throw new Error(`Lambda query error for ${result.tableName}: ${result.error}`);
     }
+  
+    if (!result.rows) {
+      throw new Error(`No rows returned for ${result.tableName}`);
+    }
+  
     return result.rows;
-}
+  }
+  

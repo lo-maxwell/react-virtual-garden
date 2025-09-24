@@ -1,6 +1,8 @@
 import { getAccountFromDatabase } from "@/backend/services/account/accountService";
 import { verifyToken } from "@/utils/firebase/authUtils";
 import { NextResponse } from "next/server";
+import { ApiErrorCodes } from "@/utils/api/error/apiErrorCodes";
+import { ApiResponse } from "@/utils/api/apiResponse";
 
 export async function GET(request: Request) {
 	try {
@@ -8,8 +10,8 @@ export async function GET(request: Request) {
 		const decodedToken = await verifyToken(request.headers.get('Authorization'));
 		const firebaseUid = decodedToken.uid;  // Extract UID from the decoded token
 		const result = await getAccountFromDatabase(firebaseUid);
-		return NextResponse.json(result, {status: 200});
+		return ApiResponse.success(result);
 	} catch (error) {
-	  return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+		return ApiResponse.fromError(error);
 	}
   }
