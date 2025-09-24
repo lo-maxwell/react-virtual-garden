@@ -2,6 +2,7 @@ import { UserEvent } from "@/models/user/userEvents/UserEvent";
 import { getUserEventFromDatabase, claimDailyReward } from "@/backend/services/user/events/userEventService";
 import { verifyToken } from "@/utils/firebase/authUtils";
 import { ApiResponse } from "@/utils/api/apiResponse";
+import { UserEventTypes } from "@/models/user/userEvents/UserEventTypes";
 
 export async function GET(request: Request, { params }: { params: { userId: string } }) {
 	const { userId } = params;
@@ -9,8 +10,7 @@ export async function GET(request: Request, { params }: { params: { userId: stri
 		const decodedToken = await verifyToken(request.headers.get("Authorization"));
 		const firebaseUid = decodedToken.uid;
 	
-		const userEvent = new UserEvent(null, firebaseUid, "DAILYLOGIN");
-		const result = await getUserEventFromDatabase(userEvent);
+		const result = await getUserEventFromDatabase(firebaseUid, UserEventTypes.DAILY.name);
 	
 		return ApiResponse.success(result);
 	  } catch (error) {

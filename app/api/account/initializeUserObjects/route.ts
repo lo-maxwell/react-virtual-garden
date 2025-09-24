@@ -1,8 +1,6 @@
 import { setDefaultCustomClaims } from "@/backend/firebase/authentication/authService";
 import { createDefaultAccountInDatabase } from "@/backend/services/account/accountService";
 import { verifyToken } from "@/utils/firebase/authUtils";
-import { NextResponse } from "next/server";
-import { ApiErrorCodes } from "@/utils/api/error/apiErrorCodes";
 import { ApiResponse } from "@/utils/api/apiResponse";
 
 export async function POST(request: Request) {
