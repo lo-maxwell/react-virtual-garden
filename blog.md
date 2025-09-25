@@ -412,6 +412,16 @@
 ### Stored userEvents, eventRewards, eventRewardItems in database
   * Underlying object only uses the most recently occurring event, but we log all events in database for future use
 
+## Day 39
+
+### Added extra validation on backend calls
+  * Now properly syncs with cloud when validation fails while planting/harvesting
+  * Fixed unnecessary fetch calls
+
+### UI Changes
+  * Updated names in some locations
+  * Daily login rewards now have 2 stages on popup, claim and see rewards. Also now clickable when rewards already claimed, to show previous rewards.
+
 TODO:
 
 Decorations should refresh selected item after running out of quantity
