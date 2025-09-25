@@ -11,7 +11,7 @@ import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import { useUser } from "@/app/hooks/contexts/UserContext";
 import GardenExpansionTooltip from "./gardenExpansionTooltip";
 import { Garden } from "@/models/garden/Garden";
-import { addColumnAPI, addColumnLocal, addRowAPI, addRowLocal, harvestAllAPI, pickupAllAPI, plantAllAPI, removeColumnAPI, removeColumnLocal, removeRowAPI, removeRowLocal, syncGardenSize, syncUserGardenInventory } from "./gardenFunctions";
+import { addColumnAPI, addColumnLocal, addRowAPI, addRowLocal, harvestAllAPI, pickupAllAPI, plantAllAPI, removeColumnAPI, removeColumnLocal, removeRowAPI, removeRowLocal, syncGardenSize, syncAllAccountObjects } from "./gardenFunctions";
 import { useAccount } from "../hooks/contexts/AccountContext";
 import { useDispatch } from "react-redux";
 import { setAllLevelSystemValues } from "@/store/slices/userLevelSystemSlice";
@@ -135,7 +135,7 @@ const GardenComponent = () => {
 			setGardenMessage(`Planted ${numPlanted} ${getItemResponse.payload.itemData.name}.`);
 			const apiResult = await plantAllAPI(plantedPlotIds, inventory, selectedItem, user, garden);
 			if (!apiResult) {
-				await syncUserGardenInventory(user, garden, inventory);
+				await syncAllAccountObjects(user, garden, inventory);
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
@@ -178,7 +178,7 @@ const GardenComponent = () => {
 			//api call
 			const apiResult = await harvestAllAPI(harvestedPlotIds, inventory, user, garden, instantGrow);
 			if (!apiResult) {
-				await syncUserGardenInventory(user, garden, inventory);
+				await syncAllAccountObjects(user, garden, inventory);
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
@@ -221,7 +221,7 @@ const GardenComponent = () => {
 			//api call
 			const apiResult = await pickupAllAPI(pickupPlotIds, inventory, user, garden);
 			if (!apiResult) {
-				await syncUserGardenInventory(user, garden, inventory);
+				await syncAllAccountObjects(user, garden, inventory);
 				reloadUser();
 				reloadGarden();
 				reloadInventory();

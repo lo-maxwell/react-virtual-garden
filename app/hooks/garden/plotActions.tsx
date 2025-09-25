@@ -10,20 +10,18 @@ import { useGarden } from "../contexts/GardenContext";
 import { useInventory } from "../contexts/InventoryContext";
 import { useSelectedItem } from "../contexts/SelectedItemContext";
 import { useUser } from "../contexts/UserContext";
-import { Garden } from "@/models/garden/Garden";
-import { Inventory } from "@/models/itemStore/inventory/Inventory";
-import User from "@/models/user/User";
 import { useDispatch } from "react-redux";
 import { makeApiRequest } from "@/utils/api/api";
 import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
 import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { Tool } from "@/models/items/tools/Tool";
+import { syncAllAccountObjects } from "../../garden/gardenFunctions";
 
 //contains static onclick functions for plot components
 export const usePlotActions = () => {
-	const {garden, setGardenMessage } = useGarden();
-	const {inventory, updateInventoryForceRefreshKey} = useInventory();
-	const {user} = useUser();
+	const {garden, setGardenMessage, reloadGarden } = useGarden();
+	const {inventory, reloadInventory} = useInventory();
+	const {user, reloadUser} = useUser();
 	const {toggleSelectedItem} = useSelectedItem();
 	const dispatch = useDispatch();
 
@@ -34,19 +32,14 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const plantSeed = (item: InventoryItem, plot: Plot) => {
-		let originalGardenObject: any;
-		let originalInventoryObject: any;
 		let originalIcon: string;
 		const uiHelper = () => {
 			originalIcon = plot.getItem().itemData.icon;
-			originalGardenObject = garden.toPlainObject();
-			originalInventoryObject = inventory.toPlainObject();
 			// Optimistically update the local state
-			const originalItem = plot.getItem();
 			const placeItemResponse = plot.placeItem(inventory, item);
 			if (!placeItemResponse.isSuccessful()) {
 				setGardenMessage(` `);
-				return {success: false, displayIcon: originalItem.itemData.icon};
+				return {success: false, displayIcon: originalIcon};
 			}
 			// updateInventoryForceRefreshKey();
 			if (item.getQuantity() <= 0) {
@@ -66,7 +59,6 @@ export const usePlotActions = () => {
 		}
 
 		const apiHelper = async () => {
-			const originalItem = plot.getItem();
 			const data = {
 				inventoryId: inventory.getInventoryId(), 
 				inventoryItemIdentifier: item.itemData.id
@@ -84,12 +76,11 @@ export const usePlotActions = () => {
 			} catch (error) {
 				console.error(error);
 				// Rollback the optimistic update
-				const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
-				if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
-				const rollbackInventory = Inventory.fromPlainObject(originalInventoryObject);
-				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
-				// plot.rollbackItem(originalItem);
-				console.warn(`There was an error planting a seed, rolled back to previous plot`);
+				await syncAllAccountObjects(user, garden, inventory);
+				console.warn(`There was an error planting a seed, synced garden state to the cloud`);
+				reloadGarden();
+				reloadInventory();
+				reloadUser();
 				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
@@ -109,13 +100,9 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const placeDecoration = (item: InventoryItem, plot: Plot) => {
-		let originalGardenObject: any;
-		let originalInventoryObject: any;
 		let originalIcon: string;
 		const uiHelper = () => {
 			originalIcon = plot.getItem().itemData.icon;
-			originalGardenObject = garden.toPlainObject();
-			originalInventoryObject = inventory.toPlainObject();
 			// Optimistically update the local state
 			const placeItemResponse = plot.placeItem(inventory, item);
 			if (!placeItemResponse.isSuccessful()) {
@@ -155,11 +142,11 @@ export const usePlotActions = () => {
 			} catch (error) {
 				console.error(error);
 				// Rollback the optimistic update
-				const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
-				if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
-				const rollbackInventory = Inventory.fromPlainObject(originalInventoryObject);
-				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
-				console.warn(`There was an error placing a decoration, rolled back to previous plot`);
+				await syncAllAccountObjects(user, garden, inventory);
+				console.warn(`There was an error placing a decoration, synced garden state to the cloud`);
+				reloadGarden();
+				reloadInventory();
+				reloadUser();
 				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
@@ -179,15 +166,9 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const clickPlant = (plot: Plot, instantGrow: boolean = false) => {
-		let originalGardenObject: any;
-		let originalInventoryObject: any;
-		let originalUserObject: any;
 		let originalIcon: string;
 		const uiHelper = () => {
 			originalIcon = plot.getItem().itemData.icon;
-			originalGardenObject = garden.toPlainObject();
-			originalInventoryObject = inventory.toPlainObject();
-			originalUserObject = user.toPlainObject();
 			// Optimistically update the local state
 			// const originalItem = plot.getItem();
 			const canHarvest = Plot.canHarvest(plot.getItem().itemData, plot.getPlantTime(), plot.getUsesRemaining(), Date.now());
@@ -247,13 +228,11 @@ export const usePlotActions = () => {
 			} catch (error) {
 				console.error(error);
 				// Rollback the optimistic update
-				const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
-				if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
-				const rollbackInventory = Inventory.fromPlainObject(originalInventoryObject);
-				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
-				const rollbackUser = User.fromPlainObject(originalUserObject);
-				if (rollbackUser instanceof User) saveUser(rollbackUser);
-				console.warn(`There was an error clicking a plant, rolled back`);
+				await syncAllAccountObjects(user, garden, inventory);
+				console.warn(`There was an error clicking a plant, synced garden state to the cloud`);
+				reloadGarden();
+				reloadInventory();
+				reloadUser();
 				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
@@ -272,13 +251,9 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const clickDecoration = (plot: Plot) => {
-		let originalGardenObject: any;
-		let originalInventoryObject: any;
 		let originalIcon: string;
 		const uiHelper = () => {
 			originalIcon = plot.getItem().itemData.icon;
-			originalGardenObject = garden.toPlainObject();
-			originalInventoryObject = inventory.toPlainObject();
 			// Optimistically update the local state
 			// const originalItem = plot.getItem();
 			if (plot.getItem().itemData.subtype != ItemSubtypes.DECORATION.name) {
@@ -332,11 +307,11 @@ export const usePlotActions = () => {
 			} catch (error) {
 				console.error(error);
 				// Rollback the optimistic update
-				const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
-				if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
-				const rollbackInventory = Inventory.fromPlainObject(originalInventoryObject);
-				if (rollbackInventory instanceof Inventory) saveInventory(rollbackInventory);
-				console.warn(`There was an error clicking a decoration, rolled back`);
+				await syncAllAccountObjects(user, garden, inventory);
+				console.warn(`There was an error clicking a decoration, synced garden state to the cloud`);
+				reloadGarden();
+				reloadInventory();
+				reloadUser();
 				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
@@ -356,11 +331,9 @@ export const usePlotActions = () => {
 	 * @returns the updated icon
 	 */
 	const destroyItem = (plot: Plot, tool: Tool) => {
-		let originalGardenObject: any;
 		let originalIcon: string;
 		const uiHelper = () => {
 			originalIcon = plot.getItem().itemData.icon;
-			originalGardenObject = garden.toPlainObject();
 			// Optimistically update the local state
 			// const originalItem = plot.getItem();
 			if (!(plot.getItemSubtype() == ItemSubtypes.DECORATION.name || plot.getItemSubtype() == ItemSubtypes.PLANT.name)) {
@@ -403,9 +376,11 @@ export const usePlotActions = () => {
 				} catch (error) {
 					console.error(error);
 					// Rollback the optimistic update
-					const rollbackGarden = Garden.fromPlainObject(originalGardenObject);
-					if (rollbackGarden instanceof Garden) saveGarden(rollbackGarden);
-					console.warn(`There was an error destroying an item, rolled back`);
+					await syncAllAccountObjects(user, garden, inventory);
+					console.warn(`There was an error destroying an item, synced garden state to the cloud`);
+					reloadGarden();
+					reloadInventory();
+					reloadUser();
 					setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 					return {success: false, displayIcon: originalIcon};
 				}

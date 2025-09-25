@@ -27,7 +27,7 @@ const AuthComponent: React.FC = () => {
     return (
         <div className="flex items-center justify-center py-8">
             <div className="bg-white p-8 rounded-lg shadow-md w-96">
-                <h2 className="text-2xl font-bold mb-4 text-center">Sign in to Virtual Garden</h2>
+                <h2 className="text-2xl font-bold mb-4 text-center">Sign in to Goose Farm</h2>
                 {firebaseUser ? (
                     <AuthLogoutComponent message={message} setMessage={setMessage}></AuthLogoutComponent>
                 ) : (

@@ -123,7 +123,6 @@ const DailyLoginRewardClaimButton = () => {
     useEffect(() => {
         const dailyLoginEvent = user.getEvent(UserEventTypes.DAILY.name);
 		setDailyLoginEvent(dailyLoginEvent || null);
-        fetchDailyLoginEvent();
 
         const now = new Date();
         // Calculate the next midnight UTC-7 (which is 7 AM UTC).
