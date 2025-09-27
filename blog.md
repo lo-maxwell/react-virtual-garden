@@ -422,6 +422,11 @@
   * Updated names in some locations
   * Daily login rewards now have 2 stages on popup, claim and see rewards. Also now clickable when rewards already claimed, to show previous rewards.
 
+## Day 40
+
+### Updated mobile ui
+  * Updated navbar, added css styles for narrow screens, thanks @ivywu100
+
 TODO:
 
 Convert to IAC with IAC generator, test output, possibly move to another stack
