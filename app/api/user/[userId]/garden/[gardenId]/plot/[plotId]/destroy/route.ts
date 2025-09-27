@@ -2,6 +2,8 @@
 import { destroyPlotItem } from "@/backend/services/garden/plot/plotService";
 import { verifyToken } from "@/utils/firebase/authUtils";
 import { NextResponse } from "next/server";
+import { ApiErrorCodes } from "@/utils/api/error/apiErrorCodes";
+import { ApiResponse } from "@/utils/api/apiResponse";
 
 export async function PATCH(request: Request, { params }: { params: { userId: string, gardenId: string, plotId: string } }) {
 	const { userId, gardenId, plotId } = params;
@@ -11,8 +13,8 @@ export async function PATCH(request: Request, { params }: { params: { userId: st
 		const firebaseUid = decodedToken.uid;  // Extract UID from the decoded token
 		const { replacementItem} = await request.json();
 		const result = await destroyPlotItem( gardenId, plotId, firebaseUid, replacementItem);
-		return NextResponse.json(result, {status: 200});
+		return ApiResponse.success(result);
 	} catch (error) {
-	  	return NextResponse.json({ error: (error as Error).message }, { status: 500 });	
+		return ApiResponse.fromError(error);
 	}
   }

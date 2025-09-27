@@ -59,7 +59,7 @@ const AuthCreateAccountComponent = ({message, setMessage}: {message: string, set
         }
 
         // Password validation
-        const minLength = 10;
+        const minLength = 8;
         const maxLength = 4096;
         let validationMessages = [];
 

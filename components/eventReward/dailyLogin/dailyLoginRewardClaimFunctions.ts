@@ -42,12 +42,18 @@ export async function syncUserInventory(user: User, inventory: Inventory): Promi
 	  // Sync user data
 	  const userApiRoute = `/api/user/${user.getUserId()}/get`;
 	  const userResult = await makeApiRequest('GET', userApiRoute, {}, true);
-	  saveUser(User.fromPlainObject(userResult));
+	  if (!userResult.success) {
+		throw new Error(userResult.error?.message || "Failed to sync user data");
+	  }
+	  saveUser(User.fromPlainObject(userResult.data));
   
 	  // Sync inventory data
 	  const inventoryApiRoute = `/api/user/${user.getUserId()}/inventory/${inventory.getInventoryId()}/get`;
 	  const inventoryResult = await makeApiRequest('GET', inventoryApiRoute, {}, true);
-	  saveInventory(Inventory.fromPlainObject(inventoryResult));
+	  if (!inventoryResult.success) {
+		throw new Error(inventoryResult.error?.message || "Failed to sync inventory data");
+	  }
+	  saveInventory(Inventory.fromPlainObject(inventoryResult.data));
 	  return true;
 	} catch (error) {
 	  console.error(error);

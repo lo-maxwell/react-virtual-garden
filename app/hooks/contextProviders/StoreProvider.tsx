@@ -2,6 +2,7 @@
 import { useAccount } from '@/app/hooks/contexts/AccountContext';
 import { StoreContext } from '@/app/hooks/contexts/StoreContext';
 import { useUser } from '@/app/hooks/contexts/UserContext';
+import { ApiErrorCodes } from "@/utils/api/error/apiErrorCodes";
 import { InventoryItem } from '@/models/items/inventoryItems/InventoryItem';
 import { Store } from '@/models/itemStore/store/Store';
 import User from '@/models/user/User';
@@ -58,26 +59,27 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		return "SUCCESS";
 	}
 
-	async function restockStoreAPI () {
-		if (!store) return false;
+	async function restockStoreAPI (): Promise<true | ApiErrorCodes> {
+		if (!store) return ApiErrorCodes.BAD_REQUEST;
 		try {
 			const data = {}
 			const apiRoute = `/api/user/${`TODO: REPLACE VALUE`}/store/${store.getStoreId()}/restock`;
 			const result = await makeApiRequest('PATCH', apiRoute, data, true);
 			console.log('Successfully restocked store:', result);
-			if (result === false) return "NOT TIME";
+			if (result.success === false) return result.error?.code || ApiErrorCodes.API_ERROR;
 			return true;
 		  } catch (error) {
 			console.error(error);
-			return "ERROR";
+			return ApiErrorCodes.NETWORK_ERROR;
 		  }
 	}
 
-	async function syncStore (user: User, store: Store) {
+	async function syncStore (user: User, store: Store): Promise<boolean> {
 	try {
 		const apiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/get`;
 		const result = await makeApiRequest('GET', apiRoute, {}, true);
-		saveStore(Store.fromPlainObject(result));
+		if (result.success === false) return false;
+		saveStore(Store.fromPlainObject(result.data));
 		reloadStore();
         return true;
       } catch (error) {
@@ -85,9 +87,9 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
         return false;
       }
 	}
-	
-    const restockStore = async () => {
-		if (!store) return "ERROR";
+
+    const restockStore = async (): Promise<string> => {
+		if (!store) return "BAD_REQUEST";
 		const localResult = restockStoreLocal();
 		if (localResult === "SUCCESS") {
 			// Terminate early before api call
@@ -97,9 +99,9 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 			}
 
 			const apiResult = await restockStoreAPI();
-			if (!apiResult || apiResult == 'NOT TIME' || apiResult == 'ERROR') {
+			if (apiResult !== true) {
 				syncStore(user, store);
-				return "NOT TIME";
+				return apiResult.toString();
 			}
 			updateReduxStoreItemsAfterRestock();
 			return "SUCCESS";

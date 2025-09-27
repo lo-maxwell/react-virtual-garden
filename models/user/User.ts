@@ -45,6 +45,8 @@ class User {
 		try {
             // Validate plainObject structure
             if (!plainObject || typeof plainObject !== 'object') {
+				console.log("plainObject type:", typeof plainObject);
+				console.log("plainObject keys:", plainObject && Object.keys(plainObject));
                 throw new Error('Invalid plainObject structure for User');
             }
 			const { userId, username, icon, level, itemHistory, actionHistory, toolbox, userEvents } = plainObject;
@@ -123,7 +125,7 @@ class User {
 	}
 
 	static getDefaultUserName(): string {
-		return "Unknown Farmer";
+		return "Goose Farmer";
 	}
 
 	getUserId(): string {
