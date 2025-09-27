@@ -8,6 +8,9 @@ import { auth } from "@/utils/firebase/firebaseConfig";
 import { saveGarden } from "@/utils/localStorage/garden";
 import { saveInventory } from "@/utils/localStorage/inventory";
 import { saveUser } from "@/utils/localStorage/user";
+import { fetchAccountObjects } from "../login/firebaseAuth/authClientService";
+import { Store } from "../../models/itemStore/store/Store";
+import { saveStore } from "../../utils/localStorage/store";
 
 export function addRowLocal(garden: Garden, user: User) {
   const success = garden.addRow(user);
@@ -134,40 +137,6 @@ export async function syncGardenSize(garden: Garden, user: User): Promise<boolea
   }
 }
 
-//TODO: Bundle this into 1 api call
-export async function syncUserGardenInventory(user: User, garden: Garden, inventory: Inventory): Promise<boolean> {
-  
-  try {
-    // Sync user data
-    const userApiRoute = `/api/user/${user.getUserId()}/get`;
-    const userResult = await makeApiRequest('GET', userApiRoute, {}, true);
-    if (!userResult.success) {
-      throw new Error(userResult.error?.message || "Failed to sync user data");
-    }
-    saveUser(User.fromPlainObject(userResult.data));
-
-    // Sync garden data
-    const gardenApiRoute = `/api/user/${user.getUserId()}/garden/${garden.getGardenId()}/get`;
-    const gardenResult = await makeApiRequest('GET', gardenApiRoute, {}, true);
-    if (!gardenResult.success) {
-      throw new Error(gardenResult.error?.message || "Failed to sync garden data");
-    }
-    saveGarden(Garden.fromPlainObject(gardenResult.data));
-
-    // Sync inventory data
-    const inventoryApiRoute = `/api/user/${user.getUserId()}/inventory/${inventory.getInventoryId()}/get`;
-    const inventoryResult = await makeApiRequest('GET', inventoryApiRoute, {}, true);
-    if (!inventoryResult.success) {
-      throw new Error(inventoryResult.error?.message || "Failed to sync inventory data");
-    }
-    saveInventory(Inventory.fromPlainObject(inventoryResult.data));
-    return true;
-  } catch (error) {
-    console.error(error);
-    return false;
-  }
-}
-
 export async function plantAllAPI(plantedPlotIds: string[], inventory: Inventory, selectedItem: InventoryItem, user: User, garden: Garden) {
   const data = {
     plotIds: plantedPlotIds,
@@ -233,6 +202,25 @@ export async function pickupAllAPI(pickupPlotIds: string[], inventory: Inventory
     return result.success;
   } catch (error) {
     console.error(error);
+    return false;
+  }
+}
+
+export async function syncAllAccountObjects(user: User, garden: Garden, inventory: Inventory): Promise<boolean> {
+  try {
+    const result = await fetchAccountObjects();
+    if (!result) {
+      console.error(`Could not find result of fetchAccountObjects!`);
+      return false;
+    }
+
+    saveUser(User.fromPlainObject(result.plainUserObject));
+    saveGarden(Garden.fromPlainObject(result.plainGardenObject));
+    saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
+    saveStore(Store.fromPlainObject(result.plainStoreObject));
+    return true;
+  } catch (error) {
+    console.error("Error syncing all account objects:", error);
     return false;
   }
 }

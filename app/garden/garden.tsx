@@ -11,21 +11,7 @@ import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import { useUser } from "@/app/hooks/contexts/UserContext";
 import GardenExpansionTooltip from "./gardenExpansionTooltip";
 import { Garden } from "@/models/garden/Garden";
-import {
-  addColumnAPI,
-  addColumnLocal,
-  addRowAPI,
-  addRowLocal,
-  harvestAllAPI,
-  pickupAllAPI,
-  plantAllAPI,
-  removeColumnAPI,
-  removeColumnLocal,
-  removeRowAPI,
-  removeRowLocal,
-  syncGardenSize,
-  syncUserGardenInventory,
-} from "./gardenFunctions";
+import { addColumnAPI, addColumnLocal, addRowAPI, addRowLocal, harvestAllAPI, pickupAllAPI, plantAllAPI, removeColumnAPI, removeColumnLocal, removeRowAPI, removeRowLocal, syncGardenSize, syncAllAccountObjects } from "./gardenFunctions";
 import { useAccount } from "../hooks/contexts/AccountContext";
 import { useDispatch } from "react-redux";
 import { setAllLevelSystemValues } from "@/store/slices/userLevelSystemSlice";
@@ -175,45 +161,28 @@ const GardenComponent = () => {
       }
     }
 
-    //Did not plant, terminate early
-    if (plantedPlotIds.length <= 0 && numPlanted <= 0) {
-      return;
-    }
-
-    // Terminate early before api call
-    if (!guestMode) {
-      //api call
-      setGardenMessage(
-        `Planted ${numPlanted} ${getItemResponse.payload.itemData.name}.`
-      );
-      const apiResult = await plantAllAPI(
-        plantedPlotIds,
-        inventory,
-        selectedItem,
-        user,
-        garden
-      );
-      if (!apiResult) {
-        await syncUserGardenInventory(user, garden, inventory);
-        reloadUser();
-        reloadGarden();
-        reloadInventory();
-        setGardenMessage(
-          `There was an error planting 1 or more seeds! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`
-        );
-        // setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
-        // return;
-      }
-    }
-    dispatch(
-      setAllLevelSystemValues({
-        id: user.getLevelSystem().getLevelSystemId(),
-        level: user.getLevelSystem().getLevel(),
-        currentExp: user.getLevelSystem().getCurrentExp(),
-        expToLevelUp: user.getLevelSystem().getExpToLevelUp(),
-      })
-    );
-  };
+		//Did not plant, terminate early
+		if (plantedPlotIds.length <= 0 && numPlanted <= 0) {
+			return;
+		}
+		
+		// Terminate early before api call
+		if (!guestMode) {
+			//api call
+			setGardenMessage(`Planted ${numPlanted} ${getItemResponse.payload.itemData.name}.`);
+			const apiResult = await plantAllAPI(plantedPlotIds, inventory, selectedItem, user, garden);
+			if (!apiResult) {
+				await syncAllAccountObjects(user, garden, inventory);
+				reloadUser();
+				reloadGarden();
+				reloadInventory();
+				setGardenMessage(`There was an error planting 1 or more seeds! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
+				// setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+				// return;
+			}
+		}
+		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
+	}
 
   const harvestAll = async () => {
     const harvestedPlotIds: string[] = [];
@@ -242,41 +211,28 @@ const GardenComponent = () => {
 
     setGardenMessage(`Harvested ${numHarvested} plants.`);
 
-    //Did not plant, terminate early
-    if (harvestedPlotIds.length <= 0 && numHarvested <= 0) {
-      return;
-    }
+		//Did not plant, terminate early
+		if (harvestedPlotIds.length <= 0 && numHarvested <= 0) {
+			return;
+		}
 
-    // Terminate early before api call
-    if (!guestMode) {
-      //api call
-      const apiResult = await harvestAllAPI(
-        harvestedPlotIds,
-        inventory,
-        user,
-        garden,
-        instantGrow
-      );
-      if (!apiResult) {
-        await syncUserGardenInventory(user, garden, inventory);
-        reloadUser();
-        reloadGarden();
-        reloadInventory();
-        setGardenMessage(
-          `There was an error harvesting 1 or more plants! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`
-        );
-        // setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
-      }
-    }
-    dispatch(
-      setAllLevelSystemValues({
-        id: user.getLevelSystem().getLevelSystemId(),
-        level: user.getLevelSystem().getLevel(),
-        currentExp: user.getLevelSystem().getCurrentExp(),
-        expToLevelUp: user.getLevelSystem().getExpToLevelUp(),
-      })
-    );
-  };
+		// Terminate early before api call
+		if (!guestMode) {
+			//api call
+			const apiResult = await harvestAllAPI(harvestedPlotIds, inventory, user, garden, instantGrow);
+			if (!apiResult) {
+				await syncAllAccountObjects(user, garden, inventory);
+				reloadUser();
+				reloadGarden();
+				reloadInventory();
+				setGardenMessage(`There was an error harvesting 1 or more plants! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
+				// setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+				
+			}
+		}
+		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
+
+	}
 
   const pickupAll = async () => {
     const pickupPlotIds: string[] = [];
@@ -306,27 +262,22 @@ const GardenComponent = () => {
       return;
     }
 
-    // Terminate early before api call
-    if (!guestMode) {
-      //api call
-      const apiResult = await pickupAllAPI(
-        pickupPlotIds,
-        inventory,
-        user,
-        garden
-      );
-      if (!apiResult) {
-        await syncUserGardenInventory(user, garden, inventory);
-        reloadUser();
-        reloadGarden();
-        reloadInventory();
-        setGardenMessage(
-          `There was an error picking up 1 or more decorations! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`
-        );
-        // setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
-      }
-    }
-  };
+		// Terminate early before api call
+		if (!guestMode) {
+			//api call
+			const apiResult = await pickupAllAPI(pickupPlotIds, inventory, user, garden);
+			if (!apiResult) {
+				await syncAllAccountObjects(user, garden, inventory);
+				reloadUser();
+				reloadGarden();
+				reloadInventory();
+				setGardenMessage(`There was an error picking up 1 or more decorations! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
+				// setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+			}
+		}
+
+	}
+
 
   async function addColumn() {
     if (!garden || !user) {

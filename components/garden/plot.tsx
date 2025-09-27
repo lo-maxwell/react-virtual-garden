@@ -6,7 +6,7 @@ import { Plant } from "@/models/items/placedItems/Plant";
 import PlotTooltip from "./plotTooltip";
 import colors from "../colors/colors";
 import { useAccount } from "@/app/hooks/contexts/AccountContext";
-import { syncUserGardenInventory } from "@/app/garden/gardenFunctions";
+import { syncAllAccountObjects } from "@/app/garden/gardenFunctions";
 import { useInventory } from "@/app/hooks/contexts/InventoryContext";
 import { useUser } from "@/app/hooks/contexts/UserContext";
 import { setAllLevelSystemValues, setCurrentExp, setExpToLevelUp, setUserLevel } from "@/store/slices/userLevelSystemSlice";
@@ -139,7 +139,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 				console.warn(`Api call failed`);
 				// setDisplayIcon(apiResult.displayIcon);
 				// TODO: sync plot function?
-				await syncUserGardenInventory(user, garden, inventory);
+				await syncAllAccountObjects(user, garden, inventory);
 				reloadUser();
 				reloadGarden();
 				reloadInventory();

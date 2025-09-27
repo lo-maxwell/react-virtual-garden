@@ -45,10 +45,6 @@ const AuthLoginComponent = ({message, setMessage}: {message: string, setMessage:
     }
 
     const handleLogin = async () => {
-        // if (allowFirebase !== 'this is the local environment') {
-        //     setMessage(`Error: Firebase login is disabled at this time. Please use guest mode instead.`);
-        //     return;
-        // }
         setMessage(``);
         try {
             const userCredential = await loginUser(email, password);
@@ -67,10 +63,6 @@ const AuthLoginComponent = ({message, setMessage}: {message: string, setMessage:
     };
 
     const handleGoogleLogin = async () => {
-        // if (allowFirebase !== 'this is the local environment') {
-        //     setMessage(`Error: Firebase login is disabled at this time. Please use guest mode instead.`);
-        //     return;
-        // }
         setMessage(``);
         try {
             const userCredential = await loginWithGoogle();
@@ -89,10 +81,10 @@ const AuthLoginComponent = ({message, setMessage}: {message: string, setMessage:
     };
 
 	const handleSendPasswordReset = async () => {
-        // if (allowFirebase !== 'this is the local environment') {
-        //     setMessage(`Error: Firebase login is disabled at this time. Please use guest mode instead.`);
-        //     return;
-        // }
+        if (!email) {
+            setMessage("Please enter your email first.");
+            return;
+        }
         setMessage(``);
         try {
             await sendResetPassword(email);

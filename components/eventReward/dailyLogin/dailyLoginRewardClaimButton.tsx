@@ -21,19 +21,15 @@ import "./dailyLoginRewardClaimButton.css";
 const DailyLoginRewardClaimButton = () => {
   const { guestMode } = useAccount();
   const [showWindow, setShowWindow] = useState(false);
-  const [dailyLoginEvent, setDailyLoginEvent] = useState<UserEvent | null>(
-    null
-  );
+  const [dailyLoginEvent, setDailyLoginEvent] = useState<UserEvent | null>(null);
   const [eventReward, setEventReward] = useState<EventReward | null>(null);
-  const [previousEventReward, setPreviousEventReward] =
-    useState<EventReward | null>(null);
+  const [previousEventReward, setPreviousEventReward] = useState<EventReward | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showClaimedRewardScreen, setShowClaimedRewardScreen] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const { user, reloadUser } = useUser();
   const { selectedItem, toggleSelectedItem } = useSelectedItem();
-  const { inventory, reloadInventory, updateInventoryForceRefreshKey } =
-    useInventory();
+  const { inventory, reloadInventory } = useInventory();
 
   const showWindowHandler = () => {
     setShowWindow(true);
@@ -53,10 +49,7 @@ const DailyLoginRewardClaimButton = () => {
       const apiResponse = await makeApiRequest("GET", apiRoute, {}, true);
 
       if (!apiResponse.success) {
-        setApiError(
-          apiResponse.error?.message ||
-            "Failed to fetch previous daily login reward. Please try again later."
-        );
+        setApiError(apiResponse.error?.message || "Failed to fetch previous daily login reward. Please try again later.");
         setPreviousEventReward(null);
         return;
       }
@@ -64,9 +57,7 @@ const DailyLoginRewardClaimButton = () => {
       setPreviousEventReward(userEvent.getEventReward());
     } catch (error) {
       console.error("Error fetching previous daily login reward:", error);
-      setApiError(
-        "Failed to fetch previous daily login reward. Please try again later."
-      );
+      setApiError("Failed to fetch previous daily login reward. Please try again later.");
       setPreviousEventReward(null);
     } finally {
       setIsLoading(false);
@@ -86,71 +77,52 @@ const DailyLoginRewardClaimButton = () => {
     }
   };
 
-  const canClaim =
-    process.env.NEXT_PUBLIC_DAILY_LOGIN_OVERRIDE === "true"
-      ? true
-      : guestMode
-      ? false
-      : dailyLoginEvent
-      ? DailyLoginRewardFactory.canClaimReward(
-          new Date(Date.now()),
-          dailyLoginEvent
-        )
-      : true;
+    
+    const canClaim = process.env.NEXT_PUBLIC_DAILY_LOGIN_OVERRIDE === 'true' ? true : (guestMode ? false : (dailyLoginEvent ? DailyLoginRewardFactory.canClaimReward(new Date(Date.now()), dailyLoginEvent) : true));
 
-  const claimDailyLoginReward = async () => {
-    toggleSelectedItem(null);
+    const claimDailyLoginReward = async () => {
+        toggleSelectedItem(null);
+        
+        setApiError(null); // Clear any previous API errors
+        setIsLoading(true);
+        try {
+            const apiRoute = `/api/user/${user.getUserId()}/events/dailyLogin`;
+            const data = { inventoryId: inventory.getInventoryId() };
+            const apiResponse = await makeApiRequest('PATCH', apiRoute, data, true);
+            
+            if (!apiResponse.success) {
+                setApiError(apiResponse.error?.message || 'Failed to fetch daily login reward. Please try again later.');
+                setEventReward(null);
+                return;
+            }
 
-    setApiError(null); // Clear any previous API errors
-    setIsLoading(true);
-    try {
-      const apiRoute = `/api/user/${user.getUserId()}/events/dailyLogin`;
-      const data = { inventoryId: inventory.getInventoryId() };
-      const apiResponse = await makeApiRequest("PATCH", apiRoute, data, true);
+            const userEvent = handleDailyLoginApiResponse(user, inventory, apiResponse.data);
 
-      if (!apiResponse.success) {
-        setApiError(
-          apiResponse.error?.message ||
-            "Failed to fetch daily login reward. Please try again later."
-        );
-        setEventReward(null);
-        return;
-      }
+            const reward = userEvent.getEventReward();
+            setEventReward(reward);
+            setShowClaimedRewardScreen(true);
+            
+            // Update the daily login event state
+            const updatedEvent = user.getEvent(UserEventTypes.DAILY.name);
+            setDailyLoginEvent(updatedEvent || null);
+            
+            saveUser(user);
+            saveInventory(inventory);
+            console.log('finished claiming daily login reward');
+            console.log(reward);
+        } catch (error) {
+            console.error('Error fetching daily login reward:', error);
+            // If there's an error, show "already claimed" message
+            setEventReward(null);
+            setApiError('Failed to fetch daily login reward. Please try again later.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-      const userEvent = handleDailyLoginApiResponse(
-        user,
-        inventory,
-        apiResponse.data
-      );
-
-      const reward = userEvent.getEventReward();
-      setEventReward(reward);
-      setShowClaimedRewardScreen(true);
-
-      // Update the daily login event state
-      const updatedEvent = user.getEvent(UserEventTypes.DAILY.name);
-      setDailyLoginEvent(updatedEvent || null);
-
-      saveUser(user);
-      saveInventory(inventory);
-      console.log("finished claiming daily login reward");
-      console.log(reward);
-    } catch (error) {
-      console.error("Error fetching daily login reward:", error);
-      // If there's an error, show "already claimed" message
-      setEventReward(null);
-      setApiError(
-        "Failed to fetch daily login reward. Please try again later."
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const dailyLoginEvent = user.getEvent(UserEventTypes.DAILY.name);
-    setDailyLoginEvent(dailyLoginEvent || null);
-    fetchDailyLoginEvent();
+    useEffect(() => {
+        const dailyLoginEvent = user.getEvent(UserEventTypes.DAILY.name);
+		setDailyLoginEvent(dailyLoginEvent || null);
 
     const now = new Date();
     // Calculate the next midnight UTC-7 (which is 7 AM UTC).
@@ -212,7 +184,6 @@ const DailyLoginRewardClaimButton = () => {
     const timeUntilNextClaim = `${hours}h ${minutes}m`;
     return (
       <>
-        {" "}
         {isLoading ? (
           <div className="text-xl mb-2">Calculating daily login reward...</div>
         ) : apiError ? (
@@ -254,8 +225,7 @@ const DailyLoginRewardClaimButton = () => {
                 closeWindowAndRefresh(false);
               }}
             >
-              {" "}
-              Awesome!{" "}
+              Awesome!
             </button>
           </>
         ) : canClaim ? (
