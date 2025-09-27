@@ -1,0 +1,20 @@
+
+@media (max-width: 430px) {
+/* Layout for default (mobile) */
+.layout-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.layout-col {
+  width: 100%;
+}
+
+/* Optional: spacing or padding if needed */
+.layout-col.user,
+.layout-col.garden,
+.layout-col.inventory {
+  padding: 0.5rem 0;
+}
+}

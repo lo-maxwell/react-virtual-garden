@@ -27,6 +27,7 @@ const ProfileMenu = ({isOpen, toggleMenu, menuRef}: {isOpen: boolean, toggleMenu
 	const handleLogout = () => {
 		logout();
 		toggleMenu();
+		router.push('/login');
 	}
 	const getLogoutButtonText = () => {
 		if (firebaseUser) return "Sign Out";
@@ -46,7 +47,7 @@ const ProfileMenu = ({isOpen, toggleMenu, menuRef}: {isOpen: boolean, toggleMenu
 
 	return <>
 		{isOpen && (
-			<div ref={menuRef} className="absolute right-0 top-[70px] mr-2 bg-[#e0dedc] text-black rounded-lg shadow-lg p-2 w-max">
+			<div ref={menuRef} className="absolute right-0 top-[60px] mr-2 bg-[#e0dedc] text-black rounded-lg shadow-lg p-2 w-max">
 				<div className="block w-full text-left text-xl py-2 px-4 whitespace-nowrap">{user.getUsername()}</div>
 				<button onClick={handleRedirect} className="block w-full text-left py-2 px-4 hover:bg-[#d0cecc] whitespace-nowrap">Settings</button>
 				{ (guestMode && !firebaseUser &&

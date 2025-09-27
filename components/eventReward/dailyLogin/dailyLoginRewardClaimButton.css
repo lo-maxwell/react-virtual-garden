@@ -1,0 +1,26 @@
+
+@media (max-width: 430px) {
+
+.modal-content {
+
+  box-sizing: border-box;
+
+  max-width: 90vw;       /* max 90% of viewport width */
+  max-height: 80vh;      /* max 80% of viewport height */
+
+  overflow-y: auto;     /* scroll inside modal if content is too tall */
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* vertically center all children */
+  align-items: center;     /* horizontally center all children */
+
+  text-align: left;
+
+  /* Ensure text wraps and breaks properly */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+}
