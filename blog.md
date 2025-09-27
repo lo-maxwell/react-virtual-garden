@@ -424,6 +424,8 @@
 
 TODO:
 
+Convert to IAC with IAC generator, test output, possibly move to another stack
+
 Decorations should refresh selected item after running out of quantity
 
 Landing/loading pages for login/register - inform user not to leave the page
