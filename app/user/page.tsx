@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import LevelSystemComponent from "@/components/level/LevelSystem";
 import IconSelector from "@/components/user/icon/IconSelector";
 import UsernameDisplay from "@/components/user/UsernameDisplay";
@@ -23,27 +23,34 @@ import { makeApiRequest } from "@/utils/api/api";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../hooks/contexts/AuthContext";
 import RedirectingMessage from "@/components/errorPages/redirectingMessage";
+import "./page.css";
 
 const UserPage = () => {
-  
-  const  RenderUser = () => {
+  const RenderUser = () => {
     const { firebaseUser } = useAuth();
-    const {user, username, handleChangeUsername, icon, handleChangeIcon, reloadUser} = useUser();
+    const {
+      user,
+      username,
+      handleChangeUsername,
+      icon,
+      handleChangeIcon,
+      reloadUser,
+    } = useUser();
     const { inventory, reloadInventory } = useInventory();
     const { store, reloadStore } = useStore();
     const { garden, reloadGarden } = useGarden();
-    const { account, guestMode, setGuestMode, environmentTestKey } = useAccount();
+    const { account, guestMode, setGuestMode, environmentTestKey } =
+      useAccount();
     const router = useRouter();
     const [isRedirecting, setIsRedirecting] = useState(false);
 
-    
     useEffect(() => {
       if (!firebaseUser && !guestMode) {
         setIsRedirecting(true); // Trigger the redirecting state
 
         // Delay the redirect by 2 seconds (adjust the time as needed)
         const timer = setTimeout(() => {
-          router.push('/login');
+          router.push("/login");
         }, 2000); // 2 seconds delay before redirecting
 
         return () => clearTimeout(timer); // Cleanup the timer if the component is unmounted or the condition changes
@@ -56,15 +63,16 @@ const UserPage = () => {
     if (!firebaseUser && !guestMode) {
       let redirectDivElement;
       if (isRedirecting) {
-        redirectDivElement = <RedirectingMessage targetPage="login page"/>;
+        redirectDivElement = <RedirectingMessage targetPage="login page" />;
       } else {
         redirectDivElement = <div>{`Fetching user data...`}</div>;
       }
 
-      return (<>
-        <div className="w-full px-4 py-4 bg-reno-sand-200 text-black"> 
+      return (
+        <>
+          <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
             {redirectDivElement}
-        </div>
+          </div>
         </>
       );
     }
@@ -75,20 +83,19 @@ const UserPage = () => {
 
     const handleCreateAccountButton = async () => {
       try {
-        
         const data = {
           plainUserObject: user.toPlainObject(),
           plainInventoryObject: inventory.toPlainObject(),
           plainStoreObject: store.toPlainObject(),
-          plainGardenObject: garden.toPlainObject()
-        }
+          plainGardenObject: garden.toPlainObject(),
+        };
         const apiRoute = `/api/admin`;
-        const result = await makeApiRequest('POST', apiRoute, data, true);
-        console.log('Successfully posted:', result);
+        const result = await makeApiRequest("POST", apiRoute, data, true);
+        console.log("Successfully posted:", result);
       } catch (error) {
         console.error(error);
       }
-    }
+    };
 
     const handleSaveAccountButton = async () => {
       try {
@@ -96,35 +103,35 @@ const UserPage = () => {
           plainUserObject: user.toPlainObject(),
           plainInventoryObject: inventory.toPlainObject(),
           plainStoreObject: store.toPlainObject(),
-          plainGardenObject: garden.toPlainObject()
-        }
+          plainGardenObject: garden.toPlainObject(),
+        };
         const apiRoute = `/api/admin`;
-        const result = await makeApiRequest('PATCH', apiRoute, data, true);
-        console.log('Successfully updated:', result);
+        const result = await makeApiRequest("PATCH", apiRoute, data, true);
+        console.log("Successfully updated:", result);
       } catch (error) {
         console.error(error);
       }
-    }
+    };
 
     const handleFetchAccountButton = async () => {
       try {
         const userId = user.getUserId();
         // Making the GET request to your API endpoint
         const response = await fetch(`/api/account/${userId}`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
-  
+
         // Check if the response is successful
         if (!response.ok) {
-          throw new Error('Failed to fetch user data');
+          throw new Error("Failed to fetch user data");
         }
-  
+
         // Parsing the response data
         const result = await response.json();
-        console.log('Successfully fetched:', result);
+        console.log("Successfully fetched:", result);
         console.log(User.fromPlainObject(result.plainUserObject));
         console.log(Garden.fromPlainObject(result.plainGardenObject));
         console.log(Inventory.fromPlainObject(result.plainInventoryObject));
@@ -140,7 +147,7 @@ const UserPage = () => {
       } catch (error) {
         console.error(error);
       }
-    }
+    };
 
     const onIconChangeHandler = async (icon: Icon) => {
       handleChangeIcon(icon);
@@ -153,20 +160,20 @@ const UserPage = () => {
       try {
         const data = {
           userId: user.getUserId(),
-          newIcon: icon.getName()
-        }
+          newIcon: icon.getName(),
+        };
         const apiRoute = `/api/user/${user.getUserId()}/icon`;
-        const result = await makeApiRequest('PATCH', apiRoute, data, true);
+        const result = await makeApiRequest("PATCH", apiRoute, data, true);
         if (result.success) {
-          console.log('Successfully posted:', result.data);
+          console.log("Successfully posted:", result.data);
         } else {
-          console.error('Error posting icon:', result.error);
+          console.error("Error posting icon:", result.error);
         }
       } catch (error) {
         console.error(error);
       }
       return;
-    }
+    };
 
     const onUsernameChangeHandler = async (username: string) => {
       handleChangeUsername(username);
@@ -179,20 +186,20 @@ const UserPage = () => {
       try {
         const data = {
           userId: user.getUserId(),
-          newUsername: username
-        }
+          newUsername: username,
+        };
         const apiRoute = `/api/user/${user.getUserId()}/username`;
-        const result = await makeApiRequest('PATCH', apiRoute, data, true);
+        const result = await makeApiRequest("PATCH", apiRoute, data, true);
         if (result.success) {
-          console.log('Successfully posted:', result.data);
+          console.log("Successfully posted:", result.data);
         } else {
-          console.error('Error posting username:', result.error);
+          console.error("Error posting username:", result.error);
         }
       } catch (error) {
         console.error(error);
       }
       return;
-    }
+    };
 
     function renderAccountManagementButtons() {
       // const environmentTestKey = await fetchEnvironmentTestKey();
@@ -206,20 +213,35 @@ const UserPage = () => {
       }
 
       // Check the value of environmentTestKey and render buttons accordingly
-      if (environmentTestKey === 'this is the local environment' || environmentTestKey === 'this is the dev environment') {
+      if (
+        environmentTestKey === "this is the local environment" ||
+        environmentTestKey === "this is the dev environment"
+      ) {
         return (
           // <>
           // <div>Environment test key successfully returned.</div>
           // </>
           // <>
-            <><div><button onClick={handleCreateAccountButton}> Create user in Database </button></div>
-            <div><button onClick={handleSaveAccountButton}> Save user to Database </button></div></>
+          <>
+            <div>
+              <button onClick={handleCreateAccountButton}>
+                {" "}
+                Create user in Database{" "}
+              </button>
+            </div>
+            <div>
+              <button onClick={handleSaveAccountButton}>
+                {" "}
+                Save user to Database{" "}
+              </button>
+            </div>
+          </>
           //   <div><button onClick={handleFetchAccountButton}> Fetch user from Database </button></div>
           //   <div><button onClick={handleToggleGuestModeButton}> {`Toggle Cloud Saving ${guestMode ? '(Currently on)' : '(Currently off)'}`} </button></div>
           // </>
-           );
-      } else if (environmentTestKey === 'this is the prod environment') {
-        return (<></>);
+        );
+      } else if (environmentTestKey === "this is the prod environment") {
+        return <></>;
       } else {
         return (
           <>
@@ -229,37 +251,52 @@ const UserPage = () => {
       }
     }
 
-    return <>
-      <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
-        <div className="flex">
-          <div className={`w-1/3`}>
-            <div className={`my-1 min-h-[8%] flex flex-row items-center justify-center `}>
-              <IconSelector iconIndex={icon} onIconChange={onIconChangeHandler}/>
-              <UsernameDisplay username={username} onUsernameChange={onUsernameChangeHandler}/>
-            </div>
-            <div className="mx-4 my-4">
-              <LevelSystemComponent level={user.getLevel()} currentExp={user.getCurrentExp()} expToLevelUp={user.getExpToLevelUp()} />
-            </div>
-            <div>{`The friends list will go here, once it's ready!`}</div>
-            <Suspense fallback={<div>Loading...</div>}>
-              {renderAccountManagementButtons()}
-            </Suspense>
+    return (
+      <>
+        <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
+          <div className="flex inner-flex">
+            <div className={`w-1/3 left-side`}>
+              <div
+                className={`my-1 min-h-[8%] flex flex-row items-center justify-center `}
+              >
+                <IconSelector
+                  iconIndex={icon}
+                  onIconChange={onIconChangeHandler}
+                />
+                <UsernameDisplay
+                  username={username}
+                  onUsernameChange={onUsernameChangeHandler}
+                />
+              </div>
+              <div className="mx-4 my-4">
+                <LevelSystemComponent
+                  level={user.getLevel()}
+                  currentExp={user.getCurrentExp()}
+                  expToLevelUp={user.getExpToLevelUp()}
+                />
+              </div>
+              <div>{`The friends list will go here, once it's ready!`}</div>
+              <Suspense fallback={<div>Loading...</div>}>
+                {renderAccountManagementButtons()}
+              </Suspense>
             </div>
 
-          <div className={`w-2/3`}>
-            <UserStats />
+            <div className={`w-2/3 right-side`}>
+              <UserStats />
+            </div>
           </div>
         </div>
+      </>
+    );
+  };
+
+  return (
+    <>
+      <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
+        {RenderUser()}
       </div>
     </>
-  }
-
-  return (<>
-    <div className="w-full px-4 py-4 bg-reno-sand-200 text-black"> 
-      {RenderUser()}
-    </div>
-    </>
   );
-}
+};
 
 export default UserPage;

@@ -125,11 +125,14 @@ export default function Header() {
                 </Link>
                 {renderLinkOptions()}
               </div>
-              <ProfileMenu
-                menuRef={menuRef}
-                isOpen={isOpen}
-                toggleMenu={toggleMenu}
-              />
+
+              <div className="profile-menu">
+                <ProfileMenu
+                  menuRef={menuRef}
+                  isOpen={isOpen}
+                  toggleMenu={toggleMenu}
+                />
+              </div>
             </div>
           </div>
         </div>
