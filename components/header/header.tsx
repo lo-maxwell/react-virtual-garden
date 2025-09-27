@@ -28,6 +28,17 @@ export default function Header() {
   const toggleHamMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 430);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Set initial value
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const isActive = (path: string) => {
     return pathname === path;
   };
@@ -76,9 +87,11 @@ export default function Header() {
               Login
             </Link>
           )}
-          <button ref={buttonRef} onClick={toggleMenu} className="text-black">
-            <ProfileDisplay isOpen={isOpen} />
-          </button>
+          {!isMobile && (firebaseUser || guestMode) && (
+            <button ref={buttonRef} onClick={toggleMenu} className="text-black">
+              <ProfileDisplay isOpen={isOpen} />
+            </button>
+          )}
         </>
       );
     } else {
@@ -110,6 +123,12 @@ export default function Header() {
               >{`[Guest Mode]`}</div>
             )}
             <div className="mobile-nav flex items-center">
+              {isMobile && (firebaseUser || guestMode) && (
+                <button ref={buttonRef} onClick={toggleMenu} className="text-black px-4">
+                  <ProfileDisplay isOpen={isOpen} />
+                </button>
+              )}
+
               <button className="menu-toggle" onClick={toggleHamMenu}>
                 ☰
               </button>
