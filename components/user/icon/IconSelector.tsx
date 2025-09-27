@@ -68,26 +68,16 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
             });
         }
 
-        const chunkedIcons = [];
-        // Chunk the icons into arrays of 5
-        for (let i = 0; i < iconSet.length; i += 5) {
-            chunkedIcons.push(iconSet.slice(i, i + 5));
-        }
-
-        if (chunkedIcons.length === 0) {
+        if (iconSet.length === 0) {
             return <div className="max-h-[60vh] overflow-y-auto">
                 No icons found. Try another category!
             </div>;
         }
 
-        return <div className="max-h-[60vh] overflow-y-auto">
-            {chunkedIcons.map((iconGroup, index) => (
-            <div key={index} className="flex flex-row mx-4 my-4 gap-x-4 "> {/* Flexbox for horizontal alignment */}
-              {iconGroup.map((iconOption) => (
+        return <div className="max-h-[60vh] overflow-y-auto flex flex-wrap justify-center gap-4">
+            {iconSet.map((iconOption) => (
                 <IconButton key={iconOption.getName() + iconOption.getIcon()} icon={iconOption.getName()} onClickFunction={() => onIconClick(iconOption)} bgColor={`bg-blue-300`} borderColor={`border-2 border-coffee-700`} textSize={"text-8xl"} elementSize={"100"}/>
-              ))}
-            </div>
-          ))}
+            ))}
           </div>;
     }
 
@@ -96,7 +86,7 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
         <span className="icon-selector">
             <IconButton icon={iconIndex} onClickFunction={showAllIconsWindow} bgColor={`bg-blue-300`} borderColor={`border border-2 border-coffee-700`} textSize={"text-4xl"} elementSize={"12"}/>
             <PopupWindow showWindow={showAllIcons} setShowWindow={setShowAllIcons}>
-                <div className="w-max bg-reno-sand-200 text-black p-8 rounded-lg shadow-md justify-between items-center">
+                <div className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl bg-reno-sand-200 text-black p-8 rounded-lg shadow-md justify-between items-center">
                     <div className="text-2xl text-semibold"> Select a new icon: </div>
                     <div className="text-xl mb-2">{RenderCategoryFilter()}</div>
                     <div className="text-sm mb-4">Plant crops or place decorations to unlock new icons.</div>
