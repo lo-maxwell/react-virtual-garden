@@ -24,14 +24,14 @@ const colors = {
 
 	seed: {
 		defaultBorderColor: "border border-reno-sand-700",
-		inventoryBackgroundColor: "",
+		inventoryBackgroundColor: "bg-apple-200",
 		inventoryTooltipBackground: "bg-green-400 border-2 border-reno-sand-700",
 		categoryTextColor: "text-coffee-700",
 	},
 
 	harvested: {
 		defaultBorderColor: "border border-reno-sand-700",
-		inventoryBackgroundColor: "",
+		inventoryBackgroundColor: "bg-orange-300",
 		inventoryTooltipBackground: "bg-green-400 border-2 border-reno-sand-700",
 		categoryTextColor: "text-coffee-700",
 
@@ -39,7 +39,7 @@ const colors = {
 
 	blueprint: {
 		defaultBorderColor: "border border-reno-sand-700",
-		inventoryBackgroundColor: "",
+		inventoryBackgroundColor: "bg-cyan-200",
 		inventoryTooltipBackground: "bg-reno-sand-100 border-2 border-coffee-600",
 		categoryTextColor: "text-coffee-700",
 	},
@@ -64,7 +64,10 @@ const colors = {
 		inventoryHighPrice: "text-green-300",
 		inventoryRegularPrice: "text-coffee-800",
 		inventoryLowPrice: "text-green-300",
-		inventoryItemBorderColor: "border-2 border-apple-600"
+		inventoryItemBorderColor: "border-2 border-apple-600",
+		inventoryFocusBackgroundColor: "bg-purple-200",
+		inventoryHoverBackgroundColor: "hover:bg-purple-200",
+		inventoryHoverTextColor: "hover:text-coffee-800"
 	},
 
 	tool: {

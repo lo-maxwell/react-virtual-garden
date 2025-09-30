@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import colors from "../colors/colors";
 import InventoryItemTooltip from "./inventoryItemTooltip";
 import ItemComponent from "./item";
+import { ItemSubtypes } from "@/models/items/ItemTypes";
 
 const InventoryItemComponent = ({itemStore, item, onClickFunction, costMultiplier, focus}: {itemStore: Inventory, item: InventoryItem, onClickFunction: (arg: any) => void, costMultiplier: number, focus: boolean}) => {
 	
@@ -39,20 +40,6 @@ const InventoryItemComponent = ({itemStore, item, onClickFunction, costMultiplie
 	}
 
 	const getPriceColor = () => {
-		// if (focus) {
-		// 	//itemStore instanceof Inventory
-		// 	return '';
-		// } else {
-		// 	//itemStore instanceof Inventory
-		// 	if (costMultiplier > 1) {
-		// 		return colors.inventory.inventoryHighPrice;
-		// 	} else if (costMultiplier == 1) {
-		// 		return colors.inventory.inventoryRegularPrice;
-		// 	} else if (costMultiplier < 1) {
-		// 		return colors.inventory.inventoryLowPrice;
-		// 	}
-		// 	return '';
-		// }
 		return '';
 	}
 
@@ -64,10 +51,31 @@ const InventoryItemComponent = ({itemStore, item, onClickFunction, costMultiplie
 		}
 	}
 
+	const getBackgroundColor = () => {
+		if (focus) {
+			return colors.inventory.inventoryFocusBackgroundColor;
+		} else {
+			switch(item.itemData.subtype) {
+				case ItemSubtypes.BLUEPRINT.name:
+					return colors.blueprint.inventoryBackgroundColor;
+				case ItemSubtypes.SEED.name:
+					return colors.seed.inventoryBackgroundColor;
+				case ItemSubtypes.HARVESTED.name:
+					return colors.harvested.inventoryBackgroundColor;
+				default:
+					return `bg-reno-sand-400`;
+			}
+		}
+	}
+
+	const getClassName = () => {
+		return `${getTextColor()} ${getBackgroundColor()} flex justify-between  px-4 py-1 my-0.5 w-full text-sm font-semibold border ${getBorderColor()} border-4 ${colors.inventory.inventoryHoverTextColor} ${colors.inventory.inventoryHoverBackgroundColor}`;
+	}
+
 	return (
 		<>
 		<InventoryItemTooltip item={item}>
-			<button onClick={handleClick} className={`${getTextColor()} flex justify-between bg-reno-sand-400 px-4 py-1 my-0.5 w-full text-sm font-semibold border ${getBorderColor()} border-4 hover:text-white hover:bg-purple-600`}>
+			<button onClick={handleClick} className={getClassName()}>
 				<ItemComponent icon={item.itemData.icon} name={item.itemData.name} quantity={quantity} price={item.itemData.value * costMultiplier} priceColor={getPriceColor()} width={55}/>
 			</button>
 		</InventoryItemTooltip>
