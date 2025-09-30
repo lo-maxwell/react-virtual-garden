@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import colors from "../colors/colors";
 import StoreItemTooltip from "./storeItemTooltip";
 import ItemComponent from "./../inventory/item";
+import { ItemSubtypes } from "@/models/items/ItemTypes";
 
 const StoreItemComponent = ({itemStore, item, onClickFunction, costMultiplier, focus}: {itemStore: Store, item: InventoryItem, onClickFunction: (arg: any) => void, costMultiplier: number, focus: boolean}) => {
 	const dispatch: AppDispatch = useDispatch();
@@ -37,18 +38,6 @@ const StoreItemComponent = ({itemStore, item, onClickFunction, costMultiplier, f
 	}
 
 	const getPriceColor = () => {
-		// if (focus) {
-		// 	return '';
-		// } else {
-		// 	if (costMultiplier > 2) {
-		// 		return colors.store.storeHighPrice;
-		// 	} else if (costMultiplier == 2) {
-		// 		return colors.store.storeRegularPrice;
-		// 	} else if (costMultiplier < 2) {
-		// 		return colors.store.storeLowPrice;
-		// 	}
-		// 	return '';
-		// }
 		return '';
 	}
 
@@ -60,10 +49,31 @@ const StoreItemComponent = ({itemStore, item, onClickFunction, costMultiplier, f
 		}
 	}
 
+	const getBackgroundColor = () => {
+		if (focus) {
+			return colors.inventory.inventoryFocusBackgroundColor;
+		} else {
+			switch(item.itemData.subtype) {
+				case ItemSubtypes.BLUEPRINT.name:
+					return colors.blueprint.inventoryBackgroundColor;
+				case ItemSubtypes.SEED.name:
+					return colors.seed.inventoryBackgroundColor;
+				case ItemSubtypes.HARVESTED.name:
+					return colors.harvested.inventoryBackgroundColor;
+				default:
+					return `bg-reno-sand-400`;
+			}
+		}
+	}
+
+	const getClassName = () => {
+		return `${getTextColor()} ${getBackgroundColor()} flex justify-between px-4 py-1 my-0.5 w-full text-sm font-semibold border ${getBorderColor()} border-4 ${colors.inventory.inventoryHoverTextColor} ${colors.inventory.inventoryHoverBackgroundColor}`;
+	}
+
 	return (
 		<>
 		<StoreItemTooltip item={item} store={itemStore as Store}>
-			<button onClick={handleClick} className={`${getTextColor()} flex justify-between bg-reno-sand-400 px-4 py-1 my-0.5 w-full text-sm font-semibold border ${getBorderColor()} border-4 hover:text-white hover:bg-purple-600`}>
+			<button onClick={handleClick} className={getClassName()}>
 				<ItemComponent icon={item.itemData.icon} name={item.itemData.name} quantity={quantity} price={item.itemData.value * costMultiplier} priceColor={getPriceColor()} width={55}/>
 			</button>
 		</StoreItemTooltip>

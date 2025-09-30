@@ -18,6 +18,8 @@ import { assert } from "console";
 import { PoolClient } from "pg";
 import { transactionWrapper } from "../utility/utility";
 import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventReward";
+import { UserEvent } from "@/models/user/userEvents/UserEvent";
+import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 
 
 /**
@@ -36,6 +38,8 @@ import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventR
 			const toolboxInstance = user.getToolbox();
 			const actionHistoryInstance = user.getActionHistory();
 			const itemHistoryInstance = user.getItemHistory();
+
+			const userEventInstance = user.getUserEvents();
 
 			const payload = {
 				"queries": [
@@ -105,6 +109,27 @@ import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventR
 								userId
 							  ]
 						],
+						"conflictColumns": [
+							"id"
+						],
+						"returnColumns": [
+							"id"
+						]
+					},
+					{
+						"tableName": "user_events",
+						"columnsToWrite": [
+							"id",
+							"owner",
+							"event_type",
+							"streak"
+						],
+						"values": Array.from(userEventInstance.values()).map((event: UserEvent) => [
+							event.getId(),
+							userId,
+							event.getEventType(),
+							event.getStreak()
+						]),
 						"conflictColumns": [
 							"id"
 						],
@@ -195,6 +220,63 @@ import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventR
 				payload.queries.push(itemHistoryInsertQuery);
 			}
 
+			const insert_event_reward_values: any = [];
+			const insert_event_reward_item_values: any = [];
+			Array.from(userEventInstance.values()).forEach((userEvent) => {
+				const eventReward = userEvent.getEventReward();
+				if (eventReward) {
+					insert_event_reward_values.push([
+						eventReward.getId(),
+						userEvent.getId(),
+						null, //Inventory id, which probably doesn't exist yet
+						eventReward.getGold(),
+						eventReward.getMessage()
+					]);
+					eventReward.items.getAllItems().forEach((item: InventoryItem) => {
+						insert_event_reward_item_values.push([
+							item.getInventoryItemId(),
+							eventReward.getId(),
+							item.itemData.id,
+							item.getQuantity()
+						]);
+					});
+				}
+			});
+
+			if (insert_event_reward_values.length > 0) {
+				const eventRewardInsertQuery = {
+					"tableName": "event_rewards",
+					"columnsToWrite": [
+						"id", "owner", "inventory", "gold", "message"
+					],
+					"values": insert_event_reward_values,
+					"conflictColumns": [
+						"owner"
+					],
+					"returnColumns": [
+						"id"
+					]
+				};
+				payload.queries.push(eventRewardInsertQuery);
+			}
+
+			if (insert_event_reward_item_values.length > 0) {
+				const eventRewardItemInsertQuery = {
+					"tableName": "event_reward_items",
+					"columnsToWrite": [
+						"id", "owner", "identifier", "quantity"
+					],
+					"values": insert_event_reward_item_values,
+					"conflictColumns": [
+						"owner", "identifier"
+					],
+					"returnColumns": [
+						"id"
+					]
+				};
+				payload.queries.push(eventRewardItemInsertQuery);
+			}
+
 			const insertResult = await invokeLambda('garden-insert', payload);
 			// Check if result is valid
 			if (!insertResult) {
@@ -206,6 +288,9 @@ import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventR
 			const toolResult = insert_tool_values.length > 0 ? parseRows<string[]>(insertResult[3]) : [];
 			const actionHistoryResult = insert_action_history_values.length > 0 ? parseRows<string[]>(insertResult[4]) : [];
 			const itemHistoryResult = insert_item_history_values.length > 0 ? parseRows<string[]>(insertResult[insertResult.length - 1]) : [];
+			const userEventResult = userEventInstance.size > 0 ? parseRows<string[]>(insertResult[5]) : [];
+			const eventRewardResult = insert_event_reward_values.length > 0 ? parseRows<string[]>(insertResult[insertResult.length - 2]) : [];
+			const eventRewardItemResult = insert_event_reward_item_values.length > 0 ? parseRows<string[]>(insertResult[insertResult.length - 1]) : [];
 
 			// Check for discrepancies
 			if (userResult.length !== 1) {
@@ -225,6 +310,15 @@ import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventR
 			}
 			if (itemHistoryResult.length !== insert_item_history_values.length) {
 				console.warn(`Expected ${insert_item_history_values.length} item history IDs to be returned, but got ${itemHistoryResult.length}`);
+			}
+			if (userEventResult.length !== userEventInstance.size) {
+				console.warn(`Expected ${userEventInstance.size} user event IDs to be returned, but got ${userEventResult.length}`);
+			}
+			if (eventRewardResult.length !== insert_event_reward_values.length) {
+				console.warn(`Expected ${insert_event_reward_values.length} event reward IDs to be returned, but got ${eventRewardResult.length}`);
+			}
+			if (eventRewardItemResult.length !== insert_event_reward_item_values.length) {
+				console.warn(`Expected ${insert_event_reward_item_values.length} event reward item IDs to be returned, but got ${eventRewardItemResult.length}`);
 			}
 			return true;
 		} catch (error) {
@@ -302,6 +396,7 @@ import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventR
 			const toolboxInstance = user.getToolbox();
 			const actionHistoryInstance = user.getActionHistory();
 			const itemHistoryInstance = user.getItemHistory();
+			const userEventInstance = user.getUserEvents();
 
 			const payload = {
 				"queries": [
@@ -388,9 +483,37 @@ import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventR
 							  ]
 						],
 						"conflictColumns": [
-							"owner"
+							"id"
 						],
-						"conflictIndex": "owner",
+						"returnColumns": [
+							"id"
+						]
+					},
+					{
+						"tableName": "user_events",
+						"columnsToWrite": [
+							"id",
+							"owner",
+							"event_type",
+							"streak"
+						],
+						"values": Array.from(userEventInstance.values()).map((event: UserEvent) => [
+							event.getId(),
+							userId,
+							event.getEventType(),
+							event.getStreak()
+						]),
+						"conflictColumns": [
+							"id"
+						],
+						"updateQuery": {
+							"values": {
+								"streak": {
+									"excluded": true
+								}
+							},
+							"conditions": {}
+						},
 						"returnColumns": [
 							"id"
 						]
@@ -494,6 +617,84 @@ import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventR
 				payload.queries.push(itemHistoryInsertQuery);
 			}
 
+			const insert_event_reward_values: any = [];
+			const insert_event_reward_item_values: any = [];
+			Array.from(userEventInstance.values()).forEach((userEvent) => {
+				const eventReward = userEvent.getEventReward();
+				if (eventReward) {
+					insert_event_reward_values.push([
+						eventReward.getId(),
+						userEvent.getId(),
+						null, //Inventory id, which probably doesn't exist yet
+						eventReward.getGold(),
+						eventReward.getMessage()
+					]);
+					eventReward.items.getAllItems().forEach((item: InventoryItem) => {
+						insert_event_reward_item_values.push([
+							item.getInventoryItemId(),
+							eventReward.getId(),
+							item.itemData.id,
+							item.getQuantity()
+						]);
+					});
+				}
+			});
+
+			if (insert_event_reward_values.length > 0) {
+				const eventRewardInsertQuery: any = {
+					"tableName": "event_rewards",
+					"columnsToWrite": [
+						"id", "owner", "inventory", "gold", "message"
+					],
+					"values": insert_event_reward_values,
+					"conflictColumns": [
+						"owner"
+					],
+					"updateQuery": {
+						"values": {
+							"inventory": null,
+							"gold": {
+								"excluded": true
+							},
+							"message": {
+								"excluded": true
+							}
+						},
+						"conditions": {}
+					},
+					"returnColumns": [
+						"id"
+					]
+				};
+				payload.queries.push(eventRewardInsertQuery);
+			}
+
+			if (insert_event_reward_item_values.length > 0) {
+				const eventRewardItemInsertQuery: any = {
+					"tableName": "event_reward_items",
+					"columnsToWrite": [
+						"id", "owner", "identifier", "quantity"
+					],
+					"values": insert_event_reward_item_values,
+					"conflictColumns": [
+						"owner",
+						"identifier"
+					],
+					"updateQuery": {
+						"values": {
+							"quantity": {
+								"excluded": true
+							}
+						},
+						"conditions": {}
+					},
+					"returnColumns": [
+						"id"
+					]
+				};
+				payload.queries.push(eventRewardItemInsertQuery);
+			}
+
 			const insertResult = await invokeLambda('garden-insert', payload);
 			// Check if result is valid
 			if (!insertResult) {
@@ -505,6 +706,9 @@ import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventR
 			const toolResult = insert_tool_values.length > 0 ? parseRows<string[]>(insertResult[3]) : [];
 			const actionHistoryResult = insert_action_history_values.length > 0 ? parseRows<string[]>(insertResult[4]) : [];
 			const itemHistoryResult = insert_item_history_values.length > 0 ? parseRows<string[]>(insertResult[insertResult.length - 1]) : [];
+			const userEventResult = userEventInstance.size > 0 ? parseRows<string[]>(insertResult[insertResult.length - 3]) : [];
+			const eventRewardResult = insert_event_reward_values.length > 0 ? parseRows<string[]>(insertResult[insertResult.length - 2]) : [];
+			const eventRewardItemResult = insert_event_reward_item_values.length > 0 ? parseRows<string[]>(insertResult[insertResult.length - 1]) : [];
 
 			// Check for discrepancies
 			if (userResult.length !== 1) {
@@ -514,7 +718,7 @@ import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventR
 				console.warn(`Expected 1 level to be upserted, but got ${levelResult.length}`);
 			}
 			if (toolboxResult.length !== 1) {
-				console.warn(`Expected 1 toolbox to be created, but got ${toolboxResult.length}`);
+				console.warn(`Expected 1 toolbox to be upserted, but got ${toolboxResult.length}`);
 			}
 			if (toolResult.length !== insert_tool_values.length) {
 				console.warn(`Expected ${insert_tool_values.length} tool IDs to be returned, but got ${toolResult.length}`);
@@ -524,6 +728,15 @@ import { EventRewardEntity, EventRewardItemEntity } from "@/models/events/EventR
 			}
 			if (itemHistoryResult.length !== insert_item_history_values.length) {
 				console.warn(`Expected ${insert_item_history_values.length} item history IDs to be returned, but got ${itemHistoryResult.length}`);
+			}
+			if (userEventResult.length !== userEventInstance.size) {
+				console.warn(`Expected ${userEventInstance.size} user event IDs to be returned, but got ${userEventResult.length}`);
+			}
+			if (eventRewardResult.length !== insert_event_reward_values.length) {
+				console.warn(`Expected ${insert_event_reward_values.length} event reward IDs to be returned, but got ${eventRewardResult.length}`);
+			}
+			if (eventRewardItemResult.length !== insert_event_reward_item_values.length) {
+				console.warn(`Expected ${insert_event_reward_item_values.length} event reward item IDs to be returned, but got ${eventRewardItemResult.length}`);
 			}
 			return true;
 		} catch (error) {
@@ -825,7 +1038,6 @@ export async function getUserFromDatabase(userId: string, client?: PoolClient): 
 			const actionHistoryList = actionHistoryRepository.makeActionHistoryListObject(actionHistories);
 			const itemHistories = itemHistoryEntityListResult.map((itemHistoryEntity) => itemHistoryRepository.makeItemHistoryObject(itemHistoryEntity));
 			const itemHistoryList = itemHistoryRepository.makeItemHistoryListObject(itemHistories);
-
 			const tool_payload = {
 				"queries": [
 					{

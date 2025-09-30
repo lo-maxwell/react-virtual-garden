@@ -52,23 +52,26 @@ export class EventReward implements EventRewardInterface {
 			
 			const { id, eventType, userId, inventoryId, streak, items, gold, message } = plainObject;
 			
-			// Perform additional type checks if necessary
-			if (typeof userId !== 'string' || typeof inventoryId !== 'string' || 
-				typeof streak !== 'number' || typeof gold !== 'number' || 
-				typeof message !== 'string') {
-				throw new Error('Invalid property types in plainObject for EventReward');
-			}
+			const finalUserId = typeof userId === 'string' ? userId : "";
+			const finalEventType = (typeof finalUserId !== 'string' || finalUserId === "")
+				? UserEventTypes.ERROR.name
+				: eventType || UserEventTypes.ERROR.name;
+
+			const finalInventoryId = typeof inventoryId === 'string' ? inventoryId : "";
+			const finalStreak = typeof streak === 'number' ? streak : 0;
+			const finalGold = typeof gold === 'number' ? gold : 0;
+			const finalMessage = typeof message === 'string' ? message : "";
 			
 			const itemsInstance = items ? InventoryItemList.fromPlainObject(items) : new InventoryItemList();
 			
 			return new EventReward({
 				id: id || uuidv4(),
-				eventType: eventType || UserEventTypes.ERROR.name,
-				userId,
-				inventoryId,
-				streak,
-				gold,
-				message
+				eventType: finalEventType,
+				userId: finalUserId,
+				inventoryId: finalInventoryId,
+				streak: finalStreak,
+				gold: finalGold,
+				message: finalMessage
 			}).setItems(itemsInstance);
 		} catch (error) {
 			console.error('Error creating EventReward from plainObject:', error);

@@ -27,6 +27,7 @@ const DailyLoginRewardClaimButton = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showClaimedRewardScreen, setShowClaimedRewardScreen] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const { user, reloadUser } = useUser();
   const { selectedItem, toggleSelectedItem } = useSelectedItem();
   const { inventory, reloadInventory } = useInventory();
@@ -44,6 +45,7 @@ const DailyLoginRewardClaimButton = () => {
     }
     setIsLoading(true);
     setApiError(null);
+    setLoadingMessage("Checking if daily login is available...");
     try {
       const apiRoute = `/api/user/${user.getUserId()}/events/dailyLogin`;
       const apiResponse = await makeApiRequest("GET", apiRoute, {}, true);
@@ -61,6 +63,7 @@ const DailyLoginRewardClaimButton = () => {
       setPreviousEventReward(null);
     } finally {
       setIsLoading(false);
+      setLoadingMessage(null);
     }
   };
 
@@ -85,6 +88,7 @@ const DailyLoginRewardClaimButton = () => {
         
         setApiError(null); // Clear any previous API errors
         setIsLoading(true);
+        setLoadingMessage("Generating daily login reward...");
         try {
             const apiRoute = `/api/user/${user.getUserId()}/events/dailyLogin`;
             const data = { inventoryId: inventory.getInventoryId() };
@@ -117,6 +121,7 @@ const DailyLoginRewardClaimButton = () => {
             setApiError('Failed to fetch daily login reward. Please try again later.');
         } finally {
             setIsLoading(false);
+            setLoadingMessage(null);
         }
     };
 
@@ -185,7 +190,7 @@ const DailyLoginRewardClaimButton = () => {
     return (
       <>
         {isLoading ? (
-          <div className="text-xl mb-2">Calculating daily login reward...</div>
+          <div className="text-xl mb-2">{loadingMessage}</div>
         ) : apiError ? (
           <>
             <div className="text-xl mb-2 text-red-500">{apiError}</div>

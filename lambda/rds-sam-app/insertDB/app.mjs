@@ -44,8 +44,8 @@ const constructUpdateQuery = (tableName, values, conditions, numExistingParams) 
 
   // Construct the set clause and populate queryParams with values
   const setClause = Object.keys(values).map((key) => {
-      // Check if the value is an object with an operator
-      if (typeof values[key] === 'object' && values[key].operator && values[key].excluded === true) {
+      // Check if the value is an object with an operator and is not null
+      if (typeof values[key] === 'object' && values[key] !== null && values[key].operator && values[key].excluded === true) {
         // Excluded + operator -> new value is the excluded value with operator applied
         if (!allowedUpdateOperators.includes(values[key].operator)) {
           throw new Error(`Invalid operator: ${values[key].operator}`);
@@ -57,7 +57,7 @@ const constructUpdateQuery = (tableName, values, conditions, numExistingParams) 
           // If no specific value for the operator, use the original + excluded
           return `${key} = ${tableName}.${key} ${values[key].operator} EXCLUDED.${key}`;
         }
-      } else if (typeof values[key] === 'object' && values[key].operator) {
+      } else if (typeof values[key] === 'object' && values[key] !== null && values[key].operator) {
         // Not excluded + operator -> new value is original with operator applied
         if (!allowedUpdateOperators.includes(values[key].operator)) {
           throw new Error(`Invalid operator: ${values[key].operator}`);
@@ -69,7 +69,7 @@ const constructUpdateQuery = (tableName, values, conditions, numExistingParams) 
           // If no specific value for the operator, use the original + excluded
           return `${key} = ${tableName}.${key} ${values[key].operator} EXCLUDED.${key}`;
         }
-      } else if (values[key].excluded === true) {
+      } else if (values[key] && values[key].excluded === true) {
         // Excluded + no operator -> new value is excluded value
         return `${key} = EXCLUDED.${key}`;
       } else {
