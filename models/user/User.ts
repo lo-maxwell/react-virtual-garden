@@ -222,6 +222,10 @@ class User {
 		return Array.from(this.userEvents.values());
 	}
 
+	public getUserEvents(): Map<string, UserEvent> {
+		return this.userEvents;
+	}
+
 	/**
 	 * Updates this user's itemHistory and actionHistory following the harvest of a plant.
 	 * @item the item that was harvested

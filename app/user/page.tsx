@@ -113,42 +113,6 @@ const UserPage = () => {
       }
     };
 
-    const handleFetchAccountButton = async () => {
-      try {
-        const userId = user.getUserId();
-        // Making the GET request to your API endpoint
-        const response = await fetch(`/api/account/${userId}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        // Check if the response is successful
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-
-        // Parsing the response data
-        const result = await response.json();
-        console.log("Successfully fetched:", result);
-        console.log(User.fromPlainObject(result.plainUserObject));
-        console.log(Garden.fromPlainObject(result.plainGardenObject));
-        console.log(Inventory.fromPlainObject(result.plainInventoryObject));
-        console.log(Store.fromPlainObject(result.plainStoreObject));
-        saveUser(User.fromPlainObject(result.plainUserObject));
-        saveGarden(Garden.fromPlainObject(result.plainGardenObject));
-        saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
-        saveStore(Store.fromPlainObject(result.plainStoreObject));
-        reloadUser();
-        reloadGarden();
-        reloadInventory();
-        reloadStore();
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
     const onIconChangeHandler = async (icon: Icon) => {
       handleChangeIcon(icon);
 
@@ -218,10 +182,6 @@ const UserPage = () => {
         environmentTestKey === "this is the dev environment"
       ) {
         return (
-          // <>
-          // <div>Environment test key successfully returned.</div>
-          // </>
-          // <>
           <>
             <div>
               <button onClick={handleCreateAccountButton}>
@@ -236,9 +196,6 @@ const UserPage = () => {
               </button>
             </div>
           </>
-          //   <div><button onClick={handleFetchAccountButton}> Fetch user from Database </button></div>
-          //   <div><button onClick={handleToggleGuestModeButton}> {`Toggle Cloud Saving ${guestMode ? '(Currently on)' : '(Currently off)'}`} </button></div>
-          // </>
         );
       } else if (environmentTestKey === "this is the prod environment") {
         return <></>;
@@ -275,7 +232,7 @@ const UserPage = () => {
                   expToLevelUp={user.getExpToLevelUp()}
                 />
               </div>
-              <div>{`The friends list will go here, once it's ready!`}</div>
+              {/* <div>{`The friends list will go here, once it's ready!`}</div> */}
               <Suspense fallback={<div>Loading...</div>}>
                 {renderAccountManagementButtons()}
               </Suspense>
