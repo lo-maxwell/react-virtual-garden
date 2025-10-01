@@ -54,7 +54,7 @@ export function ConfirmDeletePlantPopupWindow({
             className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
           />
           <label className="text-sm text-gray-700">
-            Don't ask me again
+            {`Don't ask me again`}
           </label>
         </div>
         
