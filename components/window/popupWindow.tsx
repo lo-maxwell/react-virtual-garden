@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import "./popupWindow.css";
 
 export function PopupWindow({
@@ -10,12 +10,15 @@ export function PopupWindow({
   showWindow: boolean;
   setShowWindow: Function;
 }) {
+  const popupRef = useRef<HTMLSpanElement>(null);
+
   const handleClickOutside = (event: any) => {
     if (!showWindow) return;
     const target = event.target as HTMLElement;
-    const configElement = document.querySelector(".children-window");
+    // Use the ref to get the current popup's children-window element
+    const childrenWindow = popupRef.current?.querySelector('.children-window');
     // Check if the click occurred outside the target element
-    if (configElement && !configElement.contains(target)) {
+    if (childrenWindow && !childrenWindow.contains(target)) {
       setShowWindow(false);
     }
   };
@@ -32,6 +35,7 @@ export function PopupWindow({
 
   return (
     <span
+      ref={popupRef}
       className={`${
         showWindow ? `` : `hidden`
       } fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50`}

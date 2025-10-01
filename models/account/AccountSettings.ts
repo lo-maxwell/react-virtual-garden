@@ -1,10 +1,12 @@
 export class AccountSettings {
 	guestMode: boolean;
 	displayEmojiIcons: boolean;
+	confirmDeletePlants: boolean;
 
-	constructor(guestMode: boolean = false, displayEmojiIcons: boolean = true) {
+	constructor(guestMode: boolean = false, displayEmojiIcons: boolean = true, confirmDeletePlants: boolean = true) {
 		this.guestMode = guestMode;
 		this.displayEmojiIcons = displayEmojiIcons;
+		this.confirmDeletePlants = confirmDeletePlants;
 	}
 
 	static getDefaultSettings(): AccountSettings {
@@ -18,7 +20,7 @@ export class AccountSettings {
 			throw new Error('Invalid plainObject structure for Settings');
 		}
 		const defaultSettings = AccountSettings.getDefaultSettings();
-		let { guestMode, displayEmojiIcons } = plainObject;
+		let { guestMode, displayEmojiIcons, confirmDeletePlants } = plainObject;
 		// Use default if invalid or missing
 		if (typeof guestMode !== 'boolean') {
 			guestMode = defaultSettings.guestMode;
@@ -26,7 +28,10 @@ export class AccountSettings {
 		if (typeof displayEmojiIcons !== 'boolean') {
 			displayEmojiIcons = defaultSettings.displayEmojiIcons;
 		}
-		return new AccountSettings(guestMode, displayEmojiIcons);
+		if (typeof confirmDeletePlants !== 'boolean') {
+			confirmDeletePlants = defaultSettings.confirmDeletePlants;
+		}
+		return new AccountSettings(guestMode, displayEmojiIcons, confirmDeletePlants);
 			
 	}
 
@@ -34,6 +39,7 @@ export class AccountSettings {
 		return {
 			guestMode: this.guestMode,
 			displayEmojiIcons: this.displayEmojiIcons,
+			confirmDeletePlants: this.confirmDeletePlants,
 		};
 	}
 }

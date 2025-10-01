@@ -427,6 +427,14 @@
 ### Updated mobile ui
   * Updated navbar, added css styles for narrow screens, thanks @ivywu100
 
+## Day 41
+
+### More UI polish
+  * Updated inventory item colors to better differentiate item types
+  * Added settings and confirmation dialogue before deleting plants with shovel
+  * Removed unused friends list
+  
+
 TODO:
 
 Convert to IAC with IAC generator, test output, possibly move to another stack

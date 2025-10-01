@@ -133,10 +133,6 @@ export const fetchAccountObjects = async () => {
         const apiRoute = `/api/auth/getAccountObjects`;
         const result = await makeApiRequest('GET', apiRoute, {}, true);
         if (result.success) {
-            console.log(result.data);
-            console.log(result.data.plainUserObject);
-            console.log("plainObject type:", typeof result.data.plainUserObject);
-            console.log("plainObject keys:", result.data.plainUserObject && Object.keys(result.data.plainUserObject));
             return result.data;
         } else {
             console.error("Error calling API to fetch objects:", result.error);

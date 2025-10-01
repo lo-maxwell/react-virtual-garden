@@ -8,6 +8,8 @@ interface AccountContextType {
     setGuestMode: (arg: boolean) => void;
     displayEmojiIcons: boolean;
     setDisplayEmojiIcons: (arg: boolean) => void;
+    confirmDeletePlants: boolean;
+    setConfirmDeletePlants: (arg: boolean) => void;
     environmentTestKey: string;
     // Add any other actions or state you need
 }
