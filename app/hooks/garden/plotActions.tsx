@@ -17,6 +17,15 @@ import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { Tool } from "@/models/items/tools/Tool";
 import { syncAllAccountObjects } from "../../garden/gardenFunctions";
 
+export enum PlotActionType {
+    PLANT_SEED = 'plantSeed',
+    PLACE_DECORATION = 'placeDecoration', 
+    CLICK_PLANT = 'clickPlant',
+    CLICK_DECORATION = 'clickDecoration',
+    DESTROY_ITEM = 'destroyItem',
+    DO_NOTHING = 'doNothing'
+}
+
 //contains static onclick functions for plot components
 export const usePlotActions = () => {
 	const {garden, setGardenMessage, reloadGarden } = useGarden();
@@ -88,7 +97,8 @@ export const usePlotActions = () => {
 
 		const toReturn = {
 			uiHelper: uiHelper,
-			apiHelper: apiHelper
+			apiHelper: apiHelper,
+			actionType: PlotActionType.PLANT_SEED,
 		}
 		return toReturn;
 	}
@@ -154,7 +164,8 @@ export const usePlotActions = () => {
 		
 		const toReturn = {
 			uiHelper: uiHelper,
-			apiHelper: apiHelper
+			apiHelper: apiHelper,
+			actionType: PlotActionType.PLACE_DECORATION,
 		}
 		return toReturn;
 	}
@@ -240,7 +251,8 @@ export const usePlotActions = () => {
 		
 		const toReturn = {
 			uiHelper: uiHelper,
-			apiHelper: apiHelper
+			apiHelper: apiHelper,
+			actionType: PlotActionType.CLICK_PLANT,
 		}
 		return toReturn;
 	}
@@ -319,7 +331,8 @@ export const usePlotActions = () => {
 		
 		const toReturn = {
 			uiHelper: uiHelper,
-			apiHelper: apiHelper
+			apiHelper: apiHelper,
+			actionType: PlotActionType.CLICK_DECORATION,
 		}
 		return toReturn;
 	}
@@ -388,7 +401,8 @@ export const usePlotActions = () => {
 			
 			const toReturn = {
 				uiHelper: uiHelper,
-				apiHelper: apiHelper
+				apiHelper: apiHelper,
+				actionType: PlotActionType.DESTROY_ITEM,
 			}
 			return toReturn;
 		}
@@ -406,7 +420,8 @@ export const usePlotActions = () => {
 		
 		const toReturn = {
 			uiHelper: uiHelper,
-			apiHelper: apiHelper
+			apiHelper: apiHelper,
+			actionType: PlotActionType.DO_NOTHING,
 		}
 		return toReturn;
 	}

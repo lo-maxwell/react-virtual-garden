@@ -24,7 +24,7 @@ const LoginPage: React.FC = () => {
   const { inventory, reloadInventory, resetInventory } = useInventory();
   const { store, reloadStore, resetStore } = useStore();
   const { garden, reloadGarden, resetGarden } = useGarden();
-  const { account, guestMode, setGuestMode, displayEmojiIcons, setDisplayEmojiIcons } = useAccount();
+  const { account, guestMode, setGuestMode, displayEmojiIcons, setDisplayEmojiIcons, confirmDeletePlants, setConfirmDeletePlants } = useAccount();
 	const [syncing, setSyncing] = useState(false);
   const [message, setMessage] = useState('');
   const [messageColor, setMessageColor] = useState('black');
@@ -105,7 +105,37 @@ const LoginPage: React.FC = () => {
       <div className="flex flex-1 flex-col bg-reno-sand-200 text-black"> 
         <div className="mx-4">This is the settings page.</div>
         <div className={`mx-4 ${messageColor}`}>{message}</div>
-		    <button onClick={syncAccountObjects} disabled={syncing} className="block w-full text-left py-2 px-4 hover:bg-[#d0cecc] whitespace-nowrap">{getSyncAccountObjectsButtonText()}</button>
+        <div className="mx-4 mt-4">
+          <button 
+            onClick={syncAccountObjects} 
+            disabled={syncing} 
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          >
+            {getSyncAccountObjectsButtonText()}
+          </button>
+        </div>
+        <div className="mx-4 mt-2">
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-700">
+              Confirm before destroying plants
+            </span>
+            <label className="cursor-pointer">
+              <input
+                type="checkbox"
+                checked={confirmDeletePlants}
+                onChange={() => setConfirmDeletePlants(!confirmDeletePlants)}
+                className="sr-only"
+              />
+              <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                confirmDeletePlants ? 'bg-green-600' : 'bg-gray-200'
+              }`}>
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  confirmDeletePlants ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </div>
+            </label>
+          </div>
+        </div>
         {/* <button onClick={toggleDisplayEmojiIcons} disabled={syncing} className="block w-full text-left py-2 px-4 hover:bg-[#d0cecc] whitespace-nowrap">{getToggleDisplayEmojiIconsButtonText()}</button> */}
       </div>
     </>

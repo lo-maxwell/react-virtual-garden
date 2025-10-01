@@ -45,7 +45,7 @@ const DailyLoginRewardClaimButton = () => {
     }
     setIsLoading(true);
     setApiError(null);
-    setLoadingMessage("Checking if daily login is available...");
+    setLoadingMessage("Checking if daily login reward is available...");
     try {
       const apiRoute = `/api/user/${user.getUserId()}/events/dailyLogin`;
       const apiResponse = await makeApiRequest("GET", apiRoute, {}, true);

@@ -13,10 +13,12 @@ import { setAllLevelSystemValues, setCurrentExp, setExpToLevelUp, setUserLevel }
 import { useDispatch } from "react-redux";
 import IconButton from "../user/icon/IconButton";
 import IconSVGButton from "../user/icon/IconSVGButton";
+import { ConfirmDeletePlantPopupWindow } from "./confirmDeletePlantPopupWindow";
+import { PlotActionType } from "@/app/hooks/garden/plotActions";
 
 type PlotComponentProps = {
 	plot: Plot;
-	onPlotClickHelpers: {uiHelper: () => {success: boolean, displayIcon: string}, apiHelper: () => Promise<{success: boolean, displayIcon: string}>}
+	onPlotClickHelpers: {uiHelper: () => {success: boolean, displayIcon: string}, apiHelper: () => Promise<{success: boolean, displayIcon: string}>, actionType?: PlotActionType}
 	currentTime: number;
   };
 
@@ -31,7 +33,8 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 	PlotComponent.displayName = "Plot";
 	const [displayIcon, setDisplayIcon] = useState(plot.getItem().itemData.icon);
 	const [forceRefreshKey, setForceRefreshKey] = useState(0);
-	const { account, guestMode, displayEmojiIcons } = useAccount();
+	const [showDeletePopup, setShowDeletePopup] = useState(false);
+	const { account, guestMode, displayEmojiIcons, confirmDeletePlants } = useAccount();
 	const { user, reloadUser } = useUser();
 	const { garden, reloadGarden } = useGarden();
 	const { inventory, reloadInventory } = useInventory();
@@ -121,6 +124,12 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 	}, [plot.getItemSubtype()]);
 
 	const handleClick = async () => {
+		// Check if this is a destroy action - if so, show popup instead of executing
+		if (onPlotClickHelpers.actionType === PlotActionType.DESTROY_ITEM && confirmDeletePlants) {
+			setShowDeletePopup(true);
+			return;
+		}
+
 		//onPlotClick comes from plotActions which may/may not be async
 		const uiResult = onPlotClickHelpers.uiHelper();
 		if (uiResult.success) {
@@ -150,17 +159,67 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
 	}
 
+	const handleDeletePlant = async () => {
+		// Confirm that the action type is correct before proceeding
+		if (onPlotClickHelpers.actionType !== PlotActionType.DESTROY_ITEM) {
+			console.error(`Error: handleDeletePlant called with incorrect action type. Expected: ${PlotActionType.DESTROY_ITEM}, Got: ${onPlotClickHelpers.actionType}`);
+			return;
+		}
+
+		// Execute the actual destroy logic from onPlotClickHelpers
+		const uiResult = onPlotClickHelpers.uiHelper();
+		if (uiResult.success) {
+			setDisplayIcon(uiResult.displayIcon);
+		} else {
+			console.warn("UI helper failed for delete action");
+			return;
+		}
+		
+		// Call api if not in guest mode
+		if (!guestMode) {
+			const apiResult = await onPlotClickHelpers.apiHelper();
+			if (apiResult.success) {
+				setDisplayIcon(apiResult.displayIcon);
+			} else {
+				console.warn(`Api call failed for delete action`);
+				// setDisplayIcon(apiResult.displayIcon);
+				// TODO: sync plot function?
+				await syncAllAccountObjects(user, garden, inventory);
+				reloadUser();
+				reloadGarden();
+				reloadInventory();
+				setDisplayIcon(plot.getItem().itemData.icon);
+				// setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1); //we force a refresh to clear statuses
+			}
+		}
+		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
+	};
+
+	const getPlantName = () => {
+		if (plot.getItemSubtype() === ItemSubtypes.PLANT.name) {
+			return plot.getItem().itemData.name;
+		}
+		return "this plant";
+	};
 
 	return (
-		<PlotTooltip plot={plot} currentTime={currentTime} key={forceRefreshKey}>
-			<IconButton
-			icon={displayIcon}
-			onClickFunction={handleClick}
-			bgColor={color.bgColor}
-			borderColor={color.borderColor}
-			textSize="text-5xl"
-			elementSize="16"/>
-		</PlotTooltip>
+		<>
+			<PlotTooltip plot={plot} currentTime={currentTime} key={forceRefreshKey}>
+				<IconButton
+				icon={displayIcon}
+				onClickFunction={handleClick}
+				bgColor={color.bgColor}
+				borderColor={color.borderColor}
+				textSize="text-5xl"
+				elementSize="16"/>
+			</PlotTooltip>
+			<ConfirmDeletePlantPopupWindow
+				showWindow={showDeletePopup}
+				setShowWindow={setShowDeletePopup}
+				plantName={getPlantName()}
+				onConfirmDelete={handleDeletePlant}
+			/>
+		</>
 	);
 });
 

@@ -3,6 +3,7 @@ import { AccountContext } from "@/app/hooks/contexts/AccountContext";
 import { loadAccount, saveAccount } from "@/utils/localStorage/account";
 import { ReactNode, useEffect, useState } from "react";
 import { Account } from '@/models/account/Account';
+import { AccountSettings } from "@/models/account/AccountSettings";
 
 // Define props for the provider
 interface AccountProviderProps {
@@ -10,9 +11,11 @@ interface AccountProviderProps {
 }
 
 export const AccountProvider = ({ children }: AccountProviderProps) => {
+	const defaultSettings = AccountSettings.getDefaultSettings();
     const [account, setAccount] = useState<Account | null>(null);
-	const [guestMode, setGuestMode] = useState<boolean>(false);
-	const [displayEmojiIcons, setDisplayEmojiIcons] = useState<boolean>(true);
+	const [guestMode, setGuestMode] = useState<boolean>(defaultSettings.guestMode);
+	const [displayEmojiIcons, setDisplayEmojiIcons] = useState<boolean>(defaultSettings.displayEmojiIcons);
+	const [confirmDeletePlants, setConfirmDeletePlants] = useState<boolean>(defaultSettings.confirmDeletePlants);
 	const [environmentTestKey, setEnvironmentTestKey] = useState<string>('');
 
 	function generateDefaultNewAccount(): Account {
@@ -35,6 +38,7 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		setAccount(account);
 		setGuestMode(account.settings.guestMode);
 		setDisplayEmojiIcons(account.settings.displayEmojiIcons);
+		setConfirmDeletePlants(account.settings.confirmDeletePlants);
 	}, []);
 
 	function setGuestModeHandler(value: boolean): void {
@@ -49,6 +53,14 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		setDisplayEmojiIcons(value);
 		if (account) {
 			account.settings.displayEmojiIcons = value;
+			saveAccount(account);
+		}
+	}
+
+	function setConfirmDeletePlantsHandler(value: boolean): void {
+		setConfirmDeletePlants(value);
+		if (account) {
+			account.settings.confirmDeletePlants = value;
 			saveAccount(account);
 		}
 	}
@@ -86,7 +98,7 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 
 
     return (
-        <AccountContext.Provider value={{ account: account!, guestMode: guestMode, setGuestMode: setGuestModeHandler, displayEmojiIcons: displayEmojiIcons, setDisplayEmojiIcons: setDisplayEmojiIconsHandler, environmentTestKey}}>
+        <AccountContext.Provider value={{ account: account!, guestMode: guestMode, setGuestMode: setGuestModeHandler, displayEmojiIcons: displayEmojiIcons, setDisplayEmojiIcons: setDisplayEmojiIconsHandler, confirmDeletePlants: confirmDeletePlants, setConfirmDeletePlants: setConfirmDeletePlants, environmentTestKey}}>
             {children}
         </AccountContext.Provider>
     );
