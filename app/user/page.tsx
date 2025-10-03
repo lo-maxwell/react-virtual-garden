@@ -8,17 +8,8 @@ import Icon, { IconEntity } from "@/models/user/icons/Icon";
 import { useInventory } from "../hooks/contexts/InventoryContext";
 import { useGarden } from "../hooks/contexts/GardenContext";
 import { useStore } from "../hooks/contexts/StoreContext";
-import { saveUser } from "@/utils/localStorage/user";
-import User from "@/models/user/User";
-import { Garden } from "@/models/garden/Garden";
-import { Inventory } from "@/models/itemStore/inventory/Inventory";
-import { Store } from "@/models/itemStore/store/Store";
-import { saveGarden } from "@/utils/localStorage/garden";
-import { saveInventory } from "@/utils/localStorage/inventory";
-import { saveStore } from "@/utils/localStorage/store";
 import { useAccount } from "../hooks/contexts/AccountContext";
-import { Suspense, useEffect, useState } from "react";
-import { env } from "process";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { makeApiRequest } from "@/utils/api/api";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../hooks/contexts/AuthContext";
@@ -26,108 +17,98 @@ import RedirectingMessage from "@/components/errorPages/redirectingMessage";
 import "./page.css";
 
 const UserPage = () => {
-  const RenderUser = () => {
-    const { firebaseUser } = useAuth();
-    const {
-      user,
-      username,
-      handleChangeUsername,
-      icon,
-      handleChangeIcon,
-      reloadUser,
-    } = useUser();
-    const { inventory, reloadInventory } = useInventory();
-    const { store, reloadStore } = useStore();
-    const { garden, reloadGarden } = useGarden();
-    const { account, guestMode, setGuestMode, environmentTestKey } =
-      useAccount();
-    const router = useRouter();
-    const [isRedirecting, setIsRedirecting] = useState(false);
+  const { firebaseUser } = useAuth();
+  const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
-    useEffect(() => {
-      if (!firebaseUser && !guestMode) {
-        setIsRedirecting(true); // Trigger the redirecting state
+  const { user, username, handleChangeUsername, icon, handleChangeIcon, reloadUser } = useUser();
+  const { inventory, reloadInventory } = useInventory();
+  const { store, reloadStore } = useStore();
+  const { garden, reloadGarden } = useGarden();
+  const { account, guestMode, environmentTestKey } = useAccount();
 
-        // Delay the redirect by 2 seconds (adjust the time as needed)
-        const timer = setTimeout(() => {
-          router.push("/login");
-        }, 2000); // 2 seconds delay before redirecting
-
-        return () => clearTimeout(timer); // Cleanup the timer if the component is unmounted or the condition changes
-      } else {
-        setIsRedirecting(false);
-      }
-    }, [firebaseUser, guestMode, router]);
-
-    // Show the redirecting message if needed
+  // Redirect effect
+  useEffect(() => {
     if (!firebaseUser && !guestMode) {
-      let redirectDivElement;
+      setIsRedirecting(true);
+      const timer = setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+      return () => clearTimeout(timer);
+    } else {
+      setIsRedirecting(false);
+    }
+  }, [firebaseUser, guestMode, router]);
+
+  // Early return for redirect
+  if (!firebaseUser && !guestMode) {
+    const redirectDivElement = useMemo(() => {
       if (isRedirecting) {
-        redirectDivElement = <RedirectingMessage targetPage="login page" />;
+        return <RedirectingMessage targetPage="login page" />;
       } else {
-        redirectDivElement = <div>{`Fetching user data...`}</div>;
+        return <div>Fetching user data...</div>;
       }
+    }, [isRedirecting]);
 
-      return (
-        <>
-          <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
-            {redirectDivElement}
-          </div>
-        </>
-      );
+    return (
+      <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
+        {redirectDivElement}
+      </div>
+    );
+  }
+
+  if (!user || !account) {
+    return <></>;
+  }
+
+  // Handlers
+  const handleCreateAccountButton = useCallback(async () => {
+    try {
+      const data = {
+        plainUserObject: user.toPlainObject(),
+        plainInventoryObject: inventory.toPlainObject(),
+        plainStoreObject: store.toPlainObject(),
+        plainGardenObject: garden.toPlainObject(),
+      };
+      const result = await makeApiRequest("POST", `/api/admin`, data, true);
+      console.log("Successfully posted:", result);
+    } catch (error) {
+      console.error(error);
     }
+  }, [user, inventory, store, garden]);
 
-    if (!user || !account) {
-      return <></>;
+  const handleSaveAccountButton = useCallback(async () => {
+    try {
+      const data = {
+        plainUserObject: user.toPlainObject(),
+        plainInventoryObject: inventory.toPlainObject(),
+        plainStoreObject: store.toPlainObject(),
+        plainGardenObject: garden.toPlainObject(),
+      };
+      const result = await makeApiRequest("PATCH", `/api/admin`, data, true);
+      console.log("Successfully updated:", result);
+    } catch (error) {
+      console.error(error);
     }
+  }, [user, inventory, store, garden]);
 
-    const handleCreateAccountButton = async () => {
-      try {
-        const data = {
-          plainUserObject: user.toPlainObject(),
-          plainInventoryObject: inventory.toPlainObject(),
-          plainStoreObject: store.toPlainObject(),
-          plainGardenObject: garden.toPlainObject(),
-        };
-        const apiRoute = `/api/admin`;
-        const result = await makeApiRequest("POST", apiRoute, data, true);
-        console.log("Successfully posted:", result);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  const onIconChangeHandler = useCallback(
+    async (newIcon: Icon) => {
+      handleChangeIcon(newIcon);
 
-    const handleSaveAccountButton = async () => {
-      try {
-        const data = {
-          plainUserObject: user.toPlainObject(),
-          plainInventoryObject: inventory.toPlainObject(),
-          plainStoreObject: store.toPlainObject(),
-          plainGardenObject: garden.toPlainObject(),
-        };
-        const apiRoute = `/api/admin`;
-        const result = await makeApiRequest("PATCH", apiRoute, data, true);
-        console.log("Successfully updated:", result);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    const onIconChangeHandler = async (icon: Icon) => {
-      handleChangeIcon(icon);
-
-      // Terminate early before api call
-      if (guestMode) {
-        return;
-      }
+      if (guestMode) return;
 
       try {
         const data = {
           userId: user.getUserId(),
-          newIcon: icon.getName(),
+          newIcon: newIcon.getName(),
         };
-        const apiRoute = `/api/user/${user.getUserId()}/icon`;
-        const result = await makeApiRequest("PATCH", apiRoute, data, true);
+        const result = await makeApiRequest(
+          "PATCH",
+          `/api/user/${user.getUserId()}/icon`,
+          data,
+          true
+        );
         if (result.success) {
           console.log("Successfully posted:", result.data);
         } else {
@@ -136,24 +117,27 @@ const UserPage = () => {
       } catch (error) {
         console.error(error);
       }
-      return;
-    };
+    },
+    [handleChangeIcon, guestMode, user]
+  );
 
-    const onUsernameChangeHandler = async (username: string) => {
-      handleChangeUsername(username);
+  const onUsernameChangeHandler = useCallback(
+    async (newUsername: string) => {
+      handleChangeUsername(newUsername);
 
-      // Terminate early before api call
-      if (guestMode) {
-        return;
-      }
+      if (guestMode) return;
 
       try {
         const data = {
           userId: user.getUserId(),
-          newUsername: username,
+          newUsername,
         };
-        const apiRoute = `/api/user/${user.getUserId()}/username`;
-        const result = await makeApiRequest("PATCH", apiRoute, data, true);
+        const result = await makeApiRequest(
+          "PATCH",
+          `/api/user/${user.getUserId()}/username`,
+          data,
+          true
+        );
         if (result.success) {
           console.log("Successfully posted:", result.data);
         } else {
@@ -162,97 +146,74 @@ const UserPage = () => {
       } catch (error) {
         console.error(error);
       }
-      return;
-    };
+    },
+    [handleChangeUsername, guestMode, user]
+  );
 
-    function renderAccountManagementButtons() {
-      // const environmentTestKey = await fetchEnvironmentTestKey();
-
-      if (!environmentTestKey) {
-        return (
-          <>
-            <div>Could not fetch environment, currently in local save mode</div>
-          </>
-        );
-      }
-
-      // Check the value of environmentTestKey and render buttons accordingly
-      if (
-        environmentTestKey === "this is the local environment" ||
-        environmentTestKey === "this is the dev environment"
-      ) {
-        return (
-          <>
-            <div>
-              <button onClick={handleCreateAccountButton}>
-                {" "}
-                Create user in Database{" "}
-              </button>
-            </div>
-            <div>
-              <button onClick={handleSaveAccountButton}>
-                {" "}
-                Save user to Database{" "}
-              </button>
-            </div>
-          </>
-        );
-      } else if (environmentTestKey === "this is the prod environment") {
-        return <></>;
-      } else {
-        return (
-          <>
-            <div>{environmentTestKey}</div>
-          </>
-        );
-      }
+  const renderAccountManagementButtons = useMemo(() => {
+    if (!environmentTestKey) {
+      return <div>Could not fetch environment, currently in local save mode</div>;
     }
 
-    return (
-      <>
-        <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
-          <div className="flex inner-flex">
-            <div className={`w-1/3 left-side`}>
-              <div
-                className={`my-1 min-h-[8%] flex flex-row items-center justify-center `}
-              >
-                <IconSelector
-                  iconIndex={icon}
-                  onIconChange={onIconChangeHandler}
-                />
-                <UsernameDisplay
-                  username={username}
-                  onUsernameChange={onUsernameChangeHandler}
-                />
-              </div>
-              <div className="mx-4 my-4">
-                <LevelSystemComponent
-                  level={user.getLevel()}
-                  currentExp={user.getCurrentExp()}
-                  expToLevelUp={user.getExpToLevelUp()}
-                />
-              </div>
-              {/* <div>{`The friends list will go here, once it's ready!`}</div> */}
-              <Suspense fallback={<div>Loading...</div>}>
-                {renderAccountManagementButtons()}
-              </Suspense>
-            </div>
-
-            <div className={`w-2/3 right-side`}>
-              <UserStats />
-            </div>
+    if (
+      environmentTestKey === "this is the local environment" ||
+      environmentTestKey === "this is the dev environment"
+    ) {
+      return (
+        <>
+          <div>
+            <button onClick={handleCreateAccountButton}>
+              Create user in Database
+            </button>
           </div>
-        </div>
-      </>
-    );
-  };
+          <div>
+            <button onClick={handleSaveAccountButton}>
+              Save user to Database
+            </button>
+          </div>
+        </>
+      );
+    } else if (environmentTestKey === "this is the prod environment") {
+      return null;
+    } else {
+      return <div>{environmentTestKey}</div>;
+    }
+  }, [
+    environmentTestKey,
+    handleCreateAccountButton,
+    handleSaveAccountButton,
+  ]);
 
   return (
-    <>
-      <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
-        {RenderUser()}
+    <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
+      <div className="flex inner-flex">
+        <div className="w-1/3 left-side">
+          <div className="my-1 min-h-[8%] flex flex-row items-center justify-center">
+            <IconSelector iconIndex={icon} onIconChange={onIconChangeHandler} />
+            <UsernameDisplay
+              username={username}
+              onUsernameChange={onUsernameChangeHandler}
+            />
+          </div>
+
+          <div className="mx-4 my-4">
+            <LevelSystemComponent
+              level={user.getLevel()}
+              currentExp={user.getCurrentExp()}
+              expToLevelUp={user.getExpToLevelUp()}
+            />
+          </div>
+
+          <Suspense fallback={<div>Loading...</div>}>
+            {renderAccountManagementButtons}
+          </Suspense>
+        </div>
+
+        <div className="w-2/3 right-side">
+          <UserStats />
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

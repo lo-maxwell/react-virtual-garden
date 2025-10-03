@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
 export type ForceVisibleMode = "OFF" | "ON" | "DEFAULT" | "INVERSE";
 
 const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVisible = 'DEFAULT', boxWidth = '20vw', onMouseEnter, onMouseLeave }: { children: React.ReactNode, content: React.ReactNode, position: string, backgroundColor: string, forceVisible?: ForceVisibleMode, boxWidth: string, onMouseEnter?: () => void, onMouseLeave?: () => void}) => {
@@ -33,7 +33,7 @@ const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVi
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const showTooltip = (event: React.MouseEvent<HTMLElement>) => {
+  const showTooltip = useCallback((event: React.MouseEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const { top, left, width, height } = rect;
     
@@ -89,12 +89,12 @@ const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVi
     }, 10); // Ensure tooltip is rendered before measuring
 
     if (onMouseEnter) onMouseEnter();
-  };
+  }, [finalPosition, onMouseEnter]);
 
-  const hideTooltip = () => {
+  const hideTooltip = useCallback(() => {
     setVisible(false);
     if (onMouseLeave) onMouseLeave();
-  };
+  }, [onMouseLeave]);
 
   const shouldShow =
     forceVisible === "ON"

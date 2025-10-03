@@ -10,7 +10,7 @@ import { RootState } from '@/store';
 import { setItemQuantity } from '@/store/slices/inventoryItemSlice';
 import { makeApiRequest } from '@/utils/api/api';
 import { loadStore, saveStore } from '@/utils/localStorage/store';
-import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 // Define props for the provider
@@ -23,7 +23,30 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 	const { user } = useUser();
 	const { account, guestMode } = useAccount();
 
-	function setupStore(): Store {
+	const dispatch = useDispatch();
+	const inventoryItems = useSelector((state: RootState) => state.inventoryItems);
+
+	const updateReduxStoreItemsAfterRestock = useCallback(() => {
+		if (!store) return;
+		const items = store.getAllItems();
+		const toUpdate: InventoryItem[] = [];
+		items.forEach((item) => {
+			const quantity = inventoryItems[item.getInventoryItemId()]?.quantity || -1;
+			if (quantity != item.getQuantity()) {
+				toUpdate.push(item);
+			}
+		})
+
+		toUpdate.forEach((item) => {
+			dispatch(setItemQuantity({ 
+				inventoryItemId: item.getInventoryItemId(), 
+				quantity: item.getQuantity()
+			}));
+		})
+	}, [store, inventoryItems]);
+
+
+	const setupStore = useCallback((): Store => {
 		let store = loadStore();
 		console.log(store);
 		if (!(store instanceof Store)) {
@@ -34,7 +57,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		// updateRestockTimer();
 		saveStore(store);
 		return store;
-	  }
+	  }, []);
 
 	useEffect(() => {
 		// Initialize store only on client side
@@ -42,7 +65,7 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		setStore(initialStore);
 	  }, []);
 
-	function restockStoreLocal () {
+	const restockStoreLocal = useCallback(() => {
 		if (!store) return "STORE_NOT_FOUND";
 		if (!store.needsRestock()) return "NOT_MISSING_STOCK";
 		const currentTime = Date.now();
@@ -57,13 +80,13 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 		}
 		saveStore(store);
 		return "SUCCESS";
-	}
+	}, [store]);
 
-	async function restockStoreAPI (): Promise<true | ApiErrorCodes> {
+	const restockStoreAPI = useCallback(async (): Promise<true | ApiErrorCodes> => {
 		if (!store) return ApiErrorCodes.BAD_REQUEST;
 		try {
 			const data = {}
-			const apiRoute = `/api/user/${`TODO: REPLACE VALUE`}/store/${store.getStoreId()}/restock`;
+			const apiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/restock`;
 			const result = await makeApiRequest('PATCH', apiRoute, data, true);
 			console.log('Successfully restocked store:', result);
 			if (result.success === false) return result.error?.code || ApiErrorCodes.API_ERROR;
@@ -72,23 +95,34 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 			console.error(error);
 			return ApiErrorCodes.NETWORK_ERROR;
 		  }
-	}
+	}, [store]);
 
-	async function syncStore (user: User, store: Store): Promise<boolean> {
-	try {
-		const apiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/get`;
-		const result = await makeApiRequest('GET', apiRoute, {}, true);
-		if (result.success === false) return false;
-		saveStore(Store.fromPlainObject(result.data));
-		reloadStore();
-        return true;
-      } catch (error) {
-        console.error(error);
-        return false;
-      }
-	}
+	const resetStore = useCallback(() => {
+		const newStore = Store.generateDefaultNewStore();
+		setStore(newStore);
+		saveStore(newStore);
+	}, []);
 
-    const restockStore = async (): Promise<string> => {
+	const reloadStore = useCallback(() => {
+		const initialStore = setupStore();
+		setStore(initialStore);
+	}, []);
+
+	const syncStore = useCallback(async (user: User, store: Store): Promise<boolean> => {
+		try {
+			const apiRoute = `/api/user/${user.getUserId()}/store/${store.getStoreId()}/get`;
+			const result = await makeApiRequest('GET', apiRoute, {}, true);
+			if (result.success === false) return false;
+			saveStore(Store.fromPlainObject(result.data));
+			reloadStore();
+			return true;
+		} catch (error) {
+			console.error(error);
+			return false;
+		}
+	}, [reloadStore]);
+
+    const restockStore = useCallback(async (): Promise<string> => {
 		if (!store) return "BAD_REQUEST";
 		const localResult = restockStoreLocal();
 		if (localResult === "SUCCESS") {
@@ -107,93 +141,18 @@ export const StoreProvider = ({ children }: StoreProviderProps) => {
 			return "SUCCESS";
 		}
 		return localResult;
-    };
+    }, [store, guestMode, user, restockStoreLocal, restockStoreAPI, updateReduxStoreItemsAfterRestock, syncStore]);
 
-	const dispatch = useDispatch();
-	const inventoryItems = useSelector((state: RootState) => state.inventoryItems);
 
-	const updateReduxStoreItemsAfterRestock = () => {
-		if (!store) return;
-		const items = store.getAllItems();
-		const toUpdate: InventoryItem[] = [];
-		items.forEach((item) => {
-			const quantity = inventoryItems[item.getInventoryItemId()]?.quantity || -1;
-			if (quantity != item.getQuantity()) {
-				toUpdate.push(item);
-			}
-		})
-
-		toUpdate.forEach((item) => {
-			dispatch(setItemQuantity({ 
-				inventoryItemId: item.getInventoryItemId(), 
-				quantity: item.getQuantity()
-			}));
-		})
-	}
-
-	// const restockTimeout = useRef<number | null>(null);
-	// const updateRestockTimer = useCallback(async () => {
-	// 	if (!store) return;
-	// 	if (restockTimeout.current) return; //do not interrupt existing timeouts
-	// 	const currentTime = Date.now();
-
-	// 	if (currentTime > store.getRestockTime() && store.needsRestock()) {
-	// 		//Store is waiting for a restock, timer is finished
-	// 		const newRestockTime = currentTime + store.getRestockInterval();
-	// 		store.setRestockTime(newRestockTime);
-	// 		// Set a new timeout to trigger restock after the interval
-	// 		const remainingTime = Math.max(1, newRestockTime - currentTime);
-	// 		restockTimeout.current = window.setTimeout(async () => {
-	// 			const restockResult = await restockStore();
-	// 			restockTimeout.current = null;
-	// 			if (restockResult === "NOT TIME") {
-	// 				updateRestockTimer()
-	// 			}
-				
-	// 		}, remainingTime);
-			
-	// 		// const restockResult = await restockStore();
-	// 		// if (restockResult === "NOT TIME") {
-	// 		// 	updateRestockTimer()
-	// 		// }
-	// 	} else if (store.needsRestock()) {
-	// 		 // Set a timeout for the remaining time until the next restock
-	// 		const remainingTime = Math.max(1, store.getRestockTime() - currentTime);
-	// 		restockTimeout.current = window.setTimeout(async () => {
-	// 			const restockResult = await restockStore();
-	// 			restockTimeout.current = null;
-	// 			if (restockResult === "NOT TIME") {
-	// 				updateRestockTimer()
-	// 			}
-	// 		}, remainingTime);
-	// 	}
-	// }, [store]);
-
-	// useEffect(() => {
-	// 	// Start the timer when the component mounts
-	// 	// updateRestockTimer();
-	
-	// 	// Clean up the timer when the component unmounts
-	// 	return () => {
-	// 	  if (restockTimeout.current) {
-	// 		clearTimeout(restockTimeout.current);
-	// 	  }
-	// 	};
-	//   }, [updateRestockTimer]);
-
-	const resetStore = () => {
-		const newStore = Store.generateDefaultNewStore();
-		setStore(newStore);
-		saveStore(newStore);
-	}
-
-	const reloadStore = () => {
-		const initialStore = setupStore();
-		setStore(initialStore);
-	}
+	const contextValue = useMemo(() => ({
+        store: store!,
+		resetStore,
+		reloadStore,
+		restockStore
+    }), [store, resetStore, reloadStore, restockStore]);
 
     return (
-        <StoreContext.Provider value={{ store: store!, resetStore, reloadStore, restockStore }}>
+        <StoreContext.Provider value={contextValue}>
             {children}
         </StoreContext.Provider>
     );

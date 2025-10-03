@@ -16,6 +16,7 @@ import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
 import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { Tool } from "@/models/items/tools/Tool";
 import { syncAllAccountObjects } from "../../garden/gardenFunctions";
+import { useCallback } from "react";
 
 export enum PlotActionType {
     PLANT_SEED = 'plantSeed',
@@ -40,7 +41,7 @@ export const usePlotActions = () => {
 	 * @plot the plot to modify
 	 * @returns the updated icon
 	 */
-	const plantSeed = (item: InventoryItem, plot: Plot) => {
+	const plantSeed = useCallback((item: InventoryItem, plot: Plot) => {
 		let originalIcon: string;
 		const uiHelper = () => {
 			originalIcon = plot.getItem().itemData.icon;
@@ -85,7 +86,7 @@ export const usePlotActions = () => {
 			} catch (error) {
 				console.error(error);
 				// Rollback the optimistic update
-				await syncAllAccountObjects(user, garden, inventory);
+				await syncAllAccountObjects();
 				console.warn(`There was an error planting a seed, synced garden state to the cloud`);
 				reloadGarden();
 				reloadInventory();
@@ -101,7 +102,7 @@ export const usePlotActions = () => {
 			actionType: PlotActionType.PLANT_SEED,
 		}
 		return toReturn;
-	}
+	}, [garden, inventory, user, dispatch, setGardenMessage, toggleSelectedItem, reloadGarden, reloadInventory, reloadUser]);
 
 	/**
 	 * Can only be used in an empty plot. Converts an inventoryItem blueprint into a decoration and places it in this plot.
@@ -109,7 +110,7 @@ export const usePlotActions = () => {
 	 * @plot - the plot to modify
 	 * @returns the updated icon
 	 */
-	const placeDecoration = (item: InventoryItem, plot: Plot) => {
+	const placeDecoration = useCallback((item: InventoryItem, plot: Plot) => {
 		let originalIcon: string;
 		const uiHelper = () => {
 			originalIcon = plot.getItem().itemData.icon;
@@ -152,7 +153,7 @@ export const usePlotActions = () => {
 			} catch (error) {
 				console.error(error);
 				// Rollback the optimistic update
-				await syncAllAccountObjects(user, garden, inventory);
+				await syncAllAccountObjects();
 				console.warn(`There was an error placing a decoration, synced garden state to the cloud`);
 				reloadGarden();
 				reloadInventory();
@@ -168,7 +169,7 @@ export const usePlotActions = () => {
 			actionType: PlotActionType.PLACE_DECORATION,
 		}
 		return toReturn;
-	}
+	}, [garden, inventory, user, dispatch, setGardenMessage, reloadGarden, reloadInventory, reloadUser]);
 
 	/**
 	 * Can only be used in a plot with a plant. Removes the plant and adds a harvestedItem to inventory.
@@ -176,7 +177,7 @@ export const usePlotActions = () => {
 	 * @instantGrow if set to true, ignores grow timers and instantly harvests
 	 * @returns the updated icon
 	 */
-	const clickPlant = (plot: Plot, instantGrow: boolean = false) => {
+	const clickPlant = useCallback((plot: Plot, instantGrow: boolean = false) => {
 		let originalIcon: string;
 		const uiHelper = () => {
 			originalIcon = plot.getItem().itemData.icon;
@@ -239,7 +240,7 @@ export const usePlotActions = () => {
 			} catch (error) {
 				console.error(error);
 				// Rollback the optimistic update
-				await syncAllAccountObjects(user, garden, inventory);
+				await syncAllAccountObjects();
 				console.warn(`There was an error clicking a plant, synced garden state to the cloud`);
 				reloadGarden();
 				reloadInventory();
@@ -255,14 +256,14 @@ export const usePlotActions = () => {
 			actionType: PlotActionType.CLICK_PLANT,
 		}
 		return toReturn;
-	}
+	}, [garden, inventory, user, dispatch, setGardenMessage, reloadGarden, reloadInventory, reloadUser]);
 
 	/**
 	 * Can only be used in a plot with a decoration. Removes the decoration and adds a blueprint to inventory.
 	 * @plot the plot to modify
 	 * @returns the updated icon
 	 */
-	const clickDecoration = (plot: Plot) => {
+	const clickDecoration = useCallback((plot: Plot) => {
 		let originalIcon: string;
 		const uiHelper = () => {
 			originalIcon = plot.getItem().itemData.icon;
@@ -319,7 +320,7 @@ export const usePlotActions = () => {
 			} catch (error) {
 				console.error(error);
 				// Rollback the optimistic update
-				await syncAllAccountObjects(user, garden, inventory);
+				await syncAllAccountObjects();
 				console.warn(`There was an error clicking a decoration, synced garden state to the cloud`);
 				reloadGarden();
 				reloadInventory();
@@ -335,7 +336,7 @@ export const usePlotActions = () => {
 			actionType: PlotActionType.CLICK_DECORATION,
 		}
 		return toReturn;
-	}
+	}, [garden, inventory, user, dispatch, setGardenMessage, reloadGarden, reloadInventory, reloadUser]);
 
 	/**
 	 * Can only be used in a plot with a decoration or plant. Destroys the item in the plot, giving nothing back to the player.
@@ -343,7 +344,7 @@ export const usePlotActions = () => {
 	 * @tool the tool being used (currently does nothing)
 	 * @returns the updated icon
 	 */
-	const destroyItem = (plot: Plot, tool: Tool) => {
+	const destroyItem = useCallback((plot: Plot, tool: Tool) => {
 		let originalIcon: string;
 		const uiHelper = () => {
 			originalIcon = plot.getItem().itemData.icon;
@@ -389,7 +390,7 @@ export const usePlotActions = () => {
 				} catch (error) {
 					console.error(error);
 					// Rollback the optimistic update
-					await syncAllAccountObjects(user, garden, inventory);
+					await syncAllAccountObjects();
 					console.warn(`There was an error destroying an item, synced garden state to the cloud`);
 					reloadGarden();
 					reloadInventory();
@@ -405,9 +406,9 @@ export const usePlotActions = () => {
 				actionType: PlotActionType.DESTROY_ITEM,
 			}
 			return toReturn;
-		}
+		}, [garden, inventory, user, dispatch, setGardenMessage, reloadGarden, reloadInventory, reloadUser]);
 
-	const doNothing = (plot: Plot, newMessage: string = '') => {
+	const doNothing = useCallback((plot: Plot, newMessage: string = '') => {
 		const uiHelper = () => {
 			setGardenMessage(newMessage);
 			return {success: true, displayIcon: plot.getItem().itemData.icon};
@@ -424,7 +425,7 @@ export const usePlotActions = () => {
 			actionType: PlotActionType.DO_NOTHING,
 		}
 		return toReturn;
-	}
+	}, [setGardenMessage]);
 
 	return {
 		plantSeed,

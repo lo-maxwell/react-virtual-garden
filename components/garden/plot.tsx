@@ -148,7 +148,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 				console.warn(`Api call failed`);
 				// setDisplayIcon(apiResult.displayIcon);
 				// TODO: sync plot function?
-				await syncAllAccountObjects(user, garden, inventory);
+				await syncAllAccountObjects();
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
@@ -184,7 +184,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 				console.warn(`Api call failed for delete action`);
 				// setDisplayIcon(apiResult.displayIcon);
 				// TODO: sync plot function?
-				await syncAllAccountObjects(user, garden, inventory);
+				await syncAllAccountObjects();
 				reloadUser();
 				reloadGarden();
 				reloadInventory();

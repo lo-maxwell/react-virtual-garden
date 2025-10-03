@@ -433,9 +433,19 @@
   * Updated inventory item colors to better differentiate item types
   * Added settings and confirmation dialogue before deleting plants with shovel
   * Removed unused friends list
+
+## Day 42
+
+### UI Optimization
+  * Refactoring with lots of useCallback/useMemo for fewer rerenders
+  * Cleaning up legacy code
   
 
 TODO:
+
+Optimize RDS calls, consider using rds proxy if horizontal scaling is needed (30+ concurrent connections)
+
+Move service functions into lambda
 
 Convert to IAC with IAC generator, test output, possibly move to another stack
 

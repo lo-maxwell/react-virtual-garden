@@ -17,6 +17,8 @@ import { useAccount } from "@/app/hooks/contexts/AccountContext";
 import { useDispatch } from "react-redux";
 import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
 import { Tool } from "@/models/items/tools/Tool";
+import { syncAllAccountObjects } from "@/app/garden/gardenFunctions";
+import { useGarden } from "@/app/hooks/contexts/GardenContext";
 
 
 const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshKey}: {costMultiplier: number, forceRefreshKey: number, setForceRefreshKey: React.Dispatch<React.SetStateAction<number>>}) => {
@@ -26,17 +28,17 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 	const [quantity, setQuantity] = useState(1);
 	const [tradeWindowMessage, setTradeWindowMessage] = useState(defaultTradeWindowMessage);
 	const { store, reloadStore } = useStore();
-	const { user } = useUser();
+	const { user, reloadUser } = useUser();
+	const { reloadGarden } = useGarden();
 	const { account, guestMode } = useAccount();
 	const dispatch = useDispatch();
 
-	const resetSelected = () => {
+	const resetSelected = useCallback(() => {
 		setTradeWindowMessage(defaultTradeWindowMessage);
 		toggleSelectedItem(null);
-	}
+	}, [toggleSelectedItem, defaultTradeWindowMessage]);
 
-	const renderInventoryItem = () => {
-		
+	const renderInventoryItem = useCallback(() => {
 		if (selectedItem && !(selectedItem instanceof Tool) && owner != null) {
 			let operationString = "";
 			if (owner instanceof Store) {
@@ -60,7 +62,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 			</div>
 			</>
 		}
-	}
+	}, [selectedItem, owner, quantity, resetSelected]);
 
 	useEffect(() => {
 		if (!selectedItem || selectedItem instanceof Tool) return;
@@ -71,11 +73,9 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 		}
 	  }, [quantity, selectedItem]);
 
-
 	useEffect(() => {
 		setQuantity(1);
-	  }, [selectedItem]);
-
+	}, [selectedItem]);
 
 	const onPlusClick = useCallback((delta: number) => {
 		if (!selectedItem || selectedItem instanceof Tool) return;
@@ -95,7 +95,6 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 			}
 			return 1;
 		  });
-
 	}, [selectedItem]);
 
 	const onAllClick = useCallback(() => {
@@ -110,7 +109,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 		}
 	}, [selectedItem, inventory, owner]);
 
-	const onConfirmClick = async () => {
+	const onConfirmClick = useCallback(async () => {
 		if (!selectedItem || selectedItem instanceof Tool) return;
 		if (owner instanceof Store) {
 			if (!store.canBuyItem(selectedItem, quantity, inventory)) {
@@ -122,8 +121,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 			if (localResult && updatedItem.isSuccessful()) {
 				setTradeWindowMessage('Purchase Successful!');
 				toggleSelectedItem(null);
-				console.log(selectedItem)
-				console.log(updatedItem)
+
 				// Update redux store
 				dispatch(setItemQuantity({ 
 					inventoryItemId: selectedItem.getInventoryItemId(), 
@@ -136,24 +134,24 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 
 				// Terminate early before api call
 				if (guestMode) {
-					// updateRestockTimer();
 					saveStore(store);
 					return;
 				}
 
 				const apiResult = await buyItemAPI(user, store, selectedItem, quantity, inventory);
 				if (!apiResult) {
-					syncStoreAndInventory(user, store, inventory);
-					reloadStore();
+					await syncAllAccountObjects();
+					reloadUser();
+					reloadGarden();
 					reloadInventory();
-					// TODO: force a refresh
+					reloadStore();
 					setTradeWindowMessage(`There was an error purchasing the item! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 					setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1);
-					// return;
+					return;
 				}
 			} else {
 				// TODO: Better error message
-				setTradeWindowMessage('There was an error purchasing the item.');
+				setTradeWindowMessage('There was an error purchasing the item! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.');
 			}
 		} else if (owner instanceof Inventory) {
 			const localResult = sellItemLocal(store, selectedItem, quantity, inventory);
@@ -161,8 +159,6 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 			if (localResult && updatedItem.isSuccessful()) {
 				setTradeWindowMessage('Sale Successful!');
 				toggleSelectedItem(null);
-				console.log(selectedItem)
-				console.log(updatedItem)
 				
 				// Update redux store
 				dispatch(setItemQuantity({ 
@@ -176,35 +172,37 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 
 				// Terminate early before api call
 				if (guestMode) {
-					// updateRestockTimer();
 					saveStore(store);
 					return;
 				}
 
 				const apiResult = await sellItemAPI(user, store, selectedItem, quantity, inventory);
 				if (!apiResult) {
-					syncStoreAndInventory(user, store, inventory);
-					reloadStore();
+					await syncAllAccountObjects();
+					reloadUser();
+					reloadGarden();
 					reloadInventory();
+					reloadStore();
 					setTradeWindowMessage(`There was an error selling the item! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 					setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1);
-					// return;
+					return;
 				}
 			} else {
 				// TODO: Better error message
-				setTradeWindowMessage('There was an error selling the item.');
+				setTradeWindowMessage('There was an error selling the item! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.');
 			}
 		} else {
 			//owner == null, should never occur
 			return;
 		}
-		// updateRestockTimer();
+		setQuantity(1);
 		saveStore(store);
-	}
+	}, [user, owner, store, inventory, selectedItem, guestMode, quantity, reloadStore, reloadInventory, dispatch, toggleSelectedItem]);
 
-	const renderQuantityButtons = () => {
+	const renderQuantityButtons = useCallback(() => {
+		if (!selectedItem) return null;
 		return (
-			<div className={`flex flex-row justify-between my-1 max-w-[90%] ${!selectedItem ? 'hidden' : ''}`}>
+			<div className={`flex flex-row justify-between my-1 max-w-[90%]`}>
 				<ChangeQuantityButton 
 					onClick={onAllClick} 
 					currentQuantity={quantity} 
@@ -232,7 +230,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 				</button>
 			</div>
 		);
-	}
+	}, [selectedItem, quantity]);
 	
 	return (<>
 		<div className={`my-8`} key={forceRefreshKey}>

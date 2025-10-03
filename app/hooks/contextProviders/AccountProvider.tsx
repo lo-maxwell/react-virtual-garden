@@ -1,7 +1,7 @@
 'use client'
 import { AccountContext } from "@/app/hooks/contexts/AccountContext";
 import { loadAccount, saveAccount } from "@/utils/localStorage/account";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState, useCallback, useMemo } from "react";
 import { Account } from '@/models/account/Account';
 import { AccountSettings } from "@/models/account/AccountSettings";
 
@@ -18,11 +18,11 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 	const [confirmDeletePlants, setConfirmDeletePlants] = useState<boolean>(defaultSettings.confirmDeletePlants);
 	const [environmentTestKey, setEnvironmentTestKey] = useState<string>('');
 
-	function generateDefaultNewAccount(): Account {
+	const generateDefaultNewAccount = (): Account => {
 		return new Account();
-	}
+	};
 	
-	function setupAccount(): Account {
+	const setupAccount = useCallback((): Account => {
 		let tempAccount = loadAccount();
 		console.log(tempAccount);
 		if (!(tempAccount instanceof Account)) {
@@ -31,7 +31,7 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		  saveAccount(tempAccount);
 		}
 		return tempAccount;
-	  }
+	}, []);
 
 	useEffect(() => {
 		const account = setupAccount();
@@ -39,33 +39,34 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		setGuestMode(account.settings.guestMode);
 		setDisplayEmojiIcons(account.settings.displayEmojiIcons);
 		setConfirmDeletePlants(account.settings.confirmDeletePlants);
-	}, []);
+		console.log('loaded account')
+	}, [setupAccount]);
 
-	function setGuestModeHandler(value: boolean): void {
+	const setGuestModeHandler = useCallback((value: boolean): void => {
 		setGuestMode(value);
 		if (account) {
 			account.settings.guestMode = value;
 			saveAccount(account);
 		}
-	}
+	}, [account]);
 
-	function setDisplayEmojiIconsHandler(value: boolean): void {
+	const setDisplayEmojiIconsHandler = useCallback((value: boolean): void => {
 		setDisplayEmojiIcons(value);
 		if (account) {
 			account.settings.displayEmojiIcons = value;
 			saveAccount(account);
 		}
-	}
+	}, [account]);
 
-	function setConfirmDeletePlantsHandler(value: boolean): void {
+	const setConfirmDeletePlantsHandler = useCallback((value: boolean): void => {
 		setConfirmDeletePlants(value);
 		if (account) {
 			account.settings.confirmDeletePlants = value;
 			saveAccount(account);
 		}
-	}
+	}, [account]);
 
-	const fetchEnvironmentTestKey = async () => {
+	const fetchEnvironmentTestKey = useCallback(async () => {
 		try {
 			const response = await fetch('/api/test', {
 				method: 'GET',
@@ -79,26 +80,43 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 			}
 
 			const result = await response.json();
-			// console.log('Successfully fetched test key:', result);
 			return result;
 		} catch (error) {
 			console.error(error);
 		}
-	}
+	}, []);
 
 	useEffect(() => {
 		const updateTestKey = async () => {
 			const testKey = process.env.NEXT_PUBLIC_TEST_ENV_KEY || 'error';
-			// const testKey = await fetchEnvironmentTestKey();
 			setEnvironmentTestKey(testKey);
 		};
 
 		updateTestKey();
 	}, []);
 
+	const contextValue = useMemo(() => ({
+		account: account!,
+		guestMode,
+		setGuestMode: setGuestModeHandler,
+		displayEmojiIcons,
+		setDisplayEmojiIcons: setDisplayEmojiIconsHandler,
+		confirmDeletePlants,
+		setConfirmDeletePlants: setConfirmDeletePlantsHandler,
+		environmentTestKey
+	}), [
+		account,
+		guestMode,
+		setGuestModeHandler,
+		displayEmojiIcons,
+		setDisplayEmojiIconsHandler,
+		confirmDeletePlants,
+		setConfirmDeletePlantsHandler,
+		environmentTestKey
+	]);
 
     return (
-        <AccountContext.Provider value={{ account: account!, guestMode: guestMode, setGuestMode: setGuestModeHandler, displayEmojiIcons: displayEmojiIcons, setDisplayEmojiIcons: setDisplayEmojiIconsHandler, confirmDeletePlants: confirmDeletePlants, setConfirmDeletePlants: setConfirmDeletePlants, environmentTestKey}}>
+        <AccountContext.Provider value={contextValue}>
             {children}
         </AccountContext.Provider>
     );

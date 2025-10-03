@@ -6,7 +6,7 @@ import { ItemStore } from '@/models/itemStore/ItemStore';
 import User from '@/models/user/User';
 import { usePathname } from '@/node_modules/next/navigation';
 import { useLocation } from '@/node_modules/react-router-dom/dist/index';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 
 // Define props for the provider
 interface SelectedItemProviderProps {
@@ -23,16 +23,21 @@ export const SelectedItemProvider = ({ children }: SelectedItemProviderProps) =>
         setSelectedItem(null);
     }, [pathname]); // Runs whenever the pathname changes
 
-    function toggleSelectedItem(item: InventoryItem | Tool | null) {
-        if (item && item === selectedItem) {
-            setSelectedItem(null);
-        } else {
-            setSelectedItem(item);
-        }
-    }
+    const toggleSelectedItem = useCallback((item: InventoryItem | Tool | null) => {
+        setSelectedItem(prev =>
+          item && item === prev ? null : item
+        );
+      }, []);
+
+    const contextValue = useMemo(() => ({
+        selectedItem,
+        toggleSelectedItem,
+        owner,
+        setOwner
+    }), [selectedItem, toggleSelectedItem, owner, setOwner]);
 
     return (
-        <SelectedItemContext.Provider value={{selectedItem, toggleSelectedItem, owner, setOwner}}>
+        <SelectedItemContext.Provider value={contextValue}>
             {children}
         </SelectedItemContext.Provider>
     );

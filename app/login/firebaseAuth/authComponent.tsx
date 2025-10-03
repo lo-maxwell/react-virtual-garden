@@ -1,6 +1,6 @@
 // AuthComponent.tsx
 import { useAuth } from '@/app/hooks/contexts/AuthContext';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import AuthCreateAccountComponent from './authCreateAccountComponent';
 import AuthLoginComponent from './authLoginComponent';
 import AuthLogoutComponent from './authLogoutComponent';
@@ -10,15 +10,12 @@ const AuthComponent: React.FC = () => {
     const { firebaseUser, loading, logout } = useAuth(); // Access user and loading state
     const [displayLogin, setDisplayLogin] = useState<boolean>(true);
     const [message, setMessage] = useState<string>('');
-    // const allowFirebase = process.env.NEXT_PUBLIC_TEST_ENV_KEY;
 
-    const toggleDisplayLogin = (newValue: boolean | null = null) => {
-        if (typeof newValue == "boolean" && displayLogin !== newValue) {
-            setDisplayLogin(newValue);
-        } else {
-            setDisplayLogin(displayLogin => !displayLogin);
-        }
-    }
+    const toggleDisplayLogin = useCallback((newValue: boolean | null = null) => {
+        setDisplayLogin(prev =>
+            typeof newValue === "boolean" && prev !== newValue ? newValue : !prev
+          );
+    }, []);
 
     if (loading) {
         return <p>Loading...</p>; // Show a loading message while checking auth state

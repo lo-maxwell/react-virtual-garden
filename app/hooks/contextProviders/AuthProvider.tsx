@@ -1,6 +1,6 @@
 'use client'
 import { auth } from "@/utils/firebase/firebaseConfig";
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, useCallback } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import { onAuthStateChanged, signOut, User as FirebaseUser } from "firebase/auth";
 
@@ -30,20 +30,20 @@ export function AuthProvider({ children }: AccountProviderProps) {
 			setLoading(false);
 			return;
 		}
-	  const unsubscribe = onAuthStateChanged(auth, (user) => {
-		setFirebaseUser(user);
-		setLoading(false);
-	  });
-	  return unsubscribe;
+		const unsubscribe = onAuthStateChanged(auth, (user) => {
+			setFirebaseUser(user);
+			setLoading(false);
+		});
+		return unsubscribe;
 	}, []);
   
-	const logout = async () => {
+	const logout = useCallback(async () => {
 		if (!auth) {
 			console.log('Firebase auth is not available');
 			return;
 		}
 		signOut(auth);
-	}
+	}, []);
   
 	return (
 	  <AuthContext.Provider value={{ firebaseUser, loading, logout }}>

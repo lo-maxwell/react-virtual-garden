@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import "./popupWindow.css";
 
 export function PopupWindow({
@@ -12,7 +12,7 @@ export function PopupWindow({
 }) {
   const popupRef = useRef<HTMLSpanElement>(null);
 
-  const handleClickOutside = (event: any) => {
+  const handleClickOutside = useCallback((event: any) => {
     if (!showWindow) return;
     const target = event.target as HTMLElement;
     // Use the ref to get the current popup's children-window element
@@ -21,7 +21,7 @@ export function PopupWindow({
     if (childrenWindow && !childrenWindow.contains(target)) {
       setShowWindow(false);
     }
-  };
+  }, [showWindow, setShowWindow]);
 
   useEffect(() => {
     // Add event listener when the component mounts
@@ -31,7 +31,7 @@ export function PopupWindow({
     return () => {
       document.body.removeEventListener("click", handleClickOutside);
     };
-  }, [showWindow]); // Only re-run the effect if showWindow changes
+  }, [handleClickOutside]); // Now includes handleClickOutside in dependencies
 
   return (
     <span
