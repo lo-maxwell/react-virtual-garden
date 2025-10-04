@@ -40,26 +40,15 @@ const UserPage = () => {
     }
   }, [firebaseUser, guestMode, router]);
 
-  // Early return for redirect
-  if (!firebaseUser && !guestMode) {
-    const redirectDivElement = useMemo(() => {
-      if (isRedirecting) {
-        return <RedirectingMessage targetPage="login page" />;
-      } else {
-        return <div>Fetching user data...</div>;
-      }
-    }, [isRedirecting]);
+  const redirectDivElement = useMemo(() => {
+    if (!firebaseUser && !guestMode) {
+      return isRedirecting
+        ? <RedirectingMessage targetPage="login page" />
+        : <div>Fetching user data...</div>;
+    }
+    return null;
+  }, [firebaseUser, guestMode, isRedirecting]);
 
-    return (
-      <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
-        {redirectDivElement}
-      </div>
-    );
-  }
-
-  if (!user || !account) {
-    return <></>;
-  }
 
   // Handlers
   const handleCreateAccountButton = useCallback(async () => {
@@ -150,6 +139,9 @@ const UserPage = () => {
     [handleChangeUsername, guestMode, user]
   );
 
+  
+
+
   const renderAccountManagementButtons = useMemo(() => {
     if (!environmentTestKey) {
       return <div>Could not fetch environment, currently in local save mode</div>;
@@ -183,6 +175,19 @@ const UserPage = () => {
     handleCreateAccountButton,
     handleSaveAccountButton,
   ]);
+
+  // Early return for redirect
+  if (!firebaseUser && !guestMode) {
+    return (
+      <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
+        {redirectDivElement}
+      </div>
+    );
+  }
+
+  if (!user || !account) {
+    return <></>;
+  }
 
   return (
     <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
