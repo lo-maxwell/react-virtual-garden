@@ -77,28 +77,4 @@ const LongPressButton = ({ onClick, onLongPress, onLongPressEnd, className, cont
 	);
 };
 
-//Sample
-const App = () => {
-  const handleClick = () => {
-    console.log('Button clicked');
-  };
-
-  const handleLongPress = () => {
-    console.log('Button long pressed');
-  };
-
-  const contentElement = () => {
-	return <><span>Click Or Long Press</span></>;
-  }
-
-  return (
-    <LongPressButton 
-	onClick={handleClick} 
-	onLongPress={handleLongPress} 
-	onLongPressEnd={() => {}}
-	className={"bg-gray-300 rounded w-12 h-12 flex items-center justify-center hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"} 
-	contents={contentElement()}/>
-  );
-};
-
 export default LongPressButton;

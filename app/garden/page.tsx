@@ -9,7 +9,7 @@ import { useUser } from "@/app/hooks/contexts/UserContext";
 import { useAuth } from "../hooks/contexts/AuthContext";
 import { useAccount } from "../hooks/contexts/AccountContext";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import RedirectingMessage from "@/components/errorPages/redirectingMessage";
 import "./page.css";
 
@@ -56,6 +56,7 @@ const GardenPage = () => {
     );
   }
 
+  // ✅ Simpler approach - just use regular functions
   const RenderUser = () => {
     if (!user) return <div>Loading User...</div>;
     return <UserProfileComponent />;

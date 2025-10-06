@@ -2,7 +2,7 @@ import PlotComponent, { PlotComponentRef } from "@/components/garden/plot";
 import { Plot } from "@/models/garden/Plot";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "@/models/items/ItemTypes";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useInventory } from "@/app/hooks/contexts/InventoryContext";
 import { useGarden } from "@/app/hooks/contexts/GardenContext";
 import { saveGarden } from "@/utils/localStorage/garden";
@@ -34,6 +34,7 @@ const GardenComponent = () => {
   const plotRefs = useRef<PlotComponentRef[][]>(
     garden.getPlots().map(row => row.map(() => null!))
   );
+  
   const [showExpansionOptions, setShowExpansionOptions] = useState(false);
   const {
     plantSeed,
@@ -47,18 +48,15 @@ const GardenComponent = () => {
   const dispatch = useDispatch();
 
   const [currentTime, setCurrentTime] = useState(Date.now());
-  // const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
+  
   useEffect(() => {
     const id = setInterval(() => {
-      // Update currentTime
       setCurrentTime(Date.now());
-    }, 1000); // Update every second
-    // setIntervalId(id);
-    return () => clearInterval(id); // Cleanup function to clear the interval on unmount
+    }, 1000);
+    return () => clearInterval(id);
   }, []);
 
-  const GetPlotAction = (plot: Plot, selected: InventoryItem | Tool | null) => {
-    //TODO: Fix this
+  const GetPlotAction = useCallback((plot: Plot, selected: InventoryItem | Tool | null) => {
     if (
       plot.getItemSubtype() == ItemSubtypes.GROUND.name &&
       selected instanceof InventoryItem
@@ -87,9 +85,9 @@ const GardenComponent = () => {
       return clickDecoration(plot);
     }
     return doNothing(plot);
-  };
+  }, [plantSeed, placeDecoration, clickPlant, clickDecoration, destroyItem, doNothing, instantGrow]);
 
-  const generatePlots = (plots: Plot[][]) => {
+  const generatePlots = useCallback((plots: Plot[][]) => {
     return (
       <>
         <div
@@ -123,9 +121,9 @@ const GardenComponent = () => {
         </div>
       </>
     );
-  };
+  }, [GetPlotAction, selectedItem, currentTime, plotRefs]);
 
-  const plantAll = async () => {
+  const plantAll = useCallback(async () => {
     if (
       selectedItem == null ||
       selectedItem instanceof Tool ||
@@ -172,7 +170,7 @@ const GardenComponent = () => {
 			setGardenMessage(`Planted ${numPlanted} ${getItemResponse.payload.itemData.name}.`);
 			const apiResult = await plantAllAPI(plantedPlotIds, inventory, selectedItem, user, garden);
 			if (!apiResult) {
-				await syncAllAccountObjects(user, garden, inventory);
+				await syncAllAccountObjects();
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
@@ -182,9 +180,9 @@ const GardenComponent = () => {
 			}
 		}
 		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
-	}
+	}, [selectedItem, inventory, plantSeed, guestMode, setGardenMessage, user, garden, reloadUser, reloadGarden, reloadInventory, dispatch, plotRefs]);
 
-  const harvestAll = async () => {
+  const harvestAll = useCallback(async () => {
     const harvestedPlotIds: string[] = [];
     let numHarvested = 0;
 
@@ -221,7 +219,7 @@ const GardenComponent = () => {
 			//api call
 			const apiResult = await harvestAllAPI(harvestedPlotIds, inventory, user, garden, instantGrow);
 			if (!apiResult) {
-				await syncAllAccountObjects(user, garden, inventory);
+				await syncAllAccountObjects();
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
@@ -232,9 +230,9 @@ const GardenComponent = () => {
 		}
 		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
 
-	}
+	}, [clickPlant, instantGrow, setGardenMessage, guestMode, inventory, user, garden, reloadUser, reloadGarden, reloadInventory, dispatch, plotRefs]);
 
-  const pickupAll = async () => {
+  const pickupAll = useCallback(async () => {
     const pickupPlotIds: string[] = [];
     let numDecorations = 0;
 
@@ -267,7 +265,7 @@ const GardenComponent = () => {
 			//api call
 			const apiResult = await pickupAllAPI(pickupPlotIds, inventory, user, garden);
 			if (!apiResult) {
-				await syncAllAccountObjects(user, garden, inventory);
+				await syncAllAccountObjects();
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
@@ -276,10 +274,10 @@ const GardenComponent = () => {
 			}
 		}
 
-	}
+	}, [clickDecoration, setGardenMessage, guestMode, inventory, user, garden, reloadUser, reloadGarden, reloadInventory, plotRefs]);
 
 
-  async function addColumn() {
+  const addColumn = useCallback(async () => {
     if (!garden || !user) {
       return;
     }
@@ -309,9 +307,9 @@ const GardenComponent = () => {
         expToLevelUp: user.getLevelSystem().getExpToLevelUp(),
       })
     );
-  }
+  }, [garden, user, setGardenForceRefreshKey, guestMode, dispatch]);
 
-  async function addRow() {
+  const addRow = useCallback(async () => {
     if (!garden || !user) {
       return;
     }
@@ -333,9 +331,9 @@ const GardenComponent = () => {
         // removeRowLocal(garden);
       }
     }
-  }
+  }, [garden, user, setGardenForceRefreshKey, guestMode]);
 
-  async function removeColumn() {
+  const removeColumn = useCallback(async () => {
     if (!garden) {
       return;
     }
@@ -357,9 +355,9 @@ const GardenComponent = () => {
         // addColumnLocal(garden, user);
       }
     }
-  }
+  }, [garden, user, setGardenForceRefreshKey, guestMode]);
 
-  async function removeRow() {
+  const removeRow = useCallback(async () => {
     if (!garden) {
       return;
     }
@@ -381,13 +379,13 @@ const GardenComponent = () => {
         // addRowLocal(garden, user);
       }
     }
-  }
+  }, [garden, user, setGardenForceRefreshKey, guestMode]);
 
-  function handleGardenExpansionDisplay() {
+  const handleGardenExpansionDisplay = useCallback(() => {
     setShowExpansionOptions(showExpansionOptions => !showExpansionOptions);
-  }
+  }, []);
 
-  const enableGardenExpansionButton = (row: boolean, expand: boolean) => {
+  const enableGardenExpansionButton = useCallback((row: boolean, expand: boolean) => {
     if (row && expand) {
       return !Garden.canAddRow(garden.getRows(), user.getLevel());
     } else if (!row && expand) {
@@ -398,7 +396,9 @@ const GardenComponent = () => {
       //(!row && !expand)
       return garden.getCols() < 2;
     }
-  };
+  }, [garden, user]);
+
+  const plots = useMemo(() => generatePlots(garden.getPlots()), [generatePlots, garden]);
 
   return (
     <>
@@ -408,7 +408,7 @@ const GardenComponent = () => {
         className=" px-2 py-2 flex flex-col items-center mx-2"
       >
         <div className="overflow-x-auto max-w-full py-1">
-          {generatePlots(garden.getPlots())}
+          {plots}
         </div>
       </div>
       <div className="my-1">

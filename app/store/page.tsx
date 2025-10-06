@@ -1,7 +1,7 @@
 "use client";
 import { Inventory } from "@/models/itemStore/inventory/Inventory";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import StoreComponent from "./store";
 import { Store } from "@/models/itemStore/store/Store";
 import TradeWindowComponent from "./tradeWindow/tradeWindow";
@@ -16,135 +16,125 @@ import RedirectingMessage from "@/components/errorPages/redirectingMessage";
 import "./page.css";
 
 const StorePage = () => {
-  const RenderStore = () => {
-    const { firebaseUser } = useAuth();
-    const { guestMode } = useAccount();
-    const { store } = useStore();
-    const { inventory } = useInventory();
-    const { selectedItem, toggleSelectedItem, owner, setOwner } =
-      useSelectedItem();
-    // forceRefreshKey is supposed to help with resyncing store/inventory, but it doesn't work right now
-    const [forceRefreshKey, setForceRefreshKey] = useState(0);
-    const router = useRouter();
-    const [isRedirecting, setIsRedirecting] = useState(false);
+  const { firebaseUser } = useAuth();
+  const { guestMode } = useAccount();
+  const { store } = useStore();
+  const { inventory } = useInventory();
+  const { toggleSelectedItem, setOwner, owner } = useSelectedItem();
 
-    useEffect(() => {
-      if (!firebaseUser && !guestMode) {
-        setIsRedirecting(true); // Trigger the redirecting state
+  const [forceRefreshKey, setForceRefreshKey] = useState(0);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const router = useRouter();
 
-        // Delay the redirect by 2 seconds (adjust the time as needed)
-        const timer = setTimeout(() => {
-          router.push("/login");
-        }, 2000); // 2 seconds delay before redirecting
-
-        return () => clearTimeout(timer); // Cleanup the timer if the component is unmounted or the condition changes
-      } else {
-        setIsRedirecting(false);
-      }
-    }, [firebaseUser, guestMode, router]);
-
-    // Show the redirecting message if needed
+  // Redirect effect
+  useEffect(() => {
     if (!firebaseUser && !guestMode) {
-      let redirectDivElement;
-      if (isRedirecting) {
-        redirectDivElement = <RedirectingMessage targetPage="login page" />;
-      } else {
-        redirectDivElement = <div>{`Fetching user data...`}</div>;
-      }
+      setIsRedirecting(true);
+      const timer = setTimeout(() => {
+        router.push("/login");
+      }, 2000);
 
-      return (
-        <>
-          <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
-            {redirectDivElement}
-          </div>
-        </>
-      );
+      return () => clearTimeout(timer);
+    } else {
+      setIsRedirecting(false);
     }
+  }, [firebaseUser, guestMode, router]);
 
-    const inventorySetSelected = (arg: InventoryItem | null) => {
+  // Selection handlers
+  const inventorySetSelected = useCallback(
+    (arg: InventoryItem | null) => {
+      if (!inventory) return;
       setOwner(inventory);
       toggleSelectedItem(arg);
-    };
+    },
+    [inventory, setOwner, toggleSelectedItem]
+  );
 
-    const tradeWindowSetSelected = (arg: InventoryItem | null) => {
+  const tradeWindowSetSelected = useCallback(
+    (arg: InventoryItem | null) => {
       setOwner(null);
       toggleSelectedItem(arg);
-    };
+    },
+    [setOwner, toggleSelectedItem]
+  );
 
-    const storeSetSelected = (arg: InventoryItem | null) => {
+  const storeSetSelected = useCallback(
+    (arg: InventoryItem | null) => {
+      if (!store) return;
       setOwner(store);
       toggleSelectedItem(arg);
-    };
+    },
+    [store, setOwner, toggleSelectedItem]
+  );
 
-    const findStoreComponent = () => {
-      if (!store) return <div>Loading Store...</div>;
-      return (
-        <StoreComponent
-          onInventoryItemClickFunction={storeSetSelected}
-          forceRefreshKey={forceRefreshKey}
-        />
-      );
-    };
+  // Cost multiplier (memoized)
+  const costMultiplier = useMemo(() => {
+    if (store && inventory && owner instanceof Inventory) {
+      return store.getSellMultiplier();
+    } else if (store && owner instanceof Store) {
+      return store.getBuyMultiplier();
+    }
+    return 1;
+  }, [store, inventory, owner]);
 
-    const findTradeWindowComponent = () => {
-      if (!inventory || !store) return <div>Loading Trade Window...</div>;
-      return (
-        <TradeWindowComponent
-          costMultiplier={getCostMultiplier()}
-          forceRefreshKey={forceRefreshKey}
-          setForceRefreshKey={setForceRefreshKey}
-        />
-      );
-    };
-
-    const findInventoryComponent = () => {
-      if (!inventory || !store) return <div>Loading Inventory...</div>;
-      return (
-        <>
-          <div className="w-[80%]">
-            <InventoryComponent
-              onInventoryItemClickFunction={inventorySetSelected}
-              costMultiplier={store.getSellMultiplier()}
-              forceRefreshKey={forceRefreshKey}
-            />
-          </div>
-        </>
-      );
-    };
-
-    const getCostMultiplier = () => {
-      if (store && inventory && owner instanceof Inventory) {
-        return store.getSellMultiplier();
-      } else if (store && owner instanceof Store) {
-        return store.getBuyMultiplier();
-      } else {
-        return 1;
-      }
-    };
-
+  // Components (memoized)
+  const storeComponent = useMemo(() => {
+    if (!store) return <div>Loading Store...</div>;
     return (
-      <>
-        <div className="flex storeContainer">
-          <div className="w-1/3 flex justify-center section">
-            {findStoreComponent()}
-          </div>
-          <div className="w-1/3 flex flex-col section">
-            {findTradeWindowComponent()}
-          </div>
-          <div className="w-1/3 flex justify-center section">
-            {findInventoryComponent()}
-          </div>
-        </div>
-      </>
+      <StoreComponent
+        onInventoryItemClickFunction={storeSetSelected}
+        forceRefreshKey={forceRefreshKey}
+      />
     );
-  };
+  }, [store, storeSetSelected, forceRefreshKey]);
+
+  const tradeWindowComponent = useMemo(() => {
+    if (!inventory || !store) return <div>Loading Trade Window...</div>;
+    return (
+      <TradeWindowComponent
+        costMultiplier={costMultiplier}
+        forceRefreshKey={forceRefreshKey}
+        setForceRefreshKey={setForceRefreshKey}
+      />
+    );
+  }, [inventory, store, costMultiplier, forceRefreshKey]);
+
+  const inventoryComponent = useMemo(() => {
+    if (!inventory || !store) return <div>Loading Inventory...</div>;
+    return (
+      <div className="w-[80%]">
+        <InventoryComponent
+          onInventoryItemClickFunction={inventorySetSelected}
+          costMultiplier={store.getSellMultiplier()}
+          forceRefreshKey={forceRefreshKey}
+        />
+      </div>
+    );
+  }, [inventory, store, inventorySetSelected, forceRefreshKey]);
+
+  // Early redirect UI
+  if (!firebaseUser && !guestMode) {
+    return (
+      <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
+        {isRedirecting ? (
+          <RedirectingMessage targetPage="login page" />
+        ) : (
+          <div>{`Fetching user data...`}</div>
+        )}
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
-        {RenderStore()}
+    <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
+      <div className="flex storeContainer">
+        <div className="w-1/3 flex justify-center section">{storeComponent}</div>
+        <div className="w-1/3 flex flex-col section">{tradeWindowComponent}</div>
+        <div className="w-1/3 flex justify-center section">
+          {inventoryComponent}
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

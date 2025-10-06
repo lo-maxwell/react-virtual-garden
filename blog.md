@@ -433,133 +433,18 @@
   * Updated inventory item colors to better differentiate item types
   * Added settings and confirmation dialogue before deleting plants with shovel
   * Removed unused friends list
+
+## Day 42
+
+### UI Optimization
+  * Refactoring with lots of useCallback/useMemo for fewer rerenders
+  * Cleaning up legacy code
   
 
 TODO:
 
+Optimize RDS calls, consider using rds proxy if horizontal scaling is needed (30+ concurrent connections)
+
+Move service functions into lambda
+
 Convert to IAC with IAC generator, test output, possibly move to another stack
-
-Decorations should refresh selected item after running out of quantity
-
-Landing/loading pages for login/register - inform user not to leave the page
-
-SQS queue for rate limiting between backend and lambda?
-Fix guest mode banners
-
-New password reset landing page
-
-Lambda should have a single interact with database function which takes in the action type (insert, update, select, delete) and then calls all queries, so we can use a single transaction and make it atomic
-
-Username cannot include special characters, must be alphanumeric or whitespace (esp no *, %, \ to prevent sql problems)
-
-"Force refresh saved data" button with 5 second cd
-
-Actionhistories should be harvested:category:harvested? (instead of plant: category)
-
-Action items:
-1. Make the redirect delayed and make it sit on a screen that says redirect to login page (may be changed in the future)
-2. Fix the header and hide irrelevant buttons and make it cleaner and use less space 
-3. Icon on message on top right for login/logout
-4. UI indication that guest mode is on (in the header)
-5. The login screen should be clear that logging in will disable guest mode through a popup window
-6. Message for guest mode can not be disabled until logged in 
-7. Popup for guest mode that says it is a new garden 
-8. In the case when a user logs in then logs out then clicks guest mode. Guest mode should display fresh garden/inventory instead of previous user stuff. 
-
-User page no longer allows create/save/fetch, we automatically create on account register with firebase,
-save whenever an action is performed, fetch on login; add a debug force fetch option
-
-Top right icon for user + username, clicking on it gives log out option
-
-On garden page, user and inventory can be expanded/hidden
-
-Design home page and login page
-
-Admin panel
-
-Validate garden bounds for plant/harvest
-
-Change mouseover color for inventoryItems
-
-Use redux for state management
-
-Generate multiple store types/switch between stores/restock store
-Clean up ui, especially font/scaling using rem, to accommodate more screen width
-Trade Window Multiselect + Total
-
-Make Garden more interactive than plant all -> harvest 
-
-Add level requirement to plants/seeds
-
-Add way to delete in progress plants, some sort of select delete tool
-
-Add crop rotation - either assign plant families or just individual plants + soil health; low soil health -> cannot be fertilized for a duration + yield reduction, high soil health -> free stronger fertilizer
-
-Add fertilizer item - chance for double harvest, or reduce grow time. fertilizer lasts x seconds and affects any plants that start (finish?) growing during that time. or linearly diminishing effect based on time since fertilizer application
-
-Change plant categories to better reflect common terms
-
-Make store not able to delete items, even if they drop to 0 quantity, and modify display to say out of stock
-
-Add toolkit - select (plant, harvest, pickup, place); delete (only in progress plants)
-
-Daily login bonus to prevent softlock - gives some money and a random assortment of seeds that add up to some value
-
-Change value of slow plants so they aren't super efficient, make them high risk high reward by having high seed costs + add random events that can destroy them + fertilizer that makes them super efficient
-
-Tooltips should not go off the screen; make them below if normally on top, or on top if normally below
-
-Grow zombies/other creatures - randomly move around and give bonuses (automatic harvest/planting, fertilizer, harvest bonus)
-
-User almanac - displays how many of each plant were grown, some extra details about them
-
-User sends harvest plant request alongside their user auth token -> backend checks the token matches the user (or fetches the user that matches that token), attempts to perform the harvest plant request, sends back success/failure state -> frontend updates display based on result
-
-auth0 provides a user id, which we need to stick into the sql database
-
-New user -> backend sets up user, garden, inventory, store, etc. (choose uuids here) -> backend pushes to database, forcing uuids of certain type
-
-Old user -> backend checks for current id -> grab data from database based on current id -> push to backend model
-
-
-UI Bugs
-Increasing the size of a tooltip while it is hovered does not change its position; this can cause issues where the tooltip goes off the screen or interferes with the mouse pointer, ie. when a plot goes from planted item to empty/displaying the harvested item vs planted. 
-
-Stretch Goals
-Instead of expanding row/col, have the user add 1 plot at a time
-This is a design flaw, not a coding one -- right now supports exponential growth when it should be linear, also easier to make iterative progress
-Probably requires an entirely new ui though for the user to select their next plot location
-Or don't allow buying expansions/limit it per level
-Add random events/natural disasters that interact with decorations ie. scarecrows, fences
-Small, medium, large stores with different restock intervals and stock limits
-Item metadata migration tool
-Dev/Prod external dbs, and dev/prod branches
-Garden Stock Market - buying/selling pressure, variable costs, options and futures
-
-Crop rotation thoughts
-Garden has Fertility, Structure, Biodiversity quantities. 
-Fertility - Soil nutrient levels, determines crop yields and quality rating
-Structure - Soil physical health, determines grow speed and natural disaster resistance
-Biodiversity - Soil biological health, determines xp earned and pest resistance
-Growing certain crops increases/decreases these respectively
-
-Roadmap
-Daily login bonus - should be easy to implement and fun gambling aspect/retention policy
-Goose Farm - Have to involve geese in some way besides images (?) but keep it simple farming game still
-Goose object - new type of object, has stats, each stat varies between geese
-Categorizations for appearance and base stats/general growth power but since each stat is goose dependent we need to store in database
-Gain geese by growing them - can have "goose seed" item
-Geese gain bonuses when grown near plants
-Geese lose bonuses when grown near other geese
-Geese go to a separate inventory, with a cap on how many you can have at once, can delete to make space
-If at cap, cannot plant more goose seeds
-If not at cap, plants have a small chance to turn into geese when harvested, giving major stat boosts depending on plant value/type
-Stats are used in beauty contest, which is a global ranking of how well your goose's stats match some criteria
-Thus it is useful to have many types of stats (all rounder, extremely high power, high intelligence + charisma etc)
-1 goose egg per day from daily login bonus
-maximum 7 geese eggs in inventory
-holiday events can give holiday geese eggs which do not use regular slots (the holiday geese do use slots)
-
-for the sake of mvp:
-geese are categorized by color at first, no actual plant gooses, they just convert into that color
-beauty contest is always highest x stat or 2 stats

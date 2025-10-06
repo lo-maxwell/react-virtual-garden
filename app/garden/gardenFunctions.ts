@@ -206,7 +206,7 @@ export async function pickupAllAPI(pickupPlotIds: string[], inventory: Inventory
   }
 }
 
-export async function syncAllAccountObjects(user: User, garden: Garden, inventory: Inventory): Promise<boolean> {
+export async function syncAllAccountObjects(): Promise<boolean> {
   try {
     const result = await fetchAccountObjects();
     if (!result) {
