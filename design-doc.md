@@ -6,9 +6,9 @@ Goose Farm is a 2D grid-based farming simulator that allows users to create and 
 
 ## Problem Identification and Motivation
 
-The project began with the goal of creating an interactive, lightweight web-based simulation game. The key motivation was to design a system where users could visually organize and personalize virtual spaces while managing in-game resources in a rewarding feedback loop.
+I wanted to make a browser-based farming game similar to Farmville, but with no ads/IAPs/ways to speed up timers. Ideally players will log on for a few minutes a day to check on their farms and see some progression, without much incentive to either be online all the time or to spend money.
 
-Initial challenges included defining the scope of the simulation (how much complexity to support for crops, plots, and user actions) and identifying a suitable tech stack that supports scalability and real-time interactivity within a browser.
+Initial challenges included defining the scope of the simulation (how much complexity to support for crops, plots, and user actions) and identifying a suitable, lightweight tech stack that supports scalability and real-time interactivity within a browser.
 
 ## System Architecture
 
