@@ -54,15 +54,13 @@ const UserProfileComponent = () => {
   return (
     <>
       <div className="flex flex-row items-center justify-center">
-        <button onClick={handleDebugOptionEnable}>
-          <IconDisplay
-            icon={user.getIcon()}
-            bgColor={`bg-blue-300`}
-            borderColor={`border border-2 border-coffee-700`}
-            textSize={"text-4xl"}
-            elementSize={"12"}
-          />
-        </button>
+        <IconDisplay
+          icon={user.getIcon()}
+          bgColor={`bg-blue-300`}
+          borderColor={`border border-2 border-coffee-700`}
+          textSize={"text-4xl"}
+          elementSize={"12"}
+        />
         <span
           className={`ml-4 ${getUsernameFontSize()} ${
             colors.user.usernameTextColor
@@ -89,9 +87,6 @@ const UserProfileComponent = () => {
         <div className="my-4 inline-flex">
           <DailyLoginRewardClaimButton />
         </div>
-      </div>
-      <div className={`${showDebugOptions >= 3 ? `` : `hidden`}`}>
-        <GardenDebugOptions />
       </div>
     </>
   );
