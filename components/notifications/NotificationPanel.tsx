@@ -37,12 +37,12 @@ const BottomLeftNotificationPanel = () => {
           <DailyLoginRewardClaimButton />
 
           {/* Placeholder Message Button */}
-          <button
+          {/* <button
             className="bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-colors duration-300"
             onClick={() => alert("Message feature not implemented yet")}
           >
             Messages
-          </button>
+          </button> */}
         </div>
       )}
 
