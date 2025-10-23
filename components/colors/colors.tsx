@@ -52,6 +52,15 @@ const colors = {
 		usernameEditButtonBackgroundColor: "bg-reno-sand-400"
 	},
 
+	level: {
+		levelTextColor: "text-coffee-800",
+		levelBackgroundColor: "bg-gradient-to-br from-yellow-300 via-amber-400 to-orange-500",
+		levelCircleBorder: "border border-4 border-yellow-500",
+		levelXPBarFilledColor: "bg-green-500",
+		levelXPBarBackgroundColor: "bg-reno-sand-100",
+		levelXPBarBorder: "border border-4 border-yellow-500"
+	},
+
 	store: {
 		storeDefaultItemTextColor: "text-coffee-800",
 		storeHighPrice: "text-red-900",

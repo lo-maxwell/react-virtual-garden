@@ -1,13 +1,41 @@
-'use client'
-import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
-export type ForceVisibleMode = "OFF" | "ON" | "DEFAULT" | "INVERSE";
+'use client';
+import React, { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import './tooltip.css';
 
-const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVisible = 'DEFAULT', boxWidth = '20vw', onMouseEnter, onMouseLeave }: { children: React.ReactNode, content: React.ReactNode, position: string, backgroundColor: string, forceVisible?: ForceVisibleMode, boxWidth: string, onMouseEnter?: () => void, onMouseLeave?: () => void}) => {
+export type ForceVisibleMode = 'OFF' | 'ON' | 'DEFAULT' | 'INVERSE';
+
+interface TooltipProps {
+  children: React.ReactNode;
+  content: React.ReactNode;
+  position?: 'top' | 'right' | 'bottom' | 'left';
+  backgroundColor: string;
+  forceVisible?: ForceVisibleMode;
+  boxWidth?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}
+
+const Tooltip: React.FC<TooltipProps> = ({
+  children,
+  content,
+  position = 'top',
+  backgroundColor,
+  forceVisible = 'DEFAULT',
+  boxWidth = '20vw',
+  onMouseEnter,
+  onMouseLeave,
+}) => {
   const [visible, setVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
-  const [tooltipWidth, setTooltipWidth] = useState(boxWidth); // Default value
-  const [finalPosition, setFinalPosition] = useState(position); // Add state for final position
+  const [tooltipWidth, setTooltipWidth] = useState(boxWidth);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLSpanElement>(null);
+
+  // Track hover state for child and tooltip
+  const [childHovered, setChildHovered] = useState(false);
+  const [tooltipHovered, setTooltipHovered] = useState(false);
+  const [finalPosition, setFinalPosition] = useState(position); // Add state for final position\
 
   const [dimensions, setDimensions] = useState({ width:0, height: 0 });
 
@@ -91,42 +119,45 @@ const Tooltip = ({ children, content, position = 'top', backgroundColor, forceVi
     if (onMouseEnter) onMouseEnter();
   }, [finalPosition, onMouseEnter]);
 
-  const hideTooltip = useCallback(() => {
-    setVisible(false);
-    if (onMouseLeave) onMouseLeave();
-  }, [onMouseLeave]);
-
   const shouldShow =
-    forceVisible === "ON"
+    forceVisible === 'ON'
       ? true
-      : forceVisible === "OFF"
+      : forceVisible === 'OFF'
       ? false
-      : forceVisible === "INVERSE"
-      ? !visible
-      : visible; // DEFAULT
+      : forceVisible === 'INVERSE'
+      ? !(childHovered || tooltipHovered)
+      : childHovered || tooltipHovered;
 
   return (
-    <div
-      onMouseEnter={showTooltip}
-      onMouseLeave={hideTooltip}
-      className="w-full relative inline-block"
-    >
-      {children}
-      {/* ON = always show, OFF = never show, other = show if moused over */}
-      {shouldShow && (
-        <div
+    <>
+      <span
+        ref={wrapperRef}
+        onMouseEnter={(e) => {
+          setChildHovered(true);
+          showTooltip(e);
+        }}
+        onMouseLeave={() => setChildHovered(false)}
+        className="relative w-full"
+      >
+        {children}
+      </span>
+
+      {shouldShow &&
+        createPortal(
+          <div
           ref={tooltipRef}
-          className={`fixed z-10 px-2 py-1 text-sm text-purple-800 text-semibold ${backgroundColor} rounded shadow-lg
+          className={`fixed z-50 px-2 py-1 text-sm text-purple-800 text-semibold ${backgroundColor} rounded shadow-lg
           ${position === 'top' ? 'transform -translate-x-1/2 -translate-y-full' : ''}
           ${position === 'right' ? 'transform -translate-y-1/2' : ''}
           ${position === 'bottom' ? 'transform -translate-x-1/2' : ''}
           ${position === 'left' ? 'transform -translate-y-1/2 -translate-x-full' : ''}`}
           style={{ top: `${coords.top}px`, left: `${coords.left}px`, minWidth: `100px`, maxWidth: tooltipWidth, whiteSpace: 'normal'}}
         >
-          {content}
-        </div>
-      )}
-    </div>
+            {content}
+          </div>,
+          document.body
+        )}
+    </>
   );
 };
 

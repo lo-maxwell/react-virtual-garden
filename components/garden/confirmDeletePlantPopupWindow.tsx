@@ -36,27 +36,27 @@ export function ConfirmDeletePlantPopupWindow({
     <PopupWindow showWindow={showWindow} setShowWindow={setShowWindow}>
       <div className="w-max bg-reno-sand-200 text-black p-8 rounded-lg shadow-md justify-between items-center">
         <div className="text-2xl font-semibold mb-4 text-center">
-          Delete Plant Confirmation
+          Destroy Plant Confirmation
         </div>
         <div className="text-xl mb-6 text-center">
-          Are you sure you want to delete <span className="font-semibold">{plantName}</span>?
+          Are you sure you want to destroy <span className="font-semibold">{plantName}</span>?
         </div>
         <div className="text-sm mb-6 text-center text-gray-600">
           This action cannot be undone.
         </div>
         
-        <div className="flex items-center gap-3 mb-6">
-          <input
-            type="checkbox"
-            id="dontAskAgain"
-            checked={dontAskAgain}
-            onChange={(e) => setDontAskAgain(e.target.checked)}
-            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-          />
-          <label className="text-sm text-gray-700">
+        <div className="flex justify-center items-center gap-3 mb-6">
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={dontAskAgain}
+              onChange={(e) => setDontAskAgain(e.target.checked)}
+              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+            />
             {`Don't ask me again`}
           </label>
         </div>
+
         
         <div className="flex gap-4 justify-center">
           <button
@@ -73,7 +73,7 @@ export function ConfirmDeletePlantPopupWindow({
                        border-2 border-red-600"
             onClick={handleConfirmDelete}
           >
-            Delete
+            Destroy
           </button>
         </div>
       </div>

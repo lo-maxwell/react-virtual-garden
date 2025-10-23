@@ -1,25 +1,38 @@
-import LevelSystem from "@/models/level/LevelSystem";
+import colors from "../colors/colors";
 
-const LevelSystemComponent = ({level, currentExp, expToLevelUp}: {level: number, currentExp: number, expToLevelUp: number}) => {
+
+const LevelSystemComponent = ({
+	level,
+	currentExp,
+	expToLevelUp,
+}: {
+	level: number;
+	currentExp: number;
+	expToLevelUp: number;
+}) => {
+	const progress = Math.min((currentExp / expToLevelUp) * 100, 100);
 
 	return (
-		<div className="bg-gray-300 p-4 rounded-lg shadow-md">
-			<div className="text-center mb-2">
-				<div className="text-xl font-bold text-purple-500" data-testid="current-level">Level: {level}</div>
+		<div className="flex items-center w-full max-w-xs relative">
+			{/* Level Circle */}
+			<div
+				className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm shadow-md z-10 ${colors.level.levelBackgroundColor} ${colors.level.levelTextColor} ${colors.level.levelCircleBorder}`}
+				data-testid="current-level"
+			>
+				{level}
 			</div>
-			<div className="bg-white p-2 rounded-md">
-				<div className="text-lg font-medium text-gray-800" data-testid="level-xp">
-					XP: <span className="text-purple-500">{currentExp}</span>/{expToLevelUp}
-				</div>
-				<div className="mt-2 bg-gray-200 h-4 rounded-full overflow-hidden">
-					<div
-						className="bg-purple-500 h-full"
-						style={{ width: `${(currentExp / expToLevelUp) * 100}%` }}
-					/>
-				</div>
+
+			{/* XP Bar */}
+			<div
+				className={`flex-1 h-8 rounded-r-full overflow-hidden shadow-inner ml-[-16px] ${colors.level.levelXPBarBackgroundColor} ${colors.level.levelXPBarBorder}`}
+			>
+				<div
+					className={`h-full transition-all duration-300 ${colors.level.levelXPBarFilledColor}`}
+					style={{ width: `${progress}%` }}
+				/>
 			</div>
 		</div>
-  );
-}
+	);
+};
 
 export default LevelSystemComponent;

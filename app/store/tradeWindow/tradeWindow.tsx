@@ -19,6 +19,7 @@ import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
 import { Tool } from "@/models/items/tools/Tool";
 import { syncAllAccountObjects } from "@/app/garden/gardenFunctions";
 import { useGarden } from "@/app/hooks/contexts/GardenContext";
+import { setGold } from "@/store/slices/inventorySlice";
 
 
 const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshKey}: {costMultiplier: number, forceRefreshKey: number, setForceRefreshKey: React.Dispatch<React.SetStateAction<number>>}) => {
@@ -131,6 +132,8 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 					inventoryItemId: updatedItem.payload.getInventoryItemId(), 
 					quantity: updatedItem.payload.getQuantity()
 				}));
+				dispatch(setGold(inventory.getGold()));
+				
 
 				// Terminate early before api call
 				if (guestMode) {
@@ -169,6 +172,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 					inventoryItemId: updatedItem.payload.getInventoryItemId(), 
 					quantity: updatedItem.payload.getQuantity()
 				}));
+				dispatch(setGold(inventory.getGold()));
 
 				// Terminate early before api call
 				if (guestMode) {

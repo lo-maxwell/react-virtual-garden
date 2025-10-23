@@ -41,7 +41,7 @@ const DailyLoginRewardClaimTooltip = ({ children }: { children: React.ReactNode}
 	}
 
 	return (
-		<div className="w-full">
+		<div className="">
 			<Tooltip content={<RenderItemTooltipInfo key={hoverRefreshKey} />} position="top" backgroundColor={getBackgroundColor()} boxWidth={"20vw"} onMouseEnter={() => setHoverRefreshKey(prev => prev + 1)}>
 				{children}
 			</Tooltip>

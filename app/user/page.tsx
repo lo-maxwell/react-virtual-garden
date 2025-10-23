@@ -193,20 +193,20 @@ const UserPage = () => {
     <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
       <div className="flex inner-flex">
         <div className="w-1/3 left-side">
-          <div className="my-1 min-h-[8%] flex flex-row items-center justify-center">
+          <div className="flex items-center justify-between">
             <IconSelector iconIndex={icon} onIconChange={onIconChangeHandler} />
-            <UsernameDisplay
-              username={username}
-              onUsernameChange={onUsernameChangeHandler}
-            />
-          </div>
+            <div className="flex flex-1 flex-col justify-start gap-2"> {/* Match icon height */}
+              <UsernameDisplay
+                username={username}
+                onUsernameChange={onUsernameChangeHandler}
+              />
 
-          <div className="mx-4 my-4">
-            <LevelSystemComponent
-              level={user.getLevel()}
-              currentExp={user.getCurrentExp()}
-              expToLevelUp={user.getExpToLevelUp()}
-            />
+              <LevelSystemComponent
+                level={user.getLevel()}
+                currentExp={user.getCurrentExp()}
+                expToLevelUp={user.getExpToLevelUp()}
+              />
+            </div>
           </div>
 
           <Suspense fallback={<div>Loading...</div>}>

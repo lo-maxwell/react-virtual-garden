@@ -43,7 +43,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 		}
 
 		return (<>
-			<div className="flex flex-col items-left min-w-0 flex-grow" data-testid="tool-tip">
+			<div className={`flex flex-col items-left min-w-0 flex-grow ${colors.inventory.inventoryDefaultItemTextColor}`} data-testid="tool-tip">
 				<div className="flex flex-row justify-between flex-grow min-w-max">
 					<div className="flex flex-row min-w-0">
 					<RawIconDisplay icon={currentItem.itemData.icon} width={6} height={6}/>
@@ -75,7 +75,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 		}
 
 		return  <>
-		<div className="flex flex-col items-left min-w-0 flex-grow">
+		<div className={`flex flex-col items-left min-w-0 flex-grow ${colors.inventory.inventoryDefaultItemTextColor}`} >
 			<div className="flex flex-row justify-between flex-grow min-w-max">
 				<div className="flex flex-row min-w-0">
 					<RawIconDisplay icon={currentItem.itemData.icon} width={6} height={6}/>
@@ -108,7 +108,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 		const harvestedTemplate = harvestedItem as HarvestedItemTemplate;
 
 		return <>
-		<div className="flex flex-col items-left min-w-0 flex-grow">
+		<div className={`flex flex-col items-left min-w-0 flex-grow ${colors.inventory.inventoryDefaultItemTextColor}`} >
 			<div className="flex flex-row justify-between min-w-max">
 				<div className="flex flex-row min-w-0">
 					<RawIconDisplay icon={currentItem.itemData.icon} width={6} height={6}/>
@@ -158,7 +158,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 		}
 
 		return <>
-			<div className="flex flex-col items-left min-w-0 flex-grow">
+			<div className={`flex flex-col items-left min-w-0 flex-grow ${colors.inventory.inventoryDefaultItemTextColor}`} >
 				<div>Placing: </div>
 				<div className="flex flex-row justify-between min-w-max">
 					<div className="flex flex-row">
@@ -200,7 +200,7 @@ const PlotTooltip = ({ children, plot, currentTime }: { children: React.ReactNod
 		}
 
 		return  <>
-		<div className="flex flex-col items-left min-w-0 flex-grow">
+		<div className={`flex flex-col items-left min-w-0 flex-grow ${colors.inventory.inventoryDefaultItemTextColor}`} >
 			<div className="flex flex-row justify-between flex-grow min-w-max">
 				<div>
 					<span>Empty Plot</span>

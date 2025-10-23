@@ -3,8 +3,10 @@ import { InventoryContext } from '@/app/hooks/contexts/InventoryContext';
 import { generateInventoryItem } from '@/models/items/ItemFactory';
 import { Inventory } from '@/models/itemStore/inventory/Inventory';
 import { InventoryItemList } from '@/models/itemStore/InventoryItemList';
+import { setGold } from '@/store/slices/inventorySlice';
 import { loadInventory, saveInventory } from '@/utils/localStorage/inventory';
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
 // Define props for the provider
@@ -15,6 +17,7 @@ interface InventoryProviderProps {
 export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     const [inventory, setInventory] = useState<Inventory | null>(null);
 	const [inventoryForceRefreshKey, setInventoryForceRefreshKey] = useState(0);
+	const dispatch = useDispatch();
 
 	const setupInventory = useCallback((): Inventory => {
 		let inv = loadInventory();
@@ -23,6 +26,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
 		  inv = Inventory.generateDefaultNewInventory();
 		  saveInventory(inv);
 		}
+		dispatch(setGold(inv.getGold() ?? 0));
 		return inv;
 	  }, []);
 
@@ -37,6 +41,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
 		const newInventory = Inventory.generateDefaultNewInventory();
 		setInventory(newInventory);
 		saveInventory(newInventory);
+		dispatch(setGold(newInventory.getGold() ?? 0));
 		console.log(newInventory.toPlainObject());
 	}, []);
 
@@ -47,6 +52,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
 	const reloadInventory = useCallback(() => {
 		const initialInventory = setupInventory();
 		setInventory(initialInventory);
+		dispatch(setGold(initialInventory.getGold() ?? 0));
 	}, [setupInventory]);
 
 	const contextValue = useMemo(() => ({
