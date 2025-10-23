@@ -10,7 +10,7 @@ const RawIconDisplay = ({icon, width, height, additionalSettings = ''}: {icon: s
         </>;
     }
     return <>
-        <span className={`w-${width} ${additionalSettings}`}>{iconEmojiFactory.getIconByName(icon)}</span>
+        <div className={`w-${width} h-{height} ${additionalSettings}`}>{iconEmojiFactory.getIconByName(icon)}</div>
     </>;
 }
 

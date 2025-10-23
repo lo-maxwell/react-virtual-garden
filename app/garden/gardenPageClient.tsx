@@ -13,6 +13,7 @@ import { useCallback, useEffect, useState } from "react";
 import RedirectingMessage from "@/components/errorPages/redirectingMessage";
 import "./page.css";
 import GardenDebugOptions from "@/components/developer/GardenDebugOptions";
+import BottomLeftNotificationPanel from "@/components/notifications/NotificationPanel";
 
 const GardenPageClient = ({ showDeveloperOptions = false }: { showDeveloperOptions: boolean }) => {
   const { firebaseUser } = useAuth();
@@ -83,15 +84,21 @@ const GardenPageClient = ({ showDeveloperOptions = false }: { showDeveloperOptio
   };
 
   return (
-    <>
-      <div className="layout-wrapper w-full px-4 py-4 bg-reno-sand-200 text-black relative">
-        <div className="flex layout-row">
-          <div className="w-1/4 layout-col">{RenderUser()}</div>
-          <div className="w-1/2 flex-col layout-col">{RenderGarden()}</div>
-          <div className="w-1/4 layout-col" data-testid="user-inventory">{RenderInventory()}</div>
+    <div className="layout-wrapper w-full px-4 py-4 bg-reno-sand-200 text-black relative pb-16">
+      <div className="flex w-full gap-4 layout-row">
+        {/* Left column: user on top of garden */}
+        <div className="flex-1 flex flex-col gap-4">
+          <div>{RenderUser()}</div>
+          <div>{RenderGarden()}</div>
+        </div>
+
+        {/* Right column: inventory (30% width) */}
+        <div className="w-3/10 min-w-[300px]" data-testid="user-inventory">
+          {RenderInventory()}
         </div>
       </div>
-    </>
+      <BottomLeftNotificationPanel/>
+    </div>
   );
 };
 

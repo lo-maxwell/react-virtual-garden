@@ -20,7 +20,7 @@ const ToolTooltip = ({ children, tool }: { children: React.ReactNode, tool: Tool
 		const currentTool = tool as Shovel;
 
 		return <>
-		<div className="flex flex-col items-left min-w-0 flex-grow">
+		<div className={`flex flex-col items-left min-w-0 flex-grow ${colors.inventory.inventoryDefaultItemTextColor}`}>
 			<div className="flex flex-row justify-between min-w-max">
 				<div className="flex flex-row min-w-0">
 				<RawIconDisplay icon={currentTool.itemData.icon} width={6} height={6}/>

@@ -50,7 +50,7 @@ const StoreItemTooltip = ({ children, item, store }: { children: React.ReactNode
 		}
 
 		return (
-			<div className="flex flex-col items-left min-w-0 flex-grow">
+			<div className={`flex flex-col items-left min-w-0 flex-grow ${colors.inventory.inventoryDefaultItemTextColor}`}>
 				{/* Top row: icon, name, value */}
 				<div className="flex flex-row justify-between min-w-max">
 					<div className="flex flex-row min-w-0">

@@ -84,7 +84,7 @@ const IconSelector = ({ iconIndex, onIconChange }: {iconIndex: string, onIconCha
     
 	return (
         <span className="icon-selector">
-            <IconButton icon={iconIndex} onClickFunction={showAllIconsWindow} bgColor={`bg-blue-300`} borderColor={`border border-2 border-coffee-700`} textSize={"text-4xl"} elementSize={"12"}/>
+            <IconButton icon={iconIndex} onClickFunction={showAllIconsWindow} bgColor={`bg-blue-300`} borderColor={`border border-2 border-coffee-700`} textSize={"text-5xl"} elementSize={"16"}/>
             <PopupWindow showWindow={showAllIcons} setShowWindow={setShowAllIcons}>
                 <div className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl bg-reno-sand-200 text-black p-8 rounded-lg shadow-md justify-between items-center">
                     <div className="text-2xl text-semibold"> Select a new icon: </div>

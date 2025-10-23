@@ -439,6 +439,16 @@
 ### UI Optimization
   * Refactoring with lots of useCallback/useMemo for fewer rerenders
   * Cleaning up legacy code
+
+## Day 43
+
+### More UI Changes
+  * Moved around some layouts, removed access to delete plants temporarily
+  * Fixed tooltip location issues
+  * Fixed store not updating gold upon buying items
+  * Added additional text colors
+  * Added gold to redux store
+  * Updated user profile layout, made xp bar thinner
   
 
 TODO:
