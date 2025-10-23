@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import "./popupWindow.css";
 
 export function PopupWindow({
@@ -33,7 +34,7 @@ export function PopupWindow({
     };
   }, [handleClickOutside]); // Now includes handleClickOutside in dependencies
 
-  return (
+  return createPortal(
     <span
       ref={popupRef}
       className={`${
@@ -41,6 +42,7 @@ export function PopupWindow({
       } fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50`}
     >
       <span className="children-window">{children}</span>
-    </span>
+    </span>,
+    document.body
   );
 }

@@ -80,54 +80,54 @@ const DailyLoginRewardClaimButton = () => {
     }
   };
 
-    
-    const canClaim = process.env.NEXT_PUBLIC_DAILY_LOGIN_OVERRIDE === 'true' ? true : (guestMode ? false : (dailyLoginEvent ? DailyLoginRewardFactory.canClaimReward(new Date(Date.now()), dailyLoginEvent) : true));
 
-    const claimDailyLoginReward = async () => {
-        toggleSelectedItem(null);
-        
-        setApiError(null); // Clear any previous API errors
-        setIsLoading(true);
-        setLoadingMessage("Generating daily login reward...");
-        try {
-            const apiRoute = `/api/user/${user.getUserId()}/events/dailyLogin`;
-            const data = { inventoryId: inventory.getInventoryId() };
-            const apiResponse = await makeApiRequest('PATCH', apiRoute, data, true);
-            
-            if (!apiResponse.success) {
-                setApiError(apiResponse.error?.message || 'Failed to fetch daily login reward. Please try again later.');
-                setEventReward(null);
-                return;
-            }
+  const canClaim = process.env.NEXT_PUBLIC_DAILY_LOGIN_OVERRIDE === 'true' ? true : (guestMode ? false : (dailyLoginEvent ? DailyLoginRewardFactory.canClaimReward(new Date(Date.now()), dailyLoginEvent) : true));
 
-            const userEvent = handleDailyLoginApiResponse(user, inventory, apiResponse.data);
+  const claimDailyLoginReward = async () => {
+    toggleSelectedItem(null);
 
-            const reward = userEvent.getEventReward();
-            setEventReward(reward);
-            setShowClaimedRewardScreen(true);
-            
-            // Update the daily login event state
-            const updatedEvent = user.getEvent(UserEventTypes.DAILY.name);
-            setDailyLoginEvent(updatedEvent || null);
-            
-            saveUser(user);
-            saveInventory(inventory);
-            console.log('finished claiming daily login reward');
-            console.log(reward);
-        } catch (error) {
-            console.error('Error fetching daily login reward:', error);
-            // If there's an error, show "already claimed" message
-            setEventReward(null);
-            setApiError('Failed to fetch daily login reward. Please try again later.');
-        } finally {
-            setIsLoading(false);
-            setLoadingMessage(null);
-        }
-    };
+    setApiError(null); // Clear any previous API errors
+    setIsLoading(true);
+    setLoadingMessage("Generating daily login reward...");
+    try {
+      const apiRoute = `/api/user/${user.getUserId()}/events/dailyLogin`;
+      const data = { inventoryId: inventory.getInventoryId() };
+      const apiResponse = await makeApiRequest('PATCH', apiRoute, data, true);
 
-    useEffect(() => {
-        const dailyLoginEvent = user.getEvent(UserEventTypes.DAILY.name);
-		setDailyLoginEvent(dailyLoginEvent || null);
+      if (!apiResponse.success) {
+        setApiError(apiResponse.error?.message || 'Failed to fetch daily login reward. Please try again later.');
+        setEventReward(null);
+        return;
+      }
+
+      const userEvent = handleDailyLoginApiResponse(user, inventory, apiResponse.data);
+
+      const reward = userEvent.getEventReward();
+      setEventReward(reward);
+      setShowClaimedRewardScreen(true);
+
+      // Update the daily login event state
+      const updatedEvent = user.getEvent(UserEventTypes.DAILY.name);
+      setDailyLoginEvent(updatedEvent || null);
+
+      saveUser(user);
+      saveInventory(inventory);
+      console.log('finished claiming daily login reward');
+      console.log(reward);
+    } catch (error) {
+      console.error('Error fetching daily login reward:', error);
+      // If there's an error, show "already claimed" message
+      setEventReward(null);
+      setApiError('Failed to fetch daily login reward. Please try again later.');
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage(null);
+    }
+  };
+
+  useEffect(() => {
+    const dailyLoginEvent = user.getEvent(UserEventTypes.DAILY.name);
+    setDailyLoginEvent(dailyLoginEvent || null);
 
     const now = new Date();
     // Calculate the next midnight UTC-7 (which is 7 AM UTC).
@@ -160,7 +160,7 @@ const DailyLoginRewardClaimButton = () => {
     return (
       <ItemStoreComponent
         itemStore={tempInventory}
-        onInventoryItemClickFunction={() => {}}
+        onInventoryItemClickFunction={() => { }}
         costMultiplier={1}
         maxHeightPercentage={100}
         displayFilter={false}
@@ -243,10 +243,10 @@ const DailyLoginRewardClaimButton = () => {
             )}
             {(dailyLoginEvent ? dailyLoginEvent.getStreak() + 1 : 1) % 7 ===
               0 && (
-              <div className="text-xl mb-4 text-yellow-600 font-bold">
-                Next reward is a Weekly Bonus!
-              </div>
-            )}
+                <div className="text-xl mb-4 text-yellow-600 font-bold">
+                  Next reward is a Weekly Bonus!
+                </div>
+              )}
             <button
               className="mx-auto mt-4 block 
                             border-4 border-yellow-500 
@@ -298,17 +298,21 @@ const DailyLoginRewardClaimButton = () => {
 
   return (
     <>
-      <DailyLoginRewardClaimTooltip>
-        <IconButton
-          icon={"reward"}
-          onClickFunction={showWindowHandler}
-          bgColor={canClaim ? `bg-blue-300` : `bg-gray-400`}
-          borderColor={`border border-2 border-coffee-700`}
-          textSize={"text-4xl"}
-          elementSize={"12"}
-        />
-      </DailyLoginRewardClaimTooltip>
-      <PopupWindow showWindow={showWindow} setShowWindow={() => {}}>
+      <div className="w-max">
+        <DailyLoginRewardClaimTooltip>
+          <div className="w-max">
+            <IconButton
+              icon={"reward"}
+              onClickFunction={showWindowHandler}
+              bgColor={canClaim ? `bg-blue-300` : `bg-gray-400`}
+              borderColor={`border border-2 border-coffee-700`}
+              textSize={"text-4xl"}
+              elementSize={"12"}
+            />
+          </div>
+        </DailyLoginRewardClaimTooltip>
+      </div>
+      <PopupWindow showWindow={showWindow} setShowWindow={() => { }}>
         <div className="w-max bg-reno-sand-200 text-black p-8 rounded-lg shadow-md justify-between items-center">
           <div className="text-2xl mb-2 text-black">{`Daily Login Bonus`}</div>
           {renderPopupWindowDisplay()}
