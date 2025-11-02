@@ -15,6 +15,9 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
     const [account, setAccount] = useState<Account | null>(null);
 	const [guestMode, setGuestMode] = useState<boolean>(defaultSettings.guestMode);
 	const [displayEmojiIcons, setDisplayEmojiIcons] = useState<boolean>(defaultSettings.displayEmojiIcons);
+	const [confirmPlantAll, setConfirmPlantAll] = useState<boolean>(defaultSettings.confirmPlantAll);
+	const [confirmHarvestAll, setConfirmHarvestAll] = useState<boolean>(defaultSettings.confirmHarvestAll);
+	const [confirmPickupAll, setConfirmPickupAll] = useState<boolean>(defaultSettings.confirmPickupAll);
 	const [confirmDeletePlants, setConfirmDeletePlants] = useState<boolean>(defaultSettings.confirmDeletePlants);
 	const [environmentTestKey, setEnvironmentTestKey] = useState<string>('');
 
@@ -38,6 +41,9 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		setAccount(account);
 		setGuestMode(account.settings.guestMode);
 		setDisplayEmojiIcons(account.settings.displayEmojiIcons);
+		setConfirmPlantAll(account.settings.confirmPlantAll);
+		setConfirmHarvestAll(account.settings.confirmHarvestAll);
+		setConfirmPickupAll(account.settings.confirmPickupAll);
 		setConfirmDeletePlants(account.settings.confirmDeletePlants);
 		console.log('loaded account')
 	}, [setupAccount]);
@@ -58,6 +64,30 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		}
 	}, [account]);
 
+	const setConfirmPlantAllHandler = useCallback((value: boolean): void => {
+		setConfirmPlantAll(value);
+		if (account) {
+			account.settings.confirmPlantAll = value;
+			saveAccount(account);
+		}
+	}, [account]);
+
+	const setConfirmHarvestAllHandler = useCallback((value: boolean): void => {
+		setConfirmHarvestAll(value);
+		if (account) {
+			account.settings.confirmHarvestAll = value;
+			saveAccount(account);
+		}
+	}, [account]);
+
+	const setConfirmPickupAllHandler = useCallback((value: boolean): void => {
+		setConfirmPickupAll(value);
+		if (account) {
+			account.settings.confirmPickupAll = value;
+			saveAccount(account);
+		}
+	}, [account]);
+
 	const setConfirmDeletePlantsHandler = useCallback((value: boolean): void => {
 		setConfirmDeletePlants(value);
 		if (account) {
@@ -66,25 +96,25 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		}
 	}, [account]);
 
-	const fetchEnvironmentTestKey = useCallback(async () => {
-		try {
-			const response = await fetch('/api/test', {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-				}
-			});
+	// const fetchEnvironmentTestKey = useCallback(async () => {
+	// 	try {
+	// 		const response = await fetch('/api/test', {
+	// 			method: 'GET',
+	// 			headers: {
+	// 				'Content-Type': 'application/json',
+	// 			}
+	// 		});
 
-			if (!response.ok) {
-				throw new Error('Failed to fetch test key');
-			}
+	// 		if (!response.ok) {
+	// 			throw new Error('Failed to fetch test key');
+	// 		}
 
-			const result = await response.json();
-			return result;
-		} catch (error) {
-			console.error(error);
-		}
-	}, []);
+	// 		const result = await response.json();
+	// 		return result;
+	// 	} catch (error) {
+	// 		console.error(error);
+	// 	}
+	// }, []);
 
 	useEffect(() => {
 		const updateTestKey = async () => {
@@ -101,6 +131,12 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		setGuestMode: setGuestModeHandler,
 		displayEmojiIcons,
 		setDisplayEmojiIcons: setDisplayEmojiIconsHandler,
+		confirmPlantAll,
+		setConfirmPlantAll: setConfirmPlantAllHandler,
+		confirmHarvestAll,
+		setConfirmHarvestAll: setConfirmHarvestAllHandler,
+		confirmPickupAll,
+		setConfirmPickupAll: setConfirmPickupAllHandler,
 		confirmDeletePlants,
 		setConfirmDeletePlants: setConfirmDeletePlantsHandler,
 		environmentTestKey
@@ -110,6 +146,12 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		setGuestModeHandler,
 		displayEmojiIcons,
 		setDisplayEmojiIconsHandler,
+		confirmPlantAll,
+		setConfirmPlantAllHandler,
+		confirmHarvestAll,
+		setConfirmHarvestAllHandler,
+		confirmPickupAll,
+		setConfirmPickupAllHandler,
 		confirmDeletePlants,
 		setConfirmDeletePlantsHandler,
 		environmentTestKey

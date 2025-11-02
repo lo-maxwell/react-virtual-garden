@@ -17,6 +17,9 @@ import { useDispatch } from "react-redux";
 import { setAllLevelSystemValues } from "@/store/slices/userLevelSystemSlice";
 import { ToolTypes } from "@/models/itemStore/toolbox/tool/ToolTypes";
 import { Tool } from "@/models/items/tools/Tool";
+import { ConfirmPlantAllPopupWindow } from "@/components/garden/confirmPlantAllPopupWindow";
+import { ConfirmHarvestAllPopupWindow } from "@/components/garden/confirmHarvestAllPopupWindow";
+import { ConfirmPickupAllPopupWindow } from "@/components/garden/confirmPickupAllPopupWindow";
 
 const GardenComponent = () => {
   const { inventory, reloadInventory } = useInventory();
@@ -31,6 +34,10 @@ const GardenComponent = () => {
   const { user, reloadUser } = useUser();
   const { selectedItem, toggleSelectedItem } = useSelectedItem();
   const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
+  const {confirmPlantAll, confirmHarvestAll, confirmPickupAll} = useAccount();
+	const [showPlantAllPopup, setShowPlantAllPopup] = useState(false);
+	const [showHarvestAllPopup, setShowHarvestAllPopup] = useState(false);
+	const [showPickupAllPopup, setShowPickupAllPopup] = useState(false);
   const plotRefs = useRef<PlotComponentRef[][]>(
     garden.getPlots().map(row => row.map(() => null!))
   );
@@ -123,6 +130,15 @@ const GardenComponent = () => {
     );
   }, [GetPlotAction, selectedItem, currentTime, plotRefs]);
 
+  const handlePlantAll = async () => {
+		if (confirmPlantAll) {
+			setShowPlantAllPopup(true);
+			return;
+		} else {
+      plantAll();
+    }
+  }
+
   const plantAll = useCallback(async () => {
     if (
       selectedItem == null ||
@@ -182,6 +198,15 @@ const GardenComponent = () => {
 		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
 	}, [selectedItem, inventory, plantSeed, guestMode, setGardenMessage, user, garden, reloadUser, reloadGarden, reloadInventory, dispatch, plotRefs]);
 
+  const handleHarvestAll = async () => {
+		if (confirmHarvestAll) {
+			setShowHarvestAllPopup(true);
+			return;
+		} else {
+      harvestAll();
+    }
+  }
+
   const harvestAll = useCallback(async () => {
     const harvestedPlotIds: string[] = [];
     let numHarvested = 0;
@@ -231,6 +256,15 @@ const GardenComponent = () => {
 		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
 
 	}, [clickPlant, instantGrow, setGardenMessage, guestMode, inventory, user, garden, reloadUser, reloadGarden, reloadInventory, dispatch, plotRefs]);
+
+  const handlePickupAll = async () => {
+		if (confirmPickupAll) {
+			setShowPickupAllPopup(true);
+			return;
+		} else {
+      pickupAll();
+    }
+  }
 
   const pickupAll = useCallback(async () => {
     const pickupPlotIds: string[] = [];
@@ -411,24 +445,40 @@ const GardenComponent = () => {
           {plots}
         </div>
       </div>
+      <ConfirmPlantAllPopupWindow
+				showWindow={showPlantAllPopup}
+				setShowWindow={setShowPlantAllPopup}
+				plantName={selectedItem?.itemData.name}
+				onConfirmPlantAll={plantAll}
+			/>
+      <ConfirmHarvestAllPopupWindow
+				showWindow={showHarvestAllPopup}
+				setShowWindow={setShowHarvestAllPopup}
+				onConfirmHarvestAll={harvestAll}
+			/>
+      <ConfirmPickupAllPopupWindow
+				showWindow={showPickupAllPopup}
+				setShowWindow={setShowPickupAllPopup}
+				onConfirmPickupAll={pickupAll}
+			/>
       <div className="my-1">
         <div>
           <button
-            onClick={plantAll}
+            onClick={handlePlantAll}
             className={`bg-gray-300 px-4 py-1 mx-1 my-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}
             data-testid="plant-all"
           >
             Plant All
           </button>
           <button
-            onClick={harvestAll}
+            onClick={handleHarvestAll}
             className={`bg-gray-300 px-4 py-1 mx-1 my-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}
             data-testid="harvest-all"
           >
             Harvest All
           </button>
           <button
-            onClick={pickupAll}
+            onClick={handlePickupAll}
             className={`bg-gray-300 px-4 py-1 mx-1 my-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}
             data-testid="harvest-all"
           >
