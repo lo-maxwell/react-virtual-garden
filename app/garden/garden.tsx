@@ -20,6 +20,7 @@ import { Tool } from "@/models/items/tools/Tool";
 import { ConfirmPlantAllPopupWindow } from "@/components/garden/confirmPlantAllPopupWindow";
 import { ConfirmHarvestAllPopupWindow } from "@/components/garden/confirmHarvestAllPopupWindow";
 import { ConfirmPickupAllPopupWindow } from "@/components/garden/confirmPickupAllPopupWindow";
+import ToolboxComponent from "@/components/garden/toolbox/toolbox";
 
 const GardenComponent = () => {
   const { inventory, reloadInventory } = useInventory();
@@ -131,7 +132,7 @@ const GardenComponent = () => {
   }, [GetPlotAction, selectedItem, currentTime, plotRefs]);
 
   const handlePlantAll = async () => {
-		if (confirmPlantAll) {
+		if (confirmPlantAll && selectedItem && selectedItem instanceof InventoryItem && selectedItem.itemData.subtype == ItemSubtypes.SEED.name) {
 			setShowPlantAllPopup(true);
 			return;
 		} else {
@@ -461,6 +462,7 @@ const GardenComponent = () => {
 				setShowWindow={setShowPickupAllPopup}
 				onConfirmPickupAll={pickupAll}
 			/>
+      <ToolboxComponent toolbox={user.getToolbox()} onToolClickFunction={toggleSelectedItem} maxHeightPercentage={100}/>
       <div className="my-1">
         <div>
           <button
