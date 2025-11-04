@@ -81,7 +81,7 @@ const DailyLoginRewardClaimButton = () => {
   };
 
 
-  const canClaim = process.env.NEXT_PUBLIC_DAILY_LOGIN_OVERRIDE === 'true' ? true : (guestMode ? false : (dailyLoginEvent ? DailyLoginRewardFactory.canClaimReward(new Date(Date.now()), dailyLoginEvent) : true));
+  const canClaim = process.env.NEXT_PUBLIC_DAILY_LOGIN_OVERRIDE === 'true' ? true : (guestMode ? false : (dailyLoginEvent ? DailyLoginRewardFactory.canClaimReward(new Date(), dailyLoginEvent) : true));
 
   const claimDailyLoginReward = async () => {
     toggleSelectedItem(null);
@@ -129,17 +129,7 @@ const DailyLoginRewardClaimButton = () => {
     const dailyLoginEvent = user.getEvent(UserEventTypes.DAILY.name);
     setDailyLoginEvent(dailyLoginEvent || null);
 
-    const now = new Date();
-    // Calculate the next midnight UTC-7 (which is 7 AM UTC).
-    const nextMidnightUtcMinus7 = new Date();
-    nextMidnightUtcMinus7.setUTCHours(7, 0, 0, 0);
-
-    // If current UTC time is already past 7 AM UTC, then the next midnight UTC-7 is tomorrow.
-    if (now.getTime() > nextMidnightUtcMinus7.getTime()) {
-      nextMidnightUtcMinus7.setUTCDate(nextMidnightUtcMinus7.getUTCDate() + 1);
-    }
-
-    const timeToMidnight = nextMidnightUtcMinus7.getTime() - now.getTime();
+    const timeToMidnight = DailyLoginRewardFactory.getDefaultTimeBetweenRewards();
 
     const timeoutId = setTimeout(() => {
       // Force a reload of user data, which will re-evaluate canClaim
@@ -171,20 +161,11 @@ const DailyLoginRewardClaimButton = () => {
   }
 
   function renderPopupWindowDisplay() {
-    const now = new Date();
-    const nextMidnightUtcMinus7 = new Date();
-    nextMidnightUtcMinus7.setUTCHours(7, 0, 0, 0);
-
-    if (now.getTime() > nextMidnightUtcMinus7.getTime()) {
-      nextMidnightUtcMinus7.setUTCDate(nextMidnightUtcMinus7.getUTCDate() + 1);
-    }
-
-    const timeToMidnight = nextMidnightUtcMinus7.getTime() - now.getTime();
+    const timeToMidnight = DailyLoginRewardFactory.getDefaultTimeBetweenRewards();
     const hours = Math.floor(timeToMidnight / (1000 * 60 * 60));
     const minutes = Math.floor(
       (timeToMidnight % (1000 * 60 * 60)) / (1000 * 60)
     );
-    const seconds = Math.floor((timeToMidnight % (1000 * 60)) / 1000);
 
     const timeUntilNextClaim = `${hours}h ${minutes}m`;
     return (
