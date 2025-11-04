@@ -2,16 +2,21 @@ export class AccountSettings {
 	guestMode: boolean;
 	displayEmojiIcons: boolean;
 	confirmDeletePlants: boolean;
+	confirmPlantAll: boolean;
+	confirmHarvestAll: boolean;
+	confirmPickupAll: boolean;
 
-	constructor(guestMode: boolean = false, displayEmojiIcons: boolean = true, confirmDeletePlants: boolean = true) {
+	constructor(guestMode: boolean = false, displayEmojiIcons: boolean = true, confirmPlantAll: boolean = true, confirmHarvestAll: boolean = true, confirmPickupAll: boolean = true, confirmDeletePlants: boolean = true) {
 		this.guestMode = guestMode;
 		this.displayEmojiIcons = displayEmojiIcons;
 		this.confirmDeletePlants = confirmDeletePlants;
+		this.confirmPlantAll = confirmPlantAll;
+		this.confirmHarvestAll = confirmHarvestAll;
+		this.confirmPickupAll = confirmPickupAll;
 	}
 
 	static getDefaultSettings(): AccountSettings {
-		let defaultGuestMode = false;
-		return new AccountSettings(defaultGuestMode);
+		return new AccountSettings();
 	}
 
 	static fromPlainObject(plainObject: any) {
@@ -20,7 +25,7 @@ export class AccountSettings {
 			throw new Error('Invalid plainObject structure for Settings');
 		}
 		const defaultSettings = AccountSettings.getDefaultSettings();
-		let { guestMode, displayEmojiIcons, confirmDeletePlants } = plainObject;
+		let { guestMode, displayEmojiIcons, confirmDeletePlants, confirmPlantAll, confirmPickupAll, confirmHarvestAll } = plainObject;
 		// Use default if invalid or missing
 		if (typeof guestMode !== 'boolean') {
 			guestMode = defaultSettings.guestMode;
@@ -31,7 +36,16 @@ export class AccountSettings {
 		if (typeof confirmDeletePlants !== 'boolean') {
 			confirmDeletePlants = defaultSettings.confirmDeletePlants;
 		}
-		return new AccountSettings(guestMode, displayEmojiIcons, confirmDeletePlants);
+		if (typeof confirmPlantAll !== 'boolean') {
+			confirmPlantAll = defaultSettings.confirmPlantAll;
+		}
+		if (typeof confirmHarvestAll !== 'boolean') {
+			confirmHarvestAll = defaultSettings.confirmHarvestAll;
+		}
+		if (typeof confirmPickupAll !== 'boolean') {
+			confirmPickupAll = defaultSettings.confirmPickupAll;
+		}
+		return new AccountSettings(guestMode, displayEmojiIcons, confirmPlantAll, confirmHarvestAll, confirmPickupAll, confirmDeletePlants);
 			
 	}
 
@@ -40,6 +54,9 @@ export class AccountSettings {
 			guestMode: this.guestMode,
 			displayEmojiIcons: this.displayEmojiIcons,
 			confirmDeletePlants: this.confirmDeletePlants,
+			confirmPlantAll: this.confirmPlantAll,
+			confirmHarvestAll: this.confirmHarvestAll,
+			confirmPickupAll: this.confirmPickupAll,
 		};
 	}
 }

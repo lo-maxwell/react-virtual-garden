@@ -123,50 +123,8 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 		}
 	}, [plot.getItemSubtype()]);
 
-	const handleClick = async () => {
-		// Check if this is a destroy action - if so, show popup instead of executing
-		if (onPlotClickHelpers.actionType === PlotActionType.DESTROY_ITEM && confirmDeletePlants) {
-			setShowDeletePopup(true);
-			return;
-		}
-
-		//onPlotClick comes from plotActions which may/may not be async
-		const uiResult = onPlotClickHelpers.uiHelper();
-		if (uiResult.success) {
-			setDisplayIcon(uiResult.displayIcon);
-		} else {
-			//no changes, don't need to do anything here (?)
-			return;
-		}
-		
-		// Call api if not in guest mode
-		if (!guestMode) {
-			const apiResult = await onPlotClickHelpers.apiHelper();
-			if (apiResult.success) {
-				setDisplayIcon(apiResult.displayIcon);
-			} else {
-				console.warn(`Api call failed`);
-				// setDisplayIcon(apiResult.displayIcon);
-				// TODO: sync plot function?
-				await syncAllAccountObjects();
-				reloadUser();
-				reloadGarden();
-				reloadInventory();
-				setDisplayIcon(plot.getItem().itemData.icon);
-				// setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1); //we force a refresh to clear statuses
-			}
-		}
-		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
-	}
-
-	const handleDeletePlant = async () => {
-		// Confirm that the action type is correct before proceeding
-		if (onPlotClickHelpers.actionType !== PlotActionType.DESTROY_ITEM) {
-			console.error(`Error: handleDeletePlant called with incorrect action type. Expected: ${PlotActionType.DESTROY_ITEM}, Got: ${onPlotClickHelpers.actionType}`);
-			return;
-		}
-
-		// Execute the actual destroy logic from onPlotClickHelpers
+	const onPlotClickHandler = async () => {
+		// onPlotClickHelpers
 		const uiResult = onPlotClickHelpers.uiHelper();
 		if (uiResult.success) {
 			setDisplayIcon(uiResult.displayIcon);
@@ -193,6 +151,28 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 			}
 		}
 		dispatch(setAllLevelSystemValues({ id: user.getLevelSystem().getLevelSystemId(), level: user.getLevelSystem().getLevel(), currentExp: user.getLevelSystem().getCurrentExp(), expToLevelUp: user.getLevelSystem().getExpToLevelUp() }));
+	}
+
+	const handleClick = async () => {
+		// Check if this is a destroy action - if so, show popup instead of executing
+		if (onPlotClickHelpers.actionType === PlotActionType.DESTROY_ITEM && confirmDeletePlants) {
+			setShowDeletePopup(true);
+			return;
+		}
+		
+		//onPlotClick comes from plotActions which may/may not be async
+		onPlotClickHandler();
+	}
+
+	const handleDeletePlant = async () => {
+		// Confirm that the action type is correct before proceeding
+		if (onPlotClickHelpers.actionType !== PlotActionType.DESTROY_ITEM) {
+			console.error(`Error: handleDeletePlant called with incorrect action type. Expected: ${PlotActionType.DESTROY_ITEM}, Got: ${onPlotClickHelpers.actionType}`);
+			return;
+		}
+
+		onPlotClickHandler();
+
 	};
 
 	const getPlantName = () => {

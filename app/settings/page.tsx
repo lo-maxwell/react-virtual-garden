@@ -24,7 +24,19 @@ const SettingsPage: React.FC = () => {
   const { inventory, reloadInventory, resetInventory } = useInventory();
   const { store, reloadStore, resetStore } = useStore();
   const { garden, reloadGarden, resetGarden } = useGarden();
-  const { account, guestMode, setGuestMode, displayEmojiIcons, setDisplayEmojiIcons, confirmDeletePlants, setConfirmDeletePlants } = useAccount();
+  const { account, 
+    guestMode, 
+    setGuestMode, 
+    displayEmojiIcons, 
+    setDisplayEmojiIcons, 
+    confirmPlantAll,
+		setConfirmPlantAll,
+		confirmHarvestAll,
+		setConfirmHarvestAll,
+		confirmPickupAll,
+		setConfirmPickupAll,
+		confirmDeletePlants,
+		setConfirmDeletePlants} = useAccount();
   const [syncing, setSyncing] = useState(false);
   const [message, setMessage] = useState('');
   const [messageColor, setMessageColor] = useState('black');
@@ -114,6 +126,69 @@ const SettingsPage: React.FC = () => {
           {getSyncAccountObjectsButtonText()}
         </button>
       </div>
+      <div className="mx-4 mt-2">
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-700">
+            Confirm before planting multiple plants
+          </span>
+          <label className="cursor-pointer">
+            <input
+              type="checkbox"
+              checked={confirmPlantAll}
+              onChange={() => setConfirmPlantAll(!confirmPlantAll)}
+              className="sr-only"
+            />
+            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${confirmPlantAll ? 'bg-green-600' : 'bg-gray-200'
+              }`}>
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${confirmPlantAll ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div className="mx-4 mt-2">
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-700">
+            Confirm before harvesting all plants
+          </span>
+          <label className="cursor-pointer">
+            <input
+              type="checkbox"
+              checked={confirmHarvestAll}
+              onChange={() => setConfirmHarvestAll(!confirmHarvestAll)}
+              className="sr-only"
+            />
+            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${confirmHarvestAll ? 'bg-green-600' : 'bg-gray-200'
+              }`}>
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${confirmHarvestAll ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div className="mx-4 mt-2">
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-700">
+            Confirm before picking up all decorations
+          </span>
+          <label className="cursor-pointer">
+            <input
+              type="checkbox"
+              checked={confirmPickupAll}
+              onChange={() => setConfirmPickupAll(!confirmPickupAll)}
+              className="sr-only"
+            />
+            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${confirmPickupAll ? 'bg-green-600' : 'bg-gray-200'
+              }`}>
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${confirmPickupAll ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+            </div>
+          </label>
+        </div>
+      </div>
+
       <div className="mx-4 mt-2">
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-700">
