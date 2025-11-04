@@ -49,7 +49,7 @@ const BottomLeftNotificationPanel = () => {
       {/* Toggle button - small square icon with alert */}
       <button
         onClick={togglePanel}
-        className={`relative w-12 h-12 rounded-md shadow-md flex items-center justify-center transition-colors duration-300 ${
+        className={`relative w-12 h-12 rounded-md shadow-md flex items-center justify-center transition-colors duration-300 text-3xl ${
 			isOpen
             ? "bg-purple-700 hover:bg-purple-800"
             : "bg-purple-600 hover:bg-purple-700"
