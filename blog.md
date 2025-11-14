@@ -449,6 +449,7 @@
   * Added additional text colors
   * Added gold to redux store
   * Updated user profile layout, made xp bar thinner
+  * Added mouse over for xp amounts in profile
   
 
 TODO:

@@ -1,10 +1,38 @@
 import { InvokeCommand, InvokeCommandOutput } from "@aws-sdk/client-lambda";
 import lambda from "./lambda";
 
+/**
+ * Determines the Lambda function name prefix based on the environment.
+ * Production uses 'prod-' prefix, development uses 'dev-' prefix.
+ */
+function getFunctionNamePrefix(): string {
+    const isProduction = process.env.NODE_ENV === 'production';
+    return isProduction ? 'prod-' : 'dev-';
+}
+
+/**
+ * Adds the environment prefix to a function name if it's not already present.
+ * @param functionName - The base function name (e.g., 'garden-select')
+ * @returns The function name with appropriate prefix (e.g., 'dev-garden-select' or 'prod-garden-select')
+ */
+function addEnvironmentPrefix(functionName: string): string {
+    const prefix = getFunctionNamePrefix();
+    
+    // If the function name already starts with 'dev-' or 'prod-', don't add prefix again
+    if (functionName.startsWith('dev-') || functionName.startsWith('prod-')) {
+        return functionName;
+    }
+    
+    return `${prefix}${functionName}`;
+}
+
 export async function invokeLambda<T = any>(functionName: string, payload: any): Promise<T> {
     try {
+        // Automatically add environment prefix to function name
+        const prefixedFunctionName = addEnvironmentPrefix(functionName);
+        
         const command = new InvokeCommand({
-            FunctionName: functionName,
+            FunctionName: prefixedFunctionName,
             Payload: JSON.stringify(payload),
         });
     
