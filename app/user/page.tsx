@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../hooks/contexts/AuthContext";
 import RedirectingMessage from "@/components/errorPages/redirectingMessage";
 import "./page.css";
+import colors from "@/components/colors/colors";
 
 const UserPage = () => {
   const { firebaseUser } = useAuth();
@@ -193,14 +194,14 @@ const UserPage = () => {
     <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
       <div className="flex inner-flex">
         <div className="w-1/3 left-side">
-          <div className="flex items-center justify-between">
+          
+          <div className="flex flex-row items-start justify-left space-x-4 mb-4">
             <IconSelector iconIndex={icon} onIconChange={onIconChangeHandler} />
-            <div className="flex flex-1 flex-col justify-start gap-2"> {/* Match icon height */}
+            <div className="flex flex-1 flex-col justify-between h-16"> {/* Match icon height */}
               <UsernameDisplay
-                username={username}
-                onUsernameChange={onUsernameChangeHandler}
-              />
-
+                  username={username}
+                  onUsernameChange={onUsernameChangeHandler}
+                />
               <LevelSystemComponent
                 level={user.getLevel()}
                 currentExp={user.getCurrentExp()}
@@ -215,7 +216,8 @@ const UserPage = () => {
         </div>
 
         <div className="w-2/3 right-side">
-          <UserStats />
+          {/* Removed until UI rework */}
+          {/* <UserStats /> */}
         </div>
       </div>
     </div>

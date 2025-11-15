@@ -15,7 +15,7 @@ const LevelSystemComponent = ({
   const progress = Math.min((currentExp / expToLevelUp) * 100, 100);
 
   return (
-    <div className="flex items-center w-full max-w-xs relative">
+    <div className="flex items-center w-full max-w-xs">
       {/* Level Circle */}
       <div
         className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm shadow-md z-10 ${colors.level.levelBackgroundColor} ${colors.level.levelTextColor} ${colors.level.levelCircleBorder}`}

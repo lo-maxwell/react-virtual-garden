@@ -25,21 +25,21 @@ const UsernameDisplay = ({ username, onUsernameChange }: { username: string, onU
     return (
         <>
             {editing ? (
-                <span className="flex flex-row justify-center">
+                <span className="relative flex flex-row justify-left items-center">
                     <input type="text" 
 					maxLength={24}
 					value={newUsername} 
 					onChange={handleChange} 
-					className={`border-none text-2xl ml-2 px-2 py-1 w-[16ch] ${colors.user.usernameTextColor}`}/>
+					className={`rounded-lg text-2xl px-1 ${colors.user.usernameTextColor}`}/>
                     <button onClick={handleSave}
-							className={`ml-2 my-4 px-2 text-xl rounded-lg ${colors.user.usernameEditButtonTextColor} ${colors.user.usernameEditButtonBackgroundColor}`}>
+							className={`ml-2 px-2 text-2xl rounded-lg ${colors.user.usernameEditButtonTextColor} ${colors.user.usernameEditButtonBackgroundColor}`}>
 						Save</button>
                 </span>
             ) : (
-                <span className="flex flex-row justify-center items-center">
-                    <span className={`px-2 py-1 text-2xl align-bottom ${colors.user.usernameTextColor}`}>{username}</span>
+                <span className="flex flex-row justify-left items-center">
+                    <span className={`text-2xl px-1 ${colors.user.usernameTextColor}`}>{username}</span>
                     <button onClick={handleEdit}
-							className={`ml-2 my-4 px-2 text-xl rounded-lg ${colors.user.usernameEditButtonTextColor} ${colors.user.usernameEditButtonBackgroundColor}`}>
+							className={`ml-2 px-2 text-2xl rounded-lg ${colors.user.usernameEditButtonTextColor} ${colors.user.usernameEditButtonBackgroundColor}`}>
 						Edit
 					</button>
                 </span>

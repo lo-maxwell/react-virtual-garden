@@ -30,7 +30,7 @@ const UserProfileComponent = () => {
 
   return (
     <>
-      <div className="flex flex-row items-start justify-center space-x-4">
+      <div className="flex flex-row items-start justify-left space-x-4">
         {/* Icon */}
         <IconDisplay
           icon={user.getIcon()}
@@ -43,7 +43,7 @@ const UserProfileComponent = () => {
         {/* Name + Level system stacked vertically */}
         <div className="flex flex-1 flex-col justify-between h-16"> {/* Match icon height */}
           <span
-            className={`text-2xl ${colors.user.usernameTextColor}`} // Hardcode username font size to fit
+            className={`text-2xl px-1 ${colors.user.usernameTextColor}`} // Hardcode username font size to fit
           >
             {user.getUsername()}
           </span>
