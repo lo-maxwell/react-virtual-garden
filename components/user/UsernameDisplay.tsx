@@ -32,14 +32,14 @@ const UsernameDisplay = ({ username, onUsernameChange }: { username: string, onU
 					onChange={handleChange} 
 					className={`rounded-lg text-2xl px-1 ${colors.user.usernameTextColor}`}/>
                     <button onClick={handleSave}
-							className={`ml-2 px-2 text-2xl rounded-lg ${colors.user.usernameEditButtonTextColor} ${colors.user.usernameEditButtonBackgroundColor}`}>
+							className={`absolute right-0 ml-2 px-2 text-2xl rounded-lg ${colors.user.usernameEditButtonTextColor} ${colors.user.usernameEditButtonBackgroundColor}`}>
 						Save</button>
                 </span>
             ) : (
-                <span className="flex flex-row justify-left items-center">
+                <span className="relative flex flex-row justify-left items-center">
                     <span className={`text-2xl px-1 ${colors.user.usernameTextColor}`}>{username}</span>
                     <button onClick={handleEdit}
-							className={`ml-2 px-2 text-2xl rounded-lg ${colors.user.usernameEditButtonTextColor} ${colors.user.usernameEditButtonBackgroundColor}`}>
+							className={`absolute right-0 ml-2 px-2 text-2xl rounded-lg ${colors.user.usernameEditButtonTextColor} ${colors.user.usernameEditButtonBackgroundColor}`}>
 						Edit
 					</button>
                 </span>
