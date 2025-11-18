@@ -30,7 +30,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const [tooltipWidth, setTooltipWidth] = useState(boxWidth);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLSpanElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Track hover state for child and tooltip
   const [childHovered, setChildHovered] = useState(false);
@@ -157,17 +157,17 @@ const Tooltip: React.FC<TooltipProps> = ({
 
   return (
     <>
-      <span
+      <div
         ref={wrapperRef}
         onMouseEnter={(e) => {
           setChildHovered(true);
           showTooltip(e);
         }}
         onMouseLeave={() => setChildHovered(false)}
-        className="relative w-full"
+        className="relative inline-block w-full"
       >
         {children}
-      </span>
+      </div>
 
       {shouldShow &&
         createPortal(

@@ -437,6 +437,12 @@ const GardenComponent = () => {
   const plots = useMemo(() => generatePlots(garden.getPlots()), [generatePlots, garden]);
 
   const utilities: Utility[] = [];
+  const shovelUtility: Utility = {
+    icon: user.getToolbox().getAllTools()[0].itemData.icon,
+    tool: user.getToolbox().getAllTools()[0],
+    onClickFunction: () => toggleSelectedItem(user.getToolbox().getAllTools()[0])
+  }
+  utilities.push(shovelUtility);
 
   return (
     <>
