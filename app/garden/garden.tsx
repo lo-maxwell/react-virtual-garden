@@ -21,6 +21,7 @@ import { ConfirmPlantAllPopupWindow } from "@/components/garden/confirmPlantAllP
 import { ConfirmHarvestAllPopupWindow } from "@/components/garden/confirmHarvestAllPopupWindow";
 import { ConfirmPickupAllPopupWindow } from "@/components/garden/confirmPickupAllPopupWindow";
 import ToolboxComponent from "@/components/garden/toolbox/toolbox";
+import UtilityBarComponent, { Utility } from "@/components/garden/utilityBar/utilityBar";
 
 const GardenComponent = () => {
   const { inventory, reloadInventory } = useInventory();
@@ -435,6 +436,8 @@ const GardenComponent = () => {
 
   const plots = useMemo(() => generatePlots(garden.getPlots()), [generatePlots, garden]);
 
+  const utilities: Utility[] = [];
+
   return (
     <>
       <div className="min-h-8">{gardenMessage}</div>
@@ -462,7 +465,7 @@ const GardenComponent = () => {
 				setShowWindow={setShowPickupAllPopup}
 				onConfirmPickupAll={pickupAll}
 			/>
-      <ToolboxComponent toolbox={user.getToolbox()} onToolClickFunction={toggleSelectedItem} maxHeightPercentage={100}/>
+      <UtilityBarComponent utilities={utilities} maxHeightPercentage={100}/>
       <div className="my-1">
         <div>
           <button

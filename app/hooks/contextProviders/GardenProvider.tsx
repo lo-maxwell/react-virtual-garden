@@ -1,5 +1,6 @@
 'use client'
 import { GardenContext } from '@/app/hooks/contexts/GardenContext';
+import { Utility } from '@/components/garden/utilityBar/utilityBar';
 import { Garden } from '@/models/garden/Garden';
 import { loadGarden, saveGarden } from '@/utils/localStorage/garden';
 import React, { ReactNode, useEffect, useState, useCallback, useMemo } from 'react';
@@ -15,6 +16,7 @@ export const GardenProvider = ({ children }: GardenProviderProps) => {
 	const [gardenMessage, setGardenMessage] = useState('');
 	const [instantGrow, setInstantGrow] = useState(false);
 	const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
+	const [utilities, setUtilities] = useState<Utility[]>([]);
 
 	const setupGarden = useCallback((): Garden => {
 		let garden = loadGarden();
