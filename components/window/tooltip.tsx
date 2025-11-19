@@ -30,7 +30,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const [tooltipWidth, setTooltipWidth] = useState(boxWidth);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLSpanElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Track hover state for child and tooltip
   const [childHovered, setChildHovered] = useState(false);
@@ -68,9 +68,36 @@ const Tooltip: React.FC<TooltipProps> = ({
     let tooltipTop: number, tooltipLeft: number;
     switch (finalPosition) {
       case 'top': //We're only using top right now, so didn't bother with the scroll for other cases.
-        tooltipTop = top - 10; // Account for scroll
-        tooltipLeft = left + width / 2 + 10;
+      {
+        // First place tooltip above child (temporary — before measuring)
+        tooltipTop = top - 10;
+        tooltipLeft = left + width / 2;
+      
+        // Temporarily show tooltip to measure its real height
+        setCoords({ top: tooltipTop, left: tooltipLeft });
+        setVisible(true);
+      
+        setTimeout(() => {
+          if (!tooltipRef.current) return;
+      
+          const tooltipRect = tooltipRef.current.getBoundingClientRect();
+      
+          // OPTION A: Position ABOVE the child
+          const perfectTop = top - tooltipRect.height - 10;
+      
+          // OPTION B: Position BELOW the child
+          const fallbackBottom = top + height + 10;
+      
+          // Would it go off screen if placed above?
+          const goesOffTop = perfectTop < 0;
+      
+          tooltipTop = goesOffTop ? fallbackBottom : perfectTop;
+      
+          setCoords({ top: tooltipTop, left: tooltipLeft });
+        }, 10);
+      
         break;
+      }
       case 'right':
         tooltipTop = top + height / 2 ;
         tooltipLeft = left + width + 10;
@@ -130,27 +157,30 @@ const Tooltip: React.FC<TooltipProps> = ({
 
   return (
     <>
-      <span
+      <div
         ref={wrapperRef}
         onMouseEnter={(e) => {
           setChildHovered(true);
           showTooltip(e);
         }}
         onMouseLeave={() => setChildHovered(false)}
-        className="relative w-full"
+        className="relative inline-block w-full"
       >
         {children}
-      </span>
+      </div>
 
       {shouldShow &&
         createPortal(
           <div
           ref={tooltipRef}
+          onMouseEnter={() => setTooltipHovered(true)}
+          onMouseLeave={() => setTooltipHovered(false)}
           className={`fixed z-50 px-2 py-1 text-sm text-purple-800 text-semibold ${backgroundColor} rounded shadow-lg
-          ${position === 'top' ? 'transform -translate-x-1/2 -translate-y-full' : ''}
+          ${position === 'top' ? 'transform -translate-x-1/2' : ''}
           ${position === 'right' ? 'transform -translate-y-1/2' : ''}
           ${position === 'bottom' ? 'transform -translate-x-1/2' : ''}
-          ${position === 'left' ? 'transform -translate-y-1/2 -translate-x-full' : ''}`}
+          ${position === 'left' ? 'transform -translate-y-1/2' : ''}
+          `}
           style={{ top: `${coords.top}px`, left: `${coords.left}px`, minWidth: `100px`, maxWidth: tooltipWidth, whiteSpace: 'normal'}}
         >
             {content}

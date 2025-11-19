@@ -28,37 +28,41 @@ Resources:
     Properties:
       Handler: selectFromDB/app.handler
       Role: !Ref LambdaExecutionRoleArn
-      FunctionName: garden-select
+      FunctionName: !Sub '${FunctionNamePrefix}garden-select'
 
   InsertDB:
     Type: AWS::Serverless::Function
     Properties:
       Handler: insertDB/app.handler
       Role: !Ref LambdaExecutionRoleArn
-      FunctionName: garden-insert
+      FunctionName: !Sub '${FunctionNamePrefix}garden-insert'
 
   UpdateDB:
     Type: AWS::Serverless::Function
     Properties:
       Handler: updateDB/app.handler
       Role: !Ref LambdaExecutionRoleArn
-      FunctionName: garden-update
+      FunctionName: !Sub '${FunctionNamePrefix}garden-update'
 
   DeleteDB:
     Type: AWS::Serverless::Function
     Properties:
       Handler: deleteDB/app.handler
       Role: !Ref LambdaExecutionRoleArn
-      FunctionName: garden-delete
+      FunctionName: !Sub '${FunctionNamePrefix}garden-delete'
 
   GetRandomNumber:
     Type: AWS::Serverless::Function
     Properties:
       Handler: getRandomNumber/app.handler
       Role: !Ref LambdaExecutionRoleArn
-      FunctionName: random-number
+      FunctionName: !Sub '${FunctionNamePrefix}random-number'
 
 Parameters:
+  FunctionNamePrefix:
+    Type: String
+    Default: ""
+    Description: "Prefix for Lambda function names (e.g., 'dev-' or 'prod-'). Leave empty for no prefix."
   DBEndpoint:
     Type: String
     Description: "The existing RDS endpoint (e.g., my-database.xxxxx.region.rds.amazonaws.com)"

@@ -9,24 +9,11 @@ class IconEmojiRepository {
 	}
 
 	loadIcons() {
-		// Example to load PlacedItems > Plants
-		this.Icons['Plants'] = iconData.Icons.Plants.map((iconObject: any) =>
-		  {return new Icon(iconObject.name, iconObject.icon);}
-		);
-		this.Icons['Decorations'] = iconData.Icons.Decorations.map((iconObject: any) =>
-		  {return new Icon(iconObject.name, iconObject.icon);}
-		);
-		this.Icons['Error'] = iconData.Icons.Error.map((iconObject: any) =>
-		  {return new Icon(iconObject.name, iconObject.icon);}
-		);
-		this.Icons['Ground'] = iconData.Icons.Ground.map((iconObject: any) =>
-		{return new Icon(iconObject.name, iconObject.icon);}
-	  	);
-		this.Icons['Tools'] = iconData.Icons.Tools.map((iconObject: any) =>
-		{return new Icon(iconObject.name, iconObject.icon);}
-		);
-		this.Icons['Other'] = iconData.Icons.Other.map((iconObject: any) =>
-		{return new Icon(iconObject.name, iconObject.icon);}
+		this.Icons = Object.fromEntries(
+		  Object.entries(iconData.Icons).map(([category, list]) => [
+			category,
+			list.map(icon => new Icon(icon.name, icon.icon))
+		  ])
 		);
 	  }
 

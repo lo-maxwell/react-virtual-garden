@@ -90,6 +90,20 @@
                 "icon": "🪓"
             }
         ],
+        "Utilities": [
+            {
+                "name": "plantAll",
+                "icon": "🌱"
+            },
+            {
+                "name": "harvestAll",
+                "icon": "🧺"
+            },
+            {
+                "name": "pickupAll",
+                "icon": "📦"
+            }
+        ],
         "Other": [
             {
                 "name": "reward",

@@ -9,12 +9,13 @@ const ItemHistoryListComponent = ({}) => {
 		const histories = user.getItemHistory().getAllHistories();
 		return (<>
 			<div>
+			<div className={`text-lg`}> Items Harvested </div>
 			{histories.map((history, index) => {
 				if (history.getItemData().subtype === ItemSubtypes.HARVESTED.name) {
 					return (
-						<div key={history.getItemData().name + index}>
+						<div key={history.getItemData().name + index} className={`flex items-center gap-2`}>
 							<RawIconDisplay icon={history.getItemData().icon} width={6} height={6}/>
-							{history.getItemData().name}: {history.getQuantity()}
+							{history.getItemData().name} harvested: {history.getQuantity()}
 						</div>
 					);
 				} else if (history.getItemData().subtype === ItemSubtypes.DECORATION.name) {
