@@ -13,16 +13,24 @@ const UtilityButton = ({utility, onClickFunction, focus}: {utility: Utility, onC
 
 	const getBorderColor = () => {
 		if (focus) {
-			return colors.inventory.inventoryItemBorderColor;
+			return colors.tool.toolBorderColor;
 		} else {
-			return `border-white`;
+			return ``;
+		}
+	}
+
+	const getBackgroundColor = () => {
+		if (focus) {
+			return colors.tool.toolFocusBackgroundColor;
+		} else {
+			return colors.tool.backgroundColor;
 		}
 	}
 
 	return (
 		<>
 		<UtilityTooltip utility={utility}>
-			<IconButton icon={utility.icon} onClickFunction={handleClick} bgColor={colors.tool.backgroundColor} borderColor={getBorderColor()} textSize={"text-4xl"} elementSize={"12"}/>
+			<IconButton icon={utility.icon} onClickFunction={handleClick} bgColor={getBackgroundColor()} borderColor={getBorderColor()} textSize={"text-4xl"} elementSize={"12"}/>
 		</UtilityTooltip>
 		</>
 	);

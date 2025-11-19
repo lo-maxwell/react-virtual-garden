@@ -14,7 +14,7 @@ const UtilityBarComponent = ({utilities, maxHeightPercentage}: {utilities: Utili
 	const RenderUtilityBar = () => {
 		return utilities.map((util, utilIndex) => {
 			return (
-				<div key={utilIndex} className={`inline-block`}>
+				<div key={utilIndex} className={`inline-block mx-1`}>
 					<UtilityButton utility={util} onClickFunction={util.onClickFunction} focus={util.tool ? util.tool == selectedItem : false}></UtilityButton>
 				</div>
 			)

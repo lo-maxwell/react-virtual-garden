@@ -81,7 +81,9 @@ const colors = {
 
 	tool: {
 		descriptionTextColor: "text-coffee-800",
-		backgroundColor: "bg-moon-mist-400",
+		toolFocusBackgroundColor: "bg-moon-mist-300",
+		toolBorderColor: "border-4 border-apple-600",
+		backgroundColor: "hover:bg-moon-mist-300 bg-moon-mist-400",
 	},
 
 	error: {
