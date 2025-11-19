@@ -451,6 +451,14 @@
   * Updated user profile layout, made xp bar thinner
   * Added mouse over for xp amounts in profile
   
+## Day 44
+
+### More UI Changes
+  * Added Utility Bar to replace Toolbar in garden page
+    * Contains buttons for destroying plants, plant all, harvest all, pickup all
+  * Fixed item history layout on the user page and added new user stats
+  * Renamed basic shovel to basic axe
+  * Various refactors for tooltips and popup window issues, especially on mobile
 
 TODO:
 

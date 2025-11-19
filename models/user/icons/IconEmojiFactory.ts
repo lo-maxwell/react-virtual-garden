@@ -9,25 +9,11 @@ class IconEmojiFactory {
 	}
 
 	loadIcons(icons: Record<string, Icon[]>) {
-		// Example to load PlacedItems > Plants
-		this.Icons['Plants'] = icons.Plants.map((iconObject: any) =>
-		  {return new Icon(iconObject.name, iconObject.icon);}
-		);
-		this.Icons['Decorations'] = icons.Decorations.map((iconObject: any) =>
-		  {return new Icon(iconObject.name, iconObject.icon);}
-		);
-		this.Icons['Ground'] = icons.Ground.map((iconObject: any) =>
-		  {return new Icon(iconObject.name, iconObject.icon);}
-		);
-		this.Icons['Error'] = icons.Error.map((iconObject: any) =>
-		  {return new Icon(iconObject.name, iconObject.icon);}
-		);
-		this.Icons['Tools'] = icons.Tools.map((iconObject: any) =>
-		  {return new Icon(iconObject.name, iconObject.icon);}
-		);
-		this.Icons['Other'] = icons.Other.map((iconObject: any) =>
-		  {return new Icon(iconObject.name, iconObject.icon);}
-		);
+		for (const category of Object.keys(icons)) {
+		  this.Icons[category] = icons[category].map(
+			(iconObject: any) => new Icon(iconObject.name, iconObject.icon)
+		  );
+		}
 	  }
 
 	getIconCategories() {
@@ -49,8 +35,6 @@ class IconEmojiFactory {
 		if (icons.length === 1) return icons[0].getIcon();
 		else if (icons.length === 0) return this.getDefaultErrorIcon().getIcon();
 		else {
-			console.error('Error: found multiple icons with the same name!');
-			console.error(icons);
 			return this.getDefaultErrorIcon().getIcon();
 		}
 	}

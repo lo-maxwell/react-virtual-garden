@@ -38,6 +38,12 @@
 				"path": "error.svg"
             }
         ],
+        "Utilities": [
+            {
+                "name": "default",
+				"path": "error.svg"
+            }
+        ],
 		"User": [
 			{
                 "name": "default",

@@ -21,6 +21,8 @@ import { ConfirmPlantAllPopupWindow } from "@/components/garden/confirmPlantAllP
 import { ConfirmHarvestAllPopupWindow } from "@/components/garden/confirmHarvestAllPopupWindow";
 import { ConfirmPickupAllPopupWindow } from "@/components/garden/confirmPickupAllPopupWindow";
 import ToolboxComponent from "@/components/garden/toolbox/toolbox";
+import UtilityBarComponent, { Utility } from "@/components/garden/utilityBar/utilityBar";
+import { buildGardenUtilities } from "./gardenUtilities";
 
 const GardenComponent = () => {
   const { inventory, reloadInventory } = useInventory();
@@ -435,6 +437,15 @@ const GardenComponent = () => {
 
   const plots = useMemo(() => generatePlots(garden.getPlots()), [generatePlots, garden]);
 
+  const utilities = useMemo(() => 
+    buildGardenUtilities(user, {
+      onDestroyPlant: () => toggleSelectedItem(user.getToolbox().getToolsByType("Shovel")[0]),
+      onPlantAll: handlePlantAll,
+      onHarvestAll: handleHarvestAll,
+      onPickupAll: handlePickupAll
+    }),
+  [user, handlePlantAll, handleHarvestAll, handlePickupAll]);
+
   return (
     <>
       <div className="min-h-8">{gardenMessage}</div>
@@ -462,31 +473,8 @@ const GardenComponent = () => {
 				setShowWindow={setShowPickupAllPopup}
 				onConfirmPickupAll={pickupAll}
 			/>
-      <ToolboxComponent toolbox={user.getToolbox()} onToolClickFunction={toggleSelectedItem} maxHeightPercentage={100}/>
+      <UtilityBarComponent utilities={utilities} maxHeightPercentage={100}/>
       <div className="my-1">
-        <div>
-          <button
-            onClick={handlePlantAll}
-            className={`bg-gray-300 px-4 py-1 mx-1 my-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}
-            data-testid="plant-all"
-          >
-            Plant All
-          </button>
-          <button
-            onClick={handleHarvestAll}
-            className={`bg-gray-300 px-4 py-1 mx-1 my-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}
-            data-testid="harvest-all"
-          >
-            Harvest All
-          </button>
-          <button
-            onClick={handlePickupAll}
-            className={`bg-gray-300 px-4 py-1 mx-1 my-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}
-            data-testid="harvest-all"
-          >
-            Remove Decorations
-          </button>
-        </div>
         <button
           onClick={handleGardenExpansionDisplay}
           className={`bg-gray-300 px-4 py-1 mx-1 my-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2`}
