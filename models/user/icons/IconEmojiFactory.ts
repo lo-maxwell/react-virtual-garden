@@ -35,8 +35,6 @@ class IconEmojiFactory {
 		if (icons.length === 1) return icons[0].getIcon();
 		else if (icons.length === 0) return this.getDefaultErrorIcon().getIcon();
 		else {
-			console.error('Error: found multiple icons with the same name!');
-			console.error(icons);
 			return this.getDefaultErrorIcon().getIcon();
 		}
 	}

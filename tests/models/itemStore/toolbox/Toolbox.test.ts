@@ -28,7 +28,7 @@ test('Should Initialize Default Toolbox Object', () => {
 	expect(toolbox).not.toBeUndefined();
 	expect(toolbox).not.toBeNull();
 	expect(toolbox.size()).toBe(1);
-	expect(toolbox.contains('Basic Shovel').payload).toBe(true);
+	expect(toolbox.contains('Basic Axe').payload).toBe(true);
 });
 
 test('Should Get All Tools', () => {
@@ -43,10 +43,10 @@ test('Should Get Tools By Type', () => {
 })
 
 test('Should Find Tool', () => {
-	const getResponse = testToolbox.getTool(itemTemplateFactory.getToolTemplateByName('Basic Shovel')!);
+	const getResponse = testToolbox.getTool(itemTemplateFactory.getToolTemplateByName('Basic Axe')!);
 	expect(getResponse.isSuccessful()).toBe(true);
-	expect(getResponse.payload.itemData.name).toBe('Basic Shovel');
-	const containsResponse = testToolbox.contains(itemTemplateFactory.getToolTemplateByName('Basic Shovel')!);
+	expect(getResponse.payload.itemData.name).toBe('Basic Axe');
+	const containsResponse = testToolbox.contains(itemTemplateFactory.getToolTemplateByName('Basic Axe')!);
 	expect(containsResponse.isSuccessful()).toBe(true);
 	expect(containsResponse.payload).toBe(true);
 })
@@ -79,7 +79,7 @@ test('Should Not Gain Invalid Tool', () => {
 })
 
 test('Should Trash Tool From Toolbox', () => {
-	const response = testToolbox.trashTool(itemTemplateFactory.getToolTemplateByName('Basic Shovel')!);
+	const response = testToolbox.trashTool(itemTemplateFactory.getToolTemplateByName('Basic Axe')!);
 	expect(response.isSuccessful()).toBe(true);
 	//Deletes item from the toolbox
 	expect(testToolbox.size()).toBe(0);
@@ -92,10 +92,10 @@ test('Should Not Trash Nonexistent Tool From Toolbox', () => {
 })
 
 test('Should Create Toolbox Object From PlainObject', () => {
-	const originalToolList = new ToolList([generateTool('Basic Shovel')]);
+	const originalToolList = new ToolList([generateTool('Basic Axe')]);
 	const originalToolbox = new Toolbox(uuidv4(), originalToolList);
 	const serializedToolbox = JSON.stringify((originalToolbox).toPlainObject());
 	const toolbox = Toolbox.fromPlainObject(JSON.parse(serializedToolbox));
 	expect(toolbox.size()).toBe(1);
-	expect(toolbox.contains('Basic Shovel').payload).toBe(true);
+	expect(toolbox.contains('Basic Axe').payload).toBe(true);
 })

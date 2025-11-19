@@ -44,7 +44,7 @@ class ItemTemplateFactory {
 	}
 
 	/**
-	 * @name the tool name, ie. Basic Shovel. Not case sensitive.
+	 * @name the tool name, ie. Basic Axe. Not case sensitive.
 	 * @returns the found ToolTemplate or null
 	 */
 	 getToolTemplateByName(name: string): ToolTemplate | null {

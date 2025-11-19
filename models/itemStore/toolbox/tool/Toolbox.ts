@@ -26,11 +26,11 @@ export default class Toolbox {
 
 	static generateDefaultToolbox() {
 		const defaultTools: Tool[] = [];
-		const basicShovel = generateTool("Basic Shovel");
-		if (basicShovel.itemData.name == "Basic Shovel") {
+		const basicShovel = generateTool("Basic Axe");
+		if (basicShovel.itemData.name == "Basic Axe") {
 			defaultTools.push(basicShovel);
 		} else {
-			console.warn(`Could not generate item with name ${"Basic Shovel"}`);
+			console.warn(`Could not generate item with name ${"Basic Axe"}`);
 		}
 
 		return new Toolbox(uuidv4(), new ToolList(defaultTools));
