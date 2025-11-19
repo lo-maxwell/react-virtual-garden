@@ -215,9 +215,9 @@ const UserPage = () => {
           </Suspense>
         </div>
 
-        <div className="w-2/3 right-side">
+        <div className="px-4 w-2/3 right-side">
           {/* Removed until UI rework */}
-          {/* <UserStats /> */}
+          <UserStats />
         </div>
       </div>
     </div>
