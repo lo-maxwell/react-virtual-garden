@@ -1,4 +1,6 @@
-## Virtual Garden Simulator ##
+## Goose Farm ##
+
+### A browser-based farming simulator made with React / Nextjs / Postgres. ###
 
 ## Deployed with vercel here: https://react-virtual-garden.vercel.app
 
