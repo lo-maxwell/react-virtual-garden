@@ -16,7 +16,9 @@ data = {
         "Ground": [],
 		"Plants": [],
 		"Decorations": [],
-        "Tools": []
+        "Tools": [],
+        "Utilities": [],
+        "Other": []
 	}
 }
 
