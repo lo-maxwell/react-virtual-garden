@@ -6,7 +6,7 @@ import os  # Ensure this import is at the top of your file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Construct absolute paths for the input and output files
-history_file_path = os.path.join(script_dir, '../user/actionHistories.csv')
+history_file_path = os.path.join(script_dir, '../user/final/actionHistories.csv')
 json_file_path = os.path.join(script_dir, '../final/temp/ActionHistories.json')
 
 # Initialize the data structure for JSON output

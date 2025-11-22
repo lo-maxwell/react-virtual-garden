@@ -6,7 +6,7 @@ import os  # Ensure this import is at the top of your file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Define the input and output file paths with absolute paths
-icon_file_path = os.path.join(script_dir, '../user/icons.csv')
+icon_file_path = os.path.join(script_dir, '../user/final/icons.csv')
 json_file_path = os.path.join(script_dir, '../final/temp/Icons.json')
 
 # Initialize the data structure for JSON output

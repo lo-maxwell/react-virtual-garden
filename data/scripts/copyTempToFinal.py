@@ -34,6 +34,16 @@ os.makedirs(destination_dir_placed, exist_ok=True)
 # Copy the entire directory from source to destination for placed items
 shutil.copytree(source_dir_placed, destination_dir_placed, dirs_exist_ok=True)
 
+# Define source and destination directories for placed items with absolute paths
+source_dir_placed = os.path.join(script_dir, '../user/temp')
+destination_dir_placed = os.path.join(script_dir, '../user/final')
+
+# Ensure the destination directory exists for placed items
+os.makedirs(destination_dir_placed, exist_ok=True)
+
+# Copy the entire directory from source to destination for placed items
+shutil.copytree(source_dir_placed, destination_dir_placed, dirs_exist_ok=True)
+
 print("Contents copied from inventory, placed, tool items temp to final.")
 
 # Workflow: addPlantToCSV -> cleanItemCSV -> copyTempToFinal -> itemCSVToJson or allCSVToJson

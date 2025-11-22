@@ -7,7 +7,7 @@ def convert_all_csv_to_json():
 
     # Define the scripts with absolute paths
     scripts = [
-        os.path.join(script_dir, "cleanItemCSVs.py"),
+        os.path.join(script_dir, "cleanCSVs.py"),
         os.path.join(script_dir, "copyTempToFinal.py"),
         os.path.join(script_dir, "allCSVToJson.py")
     ]

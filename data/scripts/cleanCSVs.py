@@ -2,13 +2,14 @@ import os
 import pandas as pd
 import json
 
-def clean_item_csvs():
+def clean_csvs():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     
     # Define the directories with absolute paths
     inventory_dir = os.path.join(script_dir, '../items/inventoryItems/temp')
     placed_dir = os.path.join(script_dir, '../items/placedItems/temp')
     tool_dir = os.path.join(script_dir, '../items/tools/temp')
+    user_dir = os.path.join(script_dir, '../user/temp')
     
     
     # List to keep track of removed rows
@@ -19,13 +20,23 @@ def clean_item_csvs():
         nonlocal removed_rows
         # Read the CSV file
         df = pd.read_csv(file_path)
+
+        dedupe_key = ''
+        if "/user/" in file_path:
+            dedupe_key = "name"
+        else:
+            dedupe_key = "id"
+
+        if dedupe_key not in df.columns:
+            print(f"Skipping {file_path}: '{dedupe_key}' column not found.")
+            return
         
         # Convert to JSON objects
         json_objects = df.to_dict(orient='records')
         
         # Remove duplicates based on 'id'
         original_count = len(json_objects)
-        df_unique = df.drop_duplicates(subset='id')
+        df_unique = df.drop_duplicates(subset=dedupe_key)
         new_count = len(df_unique)
         
         # Identify removed rows
@@ -33,17 +44,20 @@ def clean_item_csvs():
             removed = original_count - new_count
             removed_rows.append((file_path, removed))
         
-        # Sort by 'id'
-        df_sorted = df_unique.sort_values(by='id')
+        # Sort by 'id' if id exists
+        if dedupe_key == 'id':
+            df_sorted = df_unique.sort_values(by=dedupe_key)
         
-        # Write the sorted DataFrame back to the original CSV
-        df_sorted.to_csv(file_path, index=False)
+            # Write the sorted DataFrame back to the original CSV
+            df_sorted.to_csv(file_path, index=False)
+        else:
+            df_unique.to_csv(file_path, index=False)
 
         # Print the sorted JSON objects
         # print(json.dumps(df_sorted.to_dict(orient='records'), indent=4))
 
     # Process all CSV files in both directories
-    for directory in [inventory_dir, placed_dir, tool_dir]:
+    for directory in [inventory_dir, placed_dir, tool_dir, user_dir]:
         for filename in os.listdir(directory):
             if filename.endswith('.csv'):
                 process_csv(os.path.join(directory, filename))
@@ -56,4 +70,4 @@ def clean_item_csvs():
 
 
 # Call the function
-clean_item_csvs()
+clean_csvs()
