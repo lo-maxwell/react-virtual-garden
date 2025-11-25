@@ -61,20 +61,6 @@ export class DailyLoginRewardFactory extends RewardGenerator {
 	/**
 	 * Returns the number of milliseconds until the next midnight UTC-7.
 	 */
-	// static getDefaultTimeBetweenRewards(): number {
-	// 	const now = DateTime.now(); // Get the current time in the client's local time zone
-
-	// 	// Convert the current time to UTC
-	// 	const utcNow = now.toUTC();
-
-	// 	// Get the current midnight UTC-7 (adjust to UTC-7 time zone)
-	// 	const currentDayMidnightUtcMinus7 = utcNow.setZone('UTC-7').startOf('day');
-
-	// 	// If the current time is already past midnight UTC-7, calculate for the next midnight UTC-7
-	// 	const nextMidnight = utcNow > currentDayMidnightUtcMinus7 ? currentDayMidnightUtcMinus7.plus({ days: 1 }) : currentDayMidnightUtcMinus7;
-
-	// 	return nextMidnight.toMillis() - utcNow.toMillis(); // Return the time until the next midnight UTC-7
-	// }
 	static getDefaultTimeBetweenRewards(): number {
 		// Current time in Los Angeles
 		const nowLA = DateTime.now().setZone('America/Los_Angeles');
@@ -92,24 +78,6 @@ export class DailyLoginRewardFactory extends RewardGenerator {
 	 * @param event - The event to check.
 	 * @returns True if the user can claim a reward, false otherwise.
 	 */
-	// static canClaimReward(currentTime: Date = new Date(), event: UserEvent): boolean {
-	// 	if (event.getEventType() !== UserEventTypes.DAILY.name) return false;
-	// 	if (process.env.DAILY_LOGIN_OVERRIDE === 'true') {
-	// 		return currentTime.getTime() > event.getCreatedAt().getTime() + 1000;
-	// 	}
-	// 	const lastClaimDate = event.getCreatedAt();  // Assuming this is a Date object
-
-	// 	// Convert currentTime and lastClaimDate to UTC timestamps
-	// 	const utcCurrentTime = new Date(currentTime.toUTCString()); // Converts to UTC
-	// 	const utcLastClaimTime = new Date(lastClaimDate.toUTCString()); // Converts to UTC
-
-	// 	// Get midnight UTC-7 for both current time and last claim time
-	// 	const currentDayMidnightUtcMinus7 = this.getMidnightUtcMinus7(utcCurrentTime);
-	// 	const lastClaimDayMidnightUtcMinus7 = this.getMidnightUtcMinus7(utcLastClaimTime);
-
-	// 	// Check if the current time (in UTC-7) is after the last claim date (also in UTC-7)
-	// 	return currentDayMidnightUtcMinus7 > lastClaimDayMidnightUtcMinus7;
-	// }
 	static canClaimReward(currentTime: Date = new Date(), event: UserEvent): boolean {
 		if (event.getEventType() !== UserEventTypes.DAILY.name) return false;
 	
@@ -125,36 +93,6 @@ export class DailyLoginRewardFactory extends RewardGenerator {
 		// Compare the calendar day
 		return currentLA.startOf('day') > lastClaimLA.startOf('day');
 	}
-	
-
-	/**
-	 * Helper function to get midnight UTC-7 for a given date (Date object).
-	 * @param date - A Date object.
-	 * @returns A Date object representing midnight UTC-7.
-	 */
-	// static getMidnightUtcMinus7(date: Date): Date {
-	// 	const d = new Date(date); // Clone the date object to avoid mutation
-
-	// 	// Convert the date to UTC
-	// 	const utcTime = new Date(d.toUTCString());
-
-	// 	// Get midnight in UTC
-	// 	utcTime.setUTCHours(0, 0, 0, 0); // Set to 00:00:00 UTC
-
-	// 	// Adjust to UTC-7 (subtract 7 hours from UTC)
-	// 	utcTime.setUTCHours(utcTime.getUTCHours() - 7);
-
-	// 	return utcTime;  // Returns the Date object set to midnight UTC-7
-	// }
-	// static getMidnightUtcMinus7(date: Date) {
-	// 	return DateTime
-	// 	  .fromJSDate(date)
-	// 	  .setZone('UTC-7', { keepLocalTime: false })
-	// 	  .startOf('day')
-	// 	  .toJSDate();
-	//   }
-	  
-
 	
 	/**
 	 * Generates an EventReward object, which contains a list of items and their quantities, as well as an amount of gold,
