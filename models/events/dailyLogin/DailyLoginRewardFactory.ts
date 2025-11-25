@@ -58,80 +58,18 @@ export class DailyLoginRewardFactory extends RewardGenerator {
 		return 200 + getRandomInt(1, 100);
 	}
 
-	// /**
-	//  * Returns the number of milliseconds until the next UTC-7 midnight.
-	//  */
-	// static getDefaultTimeBetweenRewards(): number {
-	// 	const now = new Date(Date.now());
-
-	// 	// Helper to get a Date object at midnight UTC-7 for a given date
-	// 	const getMidnightUtcMinus7 = (date: Date): Date => {
-	// 		const d = new Date(date);
-	// 		// To get the midnight of the *current* UTC-7 day, we need to consider the UTC-7 date components.
-	// 		// Get the current date in UTC, then subtract the offset to align to UTC-7 "day boundary"
-	// 		d.setUTCHours(d.getUTCHours() - 7); // Temporarily adjust to 'UTC-7' interpretation of day
-	// 		d.setUTCHours(0, 0, 0, 0); // Set to midnight UTC
-	// 		d.setUTCHours(d.getUTCHours() + 7); // Adjust back to original UTC-7 offset for final representation
-	// 		return d;
-	// 	};
-
-	// 	const currentDayMidnight = getMidnightUtcMinus7(now);
-	// 	const nextMidnight = (now.getTime() < currentDayMidnight.getTime())
-	// 		? currentDayMidnight
-	// 		: getMidnightUtcMinus7(new Date(now.getTime() + 24 * 60 * 60 * 1000)); // Add 24 hours to get next day
-
-	// 	return nextMidnight.getTime() - now.getTime();
-	// }
-
-	// /**
-	//  * Checks if the user can claim a reward based on the current time and the event
-	//  * @param currentTime - The current time to compare against the last occurrence
-	//  * @param event - The event to check
-	//  * @returns True if the user can claim a reward, false otherwise
-	//  */
-	// static canClaimReward(currentTime: Date = new Date(Date.now()), event: UserEvent): boolean {
-	// 	if (event.getEventType() !== UserEventTypes.DAILY.name) return false;
-	// 	// return true; // for testing purposes
-	// 	if (process.env.DAILY_LOGIN_OVERRIDE === 'true') {
-	// 		return currentTime.getTime() > event.getCreatedAt().getTime() + 10000;
-	// 	}
-		
-	// 	const lastClaimDate = event.getCreatedAt();
-
-	// 	// Helper to get a Date object at midnight UTC-7 for a given date
-	// 	const getMidnightUtcMinus7 = (date: Date): Date => {
-	// 		const d = new Date(date);
-	// 		// To get the midnight of the *current* UTC-7 day, we need to consider the UTC-7 date components.
-	// 		// Get the current date in UTC, then subtract the offset to align to UTC-7 "day boundary"
-	// 		d.setUTCHours(d.getUTCHours() - 7); // Temporarily adjust to 'UTC-7' interpretation of day
-	// 		d.setUTCHours(0, 0, 0, 0); // Set to midnight UTC
-	// 		d.setUTCHours(d.getUTCHours() + 7); // Adjust back to original UTC-7 offset for final representation
-	// 		return d;
-	// 	};
-
-	// 	const currentDayUtcMinus7 = getMidnightUtcMinus7(currentTime);
-	// 	const lastClaimDayUtcMinus7 = getMidnightUtcMinus7(lastClaimDate);
-
-	// 	// If the current day (UTC-7) is after the last claim day (UTC-7), a new day has started.
-	// 	return currentDayUtcMinus7.getTime() > lastClaimDayUtcMinus7.getTime();
-	// }
-
 	/**
 	 * Returns the number of milliseconds until the next midnight UTC-7.
 	 */
 	static getDefaultTimeBetweenRewards(): number {
-		const now = DateTime.now(); // Get the current time in the client's local time zone
-
-		// Convert the current time to UTC
-		const utcNow = now.toUTC();
-
-		// Get the current midnight UTC-7 (adjust to UTC-7 time zone)
-		const currentDayMidnightUtcMinus7 = utcNow.setZone('UTC-7').startOf('day');
-
-		// If the current time is already past midnight UTC-7, calculate for the next midnight UTC-7
-		const nextMidnight = utcNow > currentDayMidnightUtcMinus7 ? currentDayMidnightUtcMinus7.plus({ days: 1 }) : currentDayMidnightUtcMinus7;
-
-		return nextMidnight.toMillis() - utcNow.toMillis(); // Return the time until the next midnight UTC-7
+		// Current time in Los Angeles
+		const nowLA = DateTime.now().setZone('America/Los_Angeles');
+	
+		// Next midnight in LA
+		const nextMidnightLA = nowLA.plus({ days: 1 }).startOf('day');
+	
+		// Return milliseconds until next midnight
+		return nextMidnightLA.toMillis() - nowLA.toMillis();
 	}
 
 	/**
@@ -142,43 +80,19 @@ export class DailyLoginRewardFactory extends RewardGenerator {
 	 */
 	static canClaimReward(currentTime: Date = new Date(), event: UserEvent): boolean {
 		if (event.getEventType() !== UserEventTypes.DAILY.name) return false;
+	
+		// Optional override for testing
 		if (process.env.DAILY_LOGIN_OVERRIDE === 'true') {
 			return currentTime.getTime() > event.getCreatedAt().getTime() + 1000;
 		}
-		const lastClaimDate = event.getCreatedAt();  // Assuming this is a Date object
-
-		// Convert currentTime and lastClaimDate to UTC timestamps
-		const utcCurrentTime = new Date(currentTime.toUTCString()); // Converts to UTC
-		const utcLastClaimTime = new Date(lastClaimDate.toUTCString()); // Converts to UTC
-
-		// Get midnight UTC-7 for both current time and last claim time
-		const currentDayMidnightUtcMinus7 = this.getMidnightUtcMinus7(utcCurrentTime);
-		const lastClaimDayMidnightUtcMinus7 = this.getMidnightUtcMinus7(utcLastClaimTime);
-
-		// Check if the current time (in UTC-7) is after the last claim date (also in UTC-7)
-		return currentDayMidnightUtcMinus7 > lastClaimDayMidnightUtcMinus7;
+	
+		// Convert both times to LA timezone
+		const currentLA = DateTime.fromJSDate(currentTime).setZone('America/Los_Angeles');
+		const lastClaimLA = DateTime.fromJSDate(event.getCreatedAt()).setZone('America/Los_Angeles');
+	
+		// Compare the calendar day
+		return currentLA.startOf('day') > lastClaimLA.startOf('day');
 	}
-
-	/**
-	 * Helper function to get midnight UTC-7 for a given date (Date object).
-	 * @param date - A Date object.
-	 * @returns A Date object representing midnight UTC-7.
-	 */
-	static getMidnightUtcMinus7(date: Date): Date {
-		const d = new Date(date); // Clone the date object to avoid mutation
-
-		// Convert the date to UTC
-		const utcTime = new Date(d.toUTCString());
-
-		// Get midnight in UTC
-		utcTime.setUTCHours(0, 0, 0, 0); // Set to 00:00:00 UTC
-
-		// Adjust to UTC-7 (subtract 7 hours from UTC)
-		utcTime.setUTCHours(utcTime.getUTCHours() - 7);
-
-		return utcTime;  // Returns the Date object set to midnight UTC-7
-	}
-
 	
 	/**
 	 * Generates an EventReward object, which contains a list of items and their quantities, as well as an amount of gold,
