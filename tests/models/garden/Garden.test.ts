@@ -1,6 +1,7 @@
 import { Garden } from "@/models/garden/Garden";
 import { Plot } from "@/models/garden/Plot";
 import { generatePlacedItem} from "@/models/items/ItemFactory";
+import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
 import LevelSystem from "@/models/level/LevelSystem";
 import User from "@/models/user/User";
 import { loadGarden } from "@/utils/localStorage/garden";
@@ -314,4 +315,22 @@ test('Should Reset All Plots On Invalid Format Load', () => {
 	expect(garden.getCols()).toBe(Garden.getStartingCols());
 	// Restore console.error
 	consoleErrorSpy.mockRestore();
+})
+
+test('Should Add and Remove Placed Egg', () => {
+	const eggTemplate = itemTemplateFactory.getPlacedItemTemplateByName('goose egg');
+	if (eggTemplate && eggTemplate.subtype === 'PlacedEgg') {
+		const newGarden = new Garden(uuidv4());
+		const eggItem = generatePlacedItem('goose egg', 'incubating');
+		if (eggItem.itemData.subtype === 'PlacedEgg') {
+			const plot = newGarden.setPlotItem(1, 1, eggItem);
+			expect(plot.getItem().itemData.subtype).toBe('PlacedEgg');
+			expect(plot.getItem().itemData.name).toBe('goose egg');
+			
+			// Remove egg by replacing with ground
+			const groundItem = generatePlacedItem('ground', '');
+			newGarden.setPlotItem(1, 1, groundItem);
+			expect(newGarden.getPlotByRowAndColumn(1, 1)?.getItem().itemData.name).toBe('ground');
+		}
+	}
 })

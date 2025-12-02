@@ -11,7 +11,7 @@ import { itemTemplateFactory } from '@/models/items/templates/models/ItemTemplat
 let testToolbox: Toolbox;
 
 beforeEach(() => {
-	const item1 = generateTool("basic shovel");
+	const item1 = generateTool("basic axe");
 	const testToolList = new ToolList([item1]);
 	testToolbox = new Toolbox(uuidv4(), testToolList);
 });

@@ -252,3 +252,32 @@ test('Should Create Inventory Object From PlainObject', () => {
 	expect(inv.size()).toBe(1);
 	expect(inv.contains('banana seed').payload).toBe(true);
 })
+
+test('Should Add and Remove Inventory Egg', () => {
+	const eggTemplate = itemTemplateFactory.getInventoryItemTemplateByName('goose egg');
+	if (eggTemplate && eggTemplate.subtype === 'InventoryEgg') {
+		const response = testInventory.gainItem(eggTemplate, 1);
+		expect(response.isSuccessful()).toBe(true);
+		expect(testInventory.size()).toBeGreaterThanOrEqual(3);
+		expect(testInventory.contains('goose egg').payload).toBe(true);
+		
+		const getResponse = testInventory.getItem('goose egg');
+		if (getResponse.isSuccessful()) {
+			expect(getResponse.payload.itemData.subtype).toBe('InventoryEgg');
+			expect(getResponse.payload.getQuantity()).toBeGreaterThanOrEqual(1);
+			
+			const trashResponse = testInventory.trashItem(eggTemplate, 1);
+			expect(trashResponse.isSuccessful()).toBe(true);
+		}
+	}
+})
+
+test('Should Get Items By Subtype Including Eggs', () => {
+	const eggTemplate = itemTemplateFactory.getInventoryItemTemplateByName('goose egg');
+	if (eggTemplate && eggTemplate.subtype === 'InventoryEgg') {
+		testInventory.gainItem(eggTemplate, 2);
+		const items = testInventory.getItemsBySubtype(ItemSubtypes.INVENTORY_EGG.name);
+		expect(items.length).toBeGreaterThanOrEqual(1);
+		expect(items.some(item => item.itemData.subtype === 'InventoryEgg')).toBe(true);
+	}
+})
