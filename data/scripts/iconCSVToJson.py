@@ -15,6 +15,7 @@ data = {
 		"Error": [],
         "Ground": [],
 		"Plants": [],
+        "Eggs": [],
 		"Decorations": [],
         "Tools": [],
         "Utilities": [],

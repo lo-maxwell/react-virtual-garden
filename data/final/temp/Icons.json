@@ -58,6 +58,12 @@
                 "icon": "🍍"
             }
         ],
+        "Eggs": [
+            {
+                "name": "egg",
+                "icon": "🥚"
+            }
+        ],
         "Decorations": [
             {
                 "name": "bench",

@@ -461,6 +461,22 @@
                 "level": 0,
                 "transformId": "0-00-99-99-99"
             }
+        ],
+        "PlacedEggs": [
+            {
+                "id": "0-06-01-01-00",
+                "name": "goose egg",
+                "icon": "egg",
+                "type": "PlacedItem",
+                "subtype": "Egg",
+                "category": "Goose",
+                "description": "Error",
+                "value": 15,
+                "level": 0,
+                "transformId": "0-00-00-00-00",
+                "baseExp": 0,
+                "growTime": 0
+            }
         ]
     },
     "InventoryItems": {
@@ -1212,6 +1228,20 @@
                 "value": 0,
                 "level": 0,
                 "transformId": "0-04-99-99-99"
+            }
+        ],
+        "InventoryEggs": [
+            {
+                "id": "1-07-01-01-00",
+                "name": "goose egg",
+                "icon": "egg",
+                "type": "InventoryItem",
+                "subtype": "Egg",
+                "category": "Goose",
+                "description": "Error",
+                "value": 15,
+                "level": 0,
+                "transformId": "0-06-01-01-00"
             }
         ]
     },

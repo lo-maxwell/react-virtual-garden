@@ -1,6 +1,6 @@
 ID - A-B-C-D-E 
 A = 1 digit Type; 0 = PlacedItem, 1 = InventoryItem
-B = 2 digit Subtype; 00 = Ground, 01 = Seed, 02 = Plant, 03 = HarvestedItem, 04 = Decoration, 05 = Blueprint
+B = 2 digit Subtype; 00 = Ground, 01 = Seed, 02 = Plant, 03 = HarvestedItem, 04 = Decoration, 05 = Blueprint, 06 = PlacedEgg, 07 = InventoryEgg
 C = 2 digit Category
 D = 2 digit Specific Item
 E = 2 digit Variant; differentiates items of the same type (red apple vs green apple)

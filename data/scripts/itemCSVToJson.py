@@ -9,10 +9,12 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 blueprint_file_path = os.path.join(script_dir, '../items/inventoryItems/final/blueprints.csv')
 harvested_file_path = os.path.join(script_dir, '../items/inventoryItems/final/harvested.csv')
 seeds_file_path = os.path.join(script_dir, '../items/inventoryItems/final/seeds.csv')
+inventory_eggs_file_path = os.path.join(script_dir, '../items/inventoryItems/final/eggs.csv')
 decorations_file_path = os.path.join(script_dir, '../items/placedItems/final/decorations.csv')
 ground_file_path = os.path.join(script_dir, '../items/placedItems/final/ground.csv')
 plants_file_path = os.path.join(script_dir, '../items/placedItems/final/plants.csv')
 shiny_file_path = os.path.join(script_dir, '../items/placedItems/final/shinyItemRates.csv')
+placed_eggs_file_path = os.path.join(script_dir, '../items/placedItems/final/eggs.csv')
 tools_file_path = os.path.join(script_dir, '../items/tools/final/tools.csv')
 json_file_path = os.path.join(script_dir, '../final/temp/Items.json')
 
@@ -21,12 +23,14 @@ data = {
     "PlacedItems": {
         "Plants": [],
         "Decorations": [],
-        "Ground": []
+        "Ground": [],
+        "PlacedEggs": []
     },
     "InventoryItems": {
         "Seeds": [],
         "HarvestedItems": [],
-        "Blueprints": []
+        "Blueprints": [],
+        "InventoryEggs": []
     },
     "Tools": {
         "Shovels": []
@@ -170,6 +174,48 @@ with open(plants_file_path, mode='r', encoding='utf-8') as csv_file:
             "transformShinyIds": transformShinyIdMap.get(row["id"], {})
         }
         data["PlacedItems"]["Plants"].append(plant)
+
+
+with open(placed_eggs_file_path, mode='r', encoding='utf-8') as csv_file:
+    csv_reader = csv.DictReader(csv_file)
+    
+    # Process each row in the CSV
+    # id,name,icon,type,subtype,category,description,value,level,transformId,baseExp,growTime,repeatedGrowTime,numHarvests
+    for row in csv_reader:
+        egg = {
+            "id": row["id"],
+            "name": row["name"],
+            "icon": row["icon"],
+            "type": row["type"],
+            "subtype": row["subtype"],
+            "category": row["category"],
+            "description": row["description"],
+            "value": int(row["value"]),
+            "level": int(row["level"]),
+            "transformId": row["transformId"],
+            "baseExp": int(row["baseExp"]),
+            "growTime": int(row["growTime"])
+        }
+        data["PlacedItems"]["PlacedEggs"].append(egg)
+
+with open(inventory_eggs_file_path, mode='r', encoding='utf-8') as csv_file:
+    csv_reader = csv.DictReader(csv_file)
+    
+    # Process each row in the CSV
+    for row in csv_reader:
+        inventory_egg = {
+            "id": row["id"],
+            "name": row["name"],
+            "icon": row["icon"],
+            "type": row["type"],
+            "subtype": row["subtype"],
+            "category": row["category"],
+            "description": row["description"],
+            "value": int(row["value"]),
+            "level": int(row["level"]),
+            "transformId": row["transformId"]
+        }
+        data["InventoryItems"]["InventoryEggs"].append(inventory_egg)
 
 with open(tools_file_path, mode='r', encoding='utf-8') as csv_file:
     csv_reader = csv.DictReader(csv_file)
