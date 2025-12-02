@@ -4,11 +4,13 @@ import { PlantTemplate } from "./PlacedItemTemplates/PlantTemplate";
 import { SeedTemplate } from "./InventoryItemTemplates/SeedTemplate";
 import itemsData from '@/data/final/current/Items.json';
 import { HarvestedItemTemplate } from "./InventoryItemTemplates/HarvestedItemTemplate";
+import { InventoryEggTemplate } from "./InventoryItemTemplates/InventoryEggTemplate";
 import { InventoryItemTemplate } from "./InventoryItemTemplates/InventoryItemTemplate";
 import { DecorationTemplate } from "./PlacedItemTemplates/DecorationTemplate";
 import { EmptyItemTemplate } from "./PlacedItemTemplates/EmptyItemTemplate";
 import ToolTemplate from "./ToolTemplates/ToolTemplate";
 import { ShovelTemplate } from "./ToolTemplates/ShovelTemplate";
+import { EggTemplate } from "./PlacedItemTemplates/PlacedEggTemplate";
 
 export class ItemTemplateRepository {
 	PlacedItems: Record<string, PlacedItemTemplate[]> = {};
@@ -40,6 +42,22 @@ export class ItemTemplateRepository {
         item.transformShinyIds
       )
     );
+    this.PlacedItems['PlacedEggs'] = itemsData.PlacedItems.PlacedEggs.map((item: any) =>
+    new EggTemplate(
+      item.id,
+      item.name,
+      item.icon,
+      item.type,
+      item.subtype,
+      item.category,
+      item.description,
+      item.value,
+      item.level,
+      item.transformId,
+      item.baseExp,
+      item.growTime
+    )
+  );
 	this.PlacedItems['Decorations'] = itemsData.PlacedItems.Decorations.map((item: any) =>
       new DecorationTemplate(
         item.id,
@@ -97,6 +115,20 @@ export class ItemTemplateRepository {
     );
 	this.InventoryItems['Blueprints'] = itemsData.InventoryItems.Blueprints.map((item: any) =>
       new BlueprintTemplate(
+        item.id,
+        item.name,
+        item.icon,
+        item.type,
+        item.subtype,
+        item.category,
+        item.description,
+        item.value,
+        item.level,
+        item.transformId
+      )
+    );
+	this.InventoryItems['InventoryEggs'] = itemsData.InventoryItems.InventoryEggs.map((item: any) =>
+      new InventoryEggTemplate(
         item.id,
         item.name,
         item.icon,

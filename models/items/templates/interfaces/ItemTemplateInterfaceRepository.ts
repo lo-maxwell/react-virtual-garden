@@ -1,9 +1,11 @@
 import itemsData from '@/data/final/current/Items.json';
 import { BlueprintTemplateInterface } from './InventoryItemTemplates/BlueprintTemplateInterface';
 import { HarvestedItemTemplateInterface } from './InventoryItemTemplates/HarvestedItemTemplateInterface';
+import { InventoryEggTemplateInterface } from './InventoryItemTemplates/InventoryEggTemplateInterface';
 import { InventoryItemTemplateInterface } from './InventoryItemTemplates/InventoryItemTemplateInterface';
 import { SeedTemplateInterface } from './InventoryItemTemplates/SeedTemplateInterface';
 import { DecorationTemplateInterface } from './PlacedItemTemplates/DecorationTemplateInterface';
+import { EggTemplateInterface } from './PlacedItemTemplates/PlacedEggTemplateInterface';
 import { EmptyItemTemplateInterface } from './PlacedItemTemplates/EmptyItemTemplateInterface';
 import { PlacedItemTemplateInterface } from './PlacedItemTemplates/PlacedItemTemplateInterface';
 import { PlantTemplateInterface } from './PlacedItemTemplates/PlantTemplateInterface';
@@ -23,6 +25,9 @@ class ItemTemplateInterfaceRepository {
 		this.PlacedItems['Plants'] = itemsData.PlacedItems.Plants.map((item: any) =>
 		  this.createPlantTemplate(item)
 		);
+		this.PlacedItems['PlacedEggs'] = itemsData.PlacedItems.PlacedEggs.map((item: any) =>
+		  this.createEggTemplate(item)
+		);
 		this.PlacedItems['Decorations'] = itemsData.PlacedItems.Decorations.map((item: any) =>
 		  this.createDecorationTemplate(item)
 		);
@@ -37,6 +42,9 @@ class ItemTemplateInterfaceRepository {
 		);
 		this.InventoryItems['Blueprints'] = itemsData.InventoryItems.Blueprints.map((item: any) =>
 		  this.createBlueprintTemplate(item)
+		);
+		this.InventoryItems['InventoryEggs'] = itemsData.InventoryItems.InventoryEggs.map((item: any) =>
+		  this.createInventoryEggTemplate(item)
 		);
 		this.Tools['Shovels'] = itemsData.Tools.Shovels.map((tool: any) => 
 			this.createToolTemplate(tool)
@@ -61,6 +69,24 @@ class ItemTemplateInterfaceRepository {
 		  repeatedGrowTime: item.repeatedGrowTime,
 		  numHarvests: item.numHarvests,
 		  transformShinyIds: item.transformShinyIds,
+		  // Add additional properties if needed
+		};
+	  }
+
+	  private createEggTemplate(item: any): EggTemplateInterface {
+		return {
+		  id: item.id,
+		  name: item.name,
+		  icon: item.icon,
+		  type: item.type,
+		  subtype: item.subtype,
+		  category: item.category,
+		  description: item.description,
+		  value: item.value,
+		  level: item.level,
+		  transformId: item.transformId,
+		  baseExp: item.baseExp,
+		  growTime: item.growTime
 		  // Add additional properties if needed
 		};
 	  }
@@ -143,6 +169,22 @@ class ItemTemplateInterfaceRepository {
         // Add additional properties if needed
       };
     }
+
+	private createInventoryEggTemplate(item: any): InventoryEggTemplateInterface {
+		return {
+			id: item.id,
+			name: item.name,
+			icon: item.icon,
+			type: item.type,
+			subtype: item.subtype,
+			category: item.category,
+			description: item.description,
+			value: item.value,
+			level: item.level,
+			transformId: item.transformId,
+			// Add additional properties if needed
+		};
+	}
 
 	private createToolTemplate(tool: any): ToolTemplateInterface {
 		return {

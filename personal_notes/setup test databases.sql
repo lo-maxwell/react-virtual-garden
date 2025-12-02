@@ -246,6 +246,39 @@ BEGIN
 	END IF;
 END $$;
 
+
+--Item Details (for items that need flexible JSON storage, including eggs)
+-- Can reference a placed item, an inventory item, or both (allowing same details to be shared)
+-- Details row is only deleted when both placed_item_id and inventory_item_id are NULL
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+    trigger_exists BOOLEAN := FALSE;
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'item_details'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS item_details (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			placed_item_id UUID,            -- Placed item ID (foreign key from 'placed_items' table) - for PlacedEgg
+			inventory_item_id UUID,          -- Inventory item ID (foreign key from 'inventory_items' table) - for InventoryEgg
+			details JSONB NOT NULL,  --json object containing item details, ie. for eggs: {parent1: 'goose-1', parent2: 'goose-2', laidAt: 1234567890, hatchAt: 1234567890, isFertilized: true}
+			FOREIGN KEY (placed_item_id) REFERENCES placed_items(id) ON DELETE SET NULL,  -- Set to NULL when placed_item is deleted
+			FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id) ON DELETE SET NULL,  -- Set to NULL when inventory_item is deleted
+			CHECK (placed_item_id IS NOT NULL OR inventory_item_id IS NOT NULL)  -- Ensure at least one reference is set initially
+		);
+		-- Create indexes for faster lookups
+		CREATE INDEX IF NOT EXISTS idx_item_details_placed_item ON item_details(placed_item_id) WHERE placed_item_id IS NOT NULL;
+		CREATE INDEX IF NOT EXISTS idx_item_details_inventory_item ON item_details(inventory_item_id) WHERE inventory_item_id IS NOT NULL;
+		CREATE INDEX IF NOT EXISTS idx_item_details_jsonb ON item_details USING GIN (details);
+		table_created := TRUE;
+	END IF;
+	
+END $$;
+
 --Action Histories
 -- Use a DO block for procedural execution
 DO $$
@@ -363,47 +396,47 @@ BEGIN
 END $$;
 
 -- Add/Remove columns for existing user_events table if needed during migration
-DO $$
-DECLARE
-    table_exists BOOLEAN := FALSE;
-    column_exists BOOLEAN := FALSE;
-BEGIN
-    -- Check if the user_events table exists
-    SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = 'public' AND table_name = 'user_events'
-    ) INTO table_exists;
+-- DO $$
+-- DECLARE
+--     table_exists BOOLEAN := FALSE;
+--     column_exists BOOLEAN := FALSE;
+-- BEGIN
+--     -- Check if the user_events table exists
+--     SELECT EXISTS (
+--         SELECT FROM information_schema.tables
+--         WHERE table_schema = 'public' AND table_name = 'user_events'
+--     ) INTO table_exists;
 
-    IF table_exists THEN
-        -- Remove last_occurrence if it exists
-        SELECT EXISTS (
-            SELECT 1
-            FROM information_schema.columns
-            WHERE table_schema = 'public'
-              AND table_name = 'user_events'
-              AND column_name = 'last_occurrence'
-        ) INTO column_exists;
+--     IF table_exists THEN
+--         -- Remove last_occurrence if it exists
+--         SELECT EXISTS (
+--             SELECT 1
+--             FROM information_schema.columns
+--             WHERE table_schema = 'public'
+--               AND table_name = 'user_events'
+--               AND column_name = 'last_occurrence'
+--         ) INTO column_exists;
 
-        IF column_exists THEN
-            RAISE NOTICE 'Dropping last_occurrence column from user_events.';
-            ALTER TABLE user_events DROP COLUMN last_occurrence;
-        END IF;
+--         IF column_exists THEN
+--             RAISE NOTICE 'Dropping last_occurrence column from user_events.';
+--             ALTER TABLE user_events DROP COLUMN last_occurrence;
+--         END IF;
 
-        -- Add created_at if it doesn't exist (already handled if table is new, but for migration)
-        SELECT EXISTS (
-            SELECT 1
-            FROM information_schema.columns
-            WHERE table_schema = 'public'
-              AND table_name = 'user_events'
-              AND column_name = 'created_at'
-        ) INTO column_exists;
+--         -- Add created_at if it doesn't exist (already handled if table is new, but for migration)
+--         SELECT EXISTS (
+--             SELECT 1
+--             FROM information_schema.columns
+--             WHERE table_schema = 'public'
+--               AND table_name = 'user_events'
+--               AND column_name = 'created_at'
+--         ) INTO column_exists;
 
-        IF NOT column_exists THEN
-            RAISE NOTICE 'Adding created_at column to user_events.';
-            ALTER TABLE user_events ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-        END IF;
-    END IF;
-END $$;
+--         IF NOT column_exists THEN
+--             RAISE NOTICE 'Adding created_at column to user_events.';
+--             ALTER TABLE user_events ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+--         END IF;
+--     END IF;
+-- END $$;
 
 --Event Rewards
 -- Use a DO block for procedural execution
@@ -449,6 +482,52 @@ BEGIN
 			FOREIGN KEY (owner) REFERENCES event_rewards(id),  -- Establishing relationship with 'event_rewards' table
 			UNIQUE (owner, identifier)
 		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Goose Pen
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'goose_pens'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS goose_pens (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
+			owner UUID NOT NULL,            -- event reward id (foreign key from the 'users' table)
+			size INT NOT NULL CHECK (size >= 0),  -- pen size
+			FOREIGN KEY (owner) REFERENCES users(id)  -- Establishing relationship with 'users' table
+		);
+		table_created := TRUE;
+	END IF;
+END $$;
+
+--Goose
+-- Use a DO block for procedural execution
+DO $$
+DECLARE
+    table_created BOOLEAN := FALSE;  -- Flag to track if the table was newly created
+BEGIN
+    -- Check if the table exists in the current schema
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'gooses'
+    ) THEN
+		CREATE TABLE IF NOT EXISTS gooses (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+			owner UUID NOT NULL REFERENCES goose_pens(id),
+			name VARCHAR(256) NOT NULL,
+			color CHAR(6) NOT NULL,
+			birthday TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			attributes JSONB NOT NULL DEFAULT '{}'::jsonb
+		);
+
+		CREATE INDEX gooses_attributes_idx ON gooses USING GIN (attributes);
 		table_created := TRUE;
 	END IF;
 END $$;

@@ -5,6 +5,8 @@ export const ItemTypes = Object.freeze({
 
 export const ItemSubtypes = Object.freeze({
 	PLANT:   { name: "Plant" },
+	PLACED_EGG: { name: "PlacedEgg" },
+	INVENTORY_EGG: { name: "InventoryEgg" },
 	DECORATION:   { name: "Decoration" },
 	GROUND:   { name: "Ground" },
 	SEED:   { name: "Seed" },

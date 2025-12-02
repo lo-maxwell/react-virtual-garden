@@ -467,3 +467,18 @@ Optimize RDS calls, consider using rds proxy if horizontal scaling is needed (30
 Move service functions into lambda
 
 Convert to IAC with IAC generator, test output, possibly move to another stack
+
+Goose Notes
+
+What to do with placedItems?
+
+Cannot have true inventoryItem as GooseEgg, because it needs data that cannot be expressed in a template + quantity
+
+GooseEgg "Inventory" Item - Store in GoosePen so we have both gooses and gooseEggs lists
+
+GooseEgg needs parent details + feeding details
+
+GooseEgg PlacedItem needs a counter, harvesting plants adjacent to it give it bonuses
+
+Bonuses are hashed based on player id + item type, so they're deterministic but not the same for all players
+
