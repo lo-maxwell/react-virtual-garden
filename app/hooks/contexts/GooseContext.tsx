@@ -4,14 +4,15 @@ import React, { createContext, Dispatch, SetStateAction, useContext, useState } 
 
 // Define your context type
 interface GooseContextType {
-    goosePen: GoosePen
+    goosePen: GoosePen,
+    reloadGoosePen: () => void;
     // Add any other actions or state you need
 }
 
 // Create a context with default values
 export const GooseContext = createContext<GooseContextType | undefined>(undefined);
 
-export const useGarden = () => {
+export const useGoose = () => {
     const context = useContext(GooseContext);
     if (!context) {
         throw new Error('useGoose must be used within a GooseProvider');

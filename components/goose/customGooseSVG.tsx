@@ -2,16 +2,18 @@ import React from 'react';
 
 interface CustomGooseSVGProps {
   bodyColor?: string;
+  style?: React.CSSProperties;
+  className?: string;
 }
 
-const CustomGooseSVG: React.FC<CustomGooseSVGProps> = ({ bodyColor = '#eeeeee' }) => {
+const CustomGooseSVG: React.FC<CustomGooseSVGProps> = ({ bodyColor = '#eeeeee', style, className }) => {
   return (
     <svg
       width="130.30132mm"
       height="235.00613mm"
       viewBox="0 0 130.30132 235.00613"
-      version="1.1"
-      id="svg1"
+      style={style}
+      className={className}
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs id="defs1">

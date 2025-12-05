@@ -36,8 +36,14 @@ export const GooseProvider = ({ children }: GooseProviderProps) => {
 		setGoosePen(initialGoosePen);
 	  }, []);
 
+	const reloadGooses = useCallback(() => {
+		const initialGoosePen = setupGoosePen();
+		setGoosePen(initialGoosePen);
+	}, [setupGoosePen]);
+
 	const contextValue = useMemo(() => ({
-		goosePen: goosePen!
+		goosePen: goosePen!,
+		reloadGoosePen: reloadGooses
 	  }), [
 		goosePen
 	  ]);

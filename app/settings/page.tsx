@@ -17,6 +17,9 @@ import { useUser } from '../hooks/contexts/UserContext';
 import { useDispatch } from 'react-redux';
 import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
 import { fetchAccountObjects } from '../login/firebaseAuth/authClientService';
+import GoosePen from '@/models/goose/GoosePen';
+import { saveGoosePen } from '@/utils/localStorage/goose';
+import { useGoose } from '../hooks/contexts/GooseContext';
 
 const SettingsPage: React.FC = () => {
 
@@ -24,6 +27,7 @@ const SettingsPage: React.FC = () => {
   const { inventory, reloadInventory, resetInventory } = useInventory();
   const { store, reloadStore, resetStore } = useStore();
   const { garden, reloadGarden, resetGarden } = useGarden();
+  const { reloadGoosePen } = useGoose();
   const { account, 
     guestMode, 
     setGuestMode, 
@@ -59,6 +63,7 @@ const SettingsPage: React.FC = () => {
       saveGarden(Garden.fromPlainObject(result.plainGardenObject));
       saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
       saveStore(Store.fromPlainObject(result.plainStoreObject));
+      saveGoosePen(GoosePen.fromPlainObject(result.plainGoosePenObject));
 
       const updatedInventory = Inventory.fromPlainObject(result.plainInventoryObject);
       updatedInventory.getAllItems().forEach(item => {
@@ -72,6 +77,7 @@ const SettingsPage: React.FC = () => {
       reloadGarden();
       reloadInventory();
       reloadStore();
+      reloadGoosePen();
       setMessage(`Successfully loaded account data.`);
       setMessageColor("text-green-600");
     } catch {

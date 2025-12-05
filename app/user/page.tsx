@@ -16,6 +16,9 @@ import { useAuth } from "../hooks/contexts/AuthContext";
 import RedirectingMessage from "@/components/errorPages/redirectingMessage";
 import "./page.css";
 import colors from "@/components/colors/colors";
+import { useGoose } from "../hooks/contexts/GooseContext";
+import GoosePanel from "@/components/goose/goosePanel";
+import Goose from "@/models/goose/Goose";
 
 const UserPage = () => {
   const { firebaseUser } = useAuth();
@@ -26,6 +29,7 @@ const UserPage = () => {
   const { inventory, reloadInventory } = useInventory();
   const { store, reloadStore } = useStore();
   const { garden, reloadGarden } = useGarden();
+  const { goosePen, reloadGoosePen } = useGoose();
   const { account, guestMode, environmentTestKey } = useAccount();
 
   // Redirect effect
@@ -140,7 +144,7 @@ const UserPage = () => {
     [handleChangeUsername, guestMode, user]
   );
 
-  
+
 
 
   const renderAccountManagementButtons = useMemo(() => {
@@ -190,18 +194,36 @@ const UserPage = () => {
     return <></>;
   }
 
+  const geese = goosePen.getAllGeese();
+  let gooseProps = null;
+
+  if (geese.length > 0) {
+    const goose: Goose = geese[0];
+    gooseProps = {
+      name: goose.getName(),
+      color: goose.getColor(),
+      birthday: new Date(goose.getBirthday()), // timestamp → Date
+      attributes: {
+        power: goose.getPower(),
+        charisma: goose.getCharisma(),
+        personality: goose.getPersonality(),
+        mood: goose.getMood()
+      }
+    };
+  }
+
   return (
     <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
       <div className="flex inner-flex">
         <div className="w-1/3 left-side">
-          
+
           <div className="flex flex-row items-start justify-left space-x-4 mb-4">
             <IconSelector iconIndex={icon} onIconChange={onIconChangeHandler} />
             <div className="flex flex-1 flex-col justify-between h-16"> {/* Match icon height */}
               <UsernameDisplay
-                  username={username}
-                  onUsernameChange={onUsernameChangeHandler}
-                />
+                username={username}
+                onUsernameChange={onUsernameChangeHandler}
+              />
               <LevelSystemComponent
                 level={user.getLevel()}
                 currentExp={user.getCurrentExp()}
@@ -213,6 +235,8 @@ const UserPage = () => {
           <Suspense fallback={<div>Loading...</div>}>
             {renderAccountManagementButtons}
           </Suspense>
+
+          {gooseProps ? <GoosePanel goose={gooseProps}></GoosePanel> : <></>}
         </div>
 
         <div className="px-4 w-2/3 right-side">

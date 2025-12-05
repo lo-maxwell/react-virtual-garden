@@ -16,6 +16,9 @@ import { useInventory } from '@/app/hooks/contexts/InventoryContext';
 import { useUser } from '@/app/hooks/contexts/UserContext';
 import { useStore } from '@/app/hooks/contexts/StoreContext';
 import { FirebaseError } from 'firebase/app';
+import { useGoose } from '@/app/hooks/contexts/GooseContext';
+import { saveGoosePen } from '@/utils/localStorage/goose';
+import GoosePen from '@/models/goose/GoosePen';
 
 const AuthLoginComponent = ({message, setMessage}: {message: string; setMessage: React.Dispatch<React.SetStateAction<string>>}) => {
     const [email, setEmail] = useState<string>('');
@@ -24,6 +27,7 @@ const AuthLoginComponent = ({message, setMessage}: {message: string; setMessage:
     const { reloadInventory, resetInventory } = useInventory();
     const { reloadStore, resetStore } = useStore();
     const { reloadGarden, resetGarden } = useGarden();
+    const { reloadGoosePen } = useGoose();
     const { guestMode, setGuestMode } = useAccount();
     const [allowPasswordReset, setAllowPasswordReset] = useState<boolean>(true);
 
@@ -38,11 +42,13 @@ const AuthLoginComponent = ({message, setMessage}: {message: string; setMessage:
         saveGarden(Garden.fromPlainObject(result.plainGardenObject));
         saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
         saveStore(Store.fromPlainObject(result.plainStoreObject));
+        saveGoosePen(GoosePen.fromPlainObject(result.plainGoosePenObject));
 
         reloadUser();
         reloadGarden();
         reloadInventory();
         reloadStore();
+        reloadGoosePen();
     }, [reloadUser, reloadGarden, reloadInventory, reloadStore]);
 
     const handleLogin = useCallback(async () => {

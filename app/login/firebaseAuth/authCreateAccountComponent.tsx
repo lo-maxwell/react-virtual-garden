@@ -1,14 +1,17 @@
 // AuthComponent.tsx
 import { useAccount } from '@/app/hooks/contexts/AccountContext';
 import { useGarden } from '@/app/hooks/contexts/GardenContext';
+import { useGoose } from '@/app/hooks/contexts/GooseContext';
 import { useInventory } from '@/app/hooks/contexts/InventoryContext';
 import { useStore } from '@/app/hooks/contexts/StoreContext';
 import { useUser } from '@/app/hooks/contexts/UserContext';
 import { Garden } from '@/models/garden/Garden';
+import GoosePen from '@/models/goose/GoosePen';
 import { Inventory } from '@/models/itemStore/inventory/Inventory';
 import { Store } from '@/models/itemStore/store/Store';
 import User from '@/models/user/User';
 import { saveGarden } from '@/utils/localStorage/garden';
+import { saveGoosePen } from '@/utils/localStorage/goose';
 import { saveInventory } from '@/utils/localStorage/inventory';
 import { saveStore } from '@/utils/localStorage/store';
 import { saveUser } from '@/utils/localStorage/user';
@@ -26,6 +29,7 @@ const AuthCreateAccountComponent = ({message, setMessage}: {message: string; set
     const { reloadInventory } = useInventory();
     const { reloadStore } = useStore();
     const { reloadGarden } = useGarden();
+    const { reloadGoosePen } = useGoose();
     const { setGuestMode } = useAccount();
 
     const syncAccountObjects = useCallback(async () => {
@@ -39,11 +43,13 @@ const AuthCreateAccountComponent = ({message, setMessage}: {message: string; set
         saveGarden(Garden.fromPlainObject(result.plainGardenObject));
         saveInventory(Inventory.fromPlainObject(result.plainInventoryObject));
         saveStore(Store.fromPlainObject(result.plainStoreObject));
+        saveGoosePen(GoosePen.fromPlainObject(result.plainGoosePenObject));
 
         reloadUser();
         reloadGarden();
         reloadInventory();
         reloadStore();
+        reloadGoosePen();
     }, [reloadUser, reloadGarden, reloadInventory, reloadStore]);
 
     const handleRegister = useCallback(async () => {
