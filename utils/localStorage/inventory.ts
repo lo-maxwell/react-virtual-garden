@@ -2,17 +2,17 @@ import { Inventory } from "@/models/itemStore/inventory/Inventory";
 
 export const loadInventory = () => {
 	try {
-	  const serializedInventory = localStorage.getItem('inventory');
-	  if (serializedInventory === null) {
-		return [];
-	  }
-	  return Inventory.fromPlainObject(JSON.parse(serializedInventory));
+		const serializedInventory = localStorage.getItem('inventory');
+		if (serializedInventory === null) {
+			return [];
+		}
+		return Inventory.fromPlainObject(JSON.parse(serializedInventory));
 	} catch (err) {
-	  console.error('Could not load inventory', err);
-	  return [];
+		console.error('Could not load inventory', err);
+		return [];
 	}
-  };
-  
+};
+
 export const saveInventory = (inventory: Inventory) => {
 	try {
 		const serializedInventory = JSON.stringify(inventory.toPlainObject());
