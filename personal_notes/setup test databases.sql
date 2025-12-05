@@ -499,7 +499,7 @@ BEGIN
     ) THEN
 		CREATE TABLE IF NOT EXISTS goose_pens (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Generate a UUID by default
-			owner UUID NOT NULL,            -- event reward id (foreign key from the 'users' table)
+			owner VARCHAR(28) NOT NULL,            -- event reward id (foreign key from the 'users' table)
 			size INT NOT NULL CHECK (size >= 0),  -- pen size
 			FOREIGN KEY (owner) REFERENCES users(id)  -- Establishing relationship with 'users' table
 		);
