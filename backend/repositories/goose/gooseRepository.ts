@@ -6,6 +6,16 @@ import { PoolClient } from "pg";
 
 class GooseRepository {
 
+    normalizeGooseEntity(raw: any): GooseEntity {
+        return {
+            ...raw,
+            birthday: raw.birthday instanceof Date
+                ? raw.birthday
+                : new Date(raw.birthday),
+            attributes: raw.attributes ?? {}
+        };
+    }
+
     /**
      * Validates that a plain object is a proper GooseEntity
      */
@@ -43,7 +53,8 @@ class GooseRepository {
     /**
      * Creates a Goose domain object from a GooseEntity row.
      */
-    makeGooseObject(entity: GooseEntity): Goose {
+    makeGooseObject(raw: any): Goose {
+        const entity = this.normalizeGooseEntity(raw);
         this.validateGooseEntity(entity);
 
         const attr = entity.attributes;

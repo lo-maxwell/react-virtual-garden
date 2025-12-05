@@ -1,8 +1,9 @@
-import { query } from "@/backend/connection/db";
+import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
 import Goose from "@/models/goose/Goose";
 import GoosePen, { GoosePenEntity } from "@/models/goose/GoosePen";
 import { PoolClient } from "pg";
+import gooseRepository from "./gooseRepository";
 
 class GoosePenRepository {
 
@@ -50,6 +51,22 @@ class GoosePenRepository {
 
         return new GoosePen(penEntity.id, penEntity.owner, penEntity.size, geese);
     }
+
+    /**
+     * Get a pen by owner
+     */
+     async getGoosePenByOwnerId(userId: string): Promise<GoosePenEntity | null> {
+        const result = await query<GoosePenEntity>(
+            "SELECT * FROM goose_pens WHERE owner = $1",
+            [userId]
+        );
+    
+        if (!result || result.rows.length === 0) return null;
+    
+        const penEntity = result.rows[0];
+        return penEntity;
+    }
+    
 
     /**
      * Creates a new pen
