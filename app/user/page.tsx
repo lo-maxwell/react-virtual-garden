@@ -63,6 +63,7 @@ const UserPage = () => {
         plainInventoryObject: inventory.toPlainObject(),
         plainStoreObject: store.toPlainObject(),
         plainGardenObject: garden.toPlainObject(),
+        plainGoosePenObject: goosePen.toPlainObject(),
       };
       const result = await makeApiRequest("POST", `/api/admin`, data, true);
       console.log("Successfully posted:", result);
@@ -78,6 +79,7 @@ const UserPage = () => {
         plainInventoryObject: inventory.toPlainObject(),
         plainStoreObject: store.toPlainObject(),
         plainGardenObject: garden.toPlainObject(),
+        plainGoosePenObject: goosePen.toPlainObject(),
       };
       const result = await makeApiRequest("PATCH", `/api/admin`, data, true);
       console.log("Successfully updated:", result);
