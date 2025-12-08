@@ -13,6 +13,9 @@ import ItemHistory from "@/models/user/history/itemHistory/ItemHistory";
 import { ItemHistoryList } from "@/models/user/history/ItemHistoryList";
 import User from "@/models/user/User";
 import { v4 as uuidv4 } from 'uuid';
+import Icon from "@/models/user/icons/Icon";
+import { UserEvent } from "@/models/user/userEvents/UserEvent";
+import { UserEventTypes } from "@/models/user/userEvents/UserEventTypes";
 
 test('Should Initialize User Object', () => {
 	const user = new User("00000000-0000-0000-0000-000000000000", 'test', '', new LevelSystem(uuidv4(), 100), new ItemHistoryList(), new ActionHistoryList(), new Toolbox(uuidv4()));
@@ -84,14 +87,150 @@ test('Should Update Harvest History', () => {
 })
 
 test('Should Not Update Invalid harvest History', () => {
-	const user = new User('00000000-0000-0000-0000-000000000000', 'test', '', new LevelSystem(uuidv4(), 100), new ItemHistoryList(), new ActionHistoryList(), new Toolbox());
+	const user = new User('00000000-0000-0000-0000-000000000000', 'test', '');
 	const invalidItem = generatePlacedItem("bench", "");
-	const response = user.updateHarvestHistory(invalidItem as PlacedItem, 1);
+	const response = user.updateHarvestHistory(invalidItem as unknown as InventoryItem, 1);
 	expect(response.isSuccessful()).toBe(false);
 
 	const invalidTemplate = new PlantTemplate("invalid id", "invalid name", "", ItemTypes.PLACED.name, ItemSubtypes.PLANT.name, "", "", 100, 0, "", 0, 0, 0, 0, {});
 	const invalidItem2 = new Plant(uuidv4(), invalidTemplate, "");
-	const response2 = user.updateHarvestHistory(invalidItem2 as PlacedItem, 1);
+	const response2 = user.updateHarvestHistory(invalidItem2 as unknown as InventoryItem, 1);
 	expect(response2.isSuccessful()).toBe(false);
 
 })
+
+
+/* ---------------------------------------------------------
+   generateLocalUid
+--------------------------------------------------------- */
+test("Should generate a UID of default length 28", () => {
+    const uid = User.generateLocalUid();
+    expect(uid).toHaveLength(28);
+});
+
+test("Should generate UID of custom length", () => {
+    const uid = User.generateLocalUid(10);
+    expect(uid).toHaveLength(10);
+});
+
+/* ---------------------------------------------------------
+   generateDefaultLevelSystem
+--------------------------------------------------------- */
+test("Should generate a default LevelSystem", () => {
+    const lvl = User.generateDefaultLevelSystem();
+    expect(lvl).toBeInstanceOf(LevelSystem);
+});
+
+/* ---------------------------------------------------------
+   generate default new user
+--------------------------------------------------------- */
+test("Should generate default new user", () => {
+    const user = User.generateDefaultNewUser();
+
+    expect(user.getUsername()).toBe(User.getDefaultUserName());
+    expect(user.getIcon()).toBe("goose");
+    expect(user.getUserId()).toHaveLength(28); // uses generateLocalUid
+});
+
+test("Should generate user with supplied ID", () => {
+    const id = "ABC123";
+    const user = User.generateNewUserWithId(id);
+
+    expect(user.getUserId()).toBe(id);
+    expect(user.getUsername()).toBe(User.getDefaultUserName());
+    expect(user.getIcon()).toBe("goose");
+});
+
+/* ---------------------------------------------------------
+   getDefaultUserName
+--------------------------------------------------------- */
+test("Default username should be Goose Farmer", () => {
+    expect(User.getDefaultUserName()).toBe("Goose Farmer");
+});
+
+/* ---------------------------------------------------------
+   Event Map Behavior
+--------------------------------------------------------- */
+test("Should add, retrieve, and list events", () => {
+    const user = new User("id", "name", "icon");
+    const event = new UserEvent(null, "id", UserEventTypes.DAILY.name, new Date());
+
+    user.addEvent(event);
+
+    // getEvent
+    const fetched = user.getEvent(UserEventTypes.DAILY.name);
+    expect(fetched).toBe(event);
+
+    // getAllEvents
+    const all = user.getAllEvents();
+    expect(all.length).toBe(1);
+    expect(all[0]).toBe(event);
+
+    // getUserEvents (map)
+    const eventsMap = user.getUserEvents();
+    expect(eventsMap.size).toBe(1);
+    expect(eventsMap.get(UserEventTypes.DAILY.name)).toBe(event);
+});
+
+/* ---------------------------------------------------------
+   getToolbox
+--------------------------------------------------------- */
+test("Should return toolbox", () => {
+    const tb = new Toolbox(uuidv4());
+    const user = new User("id", "name", "icon", new LevelSystem(uuidv4()), new ItemHistoryList(), new ActionHistoryList(), tb);
+
+    expect(user.getToolbox()).toBe(tb);
+});
+
+/* ---------------------------------------------------------
+   isIconUnlocked() Behavior
+--------------------------------------------------------- */
+describe("Icon Unlock Logic", () => {
+
+    test("Emoji icons — apple and goose are always unlocked", () => {
+        const user = new User("id", "test", "icon");
+
+        const apple = new Icon("apple", "🍎");
+        const goose = new Icon("goose", "🦢");
+
+        expect(user.isIconUnlocked(apple, true)).toBe(true);
+        expect(user.isIconUnlocked(goose, true)).toBe(true);
+    });
+
+    test("Emoji 'error' icon is always locked", () => {
+        const user = new User("id", "test", "icon");
+        const icon = new Icon("error", "❌");
+        expect(user.isIconUnlocked(icon, true)).toBe(false);
+    });
+
+    test("Emoji icons require itemHistory for unlock (non-default icons)", () => {
+        const template = itemTemplateFactory.getInventoryItemTemplateByName("apple")!;
+        const icon = new Icon("apple", "🍎"); // Example that exists
+
+        const unlockedUser = new User(
+            "id",
+            "name",
+            "icon",
+            undefined,
+            new ItemHistoryList([
+                new ItemHistory(uuidv4(), template, 1)
+            ])
+        );
+        expect(unlockedUser.isIconUnlocked(icon, true)).toBe(true);
+
+        const lockedUser = new User("id", "name", "icon");
+        expect(lockedUser.isIconUnlocked(icon, true)).toBe(true); // apple is special-cased to always true
+    });
+
+    test("Non-emoji icons: default is unlocked, error is locked, all others unlocked", () => {
+        const user = new User("id", "t", "icon");
+
+        const def = new Icon("default", "");
+        const err = new Icon("error", "");
+        const other = new Icon("customHat", "");
+
+        expect(user.isIconUnlocked(def, false)).toBe(true);
+        expect(user.isIconUnlocked(err, false)).toBe(false);
+        expect(user.isIconUnlocked(other, false)).toBe(true);
+    });
+});

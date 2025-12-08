@@ -1,5 +1,54 @@
 import Goose from "@/models/goose/Goose";
 import { GoosePersonalities } from "@/models/goose/GoosePersonalities";
+import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
+import { ItemSubtypes } from "@/models/items/ItemTypes";
+
+function makeHarvestedItem(value: number): HarvestedItem {
+    return {
+        itemData: {
+            subtype: ItemSubtypes.HARVESTED.name,
+            value
+        }
+    } as unknown as HarvestedItem;
+}
+
+// Mock InventoryItemTemplate
+function makeTemplate(subtype: string, name = "TestItem") {
+    return {
+        subtype,
+        name
+    } as any;
+}
+
+// Mock InventoryItem
+function makeInventoryItem(quantity: number, value: number) {
+    return {
+        getQuantity: () => quantity,
+        itemData: {
+            subtype: ItemSubtypes.HARVESTED.name,
+            value
+        }
+    };
+}
+
+// Mock Inventory object for dependency injection
+function makeInventory({
+    itemFound = true,
+    quantity = 5,
+    value = 20,
+    trashSuccess = true
+} = {}) {
+    return {
+        getItem: jest.fn().mockReturnValue(itemFound
+            ? { isSuccessful: () => true, payload: makeInventoryItem(quantity, value), messages: [] }
+            : { isSuccessful: () => false, payload: null, messages: ["Item not found"] }
+        ),
+        trashItem: jest.fn().mockReturnValue(trashSuccess
+            ? { isSuccessful: () => true, messages: [] }
+            : { isSuccessful: () => false, messages: ["Could not trash item"] }
+        )
+    };
+}
 
 describe("Goose", () => {
 
@@ -172,5 +221,109 @@ describe("Goose", () => {
         expect(g.getMood()).toBe(5);
         expect(g.getLocation()).toBe(5);
         expect(g.getPersonality()).toBe(GoosePersonalities.SHY.name);
+    });
+});
+
+describe("Goose.getMoodChangeFromItem", () => {
+    test("returns floor(value/10)+1 for valid harvested items", () => {
+        const g = new Goose("1", "A", "FFFFFF", 0, 0, 0, GoosePersonalities.SHY.name, 50, 0);
+
+        const item = makeHarvestedItem(35); // floor(35/10)+1 = 4
+        const result = g.getMoodChangeFromItem(item);
+
+        expect(result).toBe(4);
+    });
+
+    test("throws an error for non-harvested items", () => {
+        const g = new Goose("1", "A", "FFFFFF", 0, 0, 0, GoosePersonalities.SHY.name, 50, 0);
+
+        const badItem = {
+            itemData: { subtype: "SEED", value: 10 }
+        } as any;
+
+        expect(() => g.getMoodChangeFromItem(badItem)).toThrow("Invalid item");
+    });
+});
+
+describe("Goose.feedGoose", () => {
+
+    test("fails if item subtype is not HARVESTED", () => {
+        const g = new Goose("1","A","FFFFFF",0,0,0,GoosePersonalities.SHY.name,50,0);
+        const inv = makeInventory();
+        const template = makeTemplate("SEED");
+
+        const res = g.feedGoose(inv as any, template, 1);
+
+        expect(res.isSuccessful()).toBe(false);
+        expect(res.messages[0]).toMatch(/Invalid item/);
+    });
+
+    test("fails if item is not found in inventory", () => {
+        const g = new Goose("1","A","FFFFFF",0,0,0,GoosePersonalities.SHY.name,50,0);
+
+        const inv = makeInventory({ itemFound: false });
+        const template = makeTemplate(ItemSubtypes.HARVESTED.name);
+
+        const res = g.feedGoose(inv as any, template, 1);
+
+        expect(res.isSuccessful()).toBe(false);
+        expect(res.messages.join()).toMatch(/Item not found|Could not find/);
+    });
+
+    test("fails if inventory has less than required quantity", () => {
+        const g = new Goose("1","A","FFFFFF",0,0,0,GoosePersonalities.SHY.name,50,0);
+
+        const inv = makeInventory({ quantity: 1 });
+        const template = makeTemplate(ItemSubtypes.HARVESTED.name);
+
+        const res = g.feedGoose(inv as any, template, 5);
+
+        expect(res.isSuccessful()).toBe(false);
+        expect(res.messages[0]).toMatch(/Invalid quantity/);
+    });
+
+    test("fails if trashItem fails", () => {
+        const g = new Goose("1","A","FFFFFF",0,0,0,GoosePersonalities.SHY.name,50,0);
+
+        const inv = makeInventory({ trashSuccess: false });
+        const template = makeTemplate(ItemSubtypes.HARVESTED.name);
+
+        const res = g.feedGoose(inv as any, template, 1);
+
+        expect(res.isSuccessful()).toBe(false);
+        expect(res.messages[0]).toMatch(/Could not trash item/);
+    });
+
+    test("successfully feeds and increases mood", () => {
+        const g = new Goose("1","A","FFFFFF",0,0,0,GoosePersonalities.SHY.name,50,0);
+
+        // value: 20 → moodChange = floor(20/10)+1 = 3
+        const inv = makeInventory({ quantity: 5, value: 20 });
+        const template = makeTemplate(ItemSubtypes.HARVESTED.name);
+
+        const res = g.feedGoose(inv as any, template, 1);
+
+        expect(res.isSuccessful()).toBe(true);
+        expect(res.payload).toBe(53);
+    });
+
+    test("catches and returns error if getMoodChangeFromItem throws", () => {
+        const g = new Goose("1","A","FFFFFF",0,0,0,GoosePersonalities.SHY.name,50,0);
+
+        const inv = makeInventory({ value: 20 });
+
+        // Force an invalid item subtype AFTER retrieval
+        inv.getItem = jest.fn().mockReturnValue({
+            isSuccessful: () => true,
+            payload: { itemData: { subtype: "NOT_HARVESTED", value: 20 }, getQuantity: () => 5 },
+            messages: []
+        });
+
+        const template = makeTemplate(ItemSubtypes.HARVESTED.name);
+
+        const res = g.feedGoose(inv as any, template, 1);
+
+        expect(res.isSuccessful()).toBe(false);
+        expect(res.messages[0]).toMatch(/Invalid item/);
     });
 });

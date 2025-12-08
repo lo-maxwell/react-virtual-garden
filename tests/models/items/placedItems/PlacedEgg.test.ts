@@ -1,19 +1,19 @@
 import { PlacedEgg } from "@/models/items/placedItems/PlacedEgg";
-import { EggTemplate } from "@/models/items/templates/models/PlacedItemTemplates/PlacedEggTemplate";
+import { PlacedEggTemplate } from "@/models/items/templates/models/PlacedItemTemplates/PlacedEggTemplate";
 import { itemTemplateFactory } from "@/models/items/templates/models/ItemTemplateFactory";
 import { v4 as uuidv4 } from 'uuid';
 import { EggDetails } from "@/models/items/EggDetails";
 
 let placedEgg: PlacedEgg;
-let eggTemplate: EggTemplate;
+let eggTemplate: PlacedEggTemplate;
 let eggDetails: EggDetails;
 
 beforeEach(() => {
 	const template = itemTemplateFactory.getPlacedItemTemplateByName('goose egg');
 	if (!template || template.subtype !== 'PlacedEgg') {
-		eggTemplate = EggTemplate.getErrorTemplate();
+		eggTemplate = PlacedEggTemplate.getErrorTemplate();
 	} else {
-		eggTemplate = template as EggTemplate;
+		eggTemplate = template as PlacedEggTemplate;
 	}
 	
 	eggDetails = {
