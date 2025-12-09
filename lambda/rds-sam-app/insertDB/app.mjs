@@ -42,75 +42,48 @@ const allowedUpdateOperators = ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN", "
 
 
 // Function to construct the update query string and parameters
-const constructUpdateQuery = (tableName, values, conditions, numExistingParams) => {
+// --- Construct UPDATE clause for non-JSONB operators only ---
+const constructUpdateQuery = (tableName, values, conditions, numExistingParams = 0) => {
   const queryParams = [];
 
-  // Construct the set clause and populate queryParams with values
-  const setClause = Object.keys(values).map((key) => {
-      // Check if the value is an object with an operator and is not null
-      if (typeof values[key] === 'object' && values[key] !== null && values[key].operator && values[key].excluded === true) {
-        // Excluded + operator -> new value is the excluded value with operator applied
-        if (!allowedUpdateOperators.includes(values[key].operator)) {
-          throw new Error(`Invalid operator: ${values[key].operator}`);
-        }
-        if (values[key].hasOwnProperty('value')) {
-          queryParams.push(values[key].value);
-          return `${key} = EXCLUDED.${key} ${values[key].operator} $${queryParams.length + numExistingParams}`;
-        } else {
-          // If no specific value for the operator, use the original + excluded
-          return `${key} = ${tableName}.${key} ${values[key].operator} EXCLUDED.${key}`;
-        }
-      } else if (typeof values[key] === 'object' && values[key] !== null && values[key].operator) {
-        // Not excluded + operator -> new value is original with operator applied
-        if (!allowedUpdateOperators.includes(values[key].operator)) {
-          throw new Error(`Invalid operator: ${values[key].operator}`);
-        }
-        if (values[key].hasOwnProperty('value')) {
-          queryParams.push(values[key].value);
-          return `${key} = ${tableName}.${key} ${values[key].operator} $${queryParams.length + numExistingParams}`; // Use parameterized query
-        } else {
-          // If no specific value for the operator, use the original + excluded
-          return `${key} = ${tableName}.${key} ${values[key].operator} EXCLUDED.${key}`;
-        }
-      } else if (values[key] && values[key].excluded === true) {
-        // Excluded + no operator -> new value is excluded value
-        return `${key} = EXCLUDED.${key}`;
-      } else {
-        // Not excluded + no operator -> keep original value
-        queryParams.push(values[key]); // Push the value for the column into queryParams
-        return `${key} = $${queryParams.length + numExistingParams}`; // Use parameterized query
+  for (const key of Object.keys(values)) {
+    const val = values[key];
+    // Disallow any JSONB operator
+    if (val && typeof val === "object" && "operator" in val) {
+      const jsonbOps = ["jsonb_set", "jsonb_inc", "jsonb_mul", "jsonb_remove"];
+      if (jsonbOps.includes(val.operator)) {
+        throw new Error(`JSONB modification is disallowed in ON CONFLICT for column "${key}"`);
       }
+    }
+  }
+
+  const setClause = Object.keys(values).map((key) => {
+    const val = values[key];
+    if (typeof val === 'object' && val !== null && val.operator) {
+      queryParams.push(val.value);
+      return `${key} = ${tableName}.${key} ${val.operator} $${queryParams.length + numExistingParams}`;
+    } else {
+      queryParams.push(val);
+      return `${key} = $${queryParams.length + numExistingParams}`;
+    }
   }).join(', ');
 
-  // Construct the initial query string
-  let queryString = `${setClause}`; // Initial query string
+  const conditionStrings = Object.keys(conditions || {}).map((key) => {
+    const { operator, value } = conditions[key];
+    if (!allowedUpdateOperators.includes(operator)) throw new Error(`Invalid operator: ${operator}`);
+    if (!allowedTables[tableName].includes(key)) throw new Error(`Invalid column: ${key} for table: ${tableName}`);
 
-  // Conditions here are only applied to the conflicting row that is being updated
-  // Add conditions if provided
-  const conditionStrings = Object.keys(conditions).map((key) => {
-      const { operator, value } = conditions[key]; // Extract operator and value from the condition object
-      
-      // Validate operator
-      if (!allowedUpdateOperators.includes(operator)) {
-          throw new Error(`Invalid operator: ${operator}`);
-      }
-
-      // Validate key against allowed columns for the specific table
-      if (!allowedTables[tableName].includes(key)) {
-          throw new Error(`Invalid column: ${key} for table: ${tableName}`);
-      }
-
-      if (operator === 'IN') {
-          // Create placeholders for each value in the array
-          const placeholders = value.map((_, idx) => `$${queryParams.length + idx + 1 + numExistingParams}`).join(', ');
-          queryParams.push(...value); // Add all values to queryParams
-          return `${tableName}.${key} IN (${placeholders})`; // Use the placeholders in the query
-      } else {
-          queryParams.push(value); // Add the single value to queryParams
-          return `${tableName}.${key} ${operator} $${queryParams.length + numExistingParams}`; // Use parameterized query for the value
-      }
+    if (operator === 'IN') {
+      const placeholders = value.map((_, idx) => `$${queryParams.length + idx + 1 + numExistingParams}`).join(', ');
+      queryParams.push(...value);
+      return `${tableName}.${key} IN (${placeholders})`;
+    } else {
+      queryParams.push(value);
+      return `${tableName}.${key} ${operator} $${queryParams.length + numExistingParams}`;
+    }
   });
-  
+
+  let queryString = setClause;
   if (conditionStrings.length > 0) queryString += ` WHERE ${conditionStrings.join(' AND ')}`;
 
   return { queryString, queryParams };

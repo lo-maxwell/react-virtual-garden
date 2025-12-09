@@ -39,62 +39,108 @@ const allowedTables = {
 };
 
 // Define allowed operators
-const allowedOperators = ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN", "+", "-", "*", "/"];
+const allowedOperators = [
+    "=", "!=", ">", "<", ">=", "<=", "LIKE", "IN", "+", "-", "*", "/",
+    "jsonb_set", "jsonb_inc", "jsonb_mul", "jsonb_remove"
+];
 
-// Function to construct the update query string and parameters
-const constructUpdateQuery = (tableName, values, conditions, returnColumns) => {
+function buildJsonbOp(columnName, expr, op, paramIndexStart) {
+    const params = [];
+  
+    if (!op.operator || !allowedOperators.includes(op.operator)) {
+      throw new Error(`Unsupported JSONB operator: ${op.operator}`);
+    }
+  
+    if (op.operator === "jsonb_set") {
+      if (!Array.isArray(op.path)) throw new Error("jsonb_set requires path: string[]");
+      params.push(op.value);
+      const pgPath = `{${op.path.join(",")}}`;
+      return {
+        sql: `jsonb_set(${expr}, '${pgPath}', to_jsonb($${paramIndexStart}::jsonb), true)`,
+        params
+      };
+    }
+  
+    if (op.operator === "jsonb_remove") {
+      if (!Array.isArray(op.path)) throw new Error("jsonb_remove requires path: string[]");
+      const pgPath = `{${op.path.join(",")}}`;
+      return { sql: `${expr} #- '${pgPath}'`, params };
+    }
+  
+    if (op.operator === "jsonb_inc" || op.operator === "jsonb_mul") {
+      if (!Array.isArray(op.path) || typeof op.value !== "number") {
+        throw new Error(`${op.operator} requires { path: string[], value: number }`);
+      }
+      params.push(op.value);
+      const pgPath = `{${op.path.join(",")}}`;
+      const extractor = op.path.map(p => `'${p}'`).join("->>");
+      const operatorSymbol = op.operator === "jsonb_inc" ? "+" : "*";
+      const defaultValue = op.operator === "jsonb_inc" ? 0 : 1;
+  
+      return {
+        sql: `jsonb_set(${expr}, '${pgPath}', to_jsonb(coalesce((${columnName}#>>'{${op.path[0]}}')::numeric, ${defaultValue}) ${operatorSymbol} $${paramIndexStart}), true)`,
+        params
+      };
+    }
+  
+    throw new Error(`Unsupported JSONB operator: ${op.operator}`);
+  }
+  
+  // Construct UPDATE query with correct param indexing
+  export const constructUpdateQuery = (tableName, values, conditions, returnColumns) => {
     const queryParams = [];
-
-    // Construct the set clause and populate queryParams with values
-    const setClause = Object.keys(values).map((key) => {
-        // Check if the value is an object with an operator
-        if (typeof values[key] === 'object' && values[key].operator) {
-            // Validate operator
-            if (!allowedOperators.includes(values[key].operator)) {
-                throw new Error(`Invalid operator: ${values[key].operator}`);
-            }
-            // Use the current value in the database for the calculation
-            queryParams.push(values[key].value);
-            return `${key} = ${key} ${values[key].operator} $${queryParams.length}`; // Use parameterized query
-        } else {
-            queryParams.push(values[key]); // Push the value for the column into queryParams
-            return `${key} = $${queryParams.length}`; // Use parameterized query
+  
+    // Build SET clause
+    const setClause = Object.keys(values).map(key => {
+      const val = values[key];
+  
+      if (Array.isArray(val)) {
+        let expr = key;
+        for (const op of val) {
+          const { sql, params } = buildJsonbOp(key, expr, op, queryParams.length + 1);
+          expr = sql;
+          queryParams.push(...params);
         }
-    }).join(', ');
-
-    // Construct the initial query string
-    let queryString = `UPDATE ${tableName} SET ${setClause}`; // Initial query string
-
-    // Add conditions if provided
-    const conditionStrings = Object.keys(conditions).map((key) => {
-        const { operator, value } = conditions[key]; // Extract operator and value from the condition object
-        
-        // Validate operator
-        if (!allowedOperators.includes(operator)) {
-            throw new Error(`Invalid operator: ${operator}`);
-        }
-
-        // Validate key against allowed columns for the specific table
-        if (!allowedTables[tableName].includes(key)) {
-            throw new Error(`Invalid column: ${key} for table: ${tableName}`);
-        }
-
-        if (operator === 'IN') {
-            // Create placeholders for each value in the array
-            const placeholders = value.map((_, idx) => `$${queryParams.length + idx + 1}`).join(', ');
-            queryParams.push(...value); // Add all values to queryParams
-            return `${key} IN (${placeholders})`; // Use the placeholders in the query
-        } else {
-            queryParams.push(value); // Add the single value to queryParams
-            return `${key} ${operator} $${queryParams.length}`; // Use parameterized query for the value
-        }
-    });
-    queryString += ` WHERE ${conditionStrings.join(' AND ')}`;
-
-    queryString += ` RETURNING ${returnColumns.join(', ')};`; // Append RETURNING clause
-
+        return `${key} = ${expr}`;
+      }
+  
+      if (val && typeof val === "object" && "operator" in val && val.operator.startsWith("jsonb")) {
+        const { sql, params } = buildJsonbOp(key, key, val, queryParams.length + 1);
+        queryParams.push(...params);
+        return `${key} = ${sql}`;
+      }
+  
+      if (val && typeof val === "object" && "operator" in val) {
+        queryParams.push(val.value);
+        return `${key} = ${key} ${val.operator} $${queryParams.length}`;
+      }
+  
+      queryParams.push(val);
+      return `${key} = $${queryParams.length}`;
+    }).join(", ");
+  
+    // Build WHERE clause
+    const conditionStrings = Object.keys(conditions).map(key => {
+      const { operator, value } = conditions[key];
+      queryParams.push(value);
+      if (operator === "IN") {
+        const placeholders = value.map((_, idx) => `$${queryParams.length - value.length + idx + 1}`).join(", ");
+        return `${key} IN (${placeholders})`;
+      } else {
+        return `${key} ${operator} $${queryParams.length}`;
+      }
+    }).join(" AND ");
+  
+    const queryString = `
+      UPDATE ${tableName}
+      SET ${setClause}
+      WHERE ${conditionStrings}
+      RETURNING ${returnColumns.join(", ")};
+    `;
+  
     return { queryString, queryParams };
-};
+  };
+
 
 export const handler = async (event) => {
   const { queries } = event; // Updated to accept queries object
@@ -167,7 +213,7 @@ export const handler = async (event) => {
 
     // Use the new function to construct the query
     const { queryString, queryParams } = constructUpdateQuery(tableName, values, conditions, returnColumns);
-
+    
     try {
         const result = await pool.query(queryString, queryParams);
         return { tableName, rows: result.rows }; // Return result for this query
@@ -175,7 +221,7 @@ export const handler = async (event) => {
         console.error('Error executing update query:', error);
         return { 
             tableName, 
-            error: `Update query failed: ${error.message}` // Return detailed error message for this query
+            error: `Update query failed: ${error.message}\n${queryString}\n------\n ${queryParams}` // Return detailed error message for this query
         };
     }
   };
