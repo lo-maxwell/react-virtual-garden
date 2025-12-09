@@ -9,6 +9,7 @@ const config: Config = {
   safelist: [
     'w-8', 'w-9', 'w-10', 'w-11', 'w-12', 'w-13', 'w-14', 'w-15', 'w-16', 'w-17', 'w-18', 'w-19', 'w-20',
     'h-8', 'h-9', 'h-10', 'h-11', 'h-12', 'h-13', 'h-14', 'h-15', 'h-16', 'h-17', 'h-18', 'h-19', 'h-20',
+    'max-h-[20vh]', 'max-h-[30vh]', 'max-h-[40vh]', 'max-h-[50vh]', 'max-h-[60vh]', 'max-h-[70vh]', 'max-h-[80vh]', 'max-h-[90vh]', 'max-h-[100vh]'
   ],
   theme: {
     extend: {

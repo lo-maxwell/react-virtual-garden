@@ -1,3 +1,4 @@
+import { useGoose } from "@/app/hooks/contexts/GooseContext";
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import colors from "@/components/colors/colors";
 import RawIconDisplay from "@/components/user/icon/RawIconDisplay";
@@ -9,6 +10,7 @@ import { Utility } from "./utilityBar";
 const UtilityTooltip = ({ children, utility }: { children: React.ReactNode, utility: Utility }) => {
 
 	const { selectedItem } = useSelectedItem();
+	const { selectedGoose } = useGoose();
 
 	const RenderTooltipInfo = () => {
 		switch (utility.icon) {
@@ -20,6 +22,10 @@ const UtilityTooltip = ({ children, utility }: { children: React.ReactNode, util
 				return RenderHarvestAllTooltip();
 			case "pickupAll":
 				return RenderPickupAllTooltip();
+			case "feedGoose":
+				return RenderFeedGooseTooltip();
+			case "sellGoose":
+				return RenderSellGooseTooltip();
 			default:
 				return RenderEmptyItemTooltip();
 		}
@@ -107,6 +113,55 @@ const UtilityTooltip = ({ children, utility }: { children: React.ReactNode, util
 				</div>
 				<div className={`${colors.tool.descriptionTextColor} text-left`}>
 					{`Removes all currently placed decorations, returning them to your inventory.`}
+				</div>
+			</div>
+		</>
+	}
+
+	const RenderFeedGooseTooltip = () => {
+		if (!selectedGoose) return RenderEmptyItemTooltip();
+		if (!selectedItem || selectedItem.itemData instanceof ToolTemplate || selectedItem.itemData.subtype !== ItemSubtypes.HARVESTED.name) {
+			return <>
+				<div className={`flex flex-col items-left min-w-0 flex-grow ${colors.inventory.inventoryDefaultItemTextColor}`}>
+					<div className="flex flex-row justify-between min-w-max">
+						<div className="flex flex-row min-w-0 text-xl">
+							<RawIconDisplay icon={utility.icon} width={6} height={6} />
+							<span>{`Feed ${selectedGoose.getName()} `}</span>
+						</div>
+					</div>
+					<div className={`${colors.tool.descriptionTextColor} text-left`}>
+						{`Select a plant in your inventory to feed it to ${selectedGoose.getName()}`}
+					</div>
+				</div>
+			</>
+		}
+		return <>
+			<div className={`flex flex-col items-left min-w-0 flex-grow ${colors.inventory.inventoryDefaultItemTextColor}`}>
+				<div className="flex flex-row justify-between min-w-max">
+					<div className="flex flex-row min-w-0 text-xl">
+						<RawIconDisplay icon={selectedItem?.itemData.icon} width={6} height={6} />
+						<span>{`Feed ${selectedGoose.getName()} a ${selectedItem.itemData.name}`}</span>
+					</div>
+				</div>
+				<div className={`${colors.tool.descriptionTextColor} text-left`}>
+					{`Feed a ${selectedItem.itemData.name} to ${selectedGoose.getName()}.`}
+				</div>
+			</div>
+		</>
+	}
+
+	const RenderSellGooseTooltip = () => {
+		if (!selectedGoose) return RenderEmptyItemTooltip();
+		return <>
+			<div className={`flex flex-col items-left min-w-0 flex-grow ${colors.inventory.inventoryDefaultItemTextColor}`}>
+				<div className="flex flex-row justify-between min-w-max">
+					<div className="flex flex-row min-w-0 text-xl">
+						<RawIconDisplay icon={utility.icon} width={6} height={6} />
+						<span>{`Sell ${selectedGoose.getName()}`}</span>
+					</div>
+				</div>
+				<div className={`${colors.tool.descriptionTextColor} text-left`}>
+					{`Sells ${selectedGoose.getName()}.`}
 				</div>
 			</div>
 		</>

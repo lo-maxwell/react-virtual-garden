@@ -23,6 +23,7 @@ import { ConfirmPickupAllPopupWindow } from "@/components/garden/confirmPickupAl
 import ToolboxComponent from "@/components/garden/toolbox/toolbox";
 import UtilityBarComponent, { Utility } from "@/components/garden/utilityBar/utilityBar";
 import { buildGardenUtilities } from "./gardenUtilities";
+import { useGoose } from "../hooks/contexts/GooseContext";
 
 const GardenComponent = () => {
   const { inventory, reloadInventory } = useInventory();
@@ -35,6 +36,7 @@ const GardenComponent = () => {
     reloadGarden,
   } = useGarden();
   const { user, reloadUser } = useUser();
+	const {goosePen, reloadGoosePen} = useGoose();
   const { selectedItem, toggleSelectedItem } = useSelectedItem();
   const [gardenForceRefreshKey, setGardenForceRefreshKey] = useState(0);
   const {confirmPlantAll, confirmHarvestAll, confirmPickupAll} = useAccount();
@@ -193,6 +195,7 @@ const GardenComponent = () => {
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
+        reloadGoosePen();
 				setGardenMessage(`There was an error planting 1 or more seeds! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				// setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 				// return;
@@ -251,6 +254,7 @@ const GardenComponent = () => {
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
+        reloadGoosePen();
 				setGardenMessage(`There was an error harvesting 1 or more plants! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				// setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 				
@@ -306,6 +310,7 @@ const GardenComponent = () => {
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
+        reloadGoosePen();
 				setGardenMessage(`There was an error picking up 1 or more decorations! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				// setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
 			}

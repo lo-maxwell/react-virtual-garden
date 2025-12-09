@@ -15,6 +15,7 @@ import IconButton from "../user/icon/IconButton";
 import IconSVGButton from "../user/icon/IconSVGButton";
 import { ConfirmDeletePlantPopupWindow } from "./confirmDeletePlantPopupWindow";
 import { PlotActionType } from "@/app/hooks/garden/plotActions";
+import { useGoose } from "@/app/hooks/contexts/GooseContext";
 
 type PlotComponentProps = {
 	plot: Plot;
@@ -38,6 +39,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 	const { user, reloadUser } = useUser();
 	const { garden, reloadGarden } = useGarden();
 	const { inventory, reloadInventory } = useInventory();
+	const {goosePen, reloadGoosePen} = useGoose();
 	const dispatch = useDispatch();
 
 	const getColor = () => {
@@ -146,6 +148,7 @@ const PlotComponent = forwardRef<PlotComponentRef, PlotComponentProps>(({plot, o
 				reloadUser();
 				reloadGarden();
 				reloadInventory();
+				reloadGoosePen();
 				setDisplayIcon(plot.getItem().itemData.icon);
 				// setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1); //we force a refresh to clear statuses
 			}

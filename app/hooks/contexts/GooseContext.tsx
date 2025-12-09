@@ -1,11 +1,15 @@
 import { Garden } from '@/models/garden/Garden';
+import Goose from '@/models/goose/Goose';
 import GoosePen from '@/models/goose/GoosePen';
 import React, { createContext, Dispatch, SetStateAction, useContext, useState } from 'react';
 
 // Define your context type
 interface GooseContextType {
     goosePen: GoosePen,
-    reloadGoosePen: () => void;
+    reloadGoosePen: () => void,
+    updateGooseName: (gooseId: string, newGooseName: string) => boolean,
+    selectedGoose: Goose | null,
+    setSelectedGoose: (goose: Goose | null) => void,
     // Add any other actions or state you need
 }
 

@@ -158,6 +158,7 @@ export class InventoryItemList {
 			itemName = item.itemData.name;
 		} else {
 			//Should never occur
+			console.error(`Invalid item type in getItemName`);
 			response.addErrorMessage(`Could not parse item: ${item}`);
 			return response;
 		}

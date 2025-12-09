@@ -16,6 +16,8 @@ import { InventoryItemTemplate } from "../templates/models/InventoryItemTemplate
 import { HarvestedItemTemplate } from "../templates/models/InventoryItemTemplates/HarvestedItemTemplate";
 import { DecorationTemplate } from "../templates/models/PlacedItemTemplates/DecorationTemplate";
 import { EmptyItemTemplate } from "../templates/models/PlacedItemTemplates/EmptyItemTemplate";
+import { InventoryEgg } from "../inventoryItems/InventoryEgg";
+import { PlacedEgg } from "../placedItems/PlacedEgg";
 
 export type ItemConstructor<T extends InventoryItem | PlacedItem> = {
     new (...args: any[]): T;
@@ -29,7 +31,9 @@ export const itemTypeMap: { [key: string]: ItemConstructor<InventoryItem | Place
 	'HarvestedItem': HarvestedItem,
 	'Plant': Plant,
 	'Decoration': Decoration,
-	'Ground': EmptyItem
+	'Ground': EmptyItem,
+	'InventoryEgg': InventoryEgg,
+	'PlacedEgg': PlacedEgg
 }
 
 export type ItemTemplateConstructor<T extends InventoryItemTemplate | PlacedItemTemplate> = {

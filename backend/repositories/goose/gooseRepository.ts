@@ -52,6 +52,7 @@ class GooseRepository {
 
     /**
      * Creates a Goose domain object from a GooseEntity row.
+     * @param raw a object containing goose entity parts, usually gotten from the database
      */
     makeGooseObject(raw: any): Goose {
         const entity = this.normalizeGooseEntity(raw);

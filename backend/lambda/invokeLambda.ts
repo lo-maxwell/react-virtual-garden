@@ -69,6 +69,7 @@ export function parseRows<T = any>(result: any): T {
     }
   
     if (!result.rows) {
+        console.log(result);
       throw new Error(`No rows returned for ${result.tableName}`);
     }
   

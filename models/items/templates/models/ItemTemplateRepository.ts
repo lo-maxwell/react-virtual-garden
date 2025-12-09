@@ -10,7 +10,7 @@ import { DecorationTemplate } from "./PlacedItemTemplates/DecorationTemplate";
 import { EmptyItemTemplate } from "./PlacedItemTemplates/EmptyItemTemplate";
 import ToolTemplate from "./ToolTemplates/ToolTemplate";
 import { ShovelTemplate } from "./ToolTemplates/ShovelTemplate";
-import { EggTemplate } from "./PlacedItemTemplates/PlacedEggTemplate";
+import { PlacedEggTemplate } from "./PlacedItemTemplates/PlacedEggTemplate";
 
 export class ItemTemplateRepository {
 	PlacedItems: Record<string, PlacedItemTemplate[]> = {};
@@ -43,7 +43,7 @@ export class ItemTemplateRepository {
       )
     );
     this.PlacedItems['PlacedEggs'] = itemsData.PlacedItems.PlacedEggs.map((item: any) =>
-    new EggTemplate(
+    new PlacedEggTemplate(
       item.id,
       item.name,
       item.icon,

@@ -196,24 +196,6 @@ const UserPage = () => {
     return <></>;
   }
 
-  const geese = goosePen.getAllGeese();
-  let gooseProps = null;
-
-  if (geese.length > 0) {
-    const goose: Goose = geese[0];
-    gooseProps = {
-      name: goose.getName(),
-      color: goose.getColor(),
-      birthday: new Date(goose.getBirthday()), // timestamp → Date
-      attributes: {
-        power: goose.getPower(),
-        charisma: goose.getCharisma(),
-        personality: goose.getPersonality(),
-        mood: goose.getMood()
-      }
-    };
-  }
-
   return (
     <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
       <div className="flex inner-flex">
@@ -237,8 +219,6 @@ const UserPage = () => {
           <Suspense fallback={<div>Loading...</div>}>
             {renderAccountManagementButtons}
           </Suspense>
-
-          {gooseProps ? <GoosePanel goose={gooseProps}></GoosePanel> : <></>}
         </div>
 
         <div className="px-4 w-2/3 right-side">

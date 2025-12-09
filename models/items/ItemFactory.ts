@@ -14,6 +14,8 @@ import { DecorationTemplate } from "./templates/models/PlacedItemTemplates/Decor
 import { EmptyItemTemplate } from "./templates/models/PlacedItemTemplates/EmptyItemTemplate";
 import Shovel from "./tools/Shovel";
 import { ShovelTemplate } from "./templates/models/ToolTemplates/ShovelTemplate";
+import { PlacedEggTemplate } from "./templates/models/PlacedItemTemplates/PlacedEggTemplate";
+import { PlacedEgg } from "./placedItems/PlacedEgg";
 
 export const generateRandomPlacedItem = () => {
 	const placedItems = Object.values(itemTemplateFactory.repository.PlacedItems).flat().filter(item => item.name != "error");

@@ -17,6 +17,7 @@ import { HarvestedItem } from "@/models/items/inventoryItems/HarvestedItem";
 import { Tool } from "@/models/items/tools/Tool";
 import { syncAllAccountObjects } from "../../garden/gardenFunctions";
 import { useCallback } from "react";
+import { useGoose } from "../contexts/GooseContext";
 
 export enum PlotActionType {
     PLANT_SEED = 'plantSeed',
@@ -32,6 +33,7 @@ export const usePlotActions = () => {
 	const {garden, setGardenMessage, reloadGarden } = useGarden();
 	const {inventory, reloadInventory} = useInventory();
 	const {user, reloadUser} = useUser();
+	const {goosePen, reloadGoosePen} = useGoose();
 	const {toggleSelectedItem} = useSelectedItem();
 	const dispatch = useDispatch();
 
@@ -91,6 +93,7 @@ export const usePlotActions = () => {
 				reloadGarden();
 				reloadInventory();
 				reloadUser();
+				reloadGoosePen();
 				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
@@ -158,6 +161,7 @@ export const usePlotActions = () => {
 				reloadGarden();
 				reloadInventory();
 				reloadUser();
+				reloadGoosePen();
 				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
@@ -245,6 +249,7 @@ export const usePlotActions = () => {
 				reloadGarden();
 				reloadInventory();
 				reloadUser();
+				reloadGoosePen();
 				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
@@ -325,6 +330,7 @@ export const usePlotActions = () => {
 				reloadGarden();
 				reloadInventory();
 				reloadUser();
+				reloadGoosePen();
 				setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 				return {success: false, displayIcon: originalIcon};
 			}
@@ -395,6 +401,7 @@ export const usePlotActions = () => {
 					reloadGarden();
 					reloadInventory();
 					reloadUser();
+					reloadGoosePen();
 					setGardenMessage(`There was an error! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 					return {success: false, displayIcon: originalIcon};
 				}

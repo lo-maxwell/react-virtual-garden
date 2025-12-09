@@ -1,4 +1,11 @@
+import { HarvestedItem } from "../items/inventoryItems/HarvestedItem";
+import { InventoryItem } from "../items/inventoryItems/InventoryItem";
+import { ItemSubtypes } from "../items/ItemTypes";
+import { HarvestedItemTemplate } from "../items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
+import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplates/InventoryItemTemplate";
+import { Inventory } from "../itemStore/inventory/Inventory";
 import { GoosePersonalities, GoosePersonality, isGoosePersonality } from "./GoosePersonalities";
+import { GooseTransactionResponse } from "./GooseTransactionResponse";
 
 export interface GooseEntity {
     id: string;
@@ -202,7 +209,56 @@ class Goose {
     setMood(mood: number): boolean { this.mood = mood; return true; }
     setLocation(location: number): boolean { this.location = location; return true; }
 
-    
+    getMoodChangeFromItem(item: HarvestedItemTemplate): number {
+        if (item.subtype !== ItemSubtypes.HARVESTED.name) {
+            throw new Error(`Invalid item`);
+        }
+        const itemValue = item.value;
+
+        return Math.floor(itemValue / 10) + 1;
+    }
+
+    /**
+     * Feeds a goose an item, increasing its mood. Decreases the inventory item's quantity by the respective amount.
+     * @param inventory the inventory to consume the item from
+     * @param item an InventoryItem. Fails if this is not a harvested item.
+     * @param quantity the number of items to consume. Fails if this is larger than the existing quantity in the inventory.
+     * @returns a GooseTransactionResponse with payload as the updated mood, if successful
+     */
+    feedGoose(inventory: Inventory, item: InventoryItemTemplate, quantity: number): GooseTransactionResponse {
+        const response = new GooseTransactionResponse();
+
+        if (item.subtype !== ItemSubtypes.HARVESTED.name) {
+            response.addErrorMessage(`Invalid item of type ${item.subtype} for feeding`);
+            return response;
+        }
+        const getItemResponse = inventory.getItem(item);
+        const itemFromInventory = getItemResponse.payload;
+        if (!getItemResponse.isSuccessful() || !itemFromInventory) {
+            response.addErrorMessages(getItemResponse.messages.length ? getItemResponse.messages : [`Could not find ${item.name} in inventory`]);
+            return response;
+        }
+        const inventoryQuantity = itemFromInventory.getQuantity();
+        if (inventoryQuantity < quantity) {
+            response.addErrorMessage(`Invalid quantity of ${item.name} in inventory, has ${inventoryQuantity} and needs ${quantity}`);
+            return response;
+        }
+        const trashItemResponse = inventory.trashItem(itemFromInventory, quantity);
+        if (!trashItemResponse.isSuccessful()) {
+            response.addErrorMessages(trashItemResponse.messages);
+            return response;
+        }
+        try {
+            const moodChange = this.getMoodChangeFromItem(itemFromInventory.itemData);
+            this.setMood(moodChange + this.getMood());
+            response.payload = this.getMood();
+            return response;
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            response.addErrorMessage(msg);
+            return response;
+        }
+    }
 }
 
 export default Goose;

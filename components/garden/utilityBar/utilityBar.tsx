@@ -1,3 +1,4 @@
+import { useGoose } from "@/app/hooks/contexts/GooseContext";
 import { useSelectedItem } from "@/app/hooks/contexts/SelectedItemContext";
 import { Tool } from "@/models/items/tools/Tool";
 import UtilityButton from "./utilityButton";
@@ -10,6 +11,7 @@ export interface Utility {
 
 const UtilityBarComponent = ({utilities, maxHeightPercentage}: {utilities: Utility[], maxHeightPercentage: number}) => {
 	const {selectedItem, owner} = useSelectedItem();
+	const {selectedGoose} = useGoose();
 
 	const RenderUtilityBar = () => {
 		return utilities.map((util, utilIndex) => {

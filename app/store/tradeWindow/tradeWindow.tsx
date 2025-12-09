@@ -20,6 +20,7 @@ import { Tool } from "@/models/items/tools/Tool";
 import { syncAllAccountObjects } from "@/app/garden/gardenFunctions";
 import { useGarden } from "@/app/hooks/contexts/GardenContext";
 import { setGold } from "@/store/slices/inventorySlice";
+import { useGoose } from "@/app/hooks/contexts/GooseContext";
 
 
 const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshKey}: {costMultiplier: number, forceRefreshKey: number, setForceRefreshKey: React.Dispatch<React.SetStateAction<number>>}) => {
@@ -30,6 +31,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 	const [tradeWindowMessage, setTradeWindowMessage] = useState(defaultTradeWindowMessage);
 	const { store, reloadStore } = useStore();
 	const { user, reloadUser } = useUser();
+	const {goosePen, reloadGoosePen} = useGoose();
 	const { reloadGarden } = useGarden();
 	const { account, guestMode } = useAccount();
 	const dispatch = useDispatch();
@@ -148,6 +150,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 					reloadGarden();
 					reloadInventory();
 					reloadStore();
+					reloadGoosePen();
 					setTradeWindowMessage(`There was an error purchasing the item! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 					setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1);
 					return;
@@ -187,6 +190,7 @@ const TradeWindowComponent = ({costMultiplier, forceRefreshKey, setForceRefreshK
 					reloadGarden();
 					reloadInventory();
 					reloadStore();
+					reloadGoosePen();
 					setTradeWindowMessage(`There was an error selling the item! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
 					setForceRefreshKey((forceRefreshKey) => forceRefreshKey + 1);
 					return;

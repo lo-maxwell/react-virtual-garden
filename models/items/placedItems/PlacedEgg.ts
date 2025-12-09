@@ -1,15 +1,15 @@
 import { PlacedItem } from "./PlacedItem";
 import { v4 as uuidv4 } from "uuid";
-import { EggTemplate } from "../templates/models/PlacedItemTemplates/PlacedEggTemplate";
+import { PlacedEggTemplate } from "../templates/models/PlacedItemTemplates/PlacedEggTemplate";
 import { EggDetails, generateDefaultEggDetails } from "../EggDetails";
 
 export class PlacedEgg extends PlacedItem {
-    itemData: EggTemplate;
+    itemData: PlacedEggTemplate;
     eggDetails: EggDetails;
 
     constructor(
         placedItemId: string,
-        itemData: EggTemplate,
+        itemData: PlacedEggTemplate,
         status: string,
         eggDetails: EggDetails
     ) {
@@ -30,7 +30,7 @@ export class PlacedEgg extends PlacedItem {
             if (typeof status !== "string") throw new Error("Invalid status");
             if (typeof eggDetails !== "object") throw new Error("Invalid eggDetails");
 
-            const validatedItemData = EggTemplate.fromPlainObject(itemData);
+            const validatedItemData = PlacedEggTemplate.fromPlainObject(itemData);
 
             return new PlacedEgg(
                 placedItemId,
@@ -43,7 +43,7 @@ export class PlacedEgg extends PlacedItem {
             console.error("Error creating PlacedEgg from plainObject:", err);
             return new PlacedEgg(
                 uuidv4(),
-                EggTemplate.getErrorTemplate(),
+                PlacedEggTemplate.getErrorTemplate(),
                 "error",
                 generateDefaultEggDetails()
             );

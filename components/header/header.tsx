@@ -58,6 +58,13 @@ export default function Header() {
           Garden
         </Link>
         <Link
+          href="/geese"
+          className={getLinkStyle("/geese")}
+          onClick={closeMenu}
+        >
+          Geese
+        </Link>
+        <Link
           href="/store"
           className={getLinkStyle("/store")}
           onClick={closeMenu}
@@ -108,7 +115,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-blue-200 sticky top-0 z-10 w-full items-center justify-between">
+    <header className="bg-blue-200 sticky top-0 z-50 w-full items-center justify-between h-16">
       <nav className="w-full">
         <div className="flex items-center justify-between w-full px-4 py-3">
           {/* Name Button */}

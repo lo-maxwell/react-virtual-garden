@@ -14,6 +14,12 @@ export class CustomResponse {
 		this.messages.push(msg);
 	}
 
+	addErrorMessages(msgs: string[]) {
+		msgs.forEach((msg) => {
+			this.messages.push(msg);
+		})
+	}
+
 	printErrorMessages() {
 		this.messages.forEach((element, index) => {
 			console.log(element);

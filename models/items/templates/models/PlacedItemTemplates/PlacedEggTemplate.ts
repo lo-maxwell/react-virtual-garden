@@ -3,7 +3,7 @@ import { itemTemplateInterfaceRepository } from "../../interfaces/ItemTemplateIn
 import { PlacedItemTemplateInterface } from "../../interfaces/PlacedItemTemplates/PlacedItemTemplateInterface";
 import { PlacedItemTemplate } from "./PlacedItemTemplate";
 
-export class EggTemplate extends PlacedItemTemplate{
+export class PlacedEggTemplate extends PlacedItemTemplate{
 	baseExp: number;
 	growTime: number;
 	
@@ -14,7 +14,7 @@ export class EggTemplate extends PlacedItemTemplate{
 	}
 
 	static getErrorTemplate() {
-		return new EggTemplate("0-06-99-99-99", "error", "❌", "PlacedItem", "PlacedEgg", "Error", "Error", 0, 0, "1-03-99-99-99", 0, 0);
+		return new PlacedEggTemplate("0-06-99-99-99", "error", "❌", "PlacedItem", "PlacedEgg", "Error", "Error", 0, 0, "1-03-99-99-99", 0, 0);
 	}
 
 
@@ -25,11 +25,11 @@ export class EggTemplate extends PlacedItemTemplate{
 		if (templateInterface.subtype !== ItemSubtypes.PLACED_EGG.name) {
 			throw new Error('Found non PlacedEgg for PlacedEgg template');
 		}
-		const typedTemplate = templateInterface as EggTemplate;
-		return new EggTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.level, typedTemplate.transformId, typedTemplate.baseExp, typedTemplate.growTime);
+		const typedTemplate = templateInterface as PlacedEggTemplate;
+		return new PlacedEggTemplate(typedTemplate.id, typedTemplate.name, typedTemplate.icon, typedTemplate.type, typedTemplate.subtype, typedTemplate.category, typedTemplate.description, typedTemplate.value, typedTemplate.level, typedTemplate.transformId, typedTemplate.baseExp, typedTemplate.growTime);
 	}
 
-	static fromPlainObject(plainObject: any): EggTemplate {
+	static fromPlainObject(plainObject: any): PlacedEggTemplate {
 		try {
             // Validate plainObject structure
             if (!plainObject || typeof plainObject !== 'object') {
@@ -42,7 +42,7 @@ export class EggTemplate extends PlacedItemTemplate{
 			}
 			let template = itemTemplateInterfaceRepository.getPlacedTemplateInterface(id);
 			if (template) {
-				return EggTemplate.createEggTemplateFromInterface(template);	
+				return PlacedEggTemplate.createEggTemplateFromInterface(template);	
 			}
 			if (typeof name !== 'string') {
 				throw new Error('Invalid name property in plainObject for EggTemplate');
@@ -54,7 +54,7 @@ export class EggTemplate extends PlacedItemTemplate{
 			
 			template = itemTemplateInterfaceRepository.getPlacedItemTemplateInterfaceByName(name);
 			if (template) {
-				return EggTemplate.createEggTemplateFromInterface(template);	
+				return PlacedEggTemplate.createEggTemplateFromInterface(template);	
 			}
 			throw new Error('Could not find valid id or name for EggTemplate');
 		} catch (err) {

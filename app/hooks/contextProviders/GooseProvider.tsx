@@ -1,4 +1,5 @@
 'use client'
+import Goose from '@/models/goose/Goose';
 import GoosePen from '@/models/goose/GoosePen';
 import { loadGoosePen, saveGoosePen } from '@/utils/localStorage/goose';
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
@@ -14,6 +15,7 @@ interface GooseProviderProps {
 export const GooseProvider = ({ children }: GooseProviderProps) => {
 	const {user} = useUser();
     const [goosePen, setGoosePen] = useState<GoosePen | null>(null);
+	const [selectedGoose, setSelectedGoose] = useState<Goose | null>(null);
 
 	const setupGoosePen = useCallback((): GoosePen => {
 		let pen = loadGoosePen();
@@ -41,11 +43,32 @@ export const GooseProvider = ({ children }: GooseProviderProps) => {
 		setGoosePen(initialGoosePen);
 	}, [setupGoosePen]);
 
+	const updateGooseName = useCallback((gooseId: string, newGooseName: string) => {
+		if (!goosePen) return false;
+		const toUpdate = goosePen.getGooseById(gooseId);
+		if (!toUpdate) return false;
+		toUpdate.setName(newGooseName);
+		saveGoosePen(goosePen);
+		reloadGooses();
+		// If this goose is currently selected, update selectedGoose reference
+		if (selectedGoose?.getId() === gooseId) {
+			setSelectedGoose(toUpdate);
+		}
+		return toUpdate.getName() === newGooseName;
+	}, [goosePen])
+
+	const toggleSelectedGoose = useCallback((goose: Goose | null) => {
+		setSelectedGoose(goose);
+	}, [setSelectedGoose])
+
 	const contextValue = useMemo(() => ({
 		goosePen: goosePen!,
-		reloadGoosePen: reloadGooses
+		reloadGoosePen: reloadGooses,
+		updateGooseName: updateGooseName,
+		selectedGoose: selectedGoose,
+		setSelectedGoose: toggleSelectedGoose
 	  }), [
-		goosePen
+		goosePen, selectedGoose
 	  ]);
 
     return (

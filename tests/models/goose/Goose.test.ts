@@ -229,7 +229,7 @@ describe("Goose.getMoodChangeFromItem", () => {
         const g = new Goose("1", "A", "FFFFFF", 0, 0, 0, GoosePersonalities.SHY.name, 50, 0);
 
         const item = makeHarvestedItem(35); // floor(35/10)+1 = 4
-        const result = g.getMoodChangeFromItem(item);
+        const result = g.getMoodChangeFromItem(item.itemData);
 
         expect(result).toBe(4);
     });
@@ -241,7 +241,7 @@ describe("Goose.getMoodChangeFromItem", () => {
             itemData: { subtype: "SEED", value: 10 }
         } as any;
 
-        expect(() => g.getMoodChangeFromItem(badItem)).toThrow("Invalid item");
+        expect(() => g.getMoodChangeFromItem(badItem.itemData)).toThrow("Invalid item");
     });
 });
 
