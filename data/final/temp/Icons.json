@@ -108,6 +108,14 @@
             {
                 "name": "pickupAll",
                 "icon": "📦"
+            },
+            {
+                "name": "feedGoose",
+                "icon": "🍞"
+            },
+            {
+                "name": "sellGoose",
+                "icon": "💲"
             }
         ],
         "Other": [
