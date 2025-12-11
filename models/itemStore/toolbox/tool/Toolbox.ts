@@ -104,7 +104,7 @@ export default class Toolbox {
      * @tool The tool to add, identified by Tool or ToolTemplate.
      * @returns ToolTransactionResponse containing the added tool or an error message.
      */
-	 gainTool(tool: Tool | ToolTemplate): ToolTransactionResponse {
+	 gainTool(tool: Tool | ToolTemplate): ToolTransactionResponse<Tool | null> {
 		const response = this.addTool(tool);
 		return response;
 	}
@@ -114,7 +114,7 @@ export default class Toolbox {
      * @tool The tool to remove, identified by Tool, ToolTemplate, or name
      * @returns ToolTransactionResponse containing the tool or an error message.
      */
-	trashTool(tool: Tool | ToolTemplate | string): ToolTransactionResponse {
+	trashTool(tool: Tool | ToolTemplate | string): ToolTransactionResponse<Tool | null> {
 		const response = this.deleteTool(tool);
 		return response;
 	}
@@ -125,7 +125,7 @@ export default class Toolbox {
      * @tool The tool to get, identified by Tool, ToolTemplate, or name.
      * @returns ToolTransactionResponse containing the found Tool or error message.
      */
-	 getTool(tool: Tool | ToolTemplate | string): ToolTransactionResponse {
+	 getTool(tool: Tool | ToolTemplate | string): ToolTransactionResponse<Tool | null> {
 		const response = this.tools.getTool(tool);
 		return response;
 	}
@@ -146,7 +146,7 @@ export default class Toolbox {
      * @quantity The quantity of the tool to add.
      * @returns ToolTransactionResponse containing the added Tool or error message
      */
-	protected addTool(tool: Tool | ToolTemplate): ToolTransactionResponse {
+	protected addTool(tool: Tool | ToolTemplate): ToolTransactionResponse<Tool | null> {
 		if (!(tool instanceof Tool) && !(tool instanceof ToolTemplate)) {
 			const response = new ToolTransactionResponse();
 			response.addErrorMessage(`Cannot add tool to toolbox`);
@@ -161,7 +161,7 @@ export default class Toolbox {
      * @tool The tool to delete, identified by Tool, ToolTemplate, or name.
      * @returns ToolTransactionResponse containing the deleted Tool or error message.
      */
-	protected deleteTool(tool: Tool | ToolTemplate | string): ToolTransactionResponse {
+	protected deleteTool(tool: Tool | ToolTemplate | string): ToolTransactionResponse<Tool | null> {
 		const response = this.tools.deleteTool(tool);
 		return response;
 	}
@@ -170,9 +170,8 @@ export default class Toolbox {
 	 * Deletes all tools from the toolbox.
 	 * @returns ToolTransactionResponse containing the deleted toolList or error message.
 	 */
-	protected deleteAll(): ToolTransactionResponse {
-		const response = new ToolTransactionResponse();
-		response.payload = this.tools.deleteAll();
+	protected deleteAll(): ToolTransactionResponse<Tool[] | null>{
+		const response = this.tools.deleteAll();
 		return response;
 	}
 
