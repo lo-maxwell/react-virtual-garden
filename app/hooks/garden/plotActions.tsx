@@ -194,6 +194,10 @@ export const usePlotActions = () => {
 			}
 			const xp = plot.getExpValue();
 			const harvestItemResponse = plot.harvestItem(inventory, instantGrow, 1);
+			if (!harvestItemResponse.isSuccessful()) {
+				setGardenMessage(` `);
+				return {success: false, displayIcon: originalIcon, payload: null};
+			}
 			const harvestedItem = harvestItemResponse.payload.newItem as HarvestedItem;
 			const historyResult = user.updateHarvestHistory(harvestedItem, 1);
 			if (!historyResult.isSuccessful()) console.warn(historyResult);
@@ -283,6 +287,10 @@ export const usePlotActions = () => {
 			// const pickedItem = pickupItemResponse.payload.pickedItem as PlacedItem;
 			// const historyResult = user.updateDecorationHistory(pickedItem, 1);
 			// if (!historyResult.isSuccessful()) console.warn(historyResult);
+			if (!pickupItemResponse.isSuccessful()) {
+				setGardenMessage(` `);
+				return {success: false, displayIcon: originalIcon, payload: null};
+			}
 			
 			// Update redux store
 			dispatch(setItemQuantity({ 
