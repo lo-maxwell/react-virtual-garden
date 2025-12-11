@@ -51,15 +51,18 @@ export class GardenUpgrades {
 	 * @inventory the inventory that is paying gold
 	 * @returns InventoryTransactionResponse containing the final gold or an error message
 	 */
-	static expandRow(garden: Garden, store: Store, inventory: Inventory, user: User): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	static expandRow(garden: Garden, store: Store, inventory: Inventory, user: User): InventoryTransactionResponse<number> {
+		const response = new InventoryTransactionResponse<number>();
 		if (!Garden.canAddColumn(garden.getCols(), user.getLevel())) {
 			const levelRequired = (garden.getCols() + 1 - 5) * 5;
 			response.addErrorMessage(`Need to be level ${levelRequired} to expand row, currently level ${user.getLevel()}`);
 			return response;
 		}
 		const buyResponse = store.buyCustomObjectFromStore(inventory, this.getRowExpansionCost(garden, store));
-		if (!buyResponse.isSuccessful()) return buyResponse;
+		if (!buyResponse.isSuccessful()) {
+			response.addErrorMessages(buyResponse.messages);
+			return response;
+		}
 		garden.addRow(user);
 		response.payload = buyResponse.payload;
 		return response;
@@ -72,15 +75,18 @@ export class GardenUpgrades {
 	 * @inventory the inventory that is paying gold
 	 * @returns InventoryTransactionResponse containing the final gold or an error message
 	 */
-	 static expandColumn(garden: Garden, store: Store, inventory: Inventory, user: User): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	 static expandColumn(garden: Garden, store: Store, inventory: Inventory, user: User): InventoryTransactionResponse<number> {
+		const response = new InventoryTransactionResponse<number>();
 		if (!Garden.canAddRow(garden.getRows(), user.getLevel())) {
 			const levelRequired = (garden.getRows() + 1 - 5) * 5;
 			response.addErrorMessage(`Need to be level ${levelRequired} to expand column, currently level ${user.getLevel()}`);
 			return response;
 		}
 		const buyResponse = store.buyCustomObjectFromStore(inventory, this.getColExpansionCost(garden, store));
-		if (!buyResponse.isSuccessful()) return buyResponse;
+		if (!buyResponse.isSuccessful()) {
+			response.addErrorMessages(buyResponse.messages);
+			return response;
+		}
 		garden.addColumn(user);
 		response.payload = buyResponse.payload;
 		return response;
