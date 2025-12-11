@@ -7,6 +7,7 @@ import User from "../user/User";
 import { GardenTransactionResponse } from "./GardenTransactionResponse";
 import { Plot } from "./Plot";
 import { v4 as uuidv4 } from 'uuid';
+import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 
 export interface GardenEntity {
 	id: string,
@@ -410,10 +411,17 @@ export class Garden {
 	 *  updatedPlot: Plot, 
 	 *  returnedItemTemplate: ItemTemplate}
 	 */
-	private replaceItemInPlot(plot: Plot, replacementItem: PlacedItem): GardenTransactionResponse {
-		const response = new GardenTransactionResponse();
+	private replaceItemInPlot(plot: Plot, replacementItem: PlacedItem): GardenTransactionResponse<{originalItem: PlacedItem, 
+		updatedPlot: Plot, 
+		returnedItemTemplate: ItemTemplate} | null> {
+		const response = new GardenTransactionResponse<{originalItem: PlacedItem, 
+			updatedPlot: Plot, 
+			returnedItemTemplate: ItemTemplate}>();
 		const useItemResponse = plot.useItem(replacementItem, plot.getUsesRemaining());
-		if (!useItemResponse.isSuccessful()) return useItemResponse;
+		if (!useItemResponse.isSuccessful()) {
+			response.addErrorMessages(useItemResponse.messages);
+			return response;
+		}
 
 		response.payload = {
 			originalItem: useItemResponse.payload.originalItem,
@@ -432,8 +440,12 @@ export class Garden {
 	 *  updatedPlot: Plot, 
 	 *  harvestedItemTemplate: ItemTemplate}
 	 */
-	harvestPlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(uuidv4(), Garden.getGroundTemplate(), '')): GardenTransactionResponse {
-		const response = new GardenTransactionResponse();
+	harvestPlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(uuidv4(), Garden.getGroundTemplate(), '')): GardenTransactionResponse<{originalItem: PlacedItem, 
+		updatedPlot: Plot, 
+		harvestedItemTemplate: ItemTemplate} | null> {
+		const response = new GardenTransactionResponse<{originalItem: PlacedItem, 
+			updatedPlot: Plot, 
+			harvestedItemTemplate: ItemTemplate}> ();
 		let data: Plot | {row: number, col: number} | null = plot;
 		if (!(plot instanceof Plot)) {
 			data = this.getPlotByRowAndColumn(plot.row, plot.col);
@@ -453,7 +465,10 @@ export class Garden {
 			return response;
 		}
 		const replaceResponse = this.replaceItemInPlot(plotToHarvest, replacementItem);
-		if (!replaceResponse.isSuccessful()) return replaceResponse;
+		if (!replaceResponse.isSuccessful()) {
+			response.addErrorMessages(replaceResponse.messages);
+			return response;
+		}
 		response.payload = {
 			originalItem: replaceResponse.payload.originalItem, 
 			updatedPlot: replaceResponse.payload.updatedPlot, 
@@ -471,8 +486,12 @@ export class Garden {
 	 *  updatedPlot: Plot, 
 	 *  blueprintItemTemplate: ItemTemplate}
 	 */
-	repackagePlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(uuidv4(), Garden.getGroundTemplate(), '')): GardenTransactionResponse {
-		const response = new GardenTransactionResponse();
+	repackagePlot(plot: {row: number, col: number} | Plot, replacementItem: PlacedItem = new EmptyItem(uuidv4(), Garden.getGroundTemplate(), '')): GardenTransactionResponse<{originalItem: PlacedItem, 
+		updatedPlot: Plot, 
+		blueprintItemTemplate: ItemTemplate} | null> {
+		const response = new GardenTransactionResponse<{originalItem: PlacedItem, 
+			updatedPlot: Plot, 
+			blueprintItemTemplate: ItemTemplate}>();
 		let data: Plot | {row: number, col: number} | null = plot;
 		if (!(plot instanceof Plot)) {
 			data = this.getPlotByRowAndColumn(plot.row, plot.col);
@@ -492,7 +511,10 @@ export class Garden {
 			return response;
 		}
 		const replaceResponse = this.replaceItemInPlot(plotToHarvest, replacementItem);
-		if (!replaceResponse.isSuccessful()) return replaceResponse;
+		if (!replaceResponse.isSuccessful()) {
+			response.addErrorMessages(replaceResponse.messages);
+			return response;
+		}
 		response.payload = {
 			originalItem: replaceResponse.payload.originalItem, 
 			updatedPlot: replaceResponse.payload.updatedPlot, 

@@ -225,8 +225,8 @@ class Goose {
      * @param quantity the number of items to consume. Fails if this is larger than the existing quantity in the inventory.
      * @returns a GooseTransactionResponse with payload as the updated mood, if successful
      */
-    feedGoose(inventory: Inventory, item: InventoryItemTemplate, quantity: number): GooseTransactionResponse {
-        const response = new GooseTransactionResponse();
+    feedGoose(inventory: Inventory, item: InventoryItemTemplate, quantity: number): GooseTransactionResponse<number | null> {
+        const response = new GooseTransactionResponse<number>();
 
         if (item.subtype !== ItemSubtypes.HARVESTED.name) {
             response.addErrorMessage(`Invalid item of type ${item.subtype} for feeding`);

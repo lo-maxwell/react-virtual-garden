@@ -59,7 +59,11 @@ export const generatePlacedItem = (itemName: string, status: string) => {
  */
 export const generateInventoryItem = (itemName: string, quantity: number) => {
 	const itemData = itemTemplateFactory.getInventoryItemTemplateByName(itemName);
-	if (!itemData) return new Seed(uuidv4(), SeedTemplate.getErrorTemplate(), 1);
+	
+	if (!itemData){ 
+		console.log(`generating failed item ${itemName}`);
+		return new Seed(uuidv4(), SeedTemplate.getErrorTemplate(), 1);
+	}
 	switch (itemData.subtype) {
 		case "Seed":
 			//TODO: Replace type assertion with type guard

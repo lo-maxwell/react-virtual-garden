@@ -1,13 +1,13 @@
-export class CustomResponse {
-	payload: any;
+export class CustomResponse<T = null> {
+	payload: T | null;
 	messages: string[];
-	constructor(payload: any = null, messages: string[] = []) {
+	constructor(payload: T | null = null, messages: string[] = []) {
 		this.payload = payload;
 		this.messages = messages;
 	}
 
-	isSuccessful() {
-		return this.messages.length == 0;
+	isSuccessful(): this is CustomResponse<NonNullable<T>> & { payload: NonNullable<T> } {
+		return this.messages.length === 0 && this.payload !== null;
 	}
 
 	addErrorMessage(msg: string) {

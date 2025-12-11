@@ -1,4 +1,3 @@
-
 import { getToolClassFromType, ToolConstructor } from "@/models/items/utility/toolClassMaps";
 import { BooleanResponse } from "@/models/utility/BooleanResponse";
 import { ToolTransactionResponse } from "./tool/ToolTransactionResponse";
@@ -10,6 +9,7 @@ import { Tool } from "@/models/items/tools/Tool";
 export class ToolList {
 	private tools: Tool[];
 	static fixedOrder = ['Shovel'];
+	
 	constructor(tools: Tool[] = []) {
 		this.tools = tools;
 		this.sortTools(this.tools);
@@ -25,16 +25,15 @@ export class ToolList {
 
 	static fromPlainObject(plainObject: any): ToolList {
 		try {
-            // Validate plainObject structure
-            if (!plainObject || typeof plainObject !== 'object') {
-                throw new Error('Invalid plainObject structure for ToolList');
-            }
+			if (!plainObject || typeof plainObject !== 'object') {
+				throw new Error('Invalid plainObject structure for ToolList');
+			}
 			const tools = plainObject.tools.map((tool: any) => {
 				if (!tool) return null;
 				const ToolClass = getToolClassFromType(tool);
 				if (!ToolClass) {
 					console.warn(`Unknown tool type of ${tool}`);
-                    return null;
+					return null;
 				}
 				const toReturn = ToolClass.fromPlainObject(tool);
 				if (toReturn.itemData.name == 'error') {
@@ -45,7 +44,7 @@ export class ToolList {
 			return new ToolList(tools);
 		} catch (err) {
 			console.error('Error creating ToolList from plainObject:', err);
-            return new ToolList();
+			return new ToolList();
 		}
 	}
 
@@ -53,25 +52,25 @@ export class ToolList {
 		const toReturn = {
 			tools: this.tools.map(tool => {
 				return tool.toPlainObject();
-			}) // Convert each Tool to a plain object
+			})
 		};
 		return toReturn;
 	} 
 
 	/**
-     * Check if tool is an Tool.
+	 * Check if tool is a Tool.
 	 * @tool The tool to check.
-     * @returns True/False
-     */
+	 * @returns True/False
+	 */
 	static isTool(tool: any): tool is Tool {
 		return tool instanceof Tool;
 	}
 	
 	/**
-     * Check if tool is an ToolTemplate.
+	 * Check if tool is a ToolTemplate.
 	 * @tool The tool to check.
-     * @returns True/False
-     */
+	 * @returns True/False
+	 */
 	static isToolTemplate(tool: any): tool is ToolTemplate {
 		return tool instanceof ToolTemplate;
 	}
@@ -83,7 +82,6 @@ export class ToolList {
 		return this.tools.slice();
 	}
 
-	
 	/**
 	 * @type the type string, ie Shovel
 	 * @returns a copy of the inventory tools matching the given type
@@ -95,7 +93,6 @@ export class ToolList {
 		return this.tools.slice().filter((tool) => tool.itemData.type === type);
 	}
 
-	//TODO: Needs unit tests
 	/**
 	 * @returns a list of strings containing all the types of tools in this toollist
 	 */
@@ -106,29 +103,24 @@ export class ToolList {
 				types.push(tool.itemData.type);
 			}
 		})
-		// Sort types based on their index in the fixedOrder array
-		// this.sortTools(types);
+		
 		types.sort((a, b) => {
 			const indexA = ToolList.fixedOrder.indexOf(a);
 			const indexB = ToolList.fixedOrder.indexOf(b);
-	
-			// If a type is not in the fixedOrder array, it gets a large index number.
-			// This keeps unknown types at the end of the sorted array.
 			const orderA = indexA !== -1 ? indexA : ToolList.fixedOrder.length;
 			const orderB = indexB !== -1 ? indexB : ToolList.fixedOrder.length;
-	
 			return orderA - orderB;
 		});
 		return types;
 	}
 
 	/**
-     * Converts an Tool or ToolTemplate to its tool name. Strings are unaffected. Can be used on Placed or Tools.
+	 * Converts a Tool or ToolTemplate to its tool name. Strings are unaffected. Can be used on Placed or Tools.
 	 * @tool The tool to convert, identified by Tool, ToolTemplate, or name.
-     * @returns ToolTransactionResponse containing the name or an error message.
-     */
-	static getToolName(tool: Tool | ToolTemplate | string): ToolTransactionResponse {
-		const response = new ToolTransactionResponse();
+	 * @returns ToolTransactionResponse containing the name or an error message.
+	 */
+	static getToolName(tool: Tool | ToolTemplate | string): ToolTransactionResponse<string | null> {
+		const response = new ToolTransactionResponse<string>();
 		let toolName: string;
 		if (typeof tool === 'string') {
 			toolName = tool;
@@ -137,7 +129,6 @@ export class ToolList {
 		} else if (typeof tool === 'object' && (tool instanceof Tool)) {
 			toolName = tool.itemData.name;
 		} else {
-			//Should never occur
 			response.addErrorMessage(`Could not parse tool: ${tool}`);
 			return response;
 		}
@@ -146,12 +137,12 @@ export class ToolList {
 	}
 
 	/**
-     * Converts an Tool or ToolTemplate to its tool id. Can be used on Placed or Tools.
+	 * Converts a Tool or ToolTemplate to its tool id. Can be used on Placed or Tools.
 	 * @tool The tool to convert, identified by Tool or ToolTemplate.
-     * @returns ToolTransactionResponse containing the id string or an error message.
-     */
-	 static getToolId(tool: string | Tool | ToolTemplate): ToolTransactionResponse {
-		const response = new ToolTransactionResponse();
+	 * @returns ToolTransactionResponse containing the id string or an error message.
+	 */
+	static getToolId(tool: string | Tool | ToolTemplate): ToolTransactionResponse<string | null> {
+		const response = new ToolTransactionResponse<string>();
 		let toolId: string;
 		if (typeof tool === 'string') {
 			toolId = tool;
@@ -160,7 +151,6 @@ export class ToolList {
 		} else if (typeof tool === 'object' && (tool instanceof Tool)) {
 			toolId = tool.itemData.id;
 		} else {
-			//Should never occur
 			response.addErrorMessage(`Could not parse tool: ${tool}`);
 			return response;
 		}
@@ -169,15 +159,18 @@ export class ToolList {
 	}
 
 	/**
-     * Get an tool from the inventory.
-     * @tool The tool to get, identified by Tool, ToolTemplate, or name.
-     * @returns ToolTransactionResponse containing the found Tool or error message.
-     */
-	getTool(tool: Tool | ToolTemplate | string): ToolTransactionResponse {
-		const response = new ToolTransactionResponse();
+	 * Get a tool from the inventory.
+	 * @tool The tool to get, identified by Tool, ToolTemplate, or name.
+	 * @returns ToolTransactionResponse containing the found Tool or error message.
+	 */
+	getTool(tool: Tool | ToolTemplate | string): ToolTransactionResponse<Tool | null> {
+		const response = new ToolTransactionResponse<Tool>();
 		const toolNameResponse = ToolList.getToolName(tool);
-		if (!toolNameResponse.isSuccessful()) return toolNameResponse;
-		const toolName = toolNameResponse.payload;
+		if (!toolNameResponse.isSuccessful()) {
+			response.addErrorMessages(toolNameResponse.messages);
+			return response;
+		}
+		const toolName = toolNameResponse.payload as string;
 
 		this.tools.forEach((element, index) => {
 			if (element.itemData.name == toolName) {
@@ -191,11 +184,11 @@ export class ToolList {
 	}
 
 	/**
-     * Check if the inventory contains an tool.
+	 * Check if the inventory contains a tool.
 	 * Only returns true if the tool matches the given name
-     * @tool The tool to check for, identified by Tool, ToolTemplate, or name.
-     * @returns BooleanResponse containing True/False or error message.
-     */
+	 * @tool The tool to check for, identified by Tool, ToolTemplate, or name.
+	 * @returns BooleanResponse containing True/False or error message.
+	 */
 	contains(tool: Tool | ToolTemplate | string): BooleanResponse {
 		const response = new BooleanResponse();
 		const toolNameResponse = ToolList.getToolName(tool);
@@ -203,9 +196,8 @@ export class ToolList {
 			console.warn(`Error calling contains() on toolList: ` + toolNameResponse.messages);
 			response.payload = false;
 			return response;
-
 		}
-		const toolName = toolNameResponse.payload;
+		const toolName = toolNameResponse.payload as string;
 		
 		this.tools.forEach((element, index) => {
 			if (element.itemData.name == toolName) {
@@ -227,46 +219,44 @@ export class ToolList {
 	 * @tool The tool to use, identified by Tool, ToolTemplate, or name.
 	 * @quantity the quantity of tool consumed
 	 * @returns a response containing the following object, or an error message
-	 * {originalTool: Tool
-	 *  newTemplate: ToolTemplate}
+	 * {originalTool: Tool, newTemplate: ToolTemplate}
 	 */
-	useTool(tool: Tool | ToolTemplate | string, quantity: number): ToolTransactionResponse {
-		let toUse = this.getTool(tool);
-		if (toUse.isSuccessful()) {
-			const response = toUse.payload.use(quantity);
-			return response;
-		} else {
-			//Tool not found, fail
-			const response = new ToolTransactionResponse();
-			response.addErrorMessage("tool not in inventory");
-			return response;
-		}
-	}
+	// useTool(tool: Tool | ToolTemplate | string, quantity: number): ToolTransactionResponse<{originalTool: Tool, newTemplate: ToolTemplate} | null> {
+	// 	const toUse = this.getTool(tool);
+	// 	if (toUse.isSuccessful()) {
+	// 		const useTool = toUse.payload as Tool;
+	// 		const response = useTool.use(quantity);
+	// 		return response;
+	// 	} else {
+	// 		const response = new ToolTransactionResponse<{originalTool: Tool, newTemplate: ToolTemplate}>();
+	// 		response.addErrorMessages(toUse.messages);
+	// 		return response;
+	// 	}
+	// }
 
 	/**
-     * Add an tool to the inventory. Must not already exist in toolbox.
-     * @tool The tool to add.
-     * @returns ToolTransactionResponse containing the added Tool or error message
-     */
-	addTool(tool: Tool | ToolTemplate): ToolTransactionResponse {
-		const response = new ToolTransactionResponse();
+	 * Add a tool to the inventory. Must not already exist in toolbox.
+	 * @tool The tool to add.
+	 * @returns ToolTransactionResponse containing the added Tool or error message
+	 */
+	addTool(tool: Tool | ToolTemplate): ToolTransactionResponse<Tool | null> {
+		const response = new ToolTransactionResponse<Tool>();
 
 		let toUpdate = this.getTool(tool);
 		if (toUpdate.isSuccessful()) {
-			response.addErrorMessage(`Tool ${toUpdate.payload.itemData.name} already in toolbox.`)
+			const existingTool = toUpdate.payload as Tool;
+			response.addErrorMessage(`Tool ${existingTool.itemData.name} already in toolbox.`)
 			return response;
 		} else {
-			//Add tool to inventory
+			// Add tool to inventory
 			let newTool: Tool;
-			//TODO: Investigate type assertion
 			if (ToolList.isTool(tool)) {
 				const toolClass = getToolClassFromType(tool) as ToolConstructor<Tool>;
 				newTool = new toolClass(tool.getToolId(), tool.itemData);
 			} else if (ToolList.isToolTemplate(tool)) {
-				const toolClass = getToolClassFromType(tool)  as ToolConstructor<Tool>;
+				const toolClass = getToolClassFromType(tool) as ToolConstructor<Tool>;
 				newTool = new toolClass(uuidv4(), tool);
 			} else {
-				//should never occur
 				response.addErrorMessage(`Could not parse tool of type ${typeof tool}`);
 				return response;
 			}
@@ -274,7 +264,6 @@ export class ToolList {
 				response.addErrorMessage('Cannot add error tool.');
 				return response;
 			}
-			//push to front of list
 			this.tools.push(newTool);
 			this.sortTools(this.tools);
 			response.payload = newTool;
@@ -283,23 +272,21 @@ export class ToolList {
 	}
 
 	/**
-     * Delete an tool from the inventory.
-     * @tool The tool to delete, identified by Tool, ToolTemplate, or name.
-     * @returns ToolTransactionResponse containing the deleted Tool with quantity set to 0 or error message.
-     */
-	deleteTool(tool: Tool | ToolTemplate | string): ToolTransactionResponse {
-		const response = new ToolTransactionResponse();
+	 * Delete a tool from the inventory.
+	 * @tool The tool to delete, identified by Tool, ToolTemplate, or name.
+	 * @returns ToolTransactionResponse containing the deleted Tool with quantity set to 0 or error message.
+	 */
+	deleteTool(tool: Tool | ToolTemplate | string): ToolTransactionResponse<Tool | null> {
+		const response = new ToolTransactionResponse<Tool>();
 		let toDelete = this.getTool(tool);
 		if (toDelete.isSuccessful()) {
-			//Tool in inventory, delete
-			response.payload = toDelete.payload;
-			response.payload.quantity = 0;
-			const toDeleteIndex = this.tools.indexOf(toDelete.payload);
+			const toolToDelete = toDelete.payload as Tool;
+			response.payload = toolToDelete;
+			const toDeleteIndex = this.tools.indexOf(toolToDelete);
 			this.tools.splice(toDeleteIndex, 1);
 			return response;
 		} else {
-			//Tool not found, fail
-			response.addErrorMessage("tool not in inventory");
+			response.addErrorMessages(toDelete.messages);
 			return response;
 		}
 	}
@@ -308,17 +295,17 @@ export class ToolList {
 	 * Deletes all tools from the inventory.
 	 * @returns ToolTransactionResponse containing the deleted toolList or error message.
 	 */
-	deleteAll(): ToolTransactionResponse {
-		const response = new ToolTransactionResponse();
+	deleteAll(): ToolTransactionResponse<Tool[] | null> {
+		const response = new ToolTransactionResponse<Tool[]>();
 		response.payload = this.getAllTools();
 		this.tools = [];
 		return response;
 	}
 
 	/**
-     * Get the size of the inventory.
-     * @returns The number of tools in the inventory.
-     */
+	 * Get the size of the inventory.
+	 * @returns The number of tools in the inventory.
+	 */
 	size(): number {
 		return this.tools.length;
 	}

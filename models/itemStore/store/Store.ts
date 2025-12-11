@@ -288,18 +288,25 @@ export class Store extends ItemStore {
 	 *  storeItem: InventoryItem,
 	 *  purchasedItem: InventoryItem}
      */
-	 buyItemFromStore(inventory: Inventory, item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	 buyItemFromStore(inventory: Inventory, item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse<{finalGold: number,
+		storeItem: InventoryItem,
+		purchasedItem: InventoryItem} | null> {
+		const response = new InventoryTransactionResponse<{finalGold: number,
+			storeItem: InventoryItem,
+			purchasedItem: InventoryItem}>();
 		if (quantity <= 0 || !Number.isInteger(quantity)) {
 			response.addErrorMessage(`Invalid quantity: ${quantity}`);
 			return response;
 		}
 		//verify store has enough quantity
 		const getItemResponse = this.getItem(item);
-		if (!getItemResponse.isSuccessful()) return getItemResponse;
+		if (!getItemResponse.isSuccessful()) {
+			response.addErrorMessages(getItemResponse.messages);
+			return response;
+		}
 		const toBuy = getItemResponse.payload;
-		if (toBuy.quantity < quantity) {
-			response.addErrorMessage(`Invalid quantity: store has ${toBuy.quantity} but buying ${quantity}`);
+		if (toBuy.getQuantity() < quantity) {
+			response.addErrorMessage(`Invalid quantity: store has ${toBuy.getQuantity()} but buying ${quantity}`);
 			return response;
 		}
 		//add item to inventory and remove gold
@@ -309,10 +316,16 @@ export class Store extends ItemStore {
 			return response;
 		}
 		const buyItemResponse = inventory.buyItem(buyItemTemplate, this.buyMultiplier, quantity);
-		if (!buyItemResponse.isSuccessful()) return buyItemResponse;
+		if (!buyItemResponse.isSuccessful()) {
+			response.addErrorMessages(buyItemResponse.messages);
+			return response;
+		}
 		//remove item from store inventory
 		const decreaseStockResponse = this.trashItem(buyItemTemplate, quantity);
-		if (!decreaseStockResponse.isSuccessful()) return decreaseStockResponse;
+		if (!decreaseStockResponse.isSuccessful()) {
+			response.addErrorMessages(decreaseStockResponse.messages);
+			return response;
+		}
 		//format payload
 		response.payload = {
 			finalGold: buyItemResponse.payload.finalGold,
@@ -332,8 +345,12 @@ export class Store extends ItemStore {
 	 *  storeItem: InventoryItem,
 	 *  soldItem: InventoryItem}
      */
- 	sellItemToStore(inventory: Inventory, item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+ 	sellItemToStore(inventory: Inventory, item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse<{finalGold: number,
+		storeItem: InventoryItem,
+		soldItem: InventoryItem} | null> {
+		const response = new InventoryTransactionResponse<{finalGold: number,
+			storeItem: InventoryItem,
+			soldItem: InventoryItem}>();
 		if (quantity <= 0 || !Number.isInteger(quantity)) {
 			response.addErrorMessage(`Invalid quantity: ${quantity}`);
 			return response;
@@ -341,10 +358,13 @@ export class Store extends ItemStore {
 		//verify inventory has enough quantity
 		const getItemResponse = inventory.getItem(item);
 		
-		if (!getItemResponse.isSuccessful()) return getItemResponse;
+		if (!getItemResponse.isSuccessful()) {
+			response.addErrorMessages(getItemResponse.messages);
+			return response;
+		}
 		const toSell = getItemResponse.payload;
-		if (toSell.quantity < quantity) {
-			response.addErrorMessage(`Invalid quantity: inventory has ${toSell.quantity} but selling ${quantity}`);
+		if (toSell.getQuantity() < quantity) {
+			response.addErrorMessage(`Invalid quantity: inventory has ${toSell.getQuantity()} but selling ${quantity}`);
 			return response;
 		}
 		//remove item from inventory and add gold
@@ -354,10 +374,16 @@ export class Store extends ItemStore {
 			return response;
 		}
 		const sellItemResponse = inventory.sellItem(sellItemTemplate, this.sellMultiplier, quantity);
-		if (!sellItemResponse.isSuccessful()) return sellItemResponse;
+		if (!sellItemResponse.isSuccessful()) {
+			response.addErrorMessages(sellItemResponse.messages);
+			return response;
+		}
 		//add item to store inventory
 		const increaseStockResponse = this.addItem(sellItemTemplate, quantity);
-		if (!increaseStockResponse.isSuccessful()) return increaseStockResponse;
+		if (!increaseStockResponse.isSuccessful()) {
+			response.addErrorMessages(increaseStockResponse.messages);
+			return response;
+		}
 		//format payload
 		response.payload = {
 			finalGold: sellItemResponse.payload.finalGold,
@@ -371,7 +397,7 @@ export class Store extends ItemStore {
 	 * Removes all items from the store.
 	 * @returns InventoryTransactionResponse containing the deleted itemList or an error message.
 	 */
-	emptyStore(): InventoryTransactionResponse {
+	emptyStore(): InventoryTransactionResponse<InventoryItem[] | null> {
 		const response = this.deleteAll();
 		return response;
 	}
@@ -421,8 +447,8 @@ export class Store extends ItemStore {
 	 * @stockList the list of items to restock. Defaults to the internal stocklist.
 	 * @returns InventoryTransactionResponse of true or an error message.
 	 */
-	restockStore(stockList: InventoryItemList = this.stockList): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	restockStore(stockList: InventoryItemList = this.stockList): InventoryTransactionResponse<boolean> {
+		const response = new InventoryTransactionResponse<boolean>();
 		if (!this.needsRestock(stockList)) {
 			response.addErrorMessage(`Error: Nothing to restock!`);
 			return response;
@@ -440,6 +466,7 @@ export class Store extends ItemStore {
 				if (!getItemResponse.isSuccessful()) {
 					//should never occur, as we just checked contains
 					response.addErrorMessage(getItemResponse.messages[0]);
+					return;
 				}
 				const currentItem = getItemResponse.payload;
 				if (currentItem.getQuantity() < element.getQuantity()) {
@@ -464,14 +491,14 @@ export class Store extends ItemStore {
 				}
 			}
 		})
-		if (response.isSuccessful()) {
-			response.payload = true;
-		} else {
+		if (response.messages.length > 0) {
 			//error, rollback
 			this.items = new InventoryItemList(currentItems);
+			return response;
 		}
 		if (didAddItem) {
 			this.lastRestockTime = Date.now();
+			response.payload = true;
 		} else {
 			response.addErrorMessage(`Error: Nothing to restock!`);
 		}
@@ -484,14 +511,17 @@ export class Store extends ItemStore {
 	 * @cost The amount of gold spent
      * @returns InventoryTransactionResponse containing the final gold or an error message.
      */
-	buyCustomObjectFromStore(inventory: Inventory, cost: number): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	buyCustomObjectFromStore(inventory: Inventory, cost: number): InventoryTransactionResponse<number> {
+		const response = new InventoryTransactionResponse<number>();
 		if (inventory.getGold() < cost) {
 			response.addErrorMessage(`Error: requires ${cost} gold but has ${inventory.getGold()}`);
 			return response;
 		}
 		const removeGoldResponse = inventory.removeGold(cost);
-		if (!removeGoldResponse.isSuccessful()) return removeGoldResponse;
+		if (!removeGoldResponse.isSuccessful()) {
+			response.addErrorMessages(removeGoldResponse.messages);
+			return response;
+		}
 		response.payload = removeGoldResponse.payload;
 		return response;
 	}

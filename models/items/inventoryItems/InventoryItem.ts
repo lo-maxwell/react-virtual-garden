@@ -5,6 +5,7 @@ import { BlueprintTemplate } from "../templates/models/InventoryItemTemplates/Bl
 import { itemTemplateFactory } from "../templates/models/ItemTemplateFactory";
 import { SeedTemplate } from "../templates/models/InventoryItemTemplates/SeedTemplate";
 import { InventoryItemTemplate } from "../templates/models/InventoryItemTemplates/InventoryItemTemplate";
+import { ItemTemplate } from "../templates/models/ItemTemplate";
 
 export interface InventoryItemEntity {
 	id: string,
@@ -81,8 +82,10 @@ export abstract class InventoryItem extends Item {
 	 * {originalItem: InventoryItem
 	 *  newTemplate: ItemTemplate}
 	 */
-	use(quantity: number): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	use(quantity: number): InventoryTransactionResponse<{originalItem: InventoryItem
+		newTemplate: ItemTemplate} | null> {
+		const response = new InventoryTransactionResponse<{originalItem: InventoryItem
+			newTemplate: ItemTemplate}>();
 		if (this.getQuantity() < quantity) {
 			response.addErrorMessage(`item lacks the required quantity to use, needs ${quantity} and has ${this.getQuantity()}`);
 			return response;
@@ -93,7 +96,7 @@ export abstract class InventoryItem extends Item {
 				const blueprintData = this.itemData as BlueprintTemplate;
 				response.payload = {
 					originalItem: this,
-					newTemplate: itemTemplateFactory.getPlacedTemplateById(blueprintData.transformId),
+					newTemplate: itemTemplateFactory.getPlacedTemplateById(blueprintData.transformId)!,
 				};
 				this.setQuantity(this.getQuantity() - quantity);
 				break;
@@ -101,7 +104,7 @@ export abstract class InventoryItem extends Item {
 				const seedData = this.itemData as SeedTemplate;
 				response.payload = {
 					originalItem: this,
-					newTemplate: itemTemplateFactory.getPlacedTemplateById(seedData.transformId),
+					newTemplate: itemTemplateFactory.getPlacedTemplateById(seedData.transformId)!,
 				};
 				this.setQuantity(this.getQuantity() - quantity);
 				break;

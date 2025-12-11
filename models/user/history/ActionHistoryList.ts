@@ -196,8 +196,8 @@ export class ActionHistoryList {
 	 * Deletes all items from the inventory.
 	 * @returns CustomResponse containing the deleted ItemHistoryList or error message.
 	 */
-	deleteAll(): CustomResponse {
-		const response = new CustomResponse();
+	deleteAll(): CustomResponse<ActionHistory[]> {
+		const response = new CustomResponse<ActionHistory[]>();
 		response.payload = this.getAllHistories();
 		this.histories = [];
 		return response;

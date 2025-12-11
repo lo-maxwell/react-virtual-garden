@@ -1,6 +1,8 @@
 import Goose from "./Goose";
 import { v4 as uuidv4 } from 'uuid';
 import GooseEgg from "./GooseEgg";
+import { Inventory } from "../itemStore/inventory/Inventory";
+import { GooseTransactionResponse } from "./GooseTransactionResponse";
 
 export interface GoosePenEntity {
     id: string;
@@ -137,6 +139,27 @@ class GoosePen {
 
     getGooseCount(): number {
         return this.geese.length;
+    }
+
+    static calculateExpansionCost(currentSize: number): number {
+        return (currentSize + 1) * 5000;
+    }
+
+    /**
+     * @param inventory the inventory to remove gold from
+     * @returns response with payload of size of the new goose pen
+     */
+    expandGoosePen(inventory: Inventory): GooseTransactionResponse<number> {
+        const response = new GooseTransactionResponse<number>();
+        const cost = GoosePen.calculateExpansionCost(this.getSize());
+        if (inventory.getGold() < cost) {
+            response.addErrorMessage(`Cannot expand goose pen, needs ${cost} gold and has ${inventory.getGold()}`);
+            return response;
+        }
+        inventory.removeGold(cost);
+        this.setSize(this.getSize() + 1);
+        response.payload = this.getSize();
+        return response;
     }
 
     // ----------- EGG CRUD -----------

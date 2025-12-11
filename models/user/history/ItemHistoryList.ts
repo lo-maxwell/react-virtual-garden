@@ -127,7 +127,10 @@ export class ItemHistoryList {
 	getHistory(item: InventoryItem | PlacedItem | ItemTemplate | string): ItemHistoryTransactionResponse {
 		const response = new ItemHistoryTransactionResponse();
 		const itemIdResponse = InventoryItemList.getItemId(item);
-		if (!itemIdResponse.isSuccessful()) return itemIdResponse;
+		if (!itemIdResponse.isSuccessful()) {
+			response.addErrorMessages(itemIdResponse.messages);
+			return response;
+		}
 		const itemId = itemIdResponse.payload;
 
 		this.history.forEach((element, index) => {
@@ -149,7 +152,10 @@ export class ItemHistoryList {
 	contains(item: InventoryItem | PlacedItem | ItemTemplate | string): BooleanResponse {
 		const response = new BooleanResponse();
 		const itemIdResponse = InventoryItemList.getItemId(item);
-		if (!itemIdResponse.isSuccessful()) return itemIdResponse;
+		if (!itemIdResponse.isSuccessful()) {
+			response.addErrorMessages(itemIdResponse.messages);
+			return response;
+		}
 		const itemId = itemIdResponse.payload;
 		
 		this.history.forEach((element, index) => {
@@ -242,8 +248,8 @@ export class ItemHistoryList {
 	 * Deletes all items from the inventory.
 	 * @returns CustomResponse containing the deleted ItemHistoryList or error message.
 	 */
-	deleteAll(): CustomResponse {
-		const response = new CustomResponse();
+	deleteAll(): CustomResponse<ItemHistory[]> {
+		const response = new CustomResponse<ItemHistory[]>();
 		response.payload = this.getAllHistories();
 		this.history = [];
 		return response;

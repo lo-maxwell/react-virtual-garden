@@ -43,8 +43,8 @@ export class Plot {
 		} else {
 			let convertedPlantTime = BigInt(plantTime);
 			const MAX_SAFE_INTEGER = BigInt(Number.MAX_SAFE_INTEGER);
-			const lastPlantTimeMsNumber = convertedPlantTime > MAX_SAFE_INTEGER 
-				? Number.MAX_SAFE_INTEGER 
+			const lastPlantTimeMsNumber = convertedPlantTime > MAX_SAFE_INTEGER
+				? Number.MAX_SAFE_INTEGER
 				: Number(convertedPlantTime);
 			this.plantTime = lastPlantTimeMsNumber;
 		}
@@ -120,7 +120,7 @@ export class Plot {
 			harvestsRemaining: this.usesRemaining,
 			randomSeed: this.randomSeed,
 		}
-	} 
+	}
 
 	/**
 	 * @returns a copy of this plot.
@@ -135,31 +135,31 @@ export class Plot {
 
 	// Getter for randomSeed
 	getRandomSeed(): number {
-        return this.randomSeed;
-    }
+		return this.randomSeed;
+	}
 
-    // Setter for randomSeed
-    setRandomSeed(value: number) {
-        this.randomSeed = value;
-    }
+	// Setter for randomSeed
+	setRandomSeed(value: number) {
+		this.randomSeed = value;
+	}
 
 	// Updater function for randomSeed
-    updateRandomSeed(): void {
-        const multiplier = 48271; // Example multiplier
-        const increment = 1; // Example increment
-        const modulus = 2147483647; // Example modulus
+	updateRandomSeed(): void {
+		const multiplier = 48271; // Example multiplier
+		const increment = 1; // Example increment
+		const modulus = 2147483647; // Example modulus
 
-        // Update the random seed using a simple linear congruential generator formula
-        this.randomSeed = (multiplier * this.randomSeed + increment) % modulus;
-    }
+		// Update the random seed using a simple linear congruential generator formula
+		this.randomSeed = (multiplier * this.randomSeed + increment) % modulus;
+	}
 
 	static getNextRandomSeed(randomSeed: number): number {
 		const multiplier = 48271; // Example multiplier
-        const increment = 1; // Example increment
-        const modulus = 2147483647; // Example modulus
+		const increment = 1; // Example increment
+		const modulus = 2147483647; // Example modulus
 
-        // Update the random seed using a simple linear congruential generator formula
-        return (multiplier * randomSeed + increment) % modulus;
+		// Update the random seed using a simple linear congruential generator formula
+		return (multiplier * randomSeed + increment) % modulus;
 	}
 
 	/**
@@ -198,7 +198,7 @@ export class Plot {
 	/**
 	 * @returns the plot id
 	 */
-	 getPlotId(): string {
+	getPlotId(): string {
 		return this.plotId;
 	}
 
@@ -242,14 +242,14 @@ export class Plot {
 	/**
 	 * @returns the subtype of the item contained in this plot
 	 */
-	 getItemSubtype(): string {
+	getItemSubtype(): string {
 		return this.item.itemData.subtype;
 	}
 
 	/**
 	 * @returns the status
 	 */
-	 getItemStatus(): string {
+	getItemStatus(): string {
 		return this.item.getStatus();
 	}
 
@@ -293,9 +293,9 @@ export class Plot {
 			return "Ready to harvest!";
 		}
 		const remainingTime = Math.min(item.itemData.growTime, Math.max(1, Math.round((plantedTime + this.getTotalGrowTime() * 1000 - currentTime) / 1000)));
-		
+
 		const timeString = getTimeString(remainingTime);
-		
+
 		const isFirstGrowth = this.getUsesRemaining() === (this.item.itemData as PlantTemplate).numHarvests;
 
 		const fullyGrownText = isFirstGrowth ? `Fully Grown in: ` : `Next Harvest in: `
@@ -317,17 +317,29 @@ export class Plot {
 	 *  replacedItem: PlacedItem, 
 	 *  newTemplate: ItemTemplate}
 	 */
-	useItem(item: PlacedItem = Plot.generateEmptyItem(), numUses: number = 1): GardenTransactionResponse {
-		const response = new GardenTransactionResponse();
+	useItem(item: PlacedItem = Plot.generateEmptyItem(), numUses: number = 1): GardenTransactionResponse<{
+		originalItem: PlacedItem,
+		replacedItem: PlacedItem,
+		newTemplate: ItemTemplate
+	} | null> {
+		const response = new GardenTransactionResponse<{
+			originalItem: PlacedItem,
+			replacedItem: PlacedItem,
+			newTemplate: ItemTemplate
+		}>();
 		const originalItem = this.item;
-		let useItemResponse: GardenTransactionResponse;
-		switch(item.itemData.subtype) {
+		let useItemResponse: GardenTransactionResponse<{
+			originalItem: PlacedItem;
+			newTemplate: ItemTemplate | null;
+		} | null>;
+		switch (item.itemData.subtype) {
 			case ItemSubtypes.DECORATION.name:
 			case ItemSubtypes.PLANT.name:
 			case ItemSubtypes.GROUND.name:
 				useItemResponse = this.item.use();
 				if (!useItemResponse.isSuccessful()) {
-					return useItemResponse;
+					response.addErrorMessages(useItemResponse.messages);
+					return response;
 				}
 				if (this.getUsesRemaining() < numUses) {
 					response.addErrorMessage(`Error: Cannot use item in plot ${numUses} times, only ${this.usesRemaining} uses left.`);
@@ -345,7 +357,7 @@ export class Plot {
 		response.payload = {
 			originalItem: originalItem,
 			replacedItem: this.item,
-			newTemplate: useItemResponse?.payload.newTemplate
+			newTemplate: useItemResponse?.payload.newTemplate!
 		}
 
 		return response;
@@ -365,25 +377,33 @@ export class Plot {
 			newItem: PlacedItem
 		}
 	 */
-	placeItem(inventory: Inventory, item: InventoryItem): GardenTransactionResponse {
-		const response = new GardenTransactionResponse();
+	placeItem(inventory: Inventory, item: InventoryItem): GardenTransactionResponse<{
+		newItem: PlacedItem
+	} | null> {
+		const response = new GardenTransactionResponse<{
+			newItem: PlacedItem
+		}>();
 		const originalItem = this.item;
 		if (originalItem.itemData.subtype != ItemSubtypes.GROUND.name) {
 			response.addErrorMessage(`existing item is of type ${originalItem.itemData.subtype} but should be ground, cannot place here`);
 			return response;
 		}
-		let useItemResponse: GardenTransactionResponse;
-		switch(item.itemData.subtype) {
+		let useItemResponse: GardenTransactionResponse<{
+			originalItem: InventoryItem;
+			newTemplate: ItemTemplate;
+		} | null>;
+		switch (item.itemData.subtype) {
 			case ItemSubtypes.SEED.name:
 			case ItemSubtypes.BLUEPRINT.name:
 				//Type assertion?
 				useItemResponse = inventory.useItem(item, 1);
 				if (!useItemResponse.isSuccessful()) {
-					return useItemResponse;
+					response.addErrorMessages(useItemResponse.messages);
+					return response;
 				}
 				//TODO: Investigate type correction
-				const newItemType = getItemClassFromSubtype(useItemResponse.payload.newTemplate);
-				
+				const newItemType = getItemClassFromSubtype(useItemResponse.payload.newTemplate!);
+
 				const newPlacedItem = new newItemType(uuidv4(), useItemResponse.payload.newTemplate, "") as PlacedItem;
 				this.setItem(newPlacedItem);
 				break;
@@ -412,22 +432,32 @@ export class Plot {
 			newItem: InventoryItem
 		}
 	 */
-	pickupItem(inventory: Inventory, updatedItem: PlacedItem = Plot.generateEmptyItem()) {
-		const response = new GardenTransactionResponse();
+	pickupItem(inventory: Inventory, updatedItem: PlacedItem = Plot.generateEmptyItem()): GardenTransactionResponse<{
+		pickedItem: PlacedItem
+		newItem: InventoryItem
+	} | null> {
+		const response = new GardenTransactionResponse<{
+			pickedItem: PlacedItem
+			newItem: InventoryItem
+		}>();
 		if (updatedItem.itemData.type != ItemTypes.PLACED.name) {
 			response.addErrorMessage(`item to replace with is of type ${updatedItem.itemData.type} but should be placedItem, cannot replace`);
 			return response;
 		}
 		const originalItem = this.item;
-		let useItemResponse: GardenTransactionResponse;
-		switch(originalItem.itemData.subtype) {
+		let useItemResponse: GardenTransactionResponse<{
+			originalItem: PlacedItem;
+			newTemplate: ItemTemplate | null;
+		} | null>;;
+		switch (originalItem.itemData.subtype) {
 			case ItemSubtypes.PLANT.name:
 			case ItemSubtypes.DECORATION.name:
 				useItemResponse = originalItem.use();
 				if (!useItemResponse.isSuccessful()) {
-					return useItemResponse;
+					response.addErrorMessages(useItemResponse.messages);
+					return response;
 				}
-				inventory.gainItem(useItemResponse.payload.newTemplate, 1);
+				inventory.gainItem(useItemResponse.payload.newTemplate!, 1);
 				this.setItem(updatedItem);
 				break;
 			default:
@@ -435,7 +465,7 @@ export class Plot {
 				return response;
 		}
 
-		let findItemResponse = inventory.getItem(useItemResponse.payload.newTemplate);
+		let findItemResponse = inventory.getItem(useItemResponse.payload.newTemplate!);
 		if (!findItemResponse.isSuccessful()) {
 			response.addErrorMessage(`error adding item to inventory: ${findItemResponse.messages[0]}`);
 			return response;
@@ -483,18 +513,18 @@ export class Plot {
 		if (initialChance <= 0.0) {
 			return 'Regular';
 		}
-		
+
 		// Use the random seed to generate a pseudo-random number
 		const multiplier = 48271; // Example multiplier
 		const modulus = 2147483647; // Example modulus
 		const increment = 1; // No increment for this example
-	
+
 		// Generate a pseudo-random number based on the seed
 		randomSeed = (multiplier * randomSeed + increment) % modulus;
-	
+
 		// Normalize the random number to a value between 0.0 and 1.0
 		const normalizedValue = randomSeed / modulus;
-	
+
 		// Determine if the harvest is shiny based on the initial chance
 		if (normalizedValue < initialChance) {
 			// If shiny, determine which tier
@@ -502,7 +532,7 @@ export class Plot {
 			randomSeed = (multiplier * randomSeed + increment) % modulus; // Update the seed again for tier selection
 			const randomTierValue = randomSeed / modulus; // Normalize to [0, 1]
 			let cumulativeProbability = 0;
-	
+
 			for (const tier in tiers) {
 				cumulativeProbability += tiers[tier].probability;
 				if (randomTierValue <= cumulativeProbability) {
@@ -510,7 +540,7 @@ export class Plot {
 				}
 			}
 		}
-	
+
 		return 'Regular'; // Return 'Regular' if not shiny
 	}
 
@@ -529,8 +559,14 @@ export class Plot {
 			newItem: InventoryItem
 		}
 	 */
-	harvestItem(inventory: Inventory, instantHarvest: boolean = false, numHarvests: number = 1, updatedItem: PlacedItem = Plot.generateEmptyItem(), currentTime: number = Date.now()) {
-		const response = new GardenTransactionResponse();
+	harvestItem(inventory: Inventory, instantHarvest: boolean = false, numHarvests: number = 1, updatedItem: PlacedItem = Plot.generateEmptyItem(), currentTime: number = Date.now()): GardenTransactionResponse<{
+		pickedItem: PlacedItem
+		newItem: InventoryItem
+	} | null> {
+		const response = new GardenTransactionResponse<{
+			pickedItem: PlacedItem
+			newItem: InventoryItem
+		}>();
 		//verify this plot contains a plant
 		if (this.item.itemData.subtype !== ItemSubtypes.PLANT.name) {
 			response.addErrorMessage(`Error: cannot harvest item of subtype ${this.item.itemData.subtype}`);
@@ -554,7 +590,10 @@ export class Plot {
 			return response;
 		}
 		const originalItem = this.item;
-		let useItemResponse: GardenTransactionResponse;
+		let useItemResponse: GardenTransactionResponse<{
+			originalItem: PlacedItem;
+			newTemplate: ItemTemplate | null;
+		} | null>;
 		const shinyTier = Plot.checkShinyHarvest(originalItem.itemData as PlantTemplate, this.getRandomSeed(), Plot.baseShinyChance);
 		if (shinyTier === 'Regular') {
 			useItemResponse = originalItem.harvest();
@@ -562,19 +601,20 @@ export class Plot {
 			useItemResponse = originalItem.harvestShiny(shinyTier);
 		}
 		if (!useItemResponse.isSuccessful()) {
-			return useItemResponse;
+			response.addErrorMessages(useItemResponse.messages);
+			return response;
 		}
 		this.updateRandomSeed();
 		this.updateRandomSeed();
 		const harvestedAmt = Math.min(this.getUsesRemaining(), numHarvests);
-		inventory.gainItem(useItemResponse.payload.newTemplate, harvestedAmt);
+		inventory.gainItem(useItemResponse.payload.newTemplate!, harvestedAmt);
 		this.updateUsesRemaining(-1 * numHarvests);
 		if (this.getUsesRemaining() <= 0) {
 			this.setItem(updatedItem);
 		}
 		this.setPlantTime();
 
-		let findItemResponse = inventory.getItem(useItemResponse.payload.newTemplate);
+		let findItemResponse = inventory.getItem(useItemResponse.payload.newTemplate!);
 		if (!findItemResponse.isSuccessful()) {
 			response.addErrorMessage(`error adding item to inventory: ${findItemResponse.messages[0]}`);
 			return response;
@@ -599,8 +639,14 @@ export class Plot {
 				replacementItem: PlacedItem
 			}
 	 */
-	destroyItem(replacementItem: PlacedItem = Plot.generateEmptyItem(), plantTime: number = Date.now(), newUsesRemaining: number | null = null) {
-		const response = new GardenTransactionResponse();
+	destroyItem(replacementItem: PlacedItem = Plot.generateEmptyItem(), plantTime: number = Date.now(), newUsesRemaining: number | null = null): GardenTransactionResponse<{
+		originalItem: PlacedItem
+		replacementItem: PlacedItem
+	} | null> {
+		const response = new GardenTransactionResponse<{
+			originalItem: PlacedItem
+			replacementItem: PlacedItem
+		}>();
 		if (this.getItemSubtype() == ItemSubtypes.GROUND.name) {
 			response.addErrorMessage(`Cannot destroy item of type ${this.getItemSubtype()}, try directly setting instead.`);
 			return response;

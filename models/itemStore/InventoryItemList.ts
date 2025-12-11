@@ -147,8 +147,8 @@ export class InventoryItemList {
 	 * @item The item to convert, identified by Item, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the name or an error message.
      */
-	static getItemName(item: InventoryItem | PlacedItem | ItemTemplate | string): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	static getItemName(item: InventoryItem | PlacedItem | ItemTemplate | string): InventoryTransactionResponse<string | null> {
+		const response = new InventoryTransactionResponse<string>();
 		let itemName: string;
 		if (typeof item === 'string') {
 			itemName = item;
@@ -171,8 +171,8 @@ export class InventoryItemList {
 	 * @item The item to convert, identified by Item or ItemTemplate.
      * @returns InventoryTransactionResponse containing the id string or an error message.
      */
-	 static getItemId(item: string | InventoryItem | PlacedItem | ItemTemplate): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	 static getItemId(item: string | InventoryItem | PlacedItem | ItemTemplate): InventoryTransactionResponse<string | null> {
+		const response = new InventoryTransactionResponse<string>();
 		let itemId: string;
 		if (typeof item === 'string') {
 			itemId = item;
@@ -194,10 +194,13 @@ export class InventoryItemList {
      * @item The item to get, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the found InventoryItem or error message.
      */
-	getItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	getItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse<InventoryItem | null> {
+		const response = new InventoryTransactionResponse<InventoryItem>();
 		const itemNameResponse = InventoryItemList.getItemName(item);
-		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
+		if (!itemNameResponse.isSuccessful()) {
+			response.addErrorMessages(itemNameResponse.messages);
+			return response;
+		}
 		const itemName = itemNameResponse.payload;
 
 		this.items.forEach((element, index) => {
@@ -220,7 +223,10 @@ export class InventoryItemList {
 	contains(item: InventoryItem | ItemTemplate | string): BooleanResponse {
 		const response = new BooleanResponse();
 		const itemNameResponse = InventoryItemList.getItemName(item);
-		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
+		if (!itemNameResponse.isSuccessful()) {
+			response.addErrorMessages(itemNameResponse.messages);
+			return response;
+		}
 		const itemName = itemNameResponse.payload;
 		
 		this.items.forEach((element, index) => {
@@ -248,7 +254,10 @@ export class InventoryItemList {
 		}
 
 		const itemNameResponse = InventoryItemList.getItemName(item);
-		if (!itemNameResponse.isSuccessful()) return itemNameResponse;
+		if (!itemNameResponse.isSuccessful()) {
+			response.addErrorMessages(itemNameResponse.messages);
+			return response;
+		}
 		const itemName = itemNameResponse.payload;
 		
 		this.items.forEach((element, index) => {
@@ -274,10 +283,10 @@ export class InventoryItemList {
 	 * {originalItem: InventoryItem
 	 *  newTemplate: ItemTemplate}
 	 */
-	useItem(item: InventoryItem | InventoryItemTemplate | string, quantity: number): InventoryTransactionResponse {
+	useItem(item: InventoryItem | InventoryItemTemplate | string, quantity: number): InventoryTransactionResponse<{originalItem: InventoryItem, newTemplate: ItemTemplate} | null> {
 		let toUse = this.getItem(item);
 		if (toUse.isSuccessful()) {
-			const response = toUse.payload.use(quantity);
+			const response = toUse.payload!.use(quantity);
 			return response;
 		} else {
 			//Item not found, fail
@@ -293,12 +302,13 @@ export class InventoryItemList {
      * @quantity The quantity of the item to add.
      * @returns InventoryTransactionResponse containing the added InventoryItem or error message
      */
-	addItem(item: InventoryItem | InventoryItemTemplate, quantity: number): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	addItem(item: InventoryItem | InventoryItemTemplate, quantity: number): InventoryTransactionResponse<InventoryItem | null> {
+		const response = new InventoryTransactionResponse<InventoryItem>();
 
 		let toUpdate = this.getItem(item);
 		if (toUpdate.isSuccessful()) {
 			//Item already in inventory, update quantity
+			const existingItem = toUpdate.payload;
 			if (quantity === 0) {
 				response.addErrorMessage('Quantity is 0, no change');
 				return response;
@@ -307,8 +317,8 @@ export class InventoryItemList {
 				response.addErrorMessage('Cannot remove items with add. Try update instead.');
 				return response;
 			}
-			toUpdate.payload.quantity = toUpdate.payload.quantity + quantity;
-			response.payload = toUpdate.payload;
+			existingItem.setQuantity(existingItem.getQuantity() + quantity);
+			response.payload = existingItem;
 			return response;
 		} else {
 			//Add item to inventory
@@ -358,8 +368,8 @@ export class InventoryItemList {
      * @delta The amount to change the quantity by.
      * @returns InventoryTransactionResponse containing the updated InventoryItem or error message.
      */
-	updateQuantity(item: InventoryItem | InventoryItemTemplate | string, delta: number): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	updateQuantity(item: InventoryItem | InventoryItemTemplate | string, delta: number): InventoryTransactionResponse<InventoryItem | null> {
+		const response = new InventoryTransactionResponse<InventoryItem>();
 		let toUpdate = this.getItem(item);
 		if (toUpdate.isSuccessful()) {
 			//Item already in inventory, update quantity
@@ -367,9 +377,9 @@ export class InventoryItemList {
 			// if (delta < 0 && toUpdate.payload.quantity + delta <= 0) {
 			// 	return this.deleteItem(item);
 			// }
-
-			toUpdate.payload.quantity = toUpdate.payload.quantity + delta;
-			response.payload = toUpdate.payload;
+			const existingItem = toUpdate.payload;
+			existingItem.setQuantity(existingItem.getQuantity() + delta);
+			response.payload = existingItem;
 			return response;
 		} else {
 			//Item not found, fail
@@ -383,13 +393,13 @@ export class InventoryItemList {
      * @item The item to delete, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the deleted InventoryItem with quantity set to 0 or error message.
      */
-	deleteItem(item: InventoryItem | InventoryItemTemplate | string): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	deleteItem(item: InventoryItem | InventoryItemTemplate | string): InventoryTransactionResponse<InventoryItem | null> {
+		const response = new InventoryTransactionResponse<InventoryItem>();
 		let toDelete = this.getItem(item);
 		if (toDelete.isSuccessful()) {
 			//Item in inventory, delete
 			response.payload = toDelete.payload;
-			response.payload.quantity = 0;
+			response.payload.setQuantity(0);
 			const toDeleteIndex = this.items.indexOf(toDelete.payload);
 			this.items.splice(toDeleteIndex, 1);
 			return response;
@@ -404,8 +414,8 @@ export class InventoryItemList {
 	 * Deletes all items from the inventory.
 	 * @returns InventoryTransactionResponse containing the deleted itemList or error message.
 	 */
-	deleteAll(): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	deleteAll(): InventoryTransactionResponse<InventoryItem[] | null> {
+		const response = new InventoryTransactionResponse<InventoryItem[]>();
 		response.payload = this.getAllItems();
 		this.items = [];
 		return response;

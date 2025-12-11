@@ -4,6 +4,7 @@ import { ItemSubtypes } from "../ItemTypes";
 import { PlacedItemTemplate } from "../templates/models/PlacedItemTemplates/PlacedItemTemplate";
 import { itemTemplateFactory } from "../templates/models/ItemTemplateFactory";
 import { PlantTemplate } from "../templates/models/PlacedItemTemplates/PlantTemplate";
+import { ItemTemplate } from "../templates/models/ItemTemplate";
 
 export interface PlacedItemDetailsEntity {
 	identifier: string, //itemData.id
@@ -105,8 +106,8 @@ export abstract class PlacedItem extends Item {
 	 * {originalItem: PlacedItem
 	 *  newTemplate: ItemTemplate}
 	 */
-	 use(): GardenTransactionResponse {
-		const response = new GardenTransactionResponse();
+	 use(): GardenTransactionResponse<{originalItem: PlacedItem, newTemplate: ItemTemplate | null} | null> {
+		const response = new GardenTransactionResponse<{originalItem: PlacedItem, newTemplate: ItemTemplate | null}>();
 		switch(this.itemData.subtype) {
 			case ItemSubtypes.DECORATION.name:
 			case ItemSubtypes.PLANT.name:
@@ -123,8 +124,8 @@ export abstract class PlacedItem extends Item {
 		return response;
 	}
 
-	harvest(): GardenTransactionResponse {
-		const response = new GardenTransactionResponse();
+	harvest(): GardenTransactionResponse<{originalItem: PlacedItem, newTemplate: ItemTemplate | null} | null> {
+		const response = new GardenTransactionResponse<{originalItem: PlacedItem, newTemplate: ItemTemplate | null}>();
 		if (this.itemData.subtype !== ItemSubtypes.PLANT.name) {
 			response.addErrorMessage(`item is of type ${this.itemData.subtype}, cannot be harvested`);
 			return response;
@@ -136,8 +137,8 @@ export abstract class PlacedItem extends Item {
 		return response;
 	}
 
-	harvestShiny(tier: string): GardenTransactionResponse {
-		const response = new GardenTransactionResponse();
+	harvestShiny(tier: string): GardenTransactionResponse<{originalItem: PlacedItem, newTemplate: ItemTemplate | null} | null> {
+		const response = new GardenTransactionResponse<{originalItem: PlacedItem, newTemplate: ItemTemplate | null}>();
 		if (this.itemData.subtype !== ItemSubtypes.PLANT.name) {
 			response.addErrorMessage(`item is of type ${this.itemData.subtype}, cannot be harvested`);
 			return response;

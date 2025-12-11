@@ -1,8 +1,8 @@
 import { CustomResponse } from "../../utility/CustomResponse";
 
-export class InventoryTransactionResponse extends CustomResponse {
+export class InventoryTransactionResponse<T = null> extends CustomResponse<T> {
 	// TODO: make payload only accept inventory items?
-	constructor(payload: any = null, messages: string[] = []) {
+	constructor(payload: T | null = null, messages: string[] = []) {
 		super(payload, messages);
 	}
 }

@@ -270,7 +270,7 @@ test('Should Not Restock Lower Quantity', () => {
 })
 
 test('Should Rollback on Failing Restock', () => {
-	testStore.setStockList(new InventoryItemList([generateInventoryItem('apple seed', -1), generateInventoryItem('harvestedApple', -1)]));
+	testStore.setStockList(new InventoryItemList([generateInventoryItem('apple seed', -1), generateInventoryItem('invalid', -1)]));
 	const response = testStore.restockStore();
 	expect(response.isSuccessful()).toBe(false);
 	expect(testStore.getItem('apple seed').payload.getQuantity()).toBe(1);

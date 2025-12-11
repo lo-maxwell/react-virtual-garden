@@ -107,8 +107,8 @@ export class Inventory extends ItemStore{
 	 * @quantity Positive integer amount of item being added.
      * @returns InventoryTransactionResponse containing the ending gold amount or an error message.
      */
-	addGold(quantity: number): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	addGold(quantity: number): InventoryTransactionResponse<number> {
+		const response = new InventoryTransactionResponse<number>();
 		if (quantity <= 0 || !Number.isInteger(quantity)) {
 			response.addErrorMessage(`Invalid quantity: ${quantity}`);
 			return response;
@@ -123,8 +123,8 @@ export class Inventory extends ItemStore{
 	 * @quantity Positive integer amount of gold being removed.
      * @returns InventoryTransactionResponse containing the ending gold amount or an error message.
      */
-	removeGold(quantity: number): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	removeGold(quantity: number): InventoryTransactionResponse<number> {
+		const response = new InventoryTransactionResponse<number>();
 		if (quantity <= 0 || !Number.isInteger(quantity)) {
 			response.addErrorMessage(`Invalid quantity: ${quantity}`);
 			return response;
@@ -147,8 +147,8 @@ export class Inventory extends ItemStore{
 	 * {finalGold: number,
 	 *  purchasedItem: InventoryItem}
      */
-	buyItem(item: InventoryItem | ItemTemplate, multiplier: number, quantity: number): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	buyItem(item: InventoryItem | ItemTemplate, multiplier: number, quantity: number): InventoryTransactionResponse<{finalGold: number, purchasedItem: InventoryItem} | null> {
+		const response = new InventoryTransactionResponse<{finalGold: number, purchasedItem: InventoryItem}>();
 		if (quantity <= 0 || !Number.isInteger(quantity)) {
 			response.addErrorMessage(`Invalid quantity: ${quantity}`);
 			return response;
@@ -173,14 +173,18 @@ export class Inventory extends ItemStore{
 			const buyItemResponse = this.addItem(item, quantity);
 			if (buyItemResponse.isSuccessful()) {
 				const removeGoldResponse = this.removeGold(itemCost * quantity);
-				if (!removeGoldResponse.isSuccessful()) return removeGoldResponse;
+				if (!removeGoldResponse.isSuccessful()) {
+					response.addErrorMessages(removeGoldResponse.messages);
+					return response;
+				}
 				response.payload = {
 					finalGold: this.getGold(),
 					purchasedItem: buyItemResponse.payload
 				}
 				return response;
 			} else {
-				return buyItemResponse;
+				response.addErrorMessages(buyItemResponse.messages);
+				return response;
 			}
 		} else {
 			response.addErrorMessage(`Insufficient gold: had ${this.getGold()} but requires ${itemCost * quantity}`);
@@ -197,8 +201,10 @@ export class Inventory extends ItemStore{
 	 * {finalGold: number,
 	 *  remainingItem: InventoryItem}
      */
-	 sellItem(item: InventoryItem | ItemTemplate | string, multiplier: number, quantity: number): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
+	 sellItem(item: InventoryItem | ItemTemplate | string, multiplier: number, quantity: number): InventoryTransactionResponse<{finalGold: number,
+		remainingItem: InventoryItem} | null> {
+		const response = new InventoryTransactionResponse<{finalGold: number,
+			remainingItem: InventoryItem}>();
 		if (!Number.isInteger(quantity) || quantity <= 0) {
 			response.addErrorMessage(`Invalid quantity: ${quantity}`);
 			return response;
@@ -206,7 +212,8 @@ export class Inventory extends ItemStore{
 
 		const findItemResponse = this.getItem(item);
 		if (!findItemResponse.isSuccessful()) {
-			return findItemResponse;
+			response.addErrorMessages(findItemResponse.messages);
+			return response;
 		}
 		let itemCost: number = findItemResponse.payload.itemData.getPrice(multiplier);
 
@@ -214,7 +221,7 @@ export class Inventory extends ItemStore{
 		if (!containsItem.payload) {
 			const itemAmount = this.getItem(item).payload;
 			if (itemAmount) {
-				response.addErrorMessage(`Insufficient quantity in inventory: had ${itemAmount.quantity} but requires ${quantity}`);
+				response.addErrorMessage(`Insufficient quantity in inventory: had ${itemAmount.getQuantity()} but requires ${quantity}`);
 			} else {
 				response.addErrorMessage(`Insufficient quantity in inventory: had 0 but requires ${quantity}`);
 			}
@@ -224,14 +231,18 @@ export class Inventory extends ItemStore{
 		const sellItemResponse = this.items.updateQuantity(item, -1 * quantity);
 		if (sellItemResponse.isSuccessful()) {
 			const addGoldResponse = this.addGold(itemCost * quantity);
-			if (!addGoldResponse.isSuccessful()) return addGoldResponse;
+			if (!addGoldResponse.isSuccessful()) {
+				response.addErrorMessages(addGoldResponse.messages);
+				return response;
+			}
 			response.payload = {
 				finalGold: this.getGold(),
 				remainingItem: sellItemResponse.payload
 			}
 			return response;
 		} else {
-			return sellItemResponse;
+			response.addErrorMessages(sellItemResponse.messages);
+			return response;
 		}
 	}
 
@@ -247,7 +258,8 @@ export class Inventory extends ItemStore{
 	 * {originalItem: InventoryItem
 	 *  newTemplate: ItemTemplate}
 	 */
-	 useItem(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
+	 useItem(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse<{originalItem: InventoryItem
+		newTemplate: ItemTemplate} | null> {
 		const response = this.items.useItem(item, quantity);
 		//Does not delete upon hitting 0 quantity
 		// if (response.isSuccessful()) {

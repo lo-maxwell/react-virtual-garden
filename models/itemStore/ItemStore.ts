@@ -59,7 +59,7 @@ export class ItemStore {
 	 * @quantity Positive integer amount of item being added.
      * @returns InventoryTransactionResponse containing the added item or an error message.
      */
-	gainItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse {
+	gainItem(item: InventoryItem | ItemTemplate, quantity: number): InventoryTransactionResponse<InventoryItem | null> {
 		const response = this.addItem(item, quantity);
 		return response;
 	}
@@ -70,7 +70,7 @@ export class ItemStore {
 	 * @quantity Positive integer amount of item being removed. If quantity is greater than the remaining amount, removes all existing ones.
      * @returns InventoryTransactionResponse containing the item or an error message.
      */
-	trashItem(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse {
+	trashItem(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse<InventoryItem | null> {
 		const response = new InventoryTransactionResponse();
 		if (quantity <= 0 || !Number.isInteger(quantity)) {
 			response.addErrorMessage(`Invalid quantity: ${quantity}`);
@@ -86,7 +86,7 @@ export class ItemStore {
      * @item The item to get, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the found InventoryItem or error message.
      */
-	 getItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse {
+	 getItem(item: InventoryItem | ItemTemplate | string): InventoryTransactionResponse<InventoryItem | null> {
 		const response = this.items.getItem(item);
 		return response;
 	}
@@ -107,7 +107,7 @@ export class ItemStore {
      * @quantity The quantity of the item to add.
      * @returns InventoryTransactionResponse containing the added InventoryItem or error message
      */
-	protected addItem(item: InventoryItem | InventoryItemTemplate, quantity: number): InventoryTransactionResponse {
+	protected addItem(item: InventoryItem | InventoryItemTemplate, quantity: number): InventoryTransactionResponse<InventoryItem | null> {
 		const response = this.items.addItem(item, quantity);
 		return response;
 	}
@@ -118,7 +118,7 @@ export class ItemStore {
      * @delta - The amount to change the quantity by.
      * @returns InventoryTransactionResponse containing the updated InventoryItem or error message.
      */
-	protected updateQuantity(item: InventoryItem | InventoryItemTemplate | string, delta: number): InventoryTransactionResponse {
+	protected updateQuantity(item: InventoryItem | InventoryItemTemplate | string, delta: number): InventoryTransactionResponse<InventoryItem | null> {
 		const response = this.items.updateQuantity(item, delta);
 		return response;
 	}
@@ -128,7 +128,7 @@ export class ItemStore {
      * @item The item to delete, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the deleted InventoryItem or error message.
      */
-	protected deleteItem(item: InventoryItem | InventoryItemTemplate | string): InventoryTransactionResponse {
+	protected deleteItem(item: InventoryItem | InventoryItemTemplate | string): InventoryTransactionResponse<InventoryItem | null> {
 		const response = this.items.deleteItem(item);
 		return response;
 	}
@@ -137,9 +137,8 @@ export class ItemStore {
 	 * Deletes all items from the inventory.
 	 * @returns InventoryTransactionResponse containing the deleted itemList or error message.
 	 */
-	protected deleteAll(): InventoryTransactionResponse {
-		const response = new InventoryTransactionResponse();
-		response.payload = this.items.deleteAll();
+	protected deleteAll(): InventoryTransactionResponse<InventoryItem[] | null> {
+		const response = this.items.deleteAll();
 		return response;
 	}
 

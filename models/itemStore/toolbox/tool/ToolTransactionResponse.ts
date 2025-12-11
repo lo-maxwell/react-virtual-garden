@@ -1,9 +1,9 @@
 import { CustomResponse } from "@/models/utility/CustomResponse";
 
 
-export class ToolTransactionResponse extends CustomResponse {
+export class ToolTransactionResponse<T = null> extends CustomResponse<T>  {
 	// TODO: make payload only accept tool items?
-	constructor(payload: any = null, messages: string[] = []) {
+	constructor(payload: T | null = null, messages: string[] = []) {
 		super(payload, messages);
 	}
 }
