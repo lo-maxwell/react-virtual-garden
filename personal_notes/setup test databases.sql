@@ -524,10 +524,20 @@ BEGIN
 			name VARCHAR(256) NOT NULL,
 			color CHAR(6) NOT NULL,
 			birthday TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			attributes JSONB NOT NULL DEFAULT '{}'::jsonb
+			attributes JSONB NOT NULL DEFAULT '{}'::jsonb,
+			status TEXT NOT NULL DEFAULT 'active',
+			sold_at TIMESTAMP NULL,
+			sold_price INTEGER NULL,
+
+			CONSTRAINT gooses_status_check
+				CHECK (status IN ('active', 'sold'))
 		);
 
 		CREATE INDEX gooses_attributes_idx ON gooses USING GIN (attributes);
+		CREATE INDEX gooses_owner_active_idx
+		ON gooses (owner)
+		WHERE status = 'active';
+
 		table_created := TRUE;
 	END IF;
 END $$;

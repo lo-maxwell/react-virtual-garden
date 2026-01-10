@@ -32,7 +32,7 @@ const allowedTables = {
   event_rewards: ["id", "owner", "inventory", "gold", "message"],
   event_reward_items: ["id", "owner", "identifier", "quantity"],
   goose_pens: ["id", "owner", "size"],
-  gooses: ["id", "owner", "name", "color", "birthday", "attributes"],
+  gooses: ["id", "owner", "name", "color", "birthday", "attributes", "status", "sold_at", "sold_price"],
   item_details: ["id", "placed_item_id", "inventory_item_id", "details"],
   // Add more tables and their columns as needed
 };

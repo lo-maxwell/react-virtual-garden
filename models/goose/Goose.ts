@@ -7,12 +7,27 @@ import { Inventory } from "../itemStore/inventory/Inventory";
 import { GoosePersonalities, GoosePersonality, isGoosePersonality } from "./GoosePersonalities";
 import { GooseTransactionResponse } from "./GooseTransactionResponse";
 
+export const GOOSE_STATUSES = {
+    ACTIVE: 'active',
+    SOLD: 'sold',
+} as const;
+
+export type GooseStatus = typeof GOOSE_STATUSES[keyof typeof GOOSE_STATUSES];
+
+export function isGooseStatus(value: unknown): value is GooseStatus {
+    return Object.values(GOOSE_STATUSES).includes(value as GooseStatus);
+}
+
+
 export interface GooseEntity {
     id: string;
     owner: string;      // goose pen UUID
     name: string;
     color: string;      // 6-char hex code
     birthday: Date;
+    status: GooseStatus;
+    sold_at: Date | null;
+    sold_price: number | null;
 
     // JSONB attributes
     attributes: {
@@ -21,7 +36,7 @@ export interface GooseEntity {
         personality?: string;
         mood?: number;
         location?: number;
-        
+
         // Allow future expansion with no migration
         [key: string]: any;
     };
@@ -39,6 +54,10 @@ class Goose {
     private mood: number;
     private location: number;
 
+    private status: GooseStatus;
+    private soldAt: number | null;
+    private soldPrice: number | null;
+
     //should probably generate uuid
     constructor(
         id: string,
@@ -49,7 +68,11 @@ class Goose {
         charisma: number,
         personality: GoosePersonality,
         mood: number,
-        location: number
+        location: number,
+
+        status: GooseStatus = "active",
+        soldAt: number | null = null,
+        soldPrice: number | null = null
     ) {
         this.id = id;
         this.name = name;
@@ -60,6 +83,9 @@ class Goose {
         this.personality = personality;
         this.mood = mood;
         this.location = location;
+        this.status = status;
+        this.soldAt = soldAt;
+        this.soldPrice = soldPrice;
     }
 
     static fromPlainObject(plainObject: any): Goose {
@@ -67,15 +93,18 @@ class Goose {
             if (!plainObject || typeof plainObject !== "object") {
                 throw new Error("Invalid plainObject structure for Goose");
             }
-    
+
             const {
                 id,
                 name,
                 color,
                 birthday,
-                attributes = {}
+                attributes = {},
+                status,
+                soldAt = null,
+                soldPrice = null
             } = plainObject;
-    
+
             const {
                 power = 0,
                 charisma = 0,
@@ -83,11 +112,11 @@ class Goose {
                 mood = 0,
                 location = 0
             } = attributes;
-    
+
             if (typeof id !== "string") throw new Error("Invalid id");
             if (typeof name !== "string") throw new Error("Invalid name");
             if (typeof color !== "string" || color.length != 6) throw new Error("Invalid color");
-    
+
             let birthdayTimestamp: number;
             if (typeof birthday === "number") {
                 birthdayTimestamp = birthday;
@@ -96,11 +125,35 @@ class Goose {
             } else {
                 throw new Error("Invalid birthday type");
             }
-    
+
             if (!isGoosePersonality(personality)) {
                 throw new Error("Invalid personality");
             }
-    
+
+            if (!isGooseStatus(status)) {
+                throw new Error("Invalid status");
+            }
+
+            let soldAtTimestamp: number | null = null;
+            if (soldAt instanceof Date) {
+                soldAtTimestamp = soldAt.getTime();
+            } else if (typeof soldAt === "number") {
+                soldAtTimestamp = soldAt;
+            } else if (typeof soldAt === "string") {
+                const parsed = parseInt(soldAt, 10);
+                if (!isNaN(parsed)) {
+                    soldAtTimestamp = parsed;
+                } else {
+                    throw new Error("Invalid soldAt string format");
+                }
+            } else if (soldAt != null) {
+                throw new Error(`Invalid soldAt type: ${typeof soldAt}, value: ${soldAt}`);
+            }
+
+            if (soldPrice != null && typeof soldPrice !== "number") {
+                throw new Error("Invalid soldPrice");
+            }
+
             return new Goose(
                 id,
                 name,
@@ -110,12 +163,15 @@ class Goose {
                 charisma,
                 personality,
                 mood,
-                location
+                location,
+                status,
+                soldAtTimestamp,
+                soldPrice
             );
         } catch (err) {
             console.error("Error creating Goose from plainObject:", err);
             console.error("Original object:", plainObject);
-    
+
             return new Goose(
                 "error",
                 "Error Goose",
@@ -142,29 +198,22 @@ class Goose {
                 personality: this.personality,
                 mood: this.mood,
                 location: this.location
-            }
+            },
+            status: this.status,
+            soldAt: this.soldAt !== null ? new Date(this.soldAt) : null,
+            soldPrice: this.soldPrice,
         };
     }
 
 
     static fromEntity(entity: GooseEntity): Goose {
-        const { id, name, color, birthday, attributes } = entity;
-    
-        return new Goose(
-            id,
-            name,
-            color,
-            birthday instanceof Date ? birthday.getTime() : Number(birthday),
-            attributes?.power ?? 0,
-            attributes?.charisma ?? 0,
-            isGoosePersonality(attributes?.personality)
-                ? attributes.personality
-                : GoosePersonalities.ERROR.name,
-            attributes?.mood ?? 0,
-            attributes?.location ?? 0
-        );
+        return Goose.fromPlainObject({
+            ...entity,
+            soldAt: entity.sold_at,
+            soldPrice: entity.sold_price
+        });
     }
-    
+
 
     toEntity(owner: string): GooseEntity {
         return {
@@ -173,6 +222,9 @@ class Goose {
             name: this.name,
             color: this.color,
             birthday: new Date(this.birthday),
+            status: this.status,
+            sold_at: this.soldAt !== null ? new Date(this.soldAt) : null,
+            sold_price: this.soldPrice,
             attributes: {
                 power: this.power,
                 charisma: this.charisma,
@@ -183,7 +235,7 @@ class Goose {
         };
     }
 
-	// ----------- GETTERS -----------
+    // ----------- GETTERS -----------
     getId(): string { return this.id; }
     getName(): string { return this.name; }
     getColor(): string { return this.color; }
@@ -198,10 +250,10 @@ class Goose {
     // setId(id: string): void { this.id = id; } //cannot change id of a goose
     setName(name: string): boolean { this.name = name; return true; }
     setBirthday(birthday: number): boolean { this.birthday = birthday; return true; }
-    setColor(color: string): boolean { 
+    setColor(color: string): boolean {
         if (color.length !== 6) return false;
-        this.color = color; 
-        return true; 
+        this.color = color;
+        return true;
     }
     setPower(power: number): boolean { this.power = power; return true; }
     setCharisma(charisma: number): boolean { this.charisma = charisma; return true; }
@@ -216,6 +268,42 @@ class Goose {
         const itemValue = item.value;
 
         return Math.floor(itemValue / 10) + 1;
+    }
+
+    /**
+     * The gold price of this goose if you sell it
+     */
+    getSellPrice(): number {
+        const power = Math.max(0, this.getPower() ?? 0);
+        const charisma = Math.max(0, this.getCharisma() ?? 0);
+
+        // Mood is capped at 100 and normalized to 0–1
+        const mood = Math.min(100, Math.max(0, this.getMood() ?? 0));
+        const moodMultiplier = 0.5 + (mood / 100) * 0.5; // 0.5 → 1.0
+
+        /**
+         * Base value from stats
+         * - Linear contribution
+         */
+        const baseStatValue =
+            power * 20 +
+            charisma * 20;
+
+        /**
+         * Synergy bonus:
+         * - Rewards high power + charisma together
+         * - Quadratic growth but bounded
+         */
+        const synergy =
+            Math.sqrt(power * charisma) * 50;
+
+        /**
+         * Final price
+         */
+        const rawPrice = (baseStatValue + synergy) * moodMultiplier;
+
+        // Floor, round, and clamp to avoid negative / fractional nonsense
+        return Math.max(0, Math.floor(rawPrice));
     }
 
     /**
@@ -258,6 +346,20 @@ class Goose {
             response.addErrorMessage(msg);
             return response;
         }
+    }
+
+    isSold(): boolean {
+        return this.status === "sold";
+    }
+
+    sell(price: number): boolean {
+        if (this.isSold()) return false;
+
+        this.status = "sold";
+        this.soldAt = Date.now();
+        this.soldPrice = Math.max(0, Math.floor(price));
+
+        return true;
     }
 }
 
