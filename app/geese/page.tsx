@@ -9,7 +9,7 @@ import { useInventory } from "../hooks/contexts/InventoryContext";
 import { useGarden } from "../hooks/contexts/GardenContext";
 import { useStore } from "../hooks/contexts/StoreContext";
 import { useAccount } from "../hooks/contexts/AccountContext";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { makeApiRequest } from "@/utils/api/api";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../hooks/contexts/AuthContext";
@@ -29,16 +29,19 @@ import UtilityBarComponent from "@/components/garden/utilityBar/utilityBar";
 import CustomGooseSVG from "@/components/goose/customGooseSVG";
 import { InventoryItem } from "@/models/items/inventoryItems/InventoryItem";
 import { Tool } from "@/models/items/tools/Tool";
-import { feedGooseAPI } from "@/components/goose/GooseUtilityFunctions";
+import { expandGoosePenAPI, feedGooseAPI, sellGooseAPI } from "@/components/goose/GooseUtilityFunctions";
 import { syncAllAccountObjects } from "../garden/gardenFunctions";
 import { useDispatch } from "react-redux";
 import { setItemQuantity } from "@/store/slices/inventoryItemSlice";
 import { saveGoosePen } from "@/utils/localStorage/goose";
 import { saveInventory } from "@/utils/localStorage/inventory";
+import { ConfirmExpandGoosePenPopupWindow } from "@/components/goose/confirmExpandGoosePenPopupWindow";
+import GoosePen from "@/models/goose/GoosePen";
+import { setGold } from "@/store/slices/inventorySlice";
+import { ConfirmSellGoosePopupWindow } from "@/components/goose/confirmSellGoosePopupWindow";
 
 type SortType = "name" | "birthday" | "power" | "charisma" | "mood";
 type SortDirection = "asc" | "desc";
-
 const GoosePage = () => {
   const { firebaseUser } = useAuth();
   const router = useRouter();
@@ -47,6 +50,9 @@ const GoosePage = () => {
   const [sortType, setSortType] = useState<SortType>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [goosePanelMessage, setGoosePanelMessage] = useState<string>("");
+  const [goosePanelMessageColor, setGoosePanelMessageColor] = useState<string>("");
+  const [showExpandGoosePenPopup, setShowExpandGoosePenPopup] = useState(false);
+  const [showSellGoosePopup, setShowSellGoosePopup] = useState(false);
 
   const { user, username, handleChangeUsername, icon, handleChangeIcon, reloadUser } = useUser();
   const { inventory, reloadInventory, inventoryForceRefreshKey } = useInventory();
@@ -54,9 +60,16 @@ const GoosePage = () => {
   const { garden, reloadGarden } = useGarden();
   const { goosePen, reloadGoosePen, selectedGoose, setSelectedGoose } = useGoose();
   const { selectedItem, toggleSelectedItem } = useSelectedItem();
-  const { account, guestMode, environmentTestKey } = useAccount();
+  const { account, guestMode, confirmSellGoose } = useAccount();
   const dispatch = useDispatch();
+  const renderCount = useRef(0);
+  renderCount.current++;
 
+  const penSize = useMemo(() => {
+    if (!goosePen) return 0;
+    return goosePen.getSize();
+  }, [goosePen]);
+  const expansionCost = useMemo(() => { return GoosePen.calculateExpansionCost(penSize) }, [goosePen, penSize]);
 
   // Redirect effect
   useEffect(() => {
@@ -94,10 +107,15 @@ const GoosePage = () => {
   }
 
   if (!user || !account) {
-    return <></>;
+    return (
+      <div className="w-full px-4 py-4 bg-reno-sand-200 text-black">
+        <div>Loading user data...</div>
+      </div>
+    );
   }
 
-  const geese = goosePen.getAllGeese();
+  //Only display geese that are active, ie. not sold
+  const geese = goosePen.getActiveGeese();
 
   // Sort geese based on current sort type
   geese.sort((a, b) => {
@@ -153,11 +171,11 @@ const GoosePage = () => {
 
   const handleFeedGoose = async () => {
     // && confirmFeedGoose
-		if (selectedItem && selectedItem instanceof InventoryItem && selectedItem.itemData.subtype == ItemSubtypes.HARVESTED.name) {
-			// setShowFeedGoosePopup(true);
+    if (selectedItem && selectedItem instanceof InventoryItem && selectedItem.itemData.subtype == ItemSubtypes.HARVESTED.name) {
+      // setShowFeedGoosePopup(true);
       feedGoose(); //turn off later
-			return;
-		} else {
+      return;
+    } else {
       feedGoose();
     }
   }
@@ -189,18 +207,95 @@ const GoosePage = () => {
       saveInventory(inventory);
       // reloadGoosePen();
     }
-		
-		dispatch(setItemQuantity({ 
-      inventoryItemId: itemFromInventory.getInventoryItemId(), 
+
+    dispatch(setItemQuantity({
+      inventoryItemId: itemFromInventory.getInventoryItemId(),
       quantity: itemFromInventory.getQuantity()
     }));
-	};
+  };
+
+  const handleSellGoose = async () => {
+    if (confirmSellGoose) {
+      setShowSellGoosePopup(true);
+      // sellGoose(); //turn off later
+      return;
+    } else {
+      sellGoose();
+    }
+  }
+
+  const sellGoose = async () => {
+    if (selectedGoose == null || inventory == null) return;
+    const getGooseResponse = goosePen.getGooseById(selectedGoose.getId());
+    if (!getGooseResponse) return;
+    const apiResult = await sellGooseAPI(goosePen, selectedGoose, inventory);
+    if (!apiResult) {
+      await syncAllAccountObjects();
+      reloadUser();
+      reloadGarden();
+      reloadInventory();
+      reloadGoosePen();
+      setGoosePanelMessage(`There was an error selling the goose! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
+      // setGardenForceRefreshKey((gardenForceRefreshKey) => gardenForceRefreshKey + 1);
+      // return;
+    } else {
+      goosePen.sellGoose(selectedGoose.getId(), inventory);
+      saveGoosePen(goosePen);
+      saveInventory(inventory);
+      reloadGoosePen();
+
+    }
+
+    const newGold = inventory.getGold();
+    dispatch(setGold(newGold));
+  };
+
+  const handleExpandGoosePen = async () => {
+    if (true) { //Can turn off confirmation window here
+      setShowExpandGoosePenPopup(true);
+    } else {
+      expandGoosePen();
+    }
+  }
+
+  const expandGoosePen = async () => {
+    if (guestMode) {
+      setGoosePanelMessageColor(colors.error.redErrorText);
+      setGoosePanelMessage(`This is not available in guest mode.`);
+      return;
+    }
+    if (inventory.getGold() < expansionCost) {
+      setGoosePanelMessageColor(colors.error.redErrorText);
+      setGoosePanelMessage(`You don't have enough gold!`);
+      return;
+    }
+
+    setGoosePanelMessageColor(colors.goose.defaultMessageTextColor);
+    setGoosePanelMessage(`Paid ${GoosePen.calculateExpansionCost(goosePen.getSize())} gold to expand goose pen to ${goosePen.getSize() + 1} slots.`);
+    const apiResult = await expandGoosePenAPI(goosePen, inventory);
+    if (!apiResult) {
+      await syncAllAccountObjects();
+      reloadUser();
+      reloadGarden();
+      reloadInventory();
+      reloadGoosePen();
+      setGoosePanelMessageColor(colors.error.redErrorText);
+      setGoosePanelMessage(`There was an error expanding the goose pen! Please refresh the page! If the error persists, force an account refresh under profile -> settings -> force sync account.`);
+      // return;
+    }
+    goosePen.expandGoosePen(inventory);
+    saveGoosePen(goosePen);
+    saveInventory(inventory);
+    reloadGoosePen();
+    // reloadInventory(); //should be unnecessary to force a refresh here
+    dispatch(setGold(inventory.getGold()));
+  };
 
 
-  const utilities = 
+  const utilities =
     buildGooseUtilities({
       onFeedGoose: handleFeedGoose,
-      onSellGoose: () => {}
+      onSellGoose: handleSellGoose
     })
 
   // Convert all geese into GoosePanel-friendly props
@@ -242,6 +337,7 @@ const GoosePage = () => {
             setSelectedGoose(null); // Clear selected goose when closing
             console.log('set to null');
           }}
+          zValue={50}
         >
           <div className="bg-reno-sand-200 p-6 inline-block border-black border-2 rounded-3xl">
             <div className="flex flex-row gap-8 items-start">
@@ -251,7 +347,7 @@ const GoosePage = () => {
                 <div className="w-[300px] md:w-[400px] scale-100 md:scale-100 origin-top">
                   <EditableGoosePanel goose={getProps()} />
                 </div>
-                <UtilityBarComponent utilities={utilities} maxHeightPercentage={60}/>
+                <UtilityBarComponent utilities={utilities} maxHeightPercentage={60} />
                 <div>{goosePanelMessage}</div>
               </div>
 
@@ -278,7 +374,7 @@ const GoosePage = () => {
   const expandCard = (
     <div
       key="expand-card"
-      onClick={() => console.log("Expand goose pen clicked")}
+      onClick={handleExpandGoosePen}
       className="
         cursor-pointer 
         bg-apple-200 
@@ -295,25 +391,25 @@ const GoosePage = () => {
       <div className="text-lg font-bold text-gray-800">
         Expand Goose Pen
       </div>
-  
-      <CustomGooseSVG bodyColor={"#FFFFFF"} style={{ width: 100, height: 200}}/>
-  
+
+      <CustomGooseSVG bodyColor={"#FFFFFF"} style={{ width: 100, height: 200 }} />
+
       {/* Optional description or leave empty for true mimic */}
       <div className="text-sm text-gray-500 text-center">
         Increase goose capacity for this pen
       </div>
     </div>
   );
-  
+
   const panelItems = [...goosePanels, expandCard];
 
   const renderGoosePenSpace = () => {
-    const numGeese = goosePen.getAllGeese().length;
+    const numGeese = goosePen.getActiveGeese().length;
     const size = goosePen.getSize();
-  
+
     let label = `${numGeese}/${size} geese`;
     let classes = "px-3 py-1 rounded-md text-sm border";
-  
+
     if (numGeese === 0) {
       label = `empty (${numGeese}/${size})`;
       classes += " bg-gray-100 text-gray-600 border-gray-300";
@@ -323,10 +419,10 @@ const GoosePage = () => {
     } else {
       classes += " bg-green-100 text-green-700 border-green-300";
     }
-  
+
     return <div className={classes}>{label}</div>;
   };
-  
+
 
   return (
     <div className="w-full px-4 pb-4 bg-reno-sand-200 text-black">
@@ -346,11 +442,26 @@ const GoosePage = () => {
             </button>
           ))}
         </div>
+
+        <ConfirmExpandGoosePenPopupWindow
+          showWindow={showExpandGoosePenPopup}
+          setShowWindow={setShowExpandGoosePenPopup}
+          currentSize={goosePen.getSize()}
+          expansionPrice={GoosePen.calculateExpansionCost(goosePen.getSize())}
+          onConfirmExpandGoosePen={expandGoosePen}
+        />
         <div className="flex items-center"> {renderGoosePenSpace()} </div>
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
         {panelItems}
       </div>
+      <ConfirmSellGoosePopupWindow
+        showWindow={showSellGoosePopup}
+        setShowWindow={setShowSellGoosePopup}
+        gooseName={selectedGoose?.getName() ?? 'Error'}
+        goosePrice={selectedGoose?.getSellPrice() ?? 0}
+        onConfirmSellGoose={sellGoose}
+      />
     </div>
   );
 };

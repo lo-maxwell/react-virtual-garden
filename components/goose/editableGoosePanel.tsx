@@ -4,6 +4,8 @@ import { useAccount } from "@/app/hooks/contexts/AccountContext";
 import { useGoose } from "@/app/hooks/contexts/GooseContext";
 import { makeApiRequest } from "@/utils/api/api";
 import { useUser } from "@/app/hooks/contexts/UserContext";
+import GooseAttributesGrid from "./GooseAttributesGrid";
+import colors from "../colors/colors";
 
 interface EditableGoosePanelProps {
 	goose: {
@@ -73,7 +75,7 @@ const EditableGoosePanel: React.FC<EditableGoosePanelProps> = ({ goose }) => {
 	);
 
 	return (
-		<div className="flex flex-col items-center p-4 rounded-2xl bg-apple-300 shadow-md w-full max-w-sm gap-4 h-96 text-black">
+		<div className={`flex flex-col items-center p-4 rounded-2xl shadow-md w-full max-w-sm gap-4 h-96 text-black ${colors.goose.panelBackgroundColor}`}>
 			{/* Name row with optional input */}
 			<div className="flex items-center gap-2 w-full justify-center min-h-10">
 				{isEditing ? (
@@ -96,13 +98,10 @@ const EditableGoosePanel: React.FC<EditableGoosePanelProps> = ({ goose }) => {
 
 			<CustomGooseSVG bodyColor={color} style={{ width: 100, height: 200 }} />
 
-			<div className="grid grid-cols-2 gap-2 w-full text-sm">
-				<div className="p-2 rounded-xl bg-gray-100 text-center">Power: {goose.attributes.power}</div>
-				<div className="p-2 rounded-xl bg-gray-100 text-center">Charisma: {goose.attributes.charisma}</div>
-				<div className="p-2 rounded-xl bg-gray-100 text-center">Mood: {goose.attributes.mood}</div>
-				<div className="p-2 rounded-xl bg-gray-100 text-center capitalize">{goose.attributes.personality}</div>
-				<div className="p-2 rounded-xl bg-gray-100 text-center col-span-2">Birthday: {birthday}</div>
-			</div>
+			<GooseAttributesGrid 
+				attributes={goose.attributes}
+				birthday={birthday}
+			/>
 		</div>
 	);
 };

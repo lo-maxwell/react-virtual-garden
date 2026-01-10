@@ -20,7 +20,7 @@ import { fetchAccountObjects } from '../login/firebaseAuth/authClientService';
 import GoosePen from '@/models/goose/GoosePen';
 import { saveGoosePen } from '@/utils/localStorage/goose';
 import { useGoose } from '../hooks/contexts/GooseContext';
-
+import SettingsToggle from './SettingsToggle';
 const SettingsPage: React.FC = () => {
 
   const { user, reloadUser, resetUser } = useUser();
@@ -28,19 +28,21 @@ const SettingsPage: React.FC = () => {
   const { store, reloadStore, resetStore } = useStore();
   const { garden, reloadGarden, resetGarden } = useGarden();
   const { reloadGoosePen } = useGoose();
-  const { account, 
-    guestMode, 
-    setGuestMode, 
-    displayEmojiIcons, 
-    setDisplayEmojiIcons, 
+  const { account,
+    guestMode,
+    setGuestMode,
+    displayEmojiIcons,
+    setDisplayEmojiIcons,
     confirmPlantAll,
-		setConfirmPlantAll,
-		confirmHarvestAll,
-		setConfirmHarvestAll,
-		confirmPickupAll,
-		setConfirmPickupAll,
-		confirmDeletePlants,
-		setConfirmDeletePlants} = useAccount();
+    setConfirmPlantAll,
+    confirmHarvestAll,
+    setConfirmHarvestAll,
+    confirmPickupAll,
+    setConfirmPickupAll,
+    confirmDeletePlants,
+    setConfirmDeletePlants,
+    confirmSellGoose, 
+    setConfirmSellGoose } = useAccount();
   const [syncing, setSyncing] = useState(false);
   const [message, setMessage] = useState('');
   const [messageColor, setMessageColor] = useState('black');
@@ -100,24 +102,54 @@ const SettingsPage: React.FC = () => {
     }
   }, [syncing]);
 
-  const toggleDisplayEmojiIcons = useCallback(() => {
-    if (displayEmojiIcons) {
-      setMessage(`Now displaying svg icons. Please refresh the page for changes to take effect.`);
-      setMessageColor("text-green-600");
-    } else {
-      setMessage(`Now displaying emoji icons. Please refresh the page for changes to take effect.`);
-      setMessageColor("text-green-600");
-    }
-    setDisplayEmojiIcons(!displayEmojiIcons);
-  }, [displayEmojiIcons]);
 
-  const getToggleDisplayEmojiIconsButtonText = useCallback(() => {
-    if (displayEmojiIcons) {
-      return "Turn on svg icons";
-    } else {
-      return "Turn on emoji icons";
-    }
-  }, [displayEmojiIcons]);
+  const settingsToggles = [
+    {
+      label: "Confirm before planting multiple plants",
+      value: confirmPlantAll,
+      setter: setConfirmPlantAll,
+    },
+    {
+      label: "Confirm before harvesting all plants",
+      value: confirmHarvestAll,
+      setter: setConfirmHarvestAll,
+    },
+    {
+      label: "Confirm before picking up all decorations",
+      value: confirmPickupAll,
+      setter: setConfirmPickupAll,
+    },
+    {
+      label: "Confirm before destroying plants",
+      value: confirmDeletePlants,
+      setter: setConfirmDeletePlants,
+    },
+    {
+      label: "Confirm before selling geese",
+      value: confirmSellGoose,
+      setter: setConfirmSellGoose,
+    },
+  ];
+
+
+  // const toggleDisplayEmojiIcons = useCallback(() => {
+  //   if (displayEmojiIcons) {
+  //     setMessage(`Now displaying svg icons. Please refresh the page for changes to take effect.`);
+  //     setMessageColor("text-green-600");
+  //   } else {
+  //     setMessage(`Now displaying emoji icons. Please refresh the page for changes to take effect.`);
+  //     setMessageColor("text-green-600");
+  //   }
+  //   setDisplayEmojiIcons(!displayEmojiIcons);
+  // }, [displayEmojiIcons]);
+
+  // const getToggleDisplayEmojiIconsButtonText = useCallback(() => {
+  //   if (displayEmojiIcons) {
+  //     return "Turn on svg icons";
+  //   } else {
+  //     return "Turn on emoji icons";
+  //   }
+  // }, [displayEmojiIcons]);
 
   return (<>
     <div className="flex flex-1 flex-col bg-reno-sand-200 text-black">
@@ -132,89 +164,14 @@ const SettingsPage: React.FC = () => {
           {getSyncAccountObjectsButtonText()}
         </button>
       </div>
-      <div className="mx-4 mt-2">
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-700">
-            Confirm before planting multiple plants
-          </span>
-          <label className="cursor-pointer">
-            <input
-              type="checkbox"
-              checked={confirmPlantAll}
-              onChange={() => setConfirmPlantAll(!confirmPlantAll)}
-              className="sr-only"
-            />
-            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${confirmPlantAll ? 'bg-green-600' : 'bg-gray-200'
-              }`}>
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${confirmPlantAll ? 'translate-x-6' : 'translate-x-1'
-                }`} />
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <div className="mx-4 mt-2">
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-700">
-            Confirm before harvesting all plants
-          </span>
-          <label className="cursor-pointer">
-            <input
-              type="checkbox"
-              checked={confirmHarvestAll}
-              onChange={() => setConfirmHarvestAll(!confirmHarvestAll)}
-              className="sr-only"
-            />
-            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${confirmHarvestAll ? 'bg-green-600' : 'bg-gray-200'
-              }`}>
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${confirmHarvestAll ? 'translate-x-6' : 'translate-x-1'
-                }`} />
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <div className="mx-4 mt-2">
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-700">
-            Confirm before picking up all decorations
-          </span>
-          <label className="cursor-pointer">
-            <input
-              type="checkbox"
-              checked={confirmPickupAll}
-              onChange={() => setConfirmPickupAll(!confirmPickupAll)}
-              className="sr-only"
-            />
-            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${confirmPickupAll ? 'bg-green-600' : 'bg-gray-200'
-              }`}>
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${confirmPickupAll ? 'translate-x-6' : 'translate-x-1'
-                }`} />
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <div className="mx-4 mt-2">
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-700">
-            Confirm before destroying plants
-          </span>
-          <label className="cursor-pointer">
-            <input
-              type="checkbox"
-              checked={confirmDeletePlants}
-              onChange={() => setConfirmDeletePlants(!confirmDeletePlants)}
-              className="sr-only"
-            />
-            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${confirmDeletePlants ? 'bg-green-600' : 'bg-gray-200'
-              }`}>
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${confirmDeletePlants ? 'translate-x-6' : 'translate-x-1'
-                }`} />
-            </div>
-          </label>
-        </div>
-      </div>
+      {settingsToggles.map(({ label, value, setter }) => (
+        <SettingsToggle
+          key={label}
+          label={label}
+          checked={value}
+          onChange={() => setter(!value)}
+        />
+      ))}
       {/* <button onClick={toggleDisplayEmojiIcons} disabled={syncing} className="block w-full text-left py-2 px-4 hover:bg-[#d0cecc] whitespace-nowrap">{getToggleDisplayEmojiIconsButtonText()}</button> */}
     </div>
   </>

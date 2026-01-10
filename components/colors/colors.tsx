@@ -86,6 +86,12 @@ const colors = {
 		backgroundColor: "hover:bg-moon-mist-300 bg-moon-mist-400",
 	},
 
+	goose: {
+		panelBackgroundColor: "bg-apple-300",
+		defaultMessageTextColor: "text-coffee-800",
+		
+	},
+
 	error: {
 		redErrorText: "text-red-600"
 	}

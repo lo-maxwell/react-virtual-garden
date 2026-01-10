@@ -24,3 +24,44 @@ export async function feedGooseAPI(goosePen: GoosePen, goose: Goose, inventory: 
 	  return false;
 	}
   }
+
+
+export async function sellGooseAPI(goosePen: GoosePen, goose: Goose, inventory: Inventory): Promise<boolean> {
+	const data = {
+		inventoryId: inventory.getInventoryId()
+	};
+
+	try {
+		const apiRoute = `/api/goose/${goosePen.getId()}/gooses/${goose.getId()}/sell`;
+		const result = await makeApiRequest('POST', apiRoute, data, true);
+		console.log('Successfully sold goose:', result);
+		if (!result.success) {
+			console.error("Error selling goose:", result.error);
+			return false;
+		}
+		return result.success;
+	} catch (error) {
+		console.error(error);
+		return false;
+	}
+}
+
+export async function expandGoosePenAPI(goosePen: GoosePen, inventory: Inventory): Promise<boolean> {
+	const data = {
+		inventoryId: inventory.getInventoryId()
+	};
+
+	try {
+		const apiRoute = `/api/goose/${goosePen.getId()}/expand`;
+		const result = await makeApiRequest('POST', apiRoute, data, true);
+		console.log('Successfully expanded goose pen:', result);
+		if (!result.success) {
+			console.error("Error expanding goose pen:", result.error);
+			return false;
+		}
+		return result.success;
+	} catch (error) {
+		console.error(error);
+		return false;
+	}
+}

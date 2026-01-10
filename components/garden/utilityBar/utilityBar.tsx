@@ -28,7 +28,7 @@ const UtilityBarComponent = ({utilities, maxHeightPercentage}: {utilities: Utili
 	}
 
 	return (<>
-		<div className={`max-h-[${maxHeightPercentage}vh] overflow-y-auto`}>
+		<div className={`max-h-[${maxHeightPercentage}vh]`}>
 		{RenderUtilityBar()}
 		</div>
 		</>
