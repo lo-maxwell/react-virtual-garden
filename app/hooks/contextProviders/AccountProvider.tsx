@@ -19,6 +19,7 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 	const [confirmHarvestAll, setConfirmHarvestAll] = useState<boolean>(defaultSettings.confirmHarvestAll);
 	const [confirmPickupAll, setConfirmPickupAll] = useState<boolean>(defaultSettings.confirmPickupAll);
 	const [confirmDeletePlants, setConfirmDeletePlants] = useState<boolean>(defaultSettings.confirmDeletePlants);
+	const [confirmSellGoose, setConfirmSellGoose] = useState<boolean>(defaultSettings.confirmSellGoose);
 	const [environmentTestKey, setEnvironmentTestKey] = useState<string>('');
 
 	const generateDefaultNewAccount = (): Account => {
@@ -45,6 +46,7 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		setConfirmHarvestAll(account.settings.confirmHarvestAll);
 		setConfirmPickupAll(account.settings.confirmPickupAll);
 		setConfirmDeletePlants(account.settings.confirmDeletePlants);
+		setConfirmSellGoose(account.settings.confirmSellGoose);
 		console.log('loaded account')
 	}, [setupAccount]);
 
@@ -96,6 +98,14 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		}
 	}, [account]);
 
+	const setConfirmSellGooseHandler = useCallback((value: boolean): void => {
+		setConfirmSellGoose(value);
+		if (account) {
+			account.settings.confirmSellGoose = value;
+			saveAccount(account);
+		}
+	}, [account]);
+
 	// const fetchEnvironmentTestKey = useCallback(async () => {
 	// 	try {
 	// 		const response = await fetch('/api/test', {
@@ -139,6 +149,8 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		setConfirmPickupAll: setConfirmPickupAllHandler,
 		confirmDeletePlants,
 		setConfirmDeletePlants: setConfirmDeletePlantsHandler,
+		confirmSellGoose,
+		setConfirmSellGoose: setConfirmSellGooseHandler,
 		environmentTestKey
 	}), [
 		account,
@@ -154,6 +166,8 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 		setConfirmPickupAllHandler,
 		confirmDeletePlants,
 		setConfirmDeletePlantsHandler,
+		confirmSellGoose,
+		setConfirmSellGoose,
 		environmentTestKey
 	]);
 

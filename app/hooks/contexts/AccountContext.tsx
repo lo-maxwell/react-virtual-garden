@@ -16,6 +16,8 @@ interface AccountContextType {
     setConfirmPickupAll: (arg: boolean) => void;
     confirmDeletePlants: boolean;
     setConfirmDeletePlants: (arg: boolean) => void;
+    confirmSellGoose: boolean;
+    setConfirmSellGoose: (arg: boolean) => void;
     environmentTestKey: string;
     // Add any other actions or state you need
 }

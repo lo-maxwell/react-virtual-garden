@@ -1,6 +1,6 @@
 import { verifyToken } from "@/utils/firebase/authUtils";
 import { ApiResponse } from "@/utils/api/apiResponse";
-import { getGoosePenFromDatabase } from "@/backend/services/goose/gooseService";
+import { getGoosePenFromDatabase } from "@/backend/services/goose/goosePenService";
 
 export async function GET(request: Request, { params }: { params: { goosePenId: string} }) {
 	const { goosePenId } = params;
