@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { registerPortal, unregisterPortal } from './portalRegistry';
 import './tooltip.css';
 
 export type ForceVisibleMode = 'OFF' | 'ON' | 'DEFAULT' | 'INVERSE';
@@ -14,6 +15,7 @@ interface TooltipProps {
   boxWidth?: string;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
+  wrapperClassName?: string;
 }
 
 const Tooltip: React.FC<TooltipProps> = ({
@@ -25,6 +27,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   boxWidth = '20vw',
   onMouseEnter,
   onMouseLeave,
+  wrapperClassName
 }) => {
   const [visible, setVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
@@ -47,6 +50,18 @@ const Tooltip: React.FC<TooltipProps> = ({
       });
     }
   }, []);
+  
+  useLayoutEffect(() => {
+    if (visible && tooltipRef.current) {
+      registerPortal(tooltipRef.current);
+    }
+    
+    return () => {
+      if (tooltipRef.current) {
+        unregisterPortal(tooltipRef.current);
+      }
+    };
+  }, [visible]);
 
   useEffect(() => {
     // Update tooltip width on window resize
@@ -164,7 +179,7 @@ const Tooltip: React.FC<TooltipProps> = ({
           showTooltip(e);
         }}
         onMouseLeave={() => setChildHovered(false)}
-        className="relative inline-block w-full"
+        className={`relative w-full ${wrapperClassName ?? ""}`}
       >
         {children}
       </div>
@@ -175,7 +190,7 @@ const Tooltip: React.FC<TooltipProps> = ({
           ref={tooltipRef}
           onMouseEnter={() => setTooltipHovered(true)}
           onMouseLeave={() => setTooltipHovered(false)}
-          className={`fixed z-50 px-2 py-1 text-sm text-purple-800 text-semibold ${backgroundColor} rounded shadow-lg
+          className={`tooltip-portal fixed z-50 px-2 py-1 text-semibold ${backgroundColor} rounded shadow-lg
           ${position === 'top' ? 'transform -translate-x-1/2' : ''}
           ${position === 'right' ? 'transform -translate-y-1/2' : ''}
           ${position === 'bottom' ? 'transform -translate-x-1/2' : ''}
