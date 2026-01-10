@@ -17,12 +17,12 @@ function getFunctionNamePrefix(): string {
  */
 function addEnvironmentPrefix(functionName: string): string {
     const prefix = getFunctionNamePrefix();
-    
+
     // If the function name already starts with 'dev-' or 'prod-', don't add prefix again
     if (functionName.startsWith('dev-') || functionName.startsWith('prod-')) {
         return functionName;
     }
-    
+
     return `${prefix}${functionName}`;
 }
 
@@ -30,29 +30,29 @@ export async function invokeLambda<T = any>(functionName: string, payload: any):
     try {
         // Automatically add environment prefix to function name
         const prefixedFunctionName = addEnvironmentPrefix(functionName);
-        
+
         const command = new InvokeCommand({
             FunctionName: prefixedFunctionName,
             Payload: JSON.stringify(payload),
         });
-    
+
         const { Payload, FunctionError }: InvokeCommandOutput = await lambda.send(command);
-        
+
         if (FunctionError) {
             throw new Error(`Lambda execution failed: ${FunctionError}`);
         }
-        
+
         if (!Payload) {
             throw new Error('No payload returned from Lambda');
         }
 
         const result = JSON.parse(new TextDecoder().decode(Payload));
-        
+
         // Handle Lambda's response format
         if (result.statusCode && result.statusCode !== 200) {
             throw new Error(result.body?.message || 'Lambda execution failed');
         }
-        const body: T = (result.body != null) ? JSON.parse(result.body): null;
+        const body: T = (result.body != null) ? JSON.parse(result.body) : null;
         return body || result;
     } catch (error) {
         throw new Error(`Failed to invoke Lambda: ${(error as Error).message}`);
@@ -61,18 +61,36 @@ export async function invokeLambda<T = any>(functionName: string, payload: any):
 
 export function parseRows<T = any>(result: any): T {
     if (!result) {
-      throw new Error("Failed to parse result: no result object returned");
+        throw new Error("Failed to parse result: no result object returned");
     }
-  
+
     if (result.error) {
-      throw new Error(`Lambda query error for ${result.tableName}: ${result.error}`);
+        throw new Error(`Lambda query error for ${result.tableName}: ${result.error}`);
     }
-  
+
     if (!result.rows) {
         console.log(result);
-      throw new Error(`No rows returned for ${result.tableName}`);
+        throw new Error(`Malformed lambda result for ${result.tableName}: rows missing`);
     }
-  
+
     return result.rows;
-  }
-  
+}
+
+/**
+ * 
+ * @param result the result of a lambda invocation
+ * @returns the first row found
+ */
+ export function parseSingleRow<T>(result: any): T {
+    const rows = parseRows<T[]>(result);
+
+    if (rows.length === 0) {
+        throw new Error(`Expected one row from ${result.tableName}, got zero`);
+    }
+
+    if (rows.length > 1) {
+        console.warn(`Expected one row from ${result.tableName}, got ${rows.length}`);
+    }
+
+    return rows[0];
+}

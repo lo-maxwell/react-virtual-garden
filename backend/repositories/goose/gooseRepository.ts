@@ -1,7 +1,7 @@
-import { pool, query} from "@/backend/connection/db";
+import { pool, query } from "@/backend/connection/db";
 import { transactionWrapper } from "@/backend/services/utility/utility";
-import Goose, { GooseEntity } from "@/models/goose/Goose";
-import { GoosePersonality, isGoosePersonality } from "@/models/goose/GoosePersonalities";
+import Goose, { GooseEntity, isGooseStatus } from "@/models/goose/Goose";
+import { GoosePersonalities, GoosePersonality, isGoosePersonality } from "@/models/goose/GoosePersonalities";
 import { PoolClient } from "pg";
 
 class GooseRepository {
@@ -12,7 +12,18 @@ class GooseRepository {
             birthday: raw.birthday instanceof Date
                 ? raw.birthday
                 : new Date(raw.birthday),
-            attributes: raw.attributes ?? {}
+            attributes: typeof raw.attributes === "object" && raw.attributes !== null
+                ? raw.attributes
+                : {},
+            sold_at: raw.sold_at == null
+                ? null
+                : raw.sold_at instanceof Date
+                    ? raw.sold_at
+                    : new Date(raw.sold_at),
+
+            sold_price: raw.sold_price == null
+                ? null
+                : Number(raw.sold_price),
         };
     }
 
@@ -27,7 +38,10 @@ class GooseRepository {
             typeof goose.name !== "string" ||
             typeof goose.color !== "string" ||
             !(goose.birthday instanceof Date) ||
-            typeof goose.attributes !== "object"
+            typeof goose.attributes !== "object" ||
+            !isGooseStatus(goose.status) ||
+            !(goose.sold_at == null || goose.sold_at instanceof Date) ||
+            !(goose.sold_price == null || typeof goose.sold_price === "number")
         ) {
             console.error(goose);
             throw new Error("Invalid GooseEntity root fields");
@@ -36,16 +50,31 @@ class GooseRepository {
         const a = goose.attributes;
 
         if (
-            typeof a.power !== "number" ||
-            typeof a.charisma !== "number" ||
-            typeof a.mood !== "number" ||
-            typeof a.location !== "number" ||
-            typeof a.personality !== "string" ||
-            !isGoosePersonality(a.personality)
+            (a.power !== undefined && typeof a.power !== "number") ||
+            (a.charisma !== undefined && typeof a.charisma !== "number") ||
+            (a.mood !== undefined && typeof a.mood !== "number") ||
+            (a.location !== undefined && typeof a.location !== "number") ||
+            (a.personality !== undefined && !isGoosePersonality(a.personality))
         ) {
             console.error(goose);
             throw new Error("Invalid GooseEntity.attributes");
         }
+
+        if (
+            goose.status === "sold" &&
+            (goose.sold_at == null || goose.sold_price == null)
+        ) {
+            throw new Error("Sold goose must have sold_at and sold_price");
+        }
+
+        if (
+            goose.status === "active" &&
+            (goose.sold_at != null || goose.sold_price != null)
+        ) {
+            throw new Error("Active goose cannot have sold_at or sold_price");
+        }
+        
+        
 
         return true;
     }
@@ -65,11 +94,16 @@ class GooseRepository {
             entity.name,
             entity.color,
             entity.birthday.getTime(),
-            attr.power!,
-            attr.charisma!,
-            attr.personality! as GoosePersonality,
-            attr.mood!,
-            attr.location!
+            attr.power ?? 0,
+            attr.charisma ?? 0,
+            isGoosePersonality(attr.personality)
+                ? attr.personality
+                : GoosePersonalities.ERROR.name,
+            attr.mood ?? 0,
+            attr.location ?? 0,
+            entity.status,
+            entity.sold_at ? entity.sold_at.getTime() : null,
+            entity.sold_price
         );
     }
 
@@ -79,6 +113,13 @@ class GooseRepository {
 
     async getAllGeese(): Promise<Goose[]> {
         const result = await query<GooseEntity>("SELECT * FROM gooses", []);
+        if (!result || result.rows.length === 0) return [];
+
+        return result.rows.map(r => Goose.fromPlainObject(r));
+    }
+
+    async getActiveGeese(): Promise<Goose[]> {
+        const result = await query<GooseEntity>("SELECT * FROM gooses WHERE status = $1", ['active']);
         if (!result || result.rows.length === 0) return [];
 
         return result.rows.map(r => Goose.fromPlainObject(r));
@@ -95,10 +136,32 @@ class GooseRepository {
         return Goose.fromPlainObject(result.rows[0]);
     }
 
+    async getActiveGooseById(id: string): Promise<Goose | null> {
+        const result = await query<GooseEntity>(
+            "SELECT * FROM gooses WHERE id = $1 AND status = $2",
+            [id, 'active']
+        );
+
+        if (!result || result.rows.length === 0) return null;
+
+        return Goose.fromPlainObject(result.rows[0]);
+    }
+
     async getGeeseByPenId(penId: string): Promise<Goose[]> {
         const result = await query<GooseEntity>(
             "SELECT * FROM gooses WHERE owner = $1",
             [penId]
+        );
+
+        if (!result || result.rows.length === 0) return [];
+
+        return result.rows.map(r => Goose.fromPlainObject(r));
+    }
+
+    async getActiveGeeseByPenId(penId: string): Promise<Goose[]> {
+        const result = await query<GooseEntity>(
+            "SELECT * FROM gooses WHERE owner = $1 AND status = $2",
+            [penId, 'active']
         );
 
         if (!result || result.rows.length === 0) return [];

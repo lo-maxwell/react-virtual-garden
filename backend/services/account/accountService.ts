@@ -12,7 +12,7 @@ import { Store, StoreEntity } from "@/models/itemStore/store/Store";
 import User from "@/models/user/User";
 import { PoolClient } from "pg";
 import { createGardenInDatabase, getGardenFromDatabase, upsertGardenInDatabase } from "../garden/gardenService";
-import { createGoosePenInDatabase, getGoosePenFromDatabase, upsertGoosePenInDatabase } from "../goose/gooseService";
+import { createGoosePenInDatabase, upsertGoosePenInDatabase, getGoosePenFromDatabase } from "../goose/goosePenService";
 import { createInventoryInDatabase, getInventoryFromDatabase, upsertInventoryInDatabase } from "../inventory/inventoryService";
 import { createStoreInDatabase, getStoreFromDatabase, upsertStoreInDatabase } from "../store/storeService";
 import { createUserInDatabase, getUserFromDatabase, upsertUserInDatabase } from "../user/userService";
