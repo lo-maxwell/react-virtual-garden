@@ -5,14 +5,16 @@ export class AccountSettings {
 	confirmPlantAll: boolean;
 	confirmHarvestAll: boolean;
 	confirmPickupAll: boolean;
+	confirmSellGoose: boolean;
 
-	constructor(guestMode: boolean = false, displayEmojiIcons: boolean = true, confirmPlantAll: boolean = true, confirmHarvestAll: boolean = true, confirmPickupAll: boolean = true, confirmDeletePlants: boolean = true) {
+	constructor(guestMode: boolean = false, displayEmojiIcons: boolean = true, confirmPlantAll: boolean = true, confirmHarvestAll: boolean = true, confirmPickupAll: boolean = true, confirmDeletePlants: boolean = true, confirmSellGoose: boolean = true) {
 		this.guestMode = guestMode;
 		this.displayEmojiIcons = displayEmojiIcons;
 		this.confirmDeletePlants = confirmDeletePlants;
 		this.confirmPlantAll = confirmPlantAll;
 		this.confirmHarvestAll = confirmHarvestAll;
 		this.confirmPickupAll = confirmPickupAll;
+		this.confirmSellGoose = confirmSellGoose;
 	}
 
 	static getDefaultSettings(): AccountSettings {
@@ -25,7 +27,7 @@ export class AccountSettings {
 			throw new Error('Invalid plainObject structure for Settings');
 		}
 		const defaultSettings = AccountSettings.getDefaultSettings();
-		let { guestMode, displayEmojiIcons, confirmDeletePlants, confirmPlantAll, confirmPickupAll, confirmHarvestAll } = plainObject;
+		let { guestMode, displayEmojiIcons, confirmDeletePlants, confirmPlantAll, confirmPickupAll, confirmHarvestAll, confirmSellGoose } = plainObject;
 		// Use default if invalid or missing
 		if (typeof guestMode !== 'boolean') {
 			guestMode = defaultSettings.guestMode;
@@ -45,7 +47,10 @@ export class AccountSettings {
 		if (typeof confirmPickupAll !== 'boolean') {
 			confirmPickupAll = defaultSettings.confirmPickupAll;
 		}
-		return new AccountSettings(guestMode, displayEmojiIcons, confirmPlantAll, confirmHarvestAll, confirmPickupAll, confirmDeletePlants);
+		if (typeof confirmSellGoose !== 'boolean') {
+			confirmSellGoose = defaultSettings.confirmSellGoose;
+		}
+		return new AccountSettings(guestMode, displayEmojiIcons, confirmPlantAll, confirmHarvestAll, confirmPickupAll, confirmDeletePlants, confirmSellGoose);
 			
 	}
 
@@ -57,6 +62,7 @@ export class AccountSettings {
 			confirmPlantAll: this.confirmPlantAll,
 			confirmHarvestAll: this.confirmHarvestAll,
 			confirmPickupAll: this.confirmPickupAll,
+			confirmSellGoose: this.confirmSellGoose,
 		};
 	}
 }
