@@ -2,6 +2,9 @@ import Goose from "@/models/goose/Goose";
 import GoosePen from "@/models/goose/GoosePen";
 import { GoosePersonalities } from "@/models/goose/GoosePersonalities";
 import GooseEgg from "@/models/goose/GooseEgg";
+import { Inventory } from "@/models/itemStore/inventory/Inventory";
+import { GooseTransactionResponse } from "@/models/goose/GooseTransactionResponse";
+import { InventoryTransactionResponse } from "@/models/itemStore/inventory/InventoryTransactionResponse";
 
 function makeGoose(id: string) {
     return new Goose(
@@ -239,6 +242,173 @@ describe("GoosePen", () => {
 
     test("removeEgg returns false if egg not found", () => {
         expect(pen.removeEgg("404")).toBe(false);
+    });
+
+});
+
+describe("GoosePen.expandGoosePen", () => {
+
+    test("successfully expands pen when enough gold", () => {
+        // Given
+        const pen = new GoosePen("pen1", "user1", 10);
+        const inventory = new Inventory('invId', 'userid', 10000); // enough gold
+
+        // When
+        const response = pen.expandGoosePen(inventory);
+
+        // Then
+        expect(response.isSuccessful()).toBe(true);
+
+        // Payload should be the new size
+        expect(response.payload).toBe(11);
+
+        // Pen size actually updated
+        expect(pen.getSize()).toBe(11);
+
+        // Gold should be reduced by cost
+        const cost = GoosePen.calculateExpansionCost(10);
+        expect(inventory.getGold()).toBe(10000 - cost);
+    });
+
+
+    test("fails to expand pen when not enough gold", () => {
+        // Given
+        const pen = new GoosePen("pen1", "user1", 10);
+        const inventory = new Inventory('invId', 'userid', 0); // not enough gold
+
+        // When
+        const response = pen.expandGoosePen(inventory);
+
+        // Then
+        expect(response.isSuccessful()).toBe(false);
+        expect(response.payload).toBe(null);
+
+        // Pen size should NOT change
+        expect(pen.getSize()).toBe(10);
+
+        // Gold stays the same
+        expect(inventory.getGold()).toBe(0);
+
+        // Error message is correct-ish
+        expect(response.messages.length).toBe(1);
+        expect(response.messages[0]).toMatch(/Cannot expand goose pen/i);
+    });
+});
+
+describe("GoosePen.calculateExpansionCost", () => {
+
+    test("cost is 0 when current size equals default size - 1", () => {
+        const defaultSize = GoosePen.getDefaultGoosePenSize();
+
+        // currentSize passed into the method is the *current* size
+        // The formula uses: (currentSize + 1 - defaultSize) * 5000
+        const cost = GoosePen.calculateExpansionCost(defaultSize - 1);
+
+        expect(cost).toBe(0);
+    });
+
+    test("cost increases by 5000 for each size above default", () => {
+        const defaultSize = GoosePen.getDefaultGoosePenSize();
+
+        const size1 = defaultSize;       // first expansion
+        const size2 = defaultSize + 1;   // second expansion
+        const size3 = defaultSize + 2;   // third expansion
+
+        expect(GoosePen.calculateExpansionCost(size1)).toBe(5000);
+        expect(GoosePen.calculateExpansionCost(size2)).toBe(10000);
+        expect(GoosePen.calculateExpansionCost(size3)).toBe(15000);
+    });
+
+    test("cost formula matches expected linear growth", () => {
+        const defaultSize = GoosePen.getDefaultGoosePenSize();
+
+        for (let size = defaultSize - 1; size < defaultSize + 10; size++) {
+            const expected = (size + 1 - defaultSize) * 5000;
+            expect(GoosePen.calculateExpansionCost(size)).toBe(expected);
+        }
+    });
+
+    test("cost never returns a negative number", () => {
+        // If someone passes a size much lower than expected
+        const cost = GoosePen.calculateExpansionCost(0);
+        expect(cost).toBeGreaterThanOrEqual(0);
+    });
+
+});
+
+describe("GoosePen sellGoose & getActiveGeese", () => {
+
+    let pen: GoosePen;
+    let inventory: Inventory;
+
+    beforeEach(() => {
+        pen = new GoosePen("pen1", "user1", 5);
+        inventory = new Inventory("inv1", "user1", 0);
+    });
+
+    test("getActiveGeese returns only unsold geese", () => {
+        const g1 = makeGoose("G1");
+        const g2 = makeGoose("G2");
+        const g3 = makeGoose("G3");
+
+        pen.addGoose(g1);
+        pen.addGoose(g2);
+        pen.addGoose(g3);
+
+        g2.sell(g2.getSellPrice());
+
+        const active = pen.getActiveGeese();
+        expect(active.length).toBe(2);
+        expect(active).toContain(g1);
+        expect(active).toContain(g3);
+        expect(active).not.toContain(g2);
+    });
+
+    test("sellGoose successfully sells a goose and adds gold", () => {
+        const g1 = makeGoose("G1");
+        pen.addGoose(g1);
+
+        const goldBefore = inventory.getGold();
+        const response = pen.sellGoose("G1", inventory);
+
+        expect(response.isSuccessful()).toBe(true);
+        expect(response.payload).toBe(g1.getSellPrice());
+
+        expect(inventory.getGold()).toBe(goldBefore + g1.getSellPrice());
+        expect(g1.isSold()).toBe(true);
+        expect(pen.getActiveGeese()).not.toContain(g1);
+    });
+
+    test("sellGoose fails if goose does not exist", () => {
+        const response = pen.sellGoose("missing", inventory);
+
+        expect(response.isSuccessful()).toBe(false);
+        expect(response.messages[0]).toMatch(/Could not find goose/i);
+    });
+
+    test("sellGoose fails if goose already sold", () => {
+        const g1 = makeGoose("G1");
+        pen.addGoose(g1);
+        g1.sell(g1.getSellPrice());
+
+        const response = pen.sellGoose("G1", inventory);
+
+        expect(response.isSuccessful()).toBe(false);
+        expect(response.messages[0]).toMatch(/already sold/i);
+    });
+
+    test("selling one goose does not affect others", () => {
+        const g1 = makeGoose("G1");
+        const g2 = makeGoose("G2");
+
+        pen.addGoose(g1);
+        pen.addGoose(g2);
+
+        pen.sellGoose("G1", inventory);
+
+        const active = pen.getActiveGeese();
+        expect(active).toHaveLength(1);
+        expect(active[0]).toBe(g2);
     });
 
 });
