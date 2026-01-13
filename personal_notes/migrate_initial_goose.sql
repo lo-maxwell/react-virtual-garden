@@ -13,7 +13,7 @@ BEGIN
         GROUP BY gp.id
         HAVING COUNT(g.id) = 0
     LOOP
-        INSERT INTO gooses (id, owner, name, color, birthday, attributes)
+        INSERT INTO gooses (id, owner, name, color, birthday, attributes, status)
         VALUES (
             uuid_generate_v4(),          -- goose ID
             pen.pen_id,                  -- owner (pen ID)
@@ -26,7 +26,8 @@ BEGIN
                 'mood',       FLOOR(RANDOM() * 50) + 51,
                 'personality','friendly',
                 'location',   0
-            )
+            ),
+            'active'                     -- Status
         );
     END LOOP;
 END $$;
@@ -83,7 +84,7 @@ BEGIN
         END LOOP;
 
         -- Insert goose
-        INSERT INTO gooses (id, owner, name, color, birthday, attributes)
+        INSERT INTO gooses (id, owner, name, color, birthday, attributes, status)
         VALUES (
             uuid_generate_v4(),          -- id
             target_pen,                  -- owner
@@ -96,7 +97,8 @@ BEGIN
                 'mood',        floor(random()*50) + 51,
                 'location',    0,
                 'personality', personality
-            )
+            ),
+            'active'
         );
 
     END LOOP;

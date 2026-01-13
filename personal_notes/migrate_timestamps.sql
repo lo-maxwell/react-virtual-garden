@@ -1,0 +1,26 @@
+BEGIN;
+
+ALTER TABLE user_events
+  ALTER COLUMN created_at
+  TYPE TIMESTAMPTZ
+  USING created_at AT TIME ZONE 'UTC';
+
+ALTER TABLE user_events
+  ALTER COLUMN created_at
+  SET DEFAULT now();
+
+ALTER TABLE gooses
+  ALTER COLUMN birthday
+  TYPE TIMESTAMPTZ
+  USING birthday AT TIME ZONE 'UTC';
+
+ALTER TABLE gooses
+  ALTER COLUMN birthday
+  SET DEFAULT now();
+
+ALTER TABLE gooses
+  ALTER COLUMN sold_at
+  TYPE TIMESTAMPTZ
+  USING sold_at AT TIME ZONE 'UTC';
+
+COMMIT;
