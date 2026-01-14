@@ -13,6 +13,9 @@ import { PlantTemplate } from "../items/templates/models/PlacedItemTemplates/Pla
 import { v4 as uuidv4 } from 'uuid';
 import { ItemTemplate } from "../items/templates/models/ItemTemplate";
 import { getTimeString } from "../utility/Time";
+import { isPlacedEgg, PlacedEgg } from "../items/placedItems/PlacedEgg";
+import { PlacedEggTemplate } from "../items/templates/models/PlacedItemTemplates/PlacedEggTemplate";
+import { InventoryEgg } from "../items/inventoryItems/InventoryEgg";
 
 export interface PlotEntity {
 	id: string,
@@ -370,6 +373,7 @@ export class Plot {
 	 * Blueprint -> returns a new Decoration corresponding to the blueprint
 	 * Seed -> returns a new Plant corresponding to the blueprint
 	 * HarvestedItem -> error
+	 * InventoryEgg -> returns a new PlacedEgg corresponding to the egg
 	 * @inventory the inventory to modify
 	 * @item the inventoryItem to convert
 	 * @returns a response containing the following object, or an error message
@@ -407,6 +411,25 @@ export class Plot {
 				const newPlacedItem = new newItemType(uuidv4(), useItemResponse.payload.newTemplate, "") as PlacedItem;
 				this.setItem(newPlacedItem);
 				break;
+			case ItemSubtypes.INVENTORY_EGG.name:
+				useItemResponse = inventory.useItem(item, 1);
+				if (!useItemResponse.isSuccessful()) {
+					response.addErrorMessages(useItemResponse.messages);
+					return response;
+				}
+				const newPlacedEggTemplate = useItemResponse.payload.newTemplate;
+				if (!PlacedEggTemplate.isPlacedEggTemplate(newPlacedEggTemplate)) {
+					response.addErrorMessage(`Invalid item type generated from inventory egg`);
+					return response;
+				}
+				const originalInventoryEgg = useItemResponse.payload.originalItem;
+				if (!InventoryEgg.isInventoryEgg(originalInventoryEgg)) {
+					response.addErrorMessage(`Invalid inventory egg`);
+					return response;
+				}
+				const newEggPlacedItem = new PlacedEgg(uuidv4(), newPlacedEggTemplate, "", originalInventoryEgg.copyEggDetails());
+				this.setItem(newEggPlacedItem);
+				break;
 			default:
 				response.addErrorMessage(`item is of type ${item.itemData.subtype}, cannot replace used item`);
 				return response;
@@ -423,6 +446,7 @@ export class Plot {
 	 * Performs a specific action depending on the item type:
 	 * Plant -> returns a new HarvestedItem
 	 * Decoration -> returns a new Blueprint
+	 * PlacedEgg -> Error (use hatchGooseEgg() instead)
 	 * Ground -> Error
 	 * @inventory the inventory to modify
 	 * @updatedItem the item to replace with in this plot, defaults to ground.

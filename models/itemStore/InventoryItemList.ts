@@ -8,6 +8,8 @@ import { PlacedItem } from "../items/placedItems/PlacedItem";
 import { BooleanResponse } from "../utility/BooleanResponse";
 import { v4 as uuidv4 } from 'uuid';
 import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplates/InventoryItemTemplate";
+import { InventoryEgg } from "../items/inventoryItems/InventoryEgg";
+import { itemTemplateFactory } from "../items/templates/models/ItemTemplateFactory";
 
 
 export class InventoryItemList {
@@ -271,30 +273,129 @@ export class InventoryItemList {
 		return response;
 	}
 
+	// /**
+	//  * Consumes x quantity from the specified item.
+	//  * Performs a specific action depending on the item type:
+	//  * Blueprint -> returns the Decoration ItemTemplate corresponding to the Blueprint
+	//  * Seed -> returns the Plant ItemTemplate corresponding to the Seed
+	//  * HarvestedItem -> error
+	//  * @item The item to use, identified by InventoryItem, ItemTemplate, or name.
+	//  * @quantity the quantity of item consumed
+	//  * @returns a response containing the following object, or an error message
+	//  * {originalItem: InventoryItem
+	//  *  newTemplate: ItemTemplate}
+	//  */
+	// useItem(item: InventoryItem | InventoryItemTemplate | string, quantity: number): InventoryTransactionResponse<{originalItem: InventoryItem, newTemplate: ItemTemplate} | null> {
+	// 	let toUse = this.getItem(item);
+	// 	if (toUse.isSuccessful() && InventoryEgg.isInventoryEgg(toUse.payload)) {
+	// 		console.warn(`Found unique item being used in useItem(), rerouting to useUniqueItem() instead`)
+	// 		return this.useUniqueItem(toUse.payload);
+	// 	}
+	// 	if (toUse.isSuccessful()) {
+	// 		const response = toUse.payload!.use(quantity);
+	// 		return response;
+	// 	} else {
+	// 		//Item not found, fail
+	// 		const response = new InventoryTransactionResponse();
+	// 		response.addErrorMessage("item not in inventory");
+	// 		return response;
+	// 	}
+	// }
+
 	/**
-	 * Consumes x quantity from the specified item.
-	 * Performs a specific action depending on the item type:
-	 * Blueprint -> returns the Decoration ItemTemplate corresponding to the Blueprint
-	 * Seed -> returns the Plant ItemTemplate corresponding to the Seed
-	 * HarvestedItem -> error
-	 * @item The item to use, identified by InventoryItem, ItemTemplate, or name.
-	 * @quantity the quantity of item consumed
-	 * @returns a response containing the following object, or an error message
-	 * {originalItem: InventoryItem
-	 *  newTemplate: ItemTemplate}
-	 */
-	useItem(item: InventoryItem | InventoryItemTemplate | string, quantity: number): InventoryTransactionResponse<{originalItem: InventoryItem, newTemplate: ItemTemplate} | null> {
-		let toUse = this.getItem(item);
-		if (toUse.isSuccessful()) {
-			const response = toUse.payload!.use(quantity);
-			return response;
-		} else {
-			//Item not found, fail
-			const response = new InventoryTransactionResponse();
-			response.addErrorMessage("item not in inventory");
-			return response;
-		}
-	}
+     * Use an item from this item list, handling both stackable and unique items.
+     * @param item The item to use (InventoryItem, InventoryItemTemplate, or name)
+     * @param quantity Quantity to use (ignored for unique items like InventoryEgg)
+     * @returns InventoryTransactionResponse containing originalItem and newTemplate
+     */
+	 useItem(
+        item: InventoryItem | InventoryItemTemplate | string,
+        quantity: number = 1
+    ): InventoryTransactionResponse<{ originalItem: InventoryItem; newTemplate: ItemTemplate } | null> {
+        const response = new InventoryTransactionResponse<{ originalItem: InventoryItem; newTemplate: ItemTemplate }>();
+
+        // Find the inventory item
+        const foundItem = this.getItem(item);
+        if (!foundItem.isSuccessful() || !foundItem.payload) {
+            response.addErrorMessage("Item not found in inventory");
+            return response;
+        }
+
+        const inventoryItem = foundItem.payload;
+
+        // Handle unique items
+        if (InventoryEgg.isInventoryEgg(inventoryItem)) {
+            const uniqueResponse = inventoryItem.use(); // InventoryEgg.use() handles quantity=1 and returns template
+            if (!uniqueResponse.isSuccessful()) {
+                response.addErrorMessages(uniqueResponse.messages);
+                return response;
+            }
+
+            // Remove the unique item from list
+            this.deleteItem(inventoryItem);
+
+            response.payload = uniqueResponse.payload!;
+            return response;
+        }
+
+        // Handle stackable items
+        if (inventoryItem.getQuantity() < quantity) {
+            response.addErrorMessage(`Not enough quantity to use. Have ${inventoryItem.getQuantity()}, need ${quantity}`);
+            return response;
+        }
+
+        const stackableResponse = inventoryItem.use(quantity);
+        if (!stackableResponse.isSuccessful()) {
+            response.addErrorMessages(stackableResponse.messages);
+            return response;
+        }
+
+        // If quantity hits 0, do not remove item
+        // if (inventoryItem.getQuantity() <= 0) {
+        //     this.deleteItem(inventoryItem);
+        // }
+
+        response.payload = stackableResponse.payload!;
+        return response;
+    }
+
+	// /**
+	//  * For use by dynamic items, which is only eggs right now.
+	//  */
+	// useUniqueItem(
+	// 	item: InventoryEgg
+	// ): InventoryTransactionResponse<{ originalItem: InventoryEgg; newTemplate: ItemTemplate } | null> {
+	// 	const response = new InventoryTransactionResponse<{
+	// 		originalItem: InventoryEgg;
+	// 		newTemplate: ItemTemplate;
+	// 	}>();
+	
+	// 	// Quantity must be exactly 1
+	// 	if (item.getQuantity() !== 1) {
+	// 		response.addErrorMessage("Inventory egg has invalid quantity");
+	// 		return response;
+	// 	}
+	
+	// 	const template = itemTemplateFactory.getPlacedTemplateById(
+	// 		item.itemData.transformId
+	// 	);
+	
+	// 	if (!template) {
+	// 		response.addErrorMessage("Invalid egg transform template");
+	// 		return response;
+	// 	}
+	
+	// 	// Remove the egg entirely from inventory
+	// 	this.deleteItem(item);
+	
+	// 	response.payload = {
+	// 		originalItem: item,
+	// 		newTemplate: template
+	// 	};
+	
+	// 	return response;
+	// }
+	
 
 	/**
      * Add an item to the inventory.

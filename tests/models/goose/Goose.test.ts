@@ -62,7 +62,8 @@ describe("Goose", () => {
             15,
             GoosePersonalities.LAZY.name,
             50,
-            0
+            0,
+            'active'
         );
 
         expect(g.getId()).toBe("g1");
@@ -92,7 +93,8 @@ describe("Goose", () => {
                 personality: GoosePersonalities.FRIENDLY.name,
                 mood: 90,
                 location: 0
-            }
+            },
+            status: 'active'
         };
 
         const g = Goose.fromPlainObject(obj);
@@ -131,7 +133,8 @@ describe("Goose", () => {
                 personality: GoosePersonalities.LAZY.name,
                 mood: 10,
                 location: 0
-            }
+            },
+            status: 'active'
         };
 
         const g = Goose.fromPlainObject(obj);
@@ -150,7 +153,8 @@ describe("Goose", () => {
                 personality: "NOT_VALID",
                 mood: 10,
                 location: 0
-            }
+            },
+            status: 'active'
         };
 
         const g = Goose.fromPlainObject(obj);
@@ -190,8 +194,8 @@ describe("Goose", () => {
                 location: 0
             },
             status: 'active',
-            sold_at: null,
-            sold_price: null
+            soldAt: null,
+            soldPrice: null
         });
     });
 
@@ -339,8 +343,8 @@ describe("Goose selling", () => {
     test("new geese default to active status", () => {
         const g = new Goose("1", "A", "FFFFFF", 0, 0, 0, GoosePersonalities.SHY.name, 0, 0);
         expect(g.toPlainObject().status).toBe("active");
-        expect(g.toPlainObject().sold_at).toBeNull();
-        expect(g.toPlainObject().sold_price).toBeNull();
+        expect(g.toPlainObject().soldAt).toBeNull();
+        expect(g.toPlainObject().soldPrice).toBeNull();
         expect(g.isSold()).toBe(false);
     });
 
@@ -354,9 +358,9 @@ describe("Goose selling", () => {
         expect(sold).toBe(true);
         expect(g.isSold()).toBe(true);
         expect(g.toPlainObject().status).toBe("sold");
-        expect(g.toPlainObject().sold_price).toBe(price);
-        expect(g.toPlainObject().sold_at).not.toBeNull();
-        expect(typeof g.toPlainObject().sold_at?.getTime()).toBe("number");
+        expect(g.toPlainObject().soldPrice).toBe(price);
+        expect(g.toPlainObject().soldAt).not.toBeNull();
+        expect(typeof g.toPlainObject().soldAt?.getTime()).toBe("number");
     });
 
     test("sell returns false if already sold", () => {
@@ -369,7 +373,7 @@ describe("Goose selling", () => {
         expect(firstSell).toBe(true);
         expect(secondSell).toBe(false); // cannot sell again
         expect(g.toPlainObject().status).toBe("sold");
-        expect(g.toPlainObject().sold_price).toBe(price); // unchanged
+        expect(g.toPlainObject().soldPrice).toBe(price); // unchanged
     });
 
     test("sell sets soldAt to current timestamp", () => {
@@ -378,7 +382,7 @@ describe("Goose selling", () => {
         g.sell(100);
         const after = Date.now();
 
-        const soldAt = g.toPlainObject().sold_at?.getTime() ?? 0;
+        const soldAt = g.toPlainObject().soldAt?.getTime() ?? 0;
         expect(soldAt).toBeGreaterThanOrEqual(before);
         expect(soldAt).toBeLessThanOrEqual(after);
     });
@@ -390,8 +394,8 @@ describe("Goose selling", () => {
 
         const po = g.toPlainObject();
         expect(po.status).toBe("sold");
-        expect(po.sold_price).toBe(sellPrice);
-        expect(po.sold_at).toBeInstanceOf(Date);
+        expect(po.soldPrice).toBe(sellPrice);
+        expect(po.soldAt).toBeInstanceOf(Date);
     });
 
 });

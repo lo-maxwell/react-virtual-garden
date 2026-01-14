@@ -128,7 +128,7 @@ export class ItemStore {
      * @item The item to delete, identified by InventoryItem, ItemTemplate, or name.
      * @returns InventoryTransactionResponse containing the deleted InventoryItem or error message.
      */
-	protected deleteItem(item: InventoryItem | InventoryItemTemplate | string): InventoryTransactionResponse<InventoryItem | null> {
+	deleteItem(item: InventoryItem | InventoryItemTemplate | string): InventoryTransactionResponse<InventoryItem | null> {
 		const response = this.items.deleteItem(item);
 		return response;
 	}

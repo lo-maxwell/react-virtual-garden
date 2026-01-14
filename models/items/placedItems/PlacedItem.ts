@@ -101,6 +101,7 @@ export abstract class PlacedItem extends Item {
 	 * Performs a specific action depending on the item type:
 	 * Decoration -> returns the Blueprint ItemTemplate corresponding to the Decoration
 	 * Plant -> returns the HarvestedItem ItemTemplate corresponding to the Plant
+	 * PlacedEgg -> returns the original item + null (turns into a goose object)
 	 * EmptyItem -> error
 	 * @returns a response containing the following object, or an error message
 	 * {originalItem: PlacedItem
@@ -116,6 +117,12 @@ export abstract class PlacedItem extends Item {
 					newTemplate: itemTemplateFactory.getInventoryTemplateById(this.itemData.transformId),
 				};
 				// this.setStatus('removed');
+				break;
+			case ItemSubtypes.PLACED_EGG.name:
+				response.payload = {
+					originalItem: this,
+					newTemplate: null,
+				};
 				break;
 			default:
 				response.addErrorMessage(`item is of type ${this.itemData.subtype}, cannot be used`);

@@ -157,7 +157,10 @@ describe("GoosePen", () => {
                     charisma: 2,
                     personality: GoosePersonalities.CURIOUS.name,
                     mood: 10,
-                    location: 0
+                    location: 0,
+                    status: 'active',
+                    soldAt: null,
+                    soldPrice: null
                 },
             ],
             eggs: []

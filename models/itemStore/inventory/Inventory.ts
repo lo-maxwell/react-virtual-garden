@@ -7,6 +7,7 @@ import { ItemTemplate } from "@/models/items/templates/models/ItemTemplate";
 import { v4 as uuidv4 } from 'uuid';
 import { generateInventoryItem } from "@/models/items/ItemFactory";
 import User from "@/models/user/User";
+import { InventoryItemTemplate } from "@/models/items/templates/models/InventoryItemTemplates/InventoryItemTemplate";
 
 export interface InventoryEntity {
 	id: string,
@@ -246,34 +247,19 @@ export class Inventory extends ItemStore{
 		}
 	}
 
-	/**
-	 * Consumes x quantity from the specified item. Fails if there is not enough quantity of item.
-	 * Performs a specific action depending on the item type:
-	 * Blueprint -> returns the Decoration ItemTemplate corresponding to the Blueprint
-	 * Seed -> returns the Plant ItemTemplate corresponding to the Seed
-	 * HarvestedItem -> error
-	 * @item The item to use, identified by InventoryItem, ItemTemplate, or name.
-	 * @quantity the quantity of item consumed
-	 * @returns a response containing the following object, or an error message
-	 * {originalItem: InventoryItem
-	 *  newTemplate: ItemTemplate}
-	 */
-	 useItem(item: InventoryItem | ItemTemplate | string, quantity: number): InventoryTransactionResponse<{originalItem: InventoryItem
-		newTemplate: ItemTemplate} | null> {
-		const response = this.items.useItem(item, quantity);
-		//Does not delete upon hitting 0 quantity
-		// if (response.isSuccessful()) {
-		// 	if (response.payload.originalItem.quantity <= 0) {
-		// 		const deleteResponse = this.deleteItem(response.payload.originalItem);
-		// 		if (!deleteResponse.isSuccessful()) {
-		// 			response.addErrorMessage(`Error deleting item after using down to 0 quantity`);
-		// 			return response;
-		// 		}
-		// 		//we throw away the response from delete if it succeeds
-		// 	}
-		// }
-		return response;
-	}
+	// ------------------------------
+    // Item use (delegates to InventoryItemList)
+    // ------------------------------
+    /**
+     * Use an item from inventory.
+     * Handles both stackable and unique items automatically.
+     */
+	 useItem(
+        item: InventoryItem | InventoryItemTemplate | string,
+        quantity: number = 1
+    ): InventoryTransactionResponse<{ originalItem: InventoryItem; newTemplate: ItemTemplate } | null> {
+        return this.items.useItem(item, quantity);
+    }
 
 
 }

@@ -6,6 +6,7 @@ import { itemTemplateFactory } from "../templates/models/ItemTemplateFactory";
 import { SeedTemplate } from "../templates/models/InventoryItemTemplates/SeedTemplate";
 import { InventoryItemTemplate } from "../templates/models/InventoryItemTemplates/InventoryItemTemplate";
 import { ItemTemplate } from "../templates/models/ItemTemplate";
+import { InventoryEggTemplate } from "../templates/models/InventoryItemTemplates/InventoryEggTemplate";
 
 export interface InventoryItemEntity {
 	id: string,

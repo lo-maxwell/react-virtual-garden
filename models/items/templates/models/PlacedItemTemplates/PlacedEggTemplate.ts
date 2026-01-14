@@ -108,4 +108,27 @@ export class PlacedEggTemplate extends PlacedItemTemplate{
 		return formattedString.trim(); // Remove any leading or trailing spaces
 	}
 
+	static isPlacedEggTemplate(raw: any): raw is PlacedEggTemplate {
+		if (!raw || typeof raw !== "object") {
+			return false;
+		}
+	
+		// Required base fields
+		if (typeof raw.id !== "string") return false;
+		if (typeof raw.name !== "string") return false;
+		if (typeof raw.subtype !== "string") return false;
+	
+		// Must be the correct subtype
+		if (raw.subtype !== ItemSubtypes.PLACED_EGG.name) {
+			return false;
+		}
+	
+		// Optional but strongly recommended fields
+		if (typeof raw.baseExp !== "number") return false;
+		if (typeof raw.growTime !== "number") return false;
+	
+		return true;
+	}
+	
+
 }

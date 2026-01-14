@@ -16,6 +16,9 @@ import Shovel from "./tools/Shovel";
 import { ShovelTemplate } from "./templates/models/ToolTemplates/ShovelTemplate";
 import { PlacedEggTemplate } from "./templates/models/PlacedItemTemplates/PlacedEggTemplate";
 import { PlacedEgg } from "./placedItems/PlacedEgg";
+import { InventoryEggTemplate } from "./templates/models/InventoryItemTemplates/InventoryEggTemplate";
+import { InventoryEgg } from "./inventoryItems/InventoryEgg";
+import { EggDetails, generateDefaultEggDetails } from "./EggDetails";
 
 export const generateRandomPlacedItem = () => {
 	const placedItems = Object.values(itemTemplateFactory.repository.PlacedItems).flat().filter(item => item.name != "error");
@@ -52,6 +55,47 @@ export const generatePlacedItem = (itemName: string, status: string) => {
 			return new EmptyItem(uuidv4(), EmptyItemTemplate.getErrorTemplate(), '');
 	}
 }
+
+
+/**
+ * Generates a unique InventoryEgg item.
+ * @param itemName The name of the inventory egg template, e.g., "golden egg"
+ * @param eggDetails Optional EggDetails object. Defaults to generateDefaultEggDetails().
+ */
+ export const generateInventoryEgg = (
+	itemName: string,
+	eggDetails?: EggDetails
+  ): InventoryEgg => {
+	const template = itemTemplateFactory.getInventoryItemTemplateByName(itemName) as InventoryEggTemplate;
+  
+	if (!template || template.subtype !== "InventoryEgg") {
+	  console.warn(`Could not find inventory egg template for '${itemName}', generating error item`);
+	  return new InventoryEgg(uuidv4(), InventoryEggTemplate.getErrorTemplate(), 1, generateDefaultEggDetails());
+	}
+  
+	return new InventoryEgg(uuidv4(), template, 1, eggDetails ?? generateDefaultEggDetails());
+  };
+  
+  /**
+   * Generates a unique PlacedEgg item.
+   * @param itemName The name of the inventory egg template, e.g., "golden egg"
+   * @param eggDetails Optional EggDetails object. Defaults to generateDefaultEggDetails().
+   * @param status Optional status string for the placed egg. Defaults to "default".
+   */
+  export const generatePlacedEgg = (
+	itemName: string,
+	eggDetails?: EggDetails,
+	status: string = "default"
+  ): PlacedEgg => {
+	const template = itemTemplateFactory.getPlacedItemTemplateByName(itemName) as PlacedEggTemplate;
+  
+	if (!template || template.subtype !== "InventoryEgg") {
+	  console.warn(`Could not find placed egg template for '${itemName}', generating error item`);
+	  return new PlacedEgg(uuidv4(), PlacedEggTemplate.getErrorTemplate(), status, generateDefaultEggDetails());
+	}
+  
+	return new PlacedEgg(uuidv4(), template, status, eggDetails ?? generateDefaultEggDetails());
+  };
 
 /**
  * @itemName the item name, ie. apple seed
