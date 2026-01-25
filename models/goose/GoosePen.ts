@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import GooseEgg from "./GooseEgg";
 import { Inventory } from "../itemStore/inventory/Inventory";
 import { GooseTransactionResponse } from "./GooseTransactionResponse";
+import { BooleanResponse } from "../utility/BooleanResponse";
 
 export interface GoosePenEntity {
     id: string;
@@ -99,13 +100,17 @@ class GoosePen {
     setOwner(owner: string): void { this.owner = owner; }
     setSize(size: number): void { this.size = size; }
 
-    addGoose(goose: Goose): boolean {
+    addGoose(goose: Goose): BooleanResponse {
+        const response = new BooleanResponse();
         if (this.getActiveGeese().length >= this.size) {
-            return false; // pen full
+            response.payload = false;
+            response.addErrorMessage(`Cannot add goose, goose pen is full!`);
+            return response; // pen full
         }
 
         this.geese.push(goose);
-        return true;
+        response.payload = true;
+        return response;
     }
 
     getGooseById(id: string): Goose | undefined {

@@ -1,6 +1,8 @@
+import { uuidv4 } from "@firebase/util";
 import { HarvestedItem } from "../items/inventoryItems/HarvestedItem";
 import { InventoryItem } from "../items/inventoryItems/InventoryItem";
 import { ItemSubtypes } from "../items/ItemTypes";
+import { isPlacedEgg, PlacedEgg } from "../items/placedItems/PlacedEgg";
 import { HarvestedItemTemplate } from "../items/templates/models/InventoryItemTemplates/HarvestedItemTemplate";
 import { InventoryItemTemplate } from "../items/templates/models/InventoryItemTemplates/InventoryItemTemplate";
 import { Inventory } from "../itemStore/inventory/Inventory";

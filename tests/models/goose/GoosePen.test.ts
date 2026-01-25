@@ -51,7 +51,7 @@ describe("GoosePen", () => {
 
     test("addGoose adds a goose if there is space", () => {
         const g = makeGoose("A");
-        expect(pen.addGoose(g)).toBe(true);
+        expect(pen.addGoose(g).payload).toBe(true);
         expect(pen.getGooseCount()).toBe(1);
         expect(pen.getGooseById("A")).toEqual(g);
     });
@@ -61,7 +61,7 @@ describe("GoosePen", () => {
         pen.addGoose(makeGoose("2"));
         pen.addGoose(makeGoose("3"));
 
-        expect(pen.addGoose(makeGoose("4"))).toBe(false);
+        expect(pen.addGoose(makeGoose("4")).payload).toBe(false);
     });
 
     test("getGooseById returns correct goose", () => {
